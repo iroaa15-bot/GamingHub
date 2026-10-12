@@ -1,0 +1,29 @@
+name: Validate Gaming Hub Content
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/daily.json'
+      - 'docs/daily-*.png'
+      - 'tools/validate_daily.py'
+      - '.github/workflows/validate-content.yml'
+  pull_request:
+    paths:
+      - 'docs/daily.json'
+      - 'docs/daily-*.png'
+      - 'tools/validate_daily.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate approved puzzle if published
+        run: |
+          if [ -f docs/daily.json ]; then
+            python3 tools/validate_daily.py docs
+          else
+            echo "No approved daily puzzle yet; publishing is intentionally empty."
+          fi

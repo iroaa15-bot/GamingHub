@@ -1,0 +1,41 @@
+name: Godot Project Checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'project.godot'
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'tests/**'
+      - 'data/**'
+      - '.github/workflows/godot-checks.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check project source presence
+        id: source
+        shell: bash
+        run: |
+          if [ -f project.godot ] && [ -f scenes/Main.tscn ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Godot source is not uploaded yet; engine tests are not being claimed as passed."
+          fi
+      - uses: chickensoft-games/setup-godot@v2
+        if: steps.source.outputs.ready == 'true'
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Import and validate scripts
+        if: steps.source.outputs.ready == 'true'
+        run: |
+          godot --headless --path . --editor --import --quit
+          godot --headless --path . --quit-after 60

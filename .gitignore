@@ -1,0 +1,7 @@
+.godot/
+.env
+.env.*
+!*.example
+*.keystore
+*.jks
+ai_daily/output/

@@ -26,7 +26,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Godot source is not uploaded yet; engine tests are not being claimed as passed."
+            echo "::error::Godot source is missing. Upload the full project before this CI can pass."\n            exit 1
           fi
       - uses: chickensoft-games/setup-godot@v2
         if: steps.source.outputs.ready == 'true'

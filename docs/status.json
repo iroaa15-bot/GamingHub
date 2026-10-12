@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "service": "gaminghub-daily-content",
+  "status": "online",
+  "puzzle_status": "awaiting_review",
+  "daily_puzzle_available": false
+}

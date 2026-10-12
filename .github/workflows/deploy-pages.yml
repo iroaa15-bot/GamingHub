@@ -24,6 +24,13 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Validate daily puzzle before publishing
+        run: |
+          if [ -f docs/daily.json ]; then
+            python3 tools/validate_daily.py docs
+          else
+            echo 'No reviewed puzzle is published yet.'
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs

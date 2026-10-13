@@ -98,6 +98,14 @@ async def process(ws, msg):
     if code_for_activity in rooms:
         rooms[code_for_activity].last_activity = time.monotonic()
 
+    # Mobile clients send a heartbeat every 12 seconds. Reply without touching
+    # the active match turn; an unknown ping previously timed out the client.
+    if action == 'ping':
+        nonce = msg.get('id')
+        if type(nonce) is not int or nonce < 0:
+            return await send(ws, {'type':'error','message':'Invalid ping'})
+        return await send(ws, {'type':'pong','id':nonce})
+
     if action == 'leave':
         if ws in waiting:
             waiting.remove(ws)

@@ -1,0 +1,4 @@
+{
+  "server_url": "wss://gaminghub-multiplayer.onrender.com",
+  "note": "Render free web service; may sleep after inactivity. Check /health before testing."
+}

@@ -1,5 +1,6 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
 import asyncio, json, random, secrets, string, os, time
+from liveops_content import daily_rotation
 from dataclasses import dataclass, field
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
@@ -227,6 +228,11 @@ async def handler(ws):
 
 async def http_health(connection, request):
     """Render health check without requiring a WebSocket upgrade."""
+    if request.path == "/liveops/rotation.json":
+        payload = json.dumps(daily_rotation(), ensure_ascii=False, separators=(',', ':')).encode('utf-8')
+        return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",
+                                              "Cache-Control":"public, max-age=300",
+                                              "Access-Control-Allow-Origin":"*"}), payload)
     if request.path == "/health":
         return Response(200, "OK", Headers({"Content-Type":"application/json"}), b'{"status":"ok","service":"gaminghub-multiplayer"}\n')
     return None

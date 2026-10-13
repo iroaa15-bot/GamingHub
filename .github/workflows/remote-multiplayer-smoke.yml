@@ -1,0 +1,37 @@
+name: Remote Multiplayer Smoke Test
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/remote-multiplayer-smoke.yml'
+jobs:
+  verify-render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r server/requirements.txt
+      - name: Verify Render health endpoint
+        run: |
+          python - <<'PY'
+          import time, urllib.request
+          url='https://gaminghub-multiplayer.onrender.com/health'
+          for i in range(24):
+              try:
+                  with urllib.request.urlopen(url, timeout=15) as resp:
+                      body=resp.read().decode()
+                      assert resp.status == 200 and '"status":"ok"' in body, (resp.status,body)
+                      print('PASS health:',body)
+                      break
+              except Exception as e:
+                  print('Waiting for Render health:',repr(e))
+                  if i == 23: raise
+                  time.sleep(10)
+          PY
+      - name: Verify two real remote WebSocket clients
+        env:
+          GAME_WS_URL: wss://gaminghub-multiplayer.onrender.com
+        run: python server/test_live_match.py

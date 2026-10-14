@@ -1,9 +1,14 @@
-name: Remote Multiplayer Smoke Test
+name: Live Gaming Hub Smoke Tests
 on:
   workflow_dispatch:
   push:
     paths:
+      - 'server/**'
       - '.github/workflows/remote-multiplayer-smoke.yml'
+
+permissions:
+  contents: read
+
 jobs:
   verify-render:
     runs-on: ubuntu-latest
@@ -14,24 +19,57 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r server/requirements.txt
-      - name: Verify Render health endpoint
+      - name: Verify health and 24 daily questions
         run: |
           python - <<'PY'
-          import time, urllib.request
-          url='https://gaminghub-multiplayer.onrender.com/health'
-          for i in range(24):
+          import datetime, json, time, urllib.request
+          base = "https://gaminghub-multiplayer.onrender.com"
+          def get_json(path):
+              with urllib.request.urlopen(base + path, timeout=20) as response:
+                  assert response.status == 200, (path, response.status)
+                  return json.load(response)
+          for attempt in range(24):
               try:
-                  with urllib.request.urlopen(url, timeout=15) as resp:
-                      body=resp.read().decode()
-                      assert resp.status == 200 and '"status":"ok"' in body, (resp.status,body)
-                      print('PASS health:',body)
-                      break
-              except Exception as e:
-                  print('Waiting for Render health:',repr(e))
-                  if i == 23: raise
+                  health = get_json("/health")
+                  assert health.get("status") == "ok", health
+                  daily = get_json("/content/daily.json")
+                  assert daily.get("date_utc") == datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+                  assert len(daily.get("questions", [])) == 24
+                  assert health.get("ai_daily_available") is True
+                  print("PASS health and daily text:", health, len(daily["questions"]))
+                  break
+              except Exception as exc:
+                  print("Waiting for deployed revision:", repr(exc))
+                  if attempt == 23:
+                      raise
                   time.sleep(10)
           PY
-      - name: Verify two real remote WebSocket clients
+      - name: Verify all six daily image puzzles and integrity
+        run: |
+          python - <<'PY'
+          import datetime, hashlib, json, urllib.request
+          base = "https://gaminghub-multiplayer.onrender.com"
+          with urllib.request.urlopen(base + "/ai_daily/daily.json", timeout=25) as response:
+              data = json.load(response)
+          assert data.get("schema") == 3, data
+          assert data.get("date_utc") == datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+          puzzles = data["puzzles"]
+          assert len(puzzles) == 6
+          ids = set()
+          for entry in puzzles:
+              assert entry["id"] not in ids
+              ids.add(entry["id"])
+              assert entry["status"] == "approved" and entry["answer_verified"] is True
+              assert len(entry["choices_en"]) == len(entry["choices_ar"]) == 4
+              assert 0 <= entry["correct_index"] < 4
+              with urllib.request.urlopen(base + "/ai_daily/" + entry["image"], timeout=25) as response:
+                  body = response.read()
+              assert body[:8] == b'\x89PNG\r\n\x1a\n'
+              assert len(body) < 3_000_000
+              assert hashlib.sha256(body).hexdigest() == entry["sha256"]
+          print("PASS: six daily picture puzzles, image hashes and answers")
+          PY
+      - name: Verify two real multiplayer WebSocket clients
         env:
           GAME_WS_URL: wss://gaminghub-multiplayer.onrender.com
         run: python server/test_live_match.py

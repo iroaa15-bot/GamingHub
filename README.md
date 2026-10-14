@@ -24,7 +24,8 @@ Production ads remain disabled. Google test rewarded ads are limited to debug An
 - Remote two-client WSS room, question, turn, wrong guess and leave test: passing.
 - Remote end-to-end test script: `server/test_live_match.py`.
 - GitHub Actions remote test workflow: `.github/workflows/remote-multiplayer-smoke.yml`.
-- **Pending**: physical Android device and native advertising/UMP tests, authenticated Play Console review/submission and Render history deployment verification. A prior Render build is stuck and history endpoints returned HTTP 426 during verification; do not treat the latest source as the currently deployed backend.
+- Render history HTTP checks now pass: two newest-first pages, no page overlap, and historical image SHA-256 verified back to 1 October 2026. Multiplayer was retested successfully after the history endpoints became available. Render deployment metadata still reports an update in progress, so the GitHub head is not claimed as the running server revision.
+- **Pending**: physical Android device and native advertising/UMP tests, authenticated Play Console review/submission, final privacy/developer-name review and genuine Android listing screenshots.
 
 ## Safety
 Do not commit secrets, API keys, or private player photos.

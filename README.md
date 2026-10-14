@@ -12,14 +12,19 @@ Godot multiplayer mini-game. In a match, each player sees the **opponent's** sec
 - Deploy status was **live** on 2026-10-13. This is not equivalent to completed real-device testing.
 
 ## Godot client
-The multiplayer endpoint is configured in `data/network_config.json`. The complete Godot game is distributed as a separate ZIP; it has not been committed in full to this repository.
+The full Godot client, source assets, Poing AdMob v5.1.0 Android libraries and UMP bridge are now committed here. The multiplayer endpoint is configured in `data/network_config.json`.
+
+Gaming Hub is an independent project. Android package: `com.iroaa15.gaminghub`. Version code 116, version name 11.6; target SDK 36.
+
+Production ads remain disabled. Google test rewarded ads are limited to debug Android builds for adults after UMP resolves. Only the SDK earned callback grants 50 Coins; duplicate, stale and close callbacks grant nothing. Daily content is additive, newest first, with offline caches and history backfill.
 
 ## Validation
-- Python server unit tests: 10/10 passing locally.
-- Local two-client WebSocket integration: passing.
+- Local regression suites: 198 game tests, 56 backend/client-contract tests, 3 illustrated-content tests passing.
+- Godot 4.5.1 import and gameplay smoke: passing. Additional runtime test covers archive merging and reward/age/consent state gates with a simulated adapter.
+- Remote two-client WSS room, question, turn, wrong guess and leave test: passing.
 - Remote end-to-end test script: `server/test_live_match.py`.
 - GitHub Actions remote test workflow: `.github/workflows/remote-multiplayer-smoke.yml`.
-- **Pending**: confirmed remote WSS end-to-end result and two physical Android device tests.
+- **Pending**: physical Android device and native advertising/UMP tests, authenticated Play Console review/submission and Render history deployment verification. A prior Render build is stuck and history endpoints returned HTTP 426 during verification; do not treat the latest source as the currently deployed backend.
 
 ## Safety
 Do not commit secrets, API keys, or private player photos.

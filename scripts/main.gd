@@ -1806,7 +1806,7 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
- VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ عالم حور وزين • العب، اكتشف، واكسب", "✨ HOOR & ZAIN WORLD • PLAY, DISCOVER, WIN"))
+ VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
  label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)

@@ -1,8 +1,9 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
-import asyncio, json, random, secrets, string, os, time
+import asyncio, json, random, secrets, string, os, time, datetime as dt
+from urllib.parse import urlsplit, parse_qs
 from liveops_content import daily_rotation
-from daily_content import json_bytes
-from daily_images import public_json as daily_image_json, image_for_filename as daily_image_bytes
+from daily_content import json_bytes, daily_pack, validate_pack
+from daily_images import public_json as daily_image_json, image_for_filename as daily_image_bytes, pack as daily_image_pack
 from dataclasses import dataclass, field
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
@@ -316,8 +317,49 @@ async def handler(ws):
                 await cleanup_room(code, 'Opponent disconnected')
 
 
+# Additive historical library. The server can reconstruct every day deterministically.
+_HISTORY_EPOCH = dt.date(2026, 10, 1)
+_MAX_HISTORY_DAYS = 7
+
+def history_payload(kind: str, before: str | None = None, days: int = 7) -> bytes:
+    days = max(1, min(int(days), _MAX_HISTORY_DAYS))
+    today = dt.datetime.now(dt.timezone.utc).date()
+    cursor = dt.date.fromisoformat(before) if before else today + dt.timedelta(days=1)
+    if cursor > today + dt.timedelta(days=1):
+        raise ValueError("Future cursor")
+    dates = [cursor - dt.timedelta(days=k + 1) for k in range(days)]
+    dates = [day for day in dates if _HISTORY_EPOCH <= day <= today]
+    packs = []
+    for day in dates:
+        if kind == "text":
+            pack_item = daily_pack(day)
+            validate_pack(pack_item, day)
+        elif kind == "image":
+            pack_item = daily_image_pack(day.isoformat())
+        else:
+            raise ValueError("Unknown category")
+        packs.append(pack_item)
+    return json.dumps({"schema": 1, "kind": kind, "newest_first": True,
+                       "retains_old_content": True, "packs": packs,
+                       "next_before": dates[-1].isoformat() if dates and dates[-1] > _HISTORY_EPOCH else ""},
+                      ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+
 async def http_health(connection, request):
     """Render health check without requiring a WebSocket upgrade."""
+    parsed_path = urlsplit(request.path)
+    if parsed_path.path in ("/content/history.json", "/ai_daily/history.json"):
+        try:
+            args = parse_qs(parsed_path.query, strict_parsing=False)
+            n = int(args.get("days", ["7"])[0])
+            if n < 1 or n > _MAX_HISTORY_DAYS:
+                raise ValueError("Invalid page size")
+            before = args.get("before", [None])[0]
+            payload = history_payload("text" if parsed_path.path.startswith("/content/") else "image", before, n)
+            return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",
+                 "Cache-Control":"public, max-age=300", "Access-Control-Allow-Origin":"*",
+                 "X-Content-Type-Options":"nosniff"}), payload)
+        except (ValueError, OverflowError, TypeError):
+            return Response(400, "Bad Request", Headers({"Content-Type":"application/json"}), b'{"error":"invalid_history_page"}')
     if request.path == "/content/daily.json":
         payload = json_bytes()
         return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",

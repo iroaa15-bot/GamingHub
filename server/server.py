@@ -1,6 +1,8 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
 import asyncio, json, random, secrets, string, os, time
 from liveops_content import daily_rotation
+from daily_content import json_bytes
+from daily_images import public_json as daily_image_json, image_for_filename as daily_image_bytes
 from dataclasses import dataclass, field
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
@@ -8,6 +10,7 @@ from websockets.datastructures import Headers
 
 from pathlib import Path
 catalog_path = Path(__file__).resolve().parent.parent / 'data' / 'cards.json'
+AI_DAILY_DIR = Path(__file__).resolve().parent / 'ai_daily_publish'
 if not catalog_path.exists():
     catalog_path = Path(__file__).resolve().parent / 'cards.json'
 catalog = json.loads(catalog_path.read_text(encoding='utf-8'))
@@ -35,6 +38,10 @@ class Room:
     created_at: float = field(default_factory=time.monotonic)
     last_activity: float = field(default_factory=time.monotonic)
     started_at: float = 0.0
+    resume_tokens: list = field(default_factory=lambda: ["", ""])
+    detached_at: list = field(default_factory=lambda: [None, None])
+    history: list = field(default_factory=list)
+    winner: int = -1
 
 rooms = {}
 connections = {}
@@ -44,6 +51,7 @@ WAITING_TTL = int(os.getenv('WAITING_TTL', '300'))
 MATCH_TTL = int(os.getenv('MATCH_TTL', '1200'))
 MAX_ACTIVE_CONNECTIONS = int(os.getenv('MAX_ACTIVE_CONNECTIONS', '1200'))
 MAX_GUESS_LENGTH = 80
+RECONNECT_GRACE = max(10, min(300, int(os.getenv('RECONNECT_GRACE', '90'))))
 
 
 async def send(ws, payload):
@@ -51,6 +59,7 @@ async def send(ws, payload):
 
 async def broadcast(room, payload):
     for p in room.players:
+        if p is None: continue
         try: await send(p, payload)
         except Exception: pass
 
@@ -61,18 +70,41 @@ async def start_room(room):
     room.cards = random.sample(CARDS, 2)
     room.turn, room.moves, room.over = 0, 0, False
     room.asked = [set(), set()]
+    room.resume_tokens = [secrets.token_hex(32), secrets.token_hex(32)]
+    room.detached_at = [None, None]
+    room.history = []
+    room.winner = -1
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
-        await send(ws, {'type':'started','room':room.code,'opponent_card':public_card(room.cards[1-i]),'your_turn':i == 0,'player_index':i,'questions':[q['text'] for q in QUESTIONS],'questions_ar':[q['ar'] for q in QUESTIONS],'questions_tr':[q['tr'] for q in QUESTIONS]})
+        await send(ws, {'type':'started','room':room.code,'opponent_card':public_card(room.cards[1-i]),'your_turn':i == 0,'player_index':i,'resume_token':room.resume_tokens[i],'questions':[q['text'] for q in QUESTIONS],'questions_ar':[q['ar'] for q in QUESTIONS],'questions_tr':[q['tr'] for q in QUESTIONS]})
+
+def snapshot(room, index, kind='synced', include_token=False):
+    """Authoritative per-player state. Never include this player's secret card.
+
+    The replay contains public actions only until the match is finished.
+    """
+    state = {'type': kind, 'room': room.code, 'player_index': index,
+             'opponent_card': public_card(room.cards[1-index]),
+             'your_turn': room.turn == index, 'moves': room.moves,
+             'finished': room.over,
+             'questions': [q['text'] for q in QUESTIONS],
+             'questions_ar': [q['ar'] for q in QUESTIONS],
+             'history': room.history.copy(),
+             'paused': any(p is None for p in room.players)}
+    if include_token:
+        state['resume_token'] = room.resume_tokens[index]
+    return state
+
 
 async def cleanup_room(code, reason='Match expired', exclude=None):
     room = rooms.pop(code, None)
     if room is None:
         return
     for peer in room.players:
-        connections.pop(peer, None)
-        if peer == exclude:
+        if peer is not None:
+            connections.pop(peer, None)
+        if peer is None or peer == exclude:
             continue
         try:
             await send(peer, {'type':'disconnected','message':reason})
@@ -83,7 +115,9 @@ async def expire_stale_rooms(now=None):
     now = time.monotonic() if now is None else now
     for code, room in list(rooms.items()):
         ttl = MATCH_TTL if len(room.players) == 2 else WAITING_TTL
-        if now - room.last_activity > ttl:
+        if any(t is not None and now - t >= RECONNECT_GRACE for t in room.detached_at):
+            await cleanup_room(code, 'Reconnection window expired')
+        elif now - room.last_activity > ttl:
             await cleanup_room(code, 'Room timed out')
 
 async def expiry_loop():
@@ -96,17 +130,55 @@ async def process(ws, msg):
     if not isinstance(action, str):
         return await send(ws, {'type':'error','message':'Missing action'})
     code_for_activity = connections.get(ws)
-    if code_for_activity in rooms:
+    if action not in ('ping', 'sync') and code_for_activity in rooms:
         rooms[code_for_activity].last_activity = time.monotonic()
 
-    # Mobile clients send a heartbeat every 12 seconds. Reply without touching
-    # the active match turn; an unknown ping previously timed out the client.
+    # Lightweight application heartbeat; it never reveals room or card state.
     if action == 'ping':
         nonce = msg.get('id')
         if type(nonce) is not int or nonce < 0:
             return await send(ws, {'type':'error','message':'Invalid ping'})
         return await send(ws, {'type':'pong','id':nonce})
-
+    # Reconcile a potentially lost move acknowledgement without replaying the move.
+    # Only the existing room socket can request a snapshot; a room code alone is
+    # never an authentication credential.
+    if action == 'sync':
+        code = connections.get(ws)
+        room = rooms.get(code)
+        if room is None or len(room.players) != 2 or not room.cards or ws not in room.players:
+            return await send(ws, {'type':'error','message':'No active match'})
+        index = room.players.index(ws)
+        return await send(ws, snapshot(room, index))
+    if action == 'resume':
+        code = msg.get('code')
+        token = msg.get('token')
+        if ws in connections or ws in waiting:
+            return await send(ws, {'type':'error','message':'Already in a room'})
+        if not isinstance(code, str) or not isinstance(token, str) or len(token) != 64:
+            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+        room = rooms.get(code)
+        if room is None or len(room.players) != 2 or not room.cards:
+            return await send(ws, {'type':'error','message':'Match unavailable'})
+        idx = next((i for i, expected in enumerate(room.resume_tokens)
+                    if expected and secrets.compare_digest(expected, token)), -1)
+        if idx < 0:
+            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+        disconnected_at = room.detached_at[idx]
+        if disconnected_at is None:
+            return await send(ws, {'type':'error','message':'Original player still connected'})
+        if time.monotonic() - disconnected_at >= RECONNECT_GRACE:
+            await cleanup_room(code, 'Reconnection window expired')
+            return await send(ws, {'type':'error','message':'Reconnection expired'})
+        # Rotate capability on successful resume: an intercepted old token cannot be replayed.
+        room.resume_tokens[idx] = secrets.token_hex(32)
+        room.players[idx] = ws
+        room.detached_at[idx] = None
+        connections[ws] = code
+        room.last_activity = time.monotonic()
+        await send(ws, snapshot(room, idx, 'resumed', include_token=True))
+        if all(p is not None for p in room.players):
+            await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
+        return
     if action == 'leave':
         if ws in waiting:
             waiting.remove(ws)
@@ -162,6 +234,8 @@ async def process(ws, msg):
     room = rooms.get(code)
     if room is None or len(room.players) != 2 or room.over:
         return await send(ws, {'type':'error','message':'No active match'})
+    if any(p is None for p in room.players):
+        return await send(ws, {'type':'error','message':'Match paused; waiting for reconnect'})
     index = room.players.index(ws)
     if index != room.turn: return await send(ws, {'type':'error','message':'Wait for your turn'})
     if action == 'ask':
@@ -173,7 +247,9 @@ async def process(ws, msg):
         room.asked[index].add(qi)
         q = QUESTIONS[qi]
         answer = room.cards[index][q['key']] == q['value']
-        await broadcast(room, {'type':'question','player':index,'text':q['text'],'text_ar':q['ar'],'text_tr':q['tr'],'answer':answer})
+        event = {'type':'question','player':index,'question_index':qi,'text':q['text'],'text_ar':q['ar'],'text_tr':q['tr'],'answer':answer}
+        room.history.append(event)
+        await broadcast(room, event)
     elif action == 'guess':
         raw_guess = msg.get('guess', '')
         if not isinstance(raw_guess, str) or not raw_guess.strip():
@@ -182,16 +258,24 @@ async def process(ws, msg):
             return await send(ws, {'type':'error','message':'Guess too long'})
         guess = raw_guess.strip().casefold()
         correct = normalize_guess(guess) in {normalize_guess(a) for a in room.cards[index]['aliases']}
-        await broadcast(room, {'type':'guess','player':index,'guess':guess,'correct':correct})
+        event = {'type':'guess','player':index,'guess':guess,'correct':correct}
+        room.history.append(event)
+        await broadcast(room, event)
         if correct:
             room.over = True
-            return await broadcast(room, {'type':'finished','winner':index,'cards':[c['name'] for c in room.cards]})
+            room.winner = index
+            result = {'type':'finished','winner':index,'cards':[c['name'] for c in room.cards]}
+            room.history.append(result)
+            return await broadcast(room, result)
     else:
         return await send(ws, {'type':'error','message':'Unknown action'})
     room.moves += 1
     if room.moves >= 20:
         room.over = True
-        return await broadcast(room, {'type':'finished','winner':-1,'cards':[c['name'] for c in room.cards]})
+        room.winner = -1
+        result = {'type':'finished','winner':-1,'cards':[c['name'] for c in room.cards]}
+        room.history.append(result)
+        return await broadcast(room, result)
     room.turn = 1 - index
     await broadcast(room, {'type':'turn','player':room.turn,'moves':room.moves})
 
@@ -218,23 +302,55 @@ async def handler(ws):
         if ws in waiting:
             waiting.remove(ws)
         code = connections.pop(ws, None)
-        room = rooms.pop(code, None)
-        if room:
-            for peer in room.players:
-                if peer != ws:
-                    connections.pop(peer, None)
-                    try: await send(peer, {'type':'disconnected','message':'Opponent left'})
-                    except Exception: pass
+        room = rooms.get(code)
+        if room and ws in room.players:
+            idx = room.players.index(ws)
+            if len(room.players) == 2 and room.cards:
+                room.players[idx] = None
+                room.detached_at[idx] = time.monotonic()
+                for peer in room.players:
+                    if peer is not None:
+                        try: await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
+                        except Exception: pass
+            else:
+                await cleanup_room(code, 'Opponent disconnected')
+
 
 async def http_health(connection, request):
     """Render health check without requiring a WebSocket upgrade."""
+    if request.path == "/content/daily.json":
+        payload = json_bytes()
+        return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",
+                                             "Cache-Control":"public, max-age=300",
+                                             "Access-Control-Allow-Origin":"*",
+                                             "X-Content-Type-Options":"nosniff"}), payload)
     if request.path == "/liveops/rotation.json":
+        # No personal data, credentials, or player history are exposed.
         payload = json.dumps(daily_rotation(), ensure_ascii=False, separators=(',', ':')).encode('utf-8')
         return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",
                                               "Cache-Control":"public, max-age=300",
                                               "Access-Control-Allow-Origin":"*"}), payload)
+    if request.path == "/ai_daily/daily.json":
+        return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8",
+                                             "Cache-Control":"public, max-age=120",
+                                             "Access-Control-Allow-Origin":"*",
+                                             "X-Content-Type-Options":"nosniff"}), daily_image_json())
+    if request.path.startswith("/ai_daily/"):
+        name = request.path.removeprefix("/ai_daily/")
+        image = daily_image_bytes(name)
+        if image is not None:
+            return Response(200, "OK", Headers({"Content-Type":"image/png",
+                                                 "Cache-Control":"public, max-age=120",
+                                                 "Access-Control-Allow-Origin":"*",
+                                                 "X-Content-Type-Options":"nosniff"}), image)
+        return Response(404, "Not Found", Headers({"Content-Type":"application/json; charset=utf-8"}), b'')
     if request.path == "/health":
-        return Response(200, "OK", Headers({"Content-Type":"application/json"}), b'{"status":"ok","service":"gaminghub-multiplayer"}\n')
+        payload = json.dumps({
+            "status": "ok",
+            "service": "gaminghub-multiplayer",
+            "ai_daily_available": (AI_DAILY_DIR / 'daily.json').exists(),
+        }, ensure_ascii=False).encode('utf-8')
+        return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8"}), payload)
     return None
 
 async def main():

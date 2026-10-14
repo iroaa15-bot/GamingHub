@@ -242,8 +242,13 @@ def image_for_filename(filename: str) -> bytes | None:
     m=re.fullmatch(r"daily-(\d{4}-\d{2}-\d{2})-(\d{2})\.png",filename)
     if not m:return None
     date,slot=m.group(1),int(m.group(2))
-    # Only today's images are exposed; stale packs are rejected by the client.
-    if date!=dt.datetime.now(dt.timezone.utc).date().isoformat() or slot>=PER_DAY:return None
+    # Old published images remain available even after the UTC date changes.
+    try:
+        day = dt.date.fromisoformat(date)
+    except ValueError:
+        return None
+    if day < dt.date(2026, 10, 1) or day > dt.datetime.now(dt.timezone.utc).date() or slot >= PER_DAY:
+        return None
     data=pack(date)["puzzles"][slot]
     answer_key=CATALOG[data["category"]][0][0]
     # Locate the answer corresponding to correct_index with English name.

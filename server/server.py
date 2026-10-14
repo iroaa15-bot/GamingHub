@@ -348,7 +348,7 @@ async def http_health(connection, request):
         payload = json.dumps({
             "status": "ok",
             "service": "gaminghub-multiplayer",
-            "ai_daily_available": (AI_DAILY_DIR / 'daily.json').exists(),
+            "ai_daily_available": True,  # pictures are generated on demand
         }, ensure_ascii=False).encode('utf-8')
         return Response(200, "OK", Headers({"Content-Type":"application/json; charset=utf-8"}), payload)
     return None

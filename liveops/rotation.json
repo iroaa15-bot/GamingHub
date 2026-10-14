@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "season": "discovery-season-1",
+  "daily_missions": [
+    {
+      "id": "play_2",
+      "type": "matches",
+      "target": 2,
+      "xp": 30
+    },
+    {
+      "id": "play_4",
+      "type": "matches",
+      "target": 4,
+      "xp": 55
+    },
+    {
+      "id": "win_1",
+      "type": "wins",
+      "target": 1,
+      "xp": 35
+    },
+    {
+      "id": "win_3",
+      "type": "wins",
+      "target": 3,
+      "xp": 80
+    }
+  ],
+  "weekly_missions": [
+    {
+      "id": "weekly_play_8",
+      "type": "matches",
+      "target": 8,
+      "xp": 120
+    },
+    {
+      "id": "weekly_win_5",
+      "type": "wins",
+      "target": 5,
+      "xp": 180
+    },
+    {
+      "id": "weekly_play_15",
+      "type": "matches",
+      "target": 15,
+      "xp": 240
+    }
+  ],
+  "event_rotation": [
+    {
+      "id": "explorers",
+      "ar": "أسبوع المستكشفين",
+      "en": "Explorers Week",
+      "bonus_game": 4
+    },
+    {
+      "id": "mind",
+      "ar": "أسبوع الألغاز",
+      "en": "Puzzle Week",
+      "bonus_game": 5
+    },
+    {
+      "id": "champions",
+      "ar": "أسبوع الأبطال",
+      "en": "Champions Week",
+      "bonus_game": 2
+    },
+    {
+      "id": "mystery",
+      "ar": "أسبوع الغموض",
+      "en": "Mystery Week",
+      "bonus_game": 7
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+Optional documentary photographs may replace AI images using these .jpg filenames. Keep each image consistent with data/cards.json properties and use licensed images.
+lion.jpg
+pizza.jpg
+elephant.jpg
+apple.jpg
+football.jpg
+guitar.jpg
+panda.jpg
+burger.jpg
+dolphin.jpg
+giraffe.jpg
+tiger.jpg
+penguin.jpg
+banana.jpg
+strawberry.jpg
+cake.jpg
+sushi.jpg
+bicycle.jpg
+camera.jpg
+laptop.jpg
+violin.jpg
+pyramids.jpg
+eiffel.jpg
+taj_mahal.jpg
+lighthouse.jpg

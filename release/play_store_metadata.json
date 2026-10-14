@@ -1,0 +1,16 @@
+{
+  "app_id": "com.iroaa15.gaminghub",
+  "display_name_ar": "Gaming Hub",
+  "display_name_en": "Gaming Hub",
+  "category": "Games / Trivia",
+  "contains_ads": "release: ads disabled; debug: adult-only Google test rewarded ads",
+  "short_description_ar": "تخمين صور، ألغاز وأسئلة يومية جديدة، وتحديات ممتعة مع الأصدقاء.",
+  "short_description_en": "Guess pictures, solve daily puzzles, and challenge friends.",
+  "status": "DRAFT_NOT_PUBLISHED",
+  "android_target_sdk_required": 36,
+  "requires_genuine_screenshots": true,
+  "requires_privacy_policy_url": true,
+  "requires_age_rating_and_data_safety": true,
+  "support_email": "iroaa15@gmail.com",
+  "developer_name": "UNVERIFIED_PLAY_CONSOLE_NAME"
+}

@@ -4,4 +4,17 @@
 !*.example
 *.keystore
 *.jks
-ai_daily/output/
+__pycache__/
+*.pyc
+
+# Android build outputs and signing credentials
+build/
+*.keystore
+*.jks
+*.p12
+.env
+
+android/
+outputs/
+signing-private/
+addons/admob/downloads/

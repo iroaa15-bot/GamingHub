@@ -1,0 +1,32 @@
+{
+  "disclosure": "AI-generated realistic card images; not documentary photographs. Original illustrations remain available for eight cards; remaining cards use realistic images in mixed mode.",
+  "card_images": [
+    "lion.png",
+    "pizza.png",
+    "elephant.png",
+    "apple.png",
+    "football.png",
+    "guitar.png",
+    "panda.png",
+    "burger.png",
+    "dolphin.png",
+    "giraffe.png",
+    "tiger.png",
+    "penguin.png",
+    "banana.png",
+    "strawberry.png",
+    "cake.png",
+    "sushi.png",
+    "bicycle.png",
+    "camera.png",
+    "laptop.png",
+    "violin.png",
+    "pyramids.png",
+    "eiffel.png",
+    "taj_mahal.png",
+    "lighthouse.png"
+  ],
+  "hero": "../ui/hero.png",
+  "new_images_generated": "2026-10-12",
+  "total_card_images": 24
+}

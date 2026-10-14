@@ -1,0 +1,277 @@
+{
+  "assets": [
+    {
+      "path": "assets/generated/camera.webp",
+      "original_bytes": 231082,
+      "new_bytes": 86856,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/eiffel.webp",
+      "original_bytes": 324020,
+      "new_bytes": 123122,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/sushi.webp",
+      "original_bytes": 192504,
+      "new_bytes": 72874,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/apple.webp",
+      "original_bytes": 241410,
+      "new_bytes": 100368,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/dolphin.webp",
+      "original_bytes": 343112,
+      "new_bytes": 140106,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/banana.webp",
+      "original_bytes": 179578,
+      "new_bytes": 66760,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/guitar.webp",
+      "original_bytes": 251244,
+      "new_bytes": 96368,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/saturn_art.webp",
+      "original_bytes": 27550,
+      "new_bytes": 18580,
+      "size": [
+        768,
+        483
+      ]
+    },
+    {
+      "path": "assets/generated/bicycle.webp",
+      "original_bytes": 400966,
+      "new_bytes": 172888,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/burger.webp",
+      "original_bytes": 296690,
+      "new_bytes": 112204,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/football.webp",
+      "original_bytes": 267520,
+      "new_bytes": 105356,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/lion.webp",
+      "original_bytes": 391456,
+      "new_bytes": 144086,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/violin.webp",
+      "original_bytes": 223898,
+      "new_bytes": 85462,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/giraffe.webp",
+      "original_bytes": 270522,
+      "new_bytes": 113440,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/cake.webp",
+      "original_bytes": 146128,
+      "new_bytes": 63092,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/pyramids.webp",
+      "original_bytes": 400796,
+      "new_bytes": 147372,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/lighthouse.webp",
+      "original_bytes": 333106,
+      "new_bytes": 135276,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/taj_mahal.webp",
+      "original_bytes": 344164,
+      "new_bytes": 125438,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/tiger.webp",
+      "original_bytes": 399912,
+      "new_bytes": 170478,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/elephant.webp",
+      "original_bytes": 354112,
+      "new_bytes": 130562,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/pizza.webp",
+      "original_bytes": 318274,
+      "new_bytes": 130576,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/laptop.webp",
+      "original_bytes": 87086,
+      "new_bytes": 37316,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/strawberry.webp",
+      "original_bytes": 251356,
+      "new_bytes": 111512,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/penguin.webp",
+      "original_bytes": 205696,
+      "new_bytes": 78248,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/generated/panda.webp",
+      "original_bytes": 412712,
+      "new_bytes": 166482,
+      "size": [
+        768,
+        768
+      ]
+    },
+    {
+      "path": "assets/ui/world_0.webp",
+      "original_bytes": 433796,
+      "new_bytes": 76246,
+      "size": [
+        640,
+        370
+      ]
+    },
+    {
+      "path": "assets/ui/world_3.webp",
+      "original_bytes": 440749,
+      "new_bytes": 76264,
+      "size": [
+        640,
+        370
+      ]
+    },
+    {
+      "path": "assets/ui/world_4.webp",
+      "original_bytes": 482197,
+      "new_bytes": 92152,
+      "size": [
+        640,
+        370
+      ]
+    },
+    {
+      "path": "assets/ui/world_2.webp",
+      "original_bytes": 439758,
+      "new_bytes": 74424,
+      "size": [
+        640,
+        370
+      ]
+    },
+    {
+      "path": "assets/ui/world_1.webp",
+      "original_bytes": 425544,
+      "new_bytes": 73916,
+      "size": [
+        640,
+        370
+      ]
+    }
+  ],
+  "count": 30,
+  "original_bytes": 9116938,
+  "optimized_bytes": 3127824
+}

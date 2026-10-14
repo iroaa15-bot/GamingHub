@@ -1,0 +1,39 @@
+{
+  "acts": {
+    "ar": [
+      "الشاطئ ورسالة الرحلة",
+      "حديقة الاكتشاف",
+      "ورشة الجسر",
+      "برج الإشارات",
+      "عودة نور المنارة"
+    ],
+    "en": [
+      "The Beach Message",
+      "Discovery Garden",
+      "Bridge Workshop",
+      "Signal Tower",
+      "The Lighthouse Returns"
+    ],
+    "tr": [
+      "Sahil Mesajı",
+      "Keşif Bahçesi",
+      "Köprü Atölyesi",
+      "Sinyal Kulesi",
+      "Deniz Feneri Yeniden Yanar"
+    ]
+  },
+  "images": [
+    "lighthouse",
+    "apple",
+    "bicycle",
+    "camera",
+    "lighthouse"
+  ],
+  "scenes": [
+    "res://assets/campaign/island_beach.webp",
+    "res://assets/campaign/island_garden.webp",
+    "res://assets/campaign/island_workshop.webp",
+    "res://assets/campaign/island_tower.webp",
+    "res://assets/campaign/island_lighthouse.webp"
+  ]
+}

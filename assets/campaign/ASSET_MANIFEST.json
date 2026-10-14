@@ -1,0 +1,37 @@
+{
+  "tool": "built-in image_gen (imagegen skill), no CLI",
+  "date": "2026-10-12",
+  "disclosure": "AI-generated fictional illustrated scenes, not photographs of real places.",
+  "assets": [
+    {
+      "id": "island_beach",
+      "saved_project_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/work/journeys/GamingHub_Godot_v1.4/assets/campaign/island_beach.png",
+      "saved_output_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/outputs/Campaign_Scenes_v1.4/island_beach.png",
+      "prompt": "Game-ready narrative environment illustration for a family-friendly bilingual/trilingual discovery adventure. Consistent premium stylized 3D storybook look, painterly textures, soft rounded shapes, inviting turquoise, indigo and warm gold palette, visually rich but calm. Landscape composition 1536x1024, readable at small mobile banner size, no people, no text, no letters, no logos, no UI, no danger or combat. A peaceful discovery island beach arrival at morning: turquoise sea, a modest wooden expedition sailboat docked at a small jetty, sandy trail, a sealed explorer journal on a wooden crate near a gate, distant red-and-white lighthouse unlit on a headland. Create an original coherent fictional island environment, not a real landmark. Strong foreground-middle-background depth and friendly lighting."
+    },
+    {
+      "id": "island_garden",
+      "saved_project_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/work/journeys/GamingHub_Godot_v1.4/assets/campaign/island_garden.png",
+      "saved_output_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/outputs/Campaign_Scenes_v1.4/island_garden.png",
+      "prompt": "Game-ready narrative environment illustration for a family-friendly bilingual/trilingual discovery adventure. Consistent premium stylized 3D storybook look, painterly textures, soft rounded shapes, inviting turquoise, indigo and warm gold palette, visually rich but calm. Landscape composition 1536x1024, readable at small mobile banner size, no people, no text, no letters, no logos, no UI, no danger or combat. A lush discovery island learning garden at sunny midday: winding stone trail, seedlings, flowering plants, an apple tree, small open garden shelter, gentle stream, the same distant red-and-white lighthouse unlit on the coastal headland. Create an original coherent fictional island environment, not a real landmark. Strong foreground-middle-background depth and friendly lighting."
+    },
+    {
+      "id": "island_workshop",
+      "saved_project_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/work/journeys/GamingHub_Godot_v1.4/assets/campaign/island_workshop.png",
+      "saved_output_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/outputs/Campaign_Scenes_v1.4/island_workshop.png",
+      "prompt": "Game-ready narrative environment illustration for a family-friendly bilingual/trilingual discovery adventure. Consistent premium stylized 3D storybook look, painterly textures, soft rounded shapes, inviting turquoise, indigo and warm gold palette, visually rich but calm. Landscape composition 1536x1024, readable at small mobile banner size, no people, no text, no letters, no logos, no UI, no danger or combat. A cozy discovery island bridge workshop at late afternoon: a bicycle leaning against a workbench, safe neatly arranged tools, coils of copper-colored wire, timber footbridge over a little stream, a clear trail leading toward the coastal headland and distant red-and-white lighthouse. Create an original coherent fictional island environment, not a real landmark. Strong foreground-middle-background depth and friendly lighting."
+    },
+    {
+      "id": "island_tower",
+      "saved_project_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/work/journeys/GamingHub_Godot_v1.4/assets/campaign/island_tower.png",
+      "saved_output_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/outputs/Campaign_Scenes_v1.4/island_tower.png",
+      "prompt": "Game-ready narrative environment illustration for a family-friendly bilingual/trilingual discovery adventure. Consistent premium stylized 3D storybook look, painterly textures, soft rounded shapes, inviting turquoise, indigo and warm gold palette, visually rich but calm. Landscape composition 1536x1024, readable at small mobile banner size, no people, no text, no letters, no logos, no UI, no danger or combat. A discovery island signal tower balcony at sunset: coastal red-and-white tower, small signaling lamp not yet illuminated, telescope, nautical compass on a table, warm glowing sky, turquoise coves below, a winding path connecting island garden and workshop in the distance. Create an original coherent fictional island environment, not a real landmark. Strong foreground-middle-background depth and friendly lighting."
+    },
+    {
+      "id": "island_lighthouse",
+      "saved_project_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/work/journeys/GamingHub_Godot_v1.4/assets/campaign/island_lighthouse.png",
+      "saved_output_path": "C:/Users/Omar/Documents/Codex/2026-10-11/referenced-chatgpt-conversation-this-is-an/outputs/Campaign_Scenes_v1.4/island_lighthouse.png",
+      "prompt": "Game-ready narrative environment illustration for a family-friendly bilingual/trilingual discovery adventure. Consistent premium stylized 3D storybook look, painterly textures, soft rounded shapes, inviting turquoise, indigo and warm gold palette, visually rich but calm. Landscape composition 1536x1024, readable at small mobile banner size, no people, no text, no letters, no logos, no UI, no danger or combat. A beautiful discovery island red-and-white lighthouse at dusk now illuminated, a warm broad beacon guiding a small expedition sailboat toward the peaceful harbor, glowing windows, five subtle golden map-piece shaped ornaments assembled on a journal in the foreground, a hopeful celebratory coastal scene. Create an original coherent fictional island environment, not a real landmark. Strong foreground-middle-background depth and friendly lighting."
+    }
+  ]
+}

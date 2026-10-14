@@ -389,6 +389,10 @@ async def http_health(connection, request):
     if request.path == "/health":
         payload = json.dumps({
             "status": "ok",
+            "release": "11.6",
+            "content_history_available": True,
+            "release": "11.6",
+            "content_history_available": True,
             "service": "gaminghub-multiplayer",
             "ai_daily_available": True,  # pictures are generated on demand
         }, ensure_ascii=False).encode('utf-8')

@@ -1,41 +1,135 @@
-name: Godot Project Checks
+name: Godot 4.5.1 Android Debug - Source, Runtime and Package Gates
 on:
   push:
     branches: [main]
-    paths:
-      - 'project.godot'
-      - 'scripts/**'
-      - 'scenes/**'
-      - 'tests/**'
-      - 'data/**'
-      - '.github/workflows/godot-checks.yml'
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  check:
+  validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Check project source presence
-        id: source
-        shell: bash
+      - name: Install test dependencies
+        run: python3 -m pip install -r server/requirements.txt
+      - name: Reject incomplete GitHub source upload
+        run: python3 release/verify_project_upload.py
+      - name: Verify exact source SHA-256 manifest
+        run: python3 release/source_manifest.py
+      - name: Verify deterministic upload archive
         run: |
-          if [ -f project.godot ] && [ -f scenes/Main.tscn ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::error::Godot source is missing. Upload the full project before this CI can pass."\n            exit 1
-          fi
+          python3 release/source_archive.py --output /tmp/gaminghub-source.zip
+          python3 release/source_archive.py --verify /tmp/gaminghub-source.zip
+      - name: Run all checks against the exact upload archive
+        run: python3 release/verify_archive_runtime.py /tmp/gaminghub-source.zip
       - uses: chickensoft-games/setup-godot@v2
-        if: steps.source.outputs.ready == 'true'
         with:
           version: 4.5.1
           use-dotnet: false
           include-templates: false
-      - name: Import and validate scripts
-        if: steps.source.outputs.ready == 'true'
+      - name: Godot import and GDScript parsing
+        shell: bash
         run: |
-          godot --headless --path . --editor --import --quit
-          godot --headless --path . --quit-after 60
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee godot-import.log
+      - name: Main, multiplayer and offline game smoke
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/godot_smoke.gd 2>&1 | tee godot-smoke.log
+          grep -q 'GODOT_SMOKE_PASS' godot-smoke.log
+      - name: Verify additive content and reward gates at runtime
+        run: |
+          timeout 120 godot --headless --path . --script res://tests/release_runtime.gd 2>&1 | tee release-runtime.log
+          grep -q RELEASE_RUNTIME_PASS release-runtime.log
+      - name: Boot main scene for 60 frames
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --quit-after 60 2>&1 | tee godot-boot.log
+      - name: Keep diagnostic logs when validation fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-validation-logs
+          path: godot-*.log
+          if-no-files-found: ignore
+          retention-days: 14
+  android-debug:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify complete source before export
+        run: python3 release/verify_project_upload.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install required Android SDK packages
+        run: sdkmanager 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Create disposable debug-only signing key
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.android"
+          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" \
+            -storepass android -keypass android -alias androiddebugkey -keyalg RSA \
+            -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
+      - name: Configure Godot Android SDK paths
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+      - name: Import assets and check GDScript
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee godot-android-import.log
+      - name: Build debug APK
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-v11.5-debug.apk 2>&1 | tee godot-android-export.log
+      - name: Validate package, signature, identity and network permission
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 release/verify_android_package.py build/GamingHub-v11.5-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build/GamingHub-v11.5-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging build/GamingHub-v11.5-debug.apk | tee android-package-info.log
+          grep -q "package: name='com.iroaa15.gaminghub'" android-package-info.log
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions build/GamingHub-v11.5-debug.apk | tee android-permissions.log
+          grep -q 'android.permission.INTERNET' android-permissions.log
+          grep -Eq "targetSdkVersion:'36'|targetSdkVersion='36'" android-package-info.log
+      - name: Keep diagnostic logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-android-build-logs
+          path: |
+            godot-*.log
+            android-*.log
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Publish installable debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-v11.5-Android-Debug
+          path: build/GamingHub-v11.5-debug.apk
+          if-no-files-found: error
+          retention-days: 14

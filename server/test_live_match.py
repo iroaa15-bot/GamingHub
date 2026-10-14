@@ -29,6 +29,6 @@ async def main():
         await recv(a,'turn'); await recv(b,'turn')
         await a.send(json.dumps({'type':'leave'}))
         await recv(a,'left'); await recv(b,'disconnected')
-    print('PASS: remote 2-player room, hidden cards, question, turns, guess, leave')
+    print('PASS: 2-player room, hidden cards, question, turns, guess, leave')
 
 if __name__=='__main__': asyncio.run(main())

@@ -105,6 +105,14 @@ jobs:
           set -o pipefail
           mkdir -p build
           godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-v11.5-debug.apk 2>&1 | tee godot-android-export.log
+      - name: Build unsigned release bundle without private credentials
+        run: python3 release/build_unsigned_bundle.py
+      - name: Keep unsigned bundle for local upload-key signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-v11.7-unsigned-bundle
+          path: build/GamingHub-v11.7-unsigned.aab
+          retention-days: 14
       - name: Validate package, signature, identity and network permission
         shell: bash
         run: |

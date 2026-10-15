@@ -8,6 +8,7 @@ const UNIT_TEST_REWARDED := "ca-app-pub-3940256099942544/5224354917"
 var _init_done: bool = false
 var _consent_started: bool = false
 var _active_request: int = 0
+var _shown_request_id: int = 0
 var _reward_ad: RewardedAd
 var _load_callback := RewardedAdLoadCallback.new()
 var _full_callback := FullScreenContentCallback.new()
@@ -124,9 +125,10 @@ func _on_ad_loaded(ad: RewardedAd) -> void:
   return
  _reward_ad = ad
  var shown_request: int = _active_request
+ _shown_request_id = shown_request
  var full_callback := FullScreenContentCallback.new()
  full_callback.on_ad_dismissed_full_screen_content = func() -> void:
-  if shown_request == _active_request:
+  if shown_request == _shown_request_id:
    _on_ad_closed()
  full_callback.on_ad_failed_to_show_full_screen_content = func(error: AdError) -> void:
   if shown_request == _active_request:
@@ -166,6 +168,7 @@ func _fail(reason: String) -> void:
   AdManager.report_rewarded_failed(id, reason)
 
 func _clear_ad() -> void:
+ _shown_request_id = 0
  if _reward_ad != null:
   _reward_ad.destroy()
   _reward_ad = null

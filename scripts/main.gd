@@ -3429,7 +3429,8 @@ func show_privacy_and_ads() -> void:
  label(tr_ui("الإعلانات مغلقة افتراضيًا. قد تتوفر إعلانات تجريبية اختيارية للكبار فقط بعد تثبيت SDK.", "Ads are off by default. Optional test ads for adults require the verified SDK."), 19)
  label(tr_ui("ملفات الأطفال والمراهقين لا تعرض إعلانات. تُمنح العملات بعد إثبات مشاهدة الإعلان من SDK فقط.", "No ads for children or teens. Coins require a real SDK-earned callback."), 17)
  label(tr_ui("قد تتطلب مباريات الأونلاين اتصالًا بسيرفر اللعبة. بيانات المباراة تُستخدم لتشغيل الغرفة؛ راجع سياسة الخصوصية النهائية قبل النشر.", "Online matches connect to the game server. Match data supports room operation; review the final privacy policy before release."), 17)
- label(tr_ui("النسخة الحالية لا تحتوي على AdMob أصلي إلا إذا ثُبّتت الإضافة الموثقة منفصلًا.", "This package has no native AdMob binary unless the verified add-on is installed."), 16)
+ label(tr_ui("إضافة AdMob الأصلية مثبتة. الإعلانات التجريبية للبالغين في نسخة التطوير فقط، والإعلانات الإنتاجية مغلقة.", "The native AdMob add-on is installed. Adult test ads are development-only; production ads are disabled."), 16)
+ button(tr_ui("قراءة سياسة الخصوصية كاملة", "READ FULL PRIVACY POLICY"), func(): OS.shell_open("https://iroaa15-bot.github.io/GamingHub/privacy.html"), PANEL)
  button(tr_ui("تفاصيل حالة الإعلانات", "AD INTEGRATION STATUS"), show_ad_status, PANEL)
  if PoingAdsBridge.privacy_options_required():
   button(tr_ui("خيارات موافقة الإعلانات", "AD CONSENT OPTIONS"), PoingAdsBridge.show_privacy_options, PANEL)

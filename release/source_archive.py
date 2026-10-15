@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
-from source_manifest import ROOT, inventory, verify as verify_source
+from source_manifest import ROOT, inventory, verify as verify_source, source_bytes
 
 MANIFEST = 'release/source_manifest.json'
 
@@ -19,7 +19,7 @@ def _entries(root: Path) -> dict[str, str]:
     if errors:
         raise ValueError('Invalid source manifest: ' + '; '.join(errors[:5]))
     entries = inventory(root)
-    entries[MANIFEST] = hashlib.sha256((root / MANIFEST).read_bytes()).hexdigest()
+    entries[MANIFEST] = hashlib.sha256(source_bytes(root / MANIFEST)).hexdigest()
     return entries
 
 
@@ -34,7 +34,7 @@ def build(destination: Path, root: Path = ROOT) -> tuple[int, int]:
             info = ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
-            archive.writestr(info, source.read_bytes(), compress_type=ZIP_DEFLATED, compresslevel=9)
+            archive.writestr(info, source_bytes(source), compress_type=ZIP_DEFLATED, compresslevel=9)
     verify_archive(destination)
     return len(entries), destination.stat().st_size
 

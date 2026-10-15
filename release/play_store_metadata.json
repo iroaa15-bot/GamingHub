@@ -12,5 +12,8 @@
   "requires_privacy_policy_url": true,
   "requires_age_rating_and_data_safety": true,
   "support_email": "iroaa15@gmail.com",
-  "developer_name": "UNVERIFIED_PLAY_CONSOLE_NAME"
+  "developer_name": "Gaming Hub - iroaa15",
+  "privacy_url": "https://iroaa15-bot.github.io/GamingHub/privacy.html",
+  "version_code": 117,
+  "version_name": "11.7"
 }

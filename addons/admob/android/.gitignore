@@ -1,2 +1,5 @@
-# Remove /bin folder line if you want to commit
-/bin
+# Track the Android ads/core binaries required by this project.
+/bin/*
+!/bin/ads/
+!/bin/package.gd
+!/bin/package.gd.uid

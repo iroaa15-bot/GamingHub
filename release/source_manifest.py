@@ -18,7 +18,15 @@ def included(root=ROOT):
     for directory in DIRS:
         if (root/directory).is_dir():
             files.extend(p for p in (root/directory).rglob('*') if p.is_file())
-    return sorted((p for p in files if p.relative_to(root).as_posix() not in EXCLUDE
+    def enabled_binary(path):
+        name = path.relative_to(root).as_posix()
+        if name.startswith('addons/admob/ios/bin/'):
+            return False
+        if name.startswith('addons/admob/android/bin/'):
+            return name.startswith('addons/admob/android/bin/ads/') or name in {
+                'addons/admob/android/bin/package.gd', 'addons/admob/android/bin/package.gd.uid'}
+        return True
+    return sorted((p for p in files if enabled_binary(p) and p.relative_to(root).as_posix() not in EXCLUDE
                    and '__pycache__' not in p.parts and p.suffix != '.pyc'
                    and '.godot' not in p.parts and 'build' not in p.parts),
                   key=lambda p: p.relative_to(root).as_posix())

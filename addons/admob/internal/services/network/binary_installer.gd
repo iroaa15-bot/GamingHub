@@ -31,10 +31,10 @@ static func install_missing_binaries_sync() -> void:
 	if DisplayServer.get_name() != "headless":
 		return
 
-	if not PluginVersion.is_android_installed:
+	if ProjectSettings.get_setting("admob/general/android/enabled", true) and not PluginVersion.is_android_installed:
 		_install_android_sync()
 
-	if not PluginVersion.is_ios_installed:
+	if ProjectSettings.get_setting("admob/general/ios/enabled", true) and not PluginVersion.is_ios_installed:
 		_install_ios_sync()
 
 

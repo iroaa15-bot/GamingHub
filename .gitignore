@@ -14,7 +14,7 @@ build/
 *.p12
 .env
 
-android/
+/android/
 outputs/
 signing-private/
 addons/admob/downloads/

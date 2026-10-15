@@ -1,0 +1,965 @@
+{
+  "schema": 1,
+  "items": [
+    {
+      "id": "existing_lion",
+      "image": "res://assets/generated/lion.webp",
+      "sha256": "0f73ce885a4d6fbbfc00474ac912e8d16d85d9647d1f69ea7c6fc727931b4e6b",
+      "subject_key": "lion",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Lion",
+      "answer_ar": "أسد",
+      "choices_en": [
+        "Chair",
+        "Lion",
+        "Carrot",
+        "Tomato"
+      ],
+      "choices_ar": [
+        "كرسي",
+        "أسد",
+        "جزرة",
+        "طماطم"
+      ],
+      "correct_index": 1,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_pizza",
+      "image": "res://assets/generated/pizza.webp",
+      "sha256": "0f5a1ba0d7aa3d5688d5605bbd44bf017eb7a67c01f8370939f925e714694ffa",
+      "subject_key": "pizza",
+      "category": "food",
+      "category_en": "Food",
+      "category_ar": "طعام",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Pizza",
+      "answer_ar": "بيتزا",
+      "choices_en": [
+        "Chair",
+        "Burger",
+        "Cake",
+        "Pizza"
+      ],
+      "choices_ar": [
+        "كرسي",
+        "برجر",
+        "كعكة",
+        "بيتزا"
+      ],
+      "correct_index": 3,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_elephant",
+      "image": "res://assets/generated/elephant.webp",
+      "sha256": "37e195fdc2f31e36650286d5d93c6f38f69d65373f3796402a61b05dd630cc61",
+      "subject_key": "elephant",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Elephant",
+      "answer_ar": "فيل",
+      "choices_en": [
+        "Cake",
+        "Sushi",
+        "Elephant",
+        "Strawberry"
+      ],
+      "choices_ar": [
+        "كعكة",
+        "سوشي",
+        "فيل",
+        "فراولة"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_apple",
+      "image": "res://assets/generated/apple.webp",
+      "sha256": "4f60a61328df1af3e15b09bc9c04f4d9b3c52004156260b55b6e9f3fa1cbda1e",
+      "subject_key": "apple",
+      "category": "fruits",
+      "category_en": "Fruits",
+      "category_ar": "فواكه",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Apple",
+      "answer_ar": "تفاحة",
+      "choices_en": [
+        "Apple",
+        "Tiger",
+        "Penguin",
+        "Cake"
+      ],
+      "choices_ar": [
+        "تفاحة",
+        "نمر",
+        "بطريق",
+        "كعكة"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_football",
+      "image": "res://assets/generated/football.webp",
+      "sha256": "a66137b52d71a755385a29ac33641cf52b20155018984a16316e512f104d5d84",
+      "subject_key": "football",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Football",
+      "answer_ar": "كرة قدم",
+      "choices_en": [
+        "Burger",
+        "Football",
+        "Apple",
+        "Panda"
+      ],
+      "choices_ar": [
+        "برجر",
+        "كرة قدم",
+        "تفاحة",
+        "باندا"
+      ],
+      "correct_index": 1,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_guitar",
+      "image": "res://assets/generated/guitar.webp",
+      "sha256": "e1b5146563c405632457a738b2184747040a7386c61da22edab42f9ce94241e4",
+      "subject_key": "guitar",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Guitar",
+      "answer_ar": "جيتار",
+      "choices_en": [
+        "Penguin",
+        "Banana",
+        "Guitar",
+        "Tiger"
+      ],
+      "choices_ar": [
+        "بطريق",
+        "موزة",
+        "جيتار",
+        "نمر"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_panda",
+      "image": "res://assets/generated/panda.webp",
+      "sha256": "8b8d30080c9e63375b5a2d9cbd3722d4d50f4e874b2991cf96ea76c5d7e959c9",
+      "subject_key": "panda",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Panda",
+      "answer_ar": "باندا",
+      "choices_en": [
+        "Pizza",
+        "Apple",
+        "Panda",
+        "Penguin"
+      ],
+      "choices_ar": [
+        "بيتزا",
+        "تفاحة",
+        "باندا",
+        "بطريق"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_burger",
+      "image": "res://assets/generated/burger.webp",
+      "sha256": "084e370be0c3062e6f024000ae513a8676d8d5cab6f79b065d5692585782d851",
+      "subject_key": "burger",
+      "category": "food",
+      "category_en": "Food",
+      "category_ar": "طعام",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Burger",
+      "answer_ar": "برجر",
+      "choices_en": [
+        "Bicycle",
+        "Camera",
+        "Burger",
+        "Strawberry"
+      ],
+      "choices_ar": [
+        "دراجة",
+        "كاميرا",
+        "برجر",
+        "فراولة"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_dolphin",
+      "image": "res://assets/generated/dolphin.webp",
+      "sha256": "14618b4f9d28abc797ac6cbdcbe2d58dca110cf2600c7dd50d6c9e5a9b4fbe13",
+      "subject_key": "dolphin",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Dolphin",
+      "answer_ar": "دلفين",
+      "choices_en": [
+        "Elephant",
+        "Panda",
+        "Dolphin",
+        "Lion"
+      ],
+      "choices_ar": [
+        "فيل",
+        "باندا",
+        "دلفين",
+        "أسد"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_giraffe",
+      "image": "res://assets/generated/giraffe.webp",
+      "sha256": "f2501a6dfe38a71e4de587863fdaba135d25545a1ec75e87c379617d84a855db",
+      "subject_key": "giraffe",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Giraffe",
+      "answer_ar": "زرافة",
+      "choices_en": [
+        "Banana",
+        "Strawberry",
+        "Giraffe",
+        "Burger"
+      ],
+      "choices_ar": [
+        "موزة",
+        "فراولة",
+        "زرافة",
+        "برجر"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_tiger",
+      "image": "res://assets/generated/tiger.webp",
+      "sha256": "7d6045748d771d52873ff71601814728eb79c931a384d4aa80155c2e997823b1",
+      "subject_key": "tiger",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Tiger",
+      "answer_ar": "نمر",
+      "choices_en": [
+        "Penguin",
+        "Pizza",
+        "Apple",
+        "Tiger"
+      ],
+      "choices_ar": [
+        "بطريق",
+        "بيتزا",
+        "تفاحة",
+        "نمر"
+      ],
+      "correct_index": 3,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_penguin",
+      "image": "res://assets/generated/penguin.webp",
+      "sha256": "a3d11814392567c51dd4116a58f67f2cc67cafe07462e7a3ecefa68fcae89829",
+      "subject_key": "penguin",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Penguin",
+      "answer_ar": "بطريق",
+      "choices_en": [
+        "Taj Mahal",
+        "Lighthouse",
+        "Carrot",
+        "Penguin"
+      ],
+      "choices_ar": [
+        "تاج محل",
+        "منارة",
+        "جزرة",
+        "بطريق"
+      ],
+      "correct_index": 3,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_banana",
+      "image": "res://assets/generated/banana.webp",
+      "sha256": "986b86b06b3c1cc79264ed4cd9a35f637b18056ea7858777bf5c4caa02ac2660",
+      "subject_key": "banana",
+      "category": "fruits",
+      "category_en": "Fruits",
+      "category_ar": "فواكه",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Banana",
+      "answer_ar": "موزة",
+      "choices_en": [
+        "Banana",
+        "Burger",
+        "Dolphin",
+        "Giraffe"
+      ],
+      "choices_ar": [
+        "موزة",
+        "برجر",
+        "دلفين",
+        "زرافة"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_strawberry",
+      "image": "res://assets/generated/strawberry.webp",
+      "sha256": "1d615eb0e2bc99d1af80435aa8fcbca7445802515e4263930515a57f6876c7a3",
+      "subject_key": "strawberry",
+      "category": "fruits",
+      "category_en": "Fruits",
+      "category_ar": "فواكه",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Strawberry",
+      "answer_ar": "فراولة",
+      "choices_en": [
+        "Pizza",
+        "Elephant",
+        "Strawberry",
+        "Lion"
+      ],
+      "choices_ar": [
+        "بيتزا",
+        "فيل",
+        "فراولة",
+        "أسد"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_cake",
+      "image": "res://assets/generated/cake.webp",
+      "sha256": "accf53dad51f52b892a1eb46b6019420679a485aff6374a6fbd12e1e6e02375c",
+      "subject_key": "cake",
+      "category": "food",
+      "category_en": "Food",
+      "category_ar": "طعام",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Cake",
+      "answer_ar": "كعكة",
+      "choices_en": [
+        "Taj Mahal",
+        "Lighthouse",
+        "Cake",
+        "Eiffel"
+      ],
+      "choices_ar": [
+        "تاج محل",
+        "منارة",
+        "كعكة",
+        "برج إيفل"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_sushi",
+      "image": "res://assets/generated/sushi.webp",
+      "sha256": "4f7cc539f4b170f0b91fdd06ac869bf48049a5287bede33c41f9ffcd67581f1a",
+      "subject_key": "sushi",
+      "category": "food",
+      "category_en": "Food",
+      "category_ar": "طعام",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Sushi",
+      "answer_ar": "سوشي",
+      "choices_en": [
+        "Sushi",
+        "Guitar",
+        "Panda",
+        "Dolphin"
+      ],
+      "choices_ar": [
+        "سوشي",
+        "جيتار",
+        "باندا",
+        "دلفين"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_bicycle",
+      "image": "res://assets/generated/bicycle.webp",
+      "sha256": "5c41aa8ea0d7ba4a6f121ddee5f2a6b267250ad070ef81eb900c5dbd3f8bc99a",
+      "subject_key": "bicycle",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Bicycle",
+      "answer_ar": "دراجة",
+      "choices_en": [
+        "Cake",
+        "Sushi",
+        "Bicycle",
+        "Strawberry"
+      ],
+      "choices_ar": [
+        "كعكة",
+        "سوشي",
+        "دراجة",
+        "فراولة"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_camera",
+      "image": "res://assets/generated/camera.webp",
+      "sha256": "b8019baa11467afce943baa54e9e6e024c7375d2d4d6d703c648cbb0f4e9acb4",
+      "subject_key": "camera",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Camera",
+      "answer_ar": "كاميرا",
+      "choices_en": [
+        "Tiger",
+        "Penguin",
+        "Camera",
+        "Giraffe"
+      ],
+      "choices_ar": [
+        "نمر",
+        "بطريق",
+        "كاميرا",
+        "زرافة"
+      ],
+      "correct_index": 2,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_laptop",
+      "image": "res://assets/generated/laptop.webp",
+      "sha256": "099661f147550cc993a0d960e462d7f81498840b4d90e7456447da5c764081eb",
+      "subject_key": "laptop",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Laptop",
+      "answer_ar": "حاسوب محمول",
+      "choices_en": [
+        "Football",
+        "Laptop",
+        "Carrot",
+        "Tomato"
+      ],
+      "choices_ar": [
+        "كرة قدم",
+        "حاسوب محمول",
+        "جزرة",
+        "طماطم"
+      ],
+      "correct_index": 1,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_violin",
+      "image": "res://assets/generated/violin.webp",
+      "sha256": "ac19a6c6868df8b042609895ab8e0b3397f5e62f3ad5ed2af4ab9609855582d1",
+      "subject_key": "violin",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Violin",
+      "answer_ar": "كمان",
+      "choices_en": [
+        "Dolphin",
+        "Giraffe",
+        "Tiger",
+        "Violin"
+      ],
+      "choices_ar": [
+        "دلفين",
+        "زرافة",
+        "نمر",
+        "كمان"
+      ],
+      "correct_index": 3,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_pyramids",
+      "image": "res://assets/generated/pyramids.webp",
+      "sha256": "7ad80966275c3be5236e4503bc45f8271d12b5df9f9ab1a74d0fd75015c85c84",
+      "subject_key": "pyramids",
+      "category": "landmarks",
+      "category_en": "Landmarks",
+      "category_ar": "معالم",
+      "difficulty": 2,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Pyramids",
+      "answer_ar": "الأهرامات",
+      "choices_en": [
+        "Pyramids",
+        "Guitar",
+        "Panda",
+        "Burger"
+      ],
+      "choices_ar": [
+        "الأهرامات",
+        "جيتار",
+        "باندا",
+        "برجر"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_eiffel",
+      "image": "res://assets/generated/eiffel.webp",
+      "sha256": "b93d86c53b4d1b0d9973e093de2873e6b0614646bd5bd0d50f2705f0a4f50a59",
+      "subject_key": "eiffel",
+      "category": "landmarks",
+      "category_en": "Landmarks",
+      "category_ar": "معالم",
+      "difficulty": 2,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Eiffel",
+      "answer_ar": "برج إيفل",
+      "choices_en": [
+        "Lion",
+        "Pizza",
+        "Elephant",
+        "Eiffel"
+      ],
+      "choices_ar": [
+        "أسد",
+        "بيتزا",
+        "فيل",
+        "برج إيفل"
+      ],
+      "correct_index": 3,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_taj_mahal",
+      "image": "res://assets/generated/taj_mahal.webp",
+      "sha256": "8393bc304ba4acdfb60286e9abd201f3ac65b42fa1fc55c7cc4e58f7e1745bb1",
+      "subject_key": "taj_mahal",
+      "category": "landmarks",
+      "category_en": "Landmarks",
+      "category_ar": "معالم",
+      "difficulty": 2,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Taj Mahal",
+      "answer_ar": "تاج محل",
+      "choices_en": [
+        "Taj Mahal",
+        "Violin",
+        "Carrot",
+        "Tomato"
+      ],
+      "choices_ar": [
+        "تاج محل",
+        "كمان",
+        "جزرة",
+        "طماطم"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "existing_lighthouse",
+      "image": "res://assets/generated/lighthouse.webp",
+      "sha256": "891998ab34fffc006949caefdc3b8c1b598348fe094da46e5168ef83d491ea3d",
+      "subject_key": "lighthouse",
+      "category": "landmarks",
+      "category_en": "Landmarks",
+      "category_ar": "معالم",
+      "difficulty": 2,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Lighthouse",
+      "answer_ar": "منارة",
+      "choices_en": [
+        "Lighthouse",
+        "Cake",
+        "Sushi",
+        "Bicycle"
+      ],
+      "choices_ar": [
+        "منارة",
+        "كعكة",
+        "سوشي",
+        "دراجة"
+      ],
+      "correct_index": 0,
+      "source": "existing_generated_v11_7",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "elephant_new",
+      "image": "res://assets/picture_library/handoff/elephant_new.png",
+      "sha256": "1273cb43ed263954f972c87cb3ecbf15a1e5b674a2726fe86aaf88b723c738df",
+      "subject_key": "elephant",
+      "category": "animals",
+      "category_en": "Animals",
+      "category_ar": "حيوانات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Elephant",
+      "answer_ar": "فيل",
+      "choices_en": [
+        "Guitar",
+        "Elephant",
+        "Apple",
+        "Football"
+      ],
+      "choices_ar": [
+        "جيتار",
+        "فيل",
+        "تفاحة",
+        "كرة قدم"
+      ],
+      "correct_index": 1,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "eiffel_new",
+      "image": "res://assets/picture_library/handoff/eiffel_new.png",
+      "sha256": "b26b3c5c3eb80b6ac6e4df5f80aa42c3f46804a47bcce9690736440d6c74b225",
+      "subject_key": "eiffel",
+      "category": "landmarks",
+      "category_en": "Landmarks",
+      "category_ar": "معالم",
+      "difficulty": 2,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Eiffel",
+      "answer_ar": "برج إيفل",
+      "choices_en": [
+        "Laptop",
+        "Violin",
+        "Carrot",
+        "Eiffel"
+      ],
+      "choices_ar": [
+        "حاسوب محمول",
+        "كمان",
+        "جزرة",
+        "برج إيفل"
+      ],
+      "correct_index": 3,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "banana_new",
+      "image": "res://assets/picture_library/handoff/banana_new.png",
+      "sha256": "f5aba5285db1fddaf262518907c8b9707080a0aeb4bceabf03d26c900da1926b",
+      "subject_key": "banana",
+      "category": "fruits",
+      "category_en": "Fruits",
+      "category_ar": "فواكه",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Banana",
+      "answer_ar": "موزة",
+      "choices_en": [
+        "Banana",
+        "Dolphin",
+        "Giraffe",
+        "Tiger"
+      ],
+      "choices_ar": [
+        "موزة",
+        "دلفين",
+        "زرافة",
+        "نمر"
+      ],
+      "correct_index": 0,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "carrot_new",
+      "image": "res://assets/picture_library/handoff/carrot_new.png",
+      "sha256": "426abe8b8d89e870aa9e78f0d1d56c8c8dacf4d9b5598efa318e5a704a7ba0d2",
+      "subject_key": "carrot",
+      "category": "vegetables",
+      "category_en": "Vegetables",
+      "category_ar": "خضروات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Carrot",
+      "answer_ar": "جزرة",
+      "choices_en": [
+        "Penguin",
+        "Carrot",
+        "Giraffe",
+        "Tiger"
+      ],
+      "choices_ar": [
+        "بطريق",
+        "جزرة",
+        "زرافة",
+        "نمر"
+      ],
+      "correct_index": 1,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "pizza_new",
+      "image": "res://assets/picture_library/handoff/pizza_new.png",
+      "sha256": "7213d77387872dedcd35122900eb27ff0185f959557384e10facb7b6881dde0b",
+      "subject_key": "pizza",
+      "category": "food",
+      "category_en": "Food",
+      "category_ar": "طعام",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Pizza",
+      "answer_ar": "بيتزا",
+      "choices_en": [
+        "Dolphin",
+        "Giraffe",
+        "Pizza",
+        "Panda"
+      ],
+      "choices_ar": [
+        "دلفين",
+        "زرافة",
+        "بيتزا",
+        "باندا"
+      ],
+      "correct_index": 2,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "apple_new",
+      "image": "res://assets/picture_library/handoff/apple_new.png",
+      "sha256": "a40f20fffa82449c1e4adcf6331c6a6b250a135a29768172f423129056da9c6c",
+      "subject_key": "apple",
+      "category": "fruits",
+      "category_en": "Fruits",
+      "category_ar": "فواكه",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Apple",
+      "answer_ar": "تفاحة",
+      "choices_en": [
+        "Football",
+        "Guitar",
+        "Apple",
+        "Elephant"
+      ],
+      "choices_ar": [
+        "كرة قدم",
+        "جيتار",
+        "تفاحة",
+        "فيل"
+      ],
+      "correct_index": 2,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "tomato_new",
+      "image": "res://assets/picture_library/handoff/tomato_new.png",
+      "sha256": "db0feac91d8735061ee47efdf563cbd90f87865785581e1df790cf3dd37c322e",
+      "subject_key": "tomato",
+      "category": "vegetables",
+      "category_en": "Vegetables",
+      "category_ar": "خضروات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Tomato",
+      "answer_ar": "طماطم",
+      "choices_en": [
+        "Strawberry",
+        "Cake",
+        "Sushi",
+        "Tomato"
+      ],
+      "choices_ar": [
+        "فراولة",
+        "كعكة",
+        "سوشي",
+        "طماطم"
+      ],
+      "correct_index": 3,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    },
+    {
+      "id": "chair_new",
+      "image": "res://assets/picture_library/handoff/chair_new.png",
+      "sha256": "a655f3f5008852bb0a33ede47dc31c928440f8acd9baee7a3da6b0bd21d2bf40",
+      "subject_key": "chair",
+      "category": "objects",
+      "category_en": "Objects and tools",
+      "category_ar": "جماد وأدوات",
+      "difficulty": 1,
+      "question_en": "What does this picture show?",
+      "question_ar": "ماذا تُظهر هذه الصورة؟",
+      "answer_en": "Chair",
+      "answer_ar": "كرسي",
+      "choices_en": [
+        "Sushi",
+        "Chair",
+        "Strawberry",
+        "Cake"
+      ],
+      "choices_ar": [
+        "سوشي",
+        "كرسي",
+        "فراولة",
+        "كعكة"
+      ],
+      "correct_index": 1,
+      "source": "user_handoff_generated_2026_10_15",
+      "rights_status": "original_generated_no_third_party_photo",
+      "reviewed_identity": true
+    }
+  ]
+}

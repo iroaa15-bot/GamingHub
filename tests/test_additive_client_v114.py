@@ -16,7 +16,9 @@ class AdditiveClientContract(unittest.TestCase):
   self.assertIn('func load_older()',TEXT)
   self.assertIn('user://daily_pictures_history_v2.json',IMAGE)
   self.assertIn('func load_older()',IMAGE)
-  self.assertIn('ids.reverse()',IMAGE)
+  self.assertIn('values.sort_custom(',IMAGE)
+  self.assertIn('return day_a > day_b',IMAGE)
+  self.assertIn('if local_a != local_b:',IMAGE)
   self.assertIn('FileAccess.get_file_as_bytes(cache_path)',IMAGE)
  def test_new_picture_focus_on_refresh_and_safe_picture_cache(self):
   self.assertIn('before.is_empty()',IMAGE)

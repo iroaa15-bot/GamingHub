@@ -52,7 +52,7 @@ class PictureLibraryV118(unittest.TestCase):
         groups = defaultdict(list)
         for row in LIBRARY:
             groups[row['subject_key']].append(row)
-        preferred = ['elephant', 'eiffel', 'banana', 'carrot', 'pizza', 'apple', 'tomato', 'chair']
+        preferred = ['elephant', 'eiffel', 'banana', 'carrot', 'pizza', 'apple', 'tomato', 'chair', 'lion', 'lighthouse', 'guitar', 'burger', 'dolphin', 'bicycle', 'pyramids', 'cake', 'giraffe', 'camera', 'panda', 'football', 'taj_mahal', 'sushi', 'penguin', 'strawberry', 'tiger', 'laptop', 'violin']
         subjects = [x for x in preferred if x in groups] + sorted(set(groups) - set(preferred))
         self.assertGreaterEqual(len(subjects), 24)
         seen_recent = []
@@ -60,6 +60,7 @@ class PictureLibraryV118(unittest.TestCase):
         for day_index in range(15):
             today = [subjects[(day_index * 6 + slot) % len(subjects)] for slot in range(6)]
             self.assertEqual(len(set(today)), 6)
+            self.assertGreaterEqual(len({groups[subject][0]['category'] for subject in today}), 4)
             self.assertFalse(set(today) & set().union(*seen_recent[-3:]))
             seen_recent.append(today)
             for slot, subject in enumerate(today):

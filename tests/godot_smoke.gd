@@ -117,6 +117,7 @@ func _check_picture_library() -> void:
    failures.append("Picture library did not create six puzzles for " + day)
    return
   var today_subjects: Array = []
+  var today_categories: Dictionary = {}
   for puzzle in local_pack["puzzles"]:
    if not ResourceLoader.exists(str(puzzle.get("local_image", ""))):
     failures.append("Bundled picture missing: " + str(puzzle.get("library_id", "")))
@@ -125,6 +126,9 @@ func _check_picture_library() -> void:
    if subject.is_empty() or subject in today_subjects or subject in recent_subjects:
     failures.append("Picture subject repeated within three days: " + subject)
    today_subjects.append(subject)
+   today_categories[str(asset.get("category", ""))] = true
+  if today_categories.size() < 4:
+   failures.append("Picture rotation contains fewer than four categories: " + day)
   recent_subjects.append_array(today_subjects)
   if recent_subjects.size() > 18:
    recent_subjects = recent_subjects.slice(recent_subjects.size() - 18)

@@ -65,7 +65,8 @@ func _library_daily_pack(day: String) -> Dictionary:
    groups[subject].push_front(entry)
   else:
    groups[subject].append(entry)
- var preferred: Array[String] = ["elephant", "eiffel", "banana", "carrot", "pizza", "apple", "tomato", "chair"]
+ # Curated round-robin order keeps at least four categories in each six-picture day.
+ var preferred: Array[String] = ["elephant", "eiffel", "banana", "carrot", "pizza", "apple", "tomato", "chair", "lion", "lighthouse", "guitar", "burger", "dolphin", "bicycle", "pyramids", "cake", "giraffe", "camera", "panda", "football", "taj_mahal", "sushi", "penguin", "strawberry", "tiger", "laptop", "violin"]
  var subjects: Array = []
  for subject in preferred:
   if groups.has(subject):

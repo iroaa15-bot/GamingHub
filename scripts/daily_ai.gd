@@ -9,6 +9,9 @@ var texture: Texture2D = null
 var current_index: int = 0
 var last_error: String = ""
 var refreshing: bool = false
+const REFRESH_RETRY_MS := 300000
+var _last_refresh_attempt_ms: int = -300000
+var _date_check_elapsed: float = 0.0
 var _request_token: int = 0
 signal changed
 
@@ -21,6 +24,19 @@ func _ready() -> void:
  if not pack.is_empty():
   select_puzzle(0)
  refresh()
+
+func _process(delta: float) -> void:
+ # Check the UTC day periodically so a game kept open overnight gets new pictures.
+ _date_check_elapsed += delta
+ if _date_check_elapsed < 60.0:
+  return
+ _date_check_elapsed = 0.0
+ if refreshing:
+  return
+ var today: String = Time.get_date_string_from_system(true)
+ var newest_day: String = str(pack[0].get("date", "")) if not pack.is_empty() else ""
+ if newest_day < today:
+  refresh()
 
 func _valid_pack(raw: Variant) -> bool:
  if not raw is Dictionary or int(raw.get("schema", 0)) != 3:
@@ -114,6 +130,13 @@ func load_older() -> void:
 func _request_page(before: String) -> void:
  if refreshing:
   return
+ # Retry latest-page failures at most once every five minutes; older-page
+ # requests are user initiated and stay available at any time.
+ if before.is_empty():
+  var now: int = Time.get_ticks_msec()
+  if now - _last_refresh_attempt_ms < REFRESH_RETRY_MS:
+   return
+  _last_refresh_attempt_ms = now
  refreshing = true
  var req := HTTPRequest.new()
  add_child(req)

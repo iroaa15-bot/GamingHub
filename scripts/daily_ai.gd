@@ -45,6 +45,9 @@ func _load_library() -> void:
 func library_count() -> int:
  return _library_rows.size()
 
+func library_rows() -> Array:
+ return _library_rows.duplicate(true)
+
 func _library_row(asset_id: String) -> Dictionary:
  for entry in _library_rows:
   if str(entry.get("id", "")) == asset_id:
@@ -65,28 +68,35 @@ func _library_daily_pack(day: String) -> Dictionary:
    groups[subject].push_front(entry)
   else:
    groups[subject].append(entry)
- # Curated round-robin order keeps at least four categories in each six-picture day.
- var preferred: Array[String] = ["elephant", "eiffel", "banana", "carrot", "pizza", "apple", "tomato", "chair", "lion", "lighthouse", "guitar", "burger", "dolphin", "bicycle", "pyramids", "cake", "giraffe", "camera", "panda", "football", "taj_mahal", "sushi", "penguin", "strawberry", "tiger", "laptop", "violin"]
- var subjects: Array = []
- for subject in preferred:
-  if groups.has(subject):
-   subjects.append(subject)
- var remaining: Array = groups.keys()
- remaining.sort()
- for subject in remaining:
-  if subject not in subjects:
-   subjects.append(subject)
- if subjects.size() < 6:
+ # Draw one subject from each category every day. A category's full subject
+ # cycle finishes before a subject repeats, then alternate its image variants.
+ var categories: Array[String] = ["animals", "fruits", "vegetables", "food", "objects", "landmarks"]
+ var category_subjects: Dictionary = {}
+ for category in categories:
+  category_subjects[category] = []
+ for source_prefix in ["user_handoff", "twemoji", "existing"]:
+  for entry in _library_rows:
+   if not str(entry.get("source", "")).begins_with(source_prefix):
+    continue
+   var category: String = str(entry.get("category", ""))
+   var subject: String = str(entry.get("subject_key", ""))
+   if category_subjects.has(category) and not category_subjects[category].has(subject):
+    category_subjects[category].append(subject)
+ for category in categories:
+  if category_subjects[category].is_empty():
+   return {}
+ if groups.size() < 6:
   return {}
  var start_unix: int = Time.get_unix_time_from_datetime_string(LIBRARY_START + "T00:00:00")
  var day_unix: int = Time.get_unix_time_from_datetime_string(day + "T00:00:00")
  var day_index: int = maxi(0, int((day_unix - start_unix) / 86400))
  var puzzles: Array = []
  for slot in range(6):
-  var serial: int = day_index * 6 + slot
-  var subject: String = str(subjects[serial % subjects.size()])
+  var category: String = categories[(slot + day_index) % categories.size()]
+  var subject_list: Array = category_subjects[category]
+  var subject: String = str(subject_list[day_index % subject_list.size()])
   var variants: Array = groups[subject]
-  var entry: Dictionary = variants[int(serial / subjects.size()) % variants.size()]
+  var entry: Dictionary = variants[int(day_index / subject_list.size()) % variants.size()]
   var row: Dictionary = {
    "schema": 2, "id": "library-%s-%02d" % [day, slot], "date": day,
    "type": "image_guess", "source": "bundled_library", "library_id": entry["id"],

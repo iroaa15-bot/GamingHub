@@ -107,8 +107,8 @@ func _run() -> void:
 
 func _check_picture_library() -> void:
  var ai = root.get_node_or_null("DailyAI")
- if ai == null or ai.library_count() != 32:
-  failures.append("Expected 32 standalone pictures in DailyAI's bundled library")
+ if ai == null or ai.library_count() != 100:
+  failures.append("Expected 100 standalone pictures in DailyAI's bundled library")
   return
  var recent_subjects: Array = []
  for day in ["2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18"]:
@@ -127,8 +127,8 @@ func _check_picture_library() -> void:
     failures.append("Picture subject repeated within three days: " + subject)
    today_subjects.append(subject)
    today_categories[str(asset.get("category", ""))] = true
-  if today_categories.size() < 4:
-   failures.append("Picture rotation contains fewer than four categories: " + day)
+  if today_categories.size() != 6:
+   failures.append("Picture rotation must contain six categories: " + day)
   recent_subjects.append_array(today_subjects)
   if recent_subjects.size() > 18:
    recent_subjects = recent_subjects.slice(recent_subjects.size() - 18)

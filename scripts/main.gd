@@ -1152,6 +1152,50 @@ func confirm_quit_game() -> void:
  )
 
 var daily_ai_screen_active: bool = false
+var picture_library_rows: Array = []
+var picture_library_index: int = 0
+var picture_library_answers: Dictionary = {}
+
+func start_picture_library() -> void:
+ daily_ai_screen_active = false
+ picture_library_rows = DailyAI.library_rows()
+ shuffle_items(picture_library_rows)
+ picture_library_index = 0
+ picture_library_answers.clear()
+ show_picture_library()
+
+func show_picture_library() -> void:
+ clear_ui()
+ label(tr_ui("🖼️ خمن صورتك • مكتبة الصور", "🖼️ GUESS YOUR PICTURE • LIBRARY"), 30)
+ if picture_library_rows.is_empty():
+  label(tr_ui("المكتبة غير متاحة الآن", "Picture library is unavailable"), 18)
+  button(tr_ui("العودة", "BACK"), func(): show_modes(0), PANEL)
+  return
+ var row: Dictionary = picture_library_rows[picture_library_index]
+ label(tr_ui("صورة %d من %d", "PICTURE %d OF %d") % [picture_library_index + 1, picture_library_rows.size()], 17)
+ label(str(row.get("category_ar", "")) if selected_language == "ar" else str(row.get("category_en", "")), 21)
+ label(str(row.get("question_ar", "")) if selected_language == "ar" else str(row.get("question_en", "")), 20)
+ var art := TextureRect.new()
+ art.texture = load(str(row.get("image", ""))) as Texture2D
+ art.custom_minimum_size.y = 245
+ art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+ art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+ root.add_child(art)
+ var options: Array = row.get("choices_ar", []) if selected_language == "ar" else row.get("choices_en", [])
+ var asset_id: String = str(row.get("id", ""))
+ if picture_library_answers.has(asset_id):
+  var answer_index: int = int(row.get("correct_index", -1))
+  var correct: bool = int(picture_library_answers[asset_id]) == answer_index
+  label(tr_ui("إجابة صحيحة!", "Correct!") if correct else (tr_ui("الإجابة: ", "Answer: ") + str(options[answer_index])), 19)
+ elif options.size() == 4:
+  for i in range(4):
+   var chosen: int = i
+   button(str(options[i]), func(): picture_library_answers[asset_id] = chosen; show_picture_library(), GREEN)
+ if asset_id.begins_with("twemoji_"):
+  label("Twemoji by Twitter and contributors • CC BY 4.0", 12)
+ button(tr_ui("الصورة التالية ➡", "NEXT PICTURE ➡"), func(): picture_library_index = (picture_library_index + 1) % picture_library_rows.size(); show_picture_library(), ACCENT)
+ button(tr_ui("تحدي اليوم", "TODAY'S CHALLENGE"), show_ai_daily, GOLD)
+ button(tr_ui("العودة", "BACK"), func(): show_modes(0), PANEL)
 
 func _daily_ai_claims() -> Dictionary:
  var path := "user://ai_daily_claims.json"
@@ -1176,6 +1220,8 @@ func show_ai_daily() -> void:
  else:
   label(tr_ui("لغز %d من %d", "PUZZLE %d OF %d") % [DailyAI.current_index + 1, DailyAI.pack.size()], 18)
   label(str(DailyAI.item.get("category_ar", "")) if selected_language == "ar" else str(DailyAI.item.get("category_en", "")), 23)
+  if str(DailyAI.item.get("library_id", "")).begins_with("twemoji_"):
+   label("Twemoji by Twitter and contributors • CC BY 4.0", 12)
   if DailyAI.texture != null:
    var picture := TextureRect.new()
    picture.texture = DailyAI.texture
@@ -1895,6 +1941,7 @@ func show_modes(index: int) -> void:
  if game in [0, 8]:
   button(tr_ui("البطاقات: ", "CARDS: ") + deck_title(), show_decks)
  if game == 0:
+  button(tr_ui("🖼️ العب بكل صور المكتبة: %d", "🖼️ PLAY THE FULL PICTURE LIBRARY: %d") % DailyAI.library_count(), start_picture_library, GREEN)
   button(tr_ui("🖼️ تحدي الصور: 4 اختيارات من المكتبة المتجددة", "🖼️ PICTURE QUIZ: 4 CHOICES FROM THE ROTATING LIBRARY"), show_ai_daily, GOLD)
  if game > 0 and game != 8:
   label(tr_ui("أنشطة متاحة لملفك: %d", "ACTIVITIES FOR YOUR PROFILE: %d") % eligible_questions(game, false).size(), 16)

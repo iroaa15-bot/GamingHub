@@ -36,8 +36,11 @@ def included(root=ROOT):
             return name.startswith('addons/admob/android/bin/ads/') or name in {
                 'addons/admob/android/bin/package.gd', 'addons/admob/android/bin/package.gd.uid'}
         return True
+    def keep_import(path):
+        name = path.relative_to(root).as_posix()
+        return path.suffix != '.import' or (name.startswith('assets/picture_library/twemoji/') and name.endswith('.svg.import'))
     return sorted((p for p in files if enabled_binary(p) and p.relative_to(root).as_posix() not in EXCLUDE
-                   and '__pycache__' not in p.parts and p.suffix not in {'.pyc', '.import'}
+                   and '__pycache__' not in p.parts and p.suffix != '.pyc' and keep_import(p)
                    and '.godot' not in p.parts and 'build' not in p.parts),
                   key=lambda p: p.relative_to(root).as_posix())
 

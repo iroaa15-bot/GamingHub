@@ -6,7 +6,7 @@
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
-    ".github/workflows/voice-client-validation.yml": "e442d750c88661ac8caabeb0566a00e34d6ade972cde97c38ff04882cfe22ab2",
+    ".github/workflows/voice-client-validation.yml": "2c0cf3d8f1bdb495dec85304b68fa6fce4b8c17d8b958d35d461ce6882a85549",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
     "README_START_HERE_AR.md": "7d7e16e1b06af8616fdfe41fb3ea2d57a4d80b0aebb8e569dbde0636fa829e22",
     "RELEASE_v10.0_AR.md": "c4e3a9f6cab621688a2c0c45792a9b1d178de0b61b4edfedabdfc517bb67a333",
@@ -767,6 +767,6 @@
     "tests/test_visual_mystery_v45.py": "4d05ef49c1d6f43de3582763886f351f6fead42adea75488c882ae9baadd51a8",
     "tests/test_visual_results_sync_v85.py": "2a7f78c560ada217bfb287f31610e2448874c1799fb8c0c0ee7ca5c73b38ab16",
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
-    "tests/voice_client_smoke.gd": "2205045477214490f438605ac55646aca21a03194b880c0e88277865bcf5cb1f"
+    "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076"
   }
 }

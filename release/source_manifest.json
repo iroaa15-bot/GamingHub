@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 762,
+  "file_count": 763,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
@@ -628,7 +628,7 @@
     "data/ui_tr.json": "393570f7a7989b41f0e3b84be1226d0a8d7156ffe01ea1329086bcc2883cfbdf",
     "docs/CONTENT_SETUP.md": "dc96b2d74154b626ea7a8adebf3c0ac3cd15713d1d2ce69b64e39019a988f8e8",
     "docs/index.html": "c9a6f3763fb012870dc8dbf59f42662e2fd94b2e6d13e88286a69efbaf0a54f3",
-    "docs/privacy.html": "aa6bbb1cf197bb87bf57c077066a00b7611c39c7c655c8a7d88f95e683be14b0",
+    "docs/privacy.html": "ad27eed6660c48aa71398c8dcd906502a3916103520ecca753d9dadbbe234914",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
     "export_presets.cfg": "5e244748d9220a544aa6d9c45a2145dcaa59f1875e0a0357d3a6d3d2fdfa8aeb",
     "liveops/remote_example.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
@@ -694,7 +694,7 @@
     "server/liveops_content.py": "7dd3312cc3bb465b24824037760e7c23bf2514969a191cd6ce67fac1e07f59e9",
     "server/liveops_rotation.json": "ab08107b814e860da6089301815d481840df44bc41c8400ef49e5ed3fbf818c7",
     "server/requirements.txt": "2324650b5371efe39ea9417a042cc9eee45c7b771028658a0bd509cde9cdfd94",
-    "server/server.py": "18d161680b226bd2db6f54a4d59173eb2215c4808b161d99cafd6cedcaa40f61",
+    "server/server.py": "8e6b5b5e7630aedd5b303241b4ad2b0335228668a8ad32cddd4a828e90cc705f",
     "server/source_bundle.b85": "ca504b130a63825de48e0fc3837ea24616937629a42461bb58f5c21ad0f5e4f6",
     "server/test_additive_history_v114.py": "82edd1728f01c633744f94be49dddd940f272e91bb7f8e19e168982d8dca9ca0",
     "server/test_daily_content.py": "9516e7c8e4cd769ddce74fbe9eda0e107ff32c4c8fff7dc6c34c7744802440b7",
@@ -705,6 +705,7 @@
     "server/test_network_sync_v88.py": "9a4395685cc081f97d5e30700e63f7b148b656da097a1aa65584ce43aad5ab6f",
     "server/test_reconnect_v87.py": "e464dd8c3d87afc2b1485830200a5352828969d47a9fd68a2db1ca1ce4d63a55",
     "server/test_recovery_v86.py": "31f3182d91db1d65e18a22aa5186aba0ef0210294658e1029ff819c7df82922f",
+    "server/test_voice_signaling.py": "10070a3c908bb2638b8f2e796ad17c5f3d36a897b553e0e9ad27f205d9f7017c",
     "tests/activities.gd": "bb91340d606bff7f9c1f1819a6ba22508e8e1a725828a7b84037f966d8502ba6",
     "tests/activities.gd.uid": "d344cdceaa817e03de8e3f680e563ab20321a509b92757826c92791432810599",
     "tests/expansion.gd": "109a7de58ddff6b619425c84f87a4ec142424ff61134940063fd33bf16ecc3ef",

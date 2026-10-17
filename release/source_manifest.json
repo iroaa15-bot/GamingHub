@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 774,
+  "file_count": 775,
   "sha256": {
     ".github/workflows/android-test-apk.yml": "36b2b91a74a141ac2c8fdcf07216cf6583524f084e32703e84572e64359432c3",
     ".github/workflows/approve-development-manifest.yml": "4dc431063ce9266084c5083e40c9a02cd15591125f42a2bd327df81c7d45cc19",
@@ -635,7 +635,7 @@
     "docs/index.html": "c9a6f3763fb012870dc8dbf59f42662e2fd94b2e6d13e88286a69efbaf0a54f3",
     "docs/privacy.html": "ad27eed6660c48aa71398c8dcd906502a3916103520ecca753d9dadbbe234914",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
-    "export_presets.cfg": "e855a8871331c4d2f7ff79dabb2b6e707072ab9cd72db23b5624a101a6670172",
+    "export_presets.cfg": "4965b4a8b1eef3cc116b5c3f4397602a6d645330e071e1ba83cd14f548b1e79b",
     "liveops/remote_example.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
     "liveops/rotation.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
     "monetization/ANDROID_NATIVE_BRIDGE_CONTRACT.md": "a5f7bea1e7a39e9647a5857a0cc1fcd7b1edbc8aef87270f126675cc00127d31",
@@ -775,6 +775,7 @@
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
     "scripts/voice_pcm_transport.gd": "5947ad4d865a80f7592f9855cddea02474cc6e661fb96280da92dced54fcf142",
-    "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2"
+    "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2",
+    ".github/workflows/windows-voice-test.yml": "9e69098b740ce58ac540c581c9a4bae282389d8e572a59c6556d622350fec382"
   }
 }

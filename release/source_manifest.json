@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 766,
+  "file_count": 769,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "171d209ac06989ae380f512f52416fe71c7a49195aafabd930c80bd247df7555",
@@ -767,6 +767,9 @@
     ".github/workflows/v118-optional-comms-qa.yml": "9f8dd6339d7f738399f5829190f9476e6ab85936ed174aae8788d0a6f7456b32",
     "docs/V11_8_OPTIONAL_COMMS_STATUS.md": "099beaf5d45018f5ec5904d6aa7dd8ae152a9dfc79981e827e69dce08e641260",
     "server/test_optional_comms_v118.py": "5f0135c5f117dab278d8718631035587e3f93bb0acafcf1278f676b6cedee73e",
-    ".github/workflows/v118-native-voice.yml": "9a1ec1fdebbdd513f96c7ff087876c00e4c3cf0b828e2003f13f2bbe9b628eb2"
+    ".github/workflows/v118-native-voice.yml": "9a1ec1fdebbdd513f96c7ff087876c00e4c3cf0b828e2003f13f2bbe9b628eb2",
+    "addons/gaminghub_voice/plugin.cfg": "a6fe3923c12fab87901fee87d32d8ded50d681091ca4c2973d58a79da9986f65",
+    "addons/gaminghub_voice/plugin.gd": "b047c626ec91db8b54602702a4a091214d01a14723774a202074d90d9a3845ae",
+    "addons/gaminghub_voice/voice_export.gd": "aeae5aa0e5e82c6c388d74aa34c006e890a17748f600c9a902500eaff3b206bd"
   }
 }

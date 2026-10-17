@@ -257,7 +257,10 @@ async def process(ws, msg):
         mode = msg.get('mode')
         if mode not in ('none', 'text', 'voice', 'both'):
             return await send(ws, {'type':'error','message':'Invalid communication mode'})
+        previous_mode = room.comms[index]
         room.comms[index] = mode
+        if previous_mode in ('voice', 'both') and mode not in ('voice', 'both'):
+            await send(room.players[1-index], {'type':'voice_signal', 'player':index, 'signal':{'kind':'hangup'}})
         await broadcast(room, {'type':'comms_state', 'modes':room.comms.copy()})
         return
     if action == 'chat':

@@ -69,8 +69,6 @@ func encode_frames(frames: PackedVector2Array) -> Array[String]:
 func receive_packet(encoded: String) -> bool:
  if _playback == null or encoded.length() != 856:
   return false
- if not encoded.is_valid_ascii():
-  return false
  var pcm := Marshalls.base64_to_raw(encoded)
  if pcm.size() != SAMPLES * 2:
   return false

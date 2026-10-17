@@ -7,6 +7,7 @@ on:
       - scripts/multiplayer.gd
       - scripts/voice_signaling_bridge.gd
       - tests/voice_client_smoke.gd
+      - release/source_manifest.json
       - .github/workflows/voice-client-validation.yml
   workflow_dispatch:
 permissions:
@@ -22,6 +23,8 @@ jobs:
           version: 4.5.1
           use-dotnet: false
           include-templates: false
+      - name: Verify protected source manifest
+        run: python3 release/source_manifest.py
       - name: Import Godot resources
         run: godot --headless --path . --editor --import --quit
       - name: Run consent and signaling bridge smoke

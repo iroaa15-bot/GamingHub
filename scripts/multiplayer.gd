@@ -16,6 +16,11 @@ var address_input: LineEdit
 var code_input: LineEdit
 var guess_input: LineEdit
 var action_area: VBoxContainer
+var comms_mode := "none"
+var peer_comms_mode := "none"
+var chat_enabled := false
+var chat_input: LineEdit
+var chat_log: RichTextLabel
 var card_art: TextureRect
 var status: Label
 var language: String = "ar"
@@ -87,6 +92,7 @@ func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
 
 func _ready() -> void:
+ _connect_voice_bridge()
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
@@ -229,6 +235,7 @@ func _request_exit_to_games() -> void:
  )
 
 func _exit_to_games() -> void:
+ _stop_voice_transport()
  if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send({"type": "cancel_queue"})
   _send({"type": "leave"})
@@ -304,6 +311,7 @@ func _update_lobby() -> void:
  share_button.disabled = room_code.is_empty() or leaving
 
 func _reset_match_state() -> void:
+ _stop_voice_transport()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -335,6 +343,11 @@ func _reset_match_state() -> void:
  possible_cards.clear()
  asked_questions.clear()
  candidate_page = 0
+ comms_mode = "none"
+ peer_comms_mode = "none"
+ chat_enabled = false
+ chat_input = null
+ chat_log = null
  if is_instance_valid(action_area):
   _refresh_actions()
  _clear_match_view()
@@ -348,6 +361,7 @@ func _join_room() -> void:
  _request_action({"type":"join", "code":code})
 
 func _leave_match() -> void:
+ _stop_voice_transport()
  if leaving:
   return
  if reconnecting:
@@ -442,6 +456,7 @@ func _connect_server() -> void:
  status.text = _t("جاري الاتصال...", "Connecting...") if err == OK else _t("فشل بدء الاتصال: ", "Connection error: ") + str(err)
 
 func _start_reconnect() -> void:
+ _stop_voice_transport()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -694,6 +709,9 @@ func _handle(msg: Dictionary) -> void:
    pending_action.clear()
    matchmaking_pending = false
    _clear_match_view()
+   comms_mode = "none"
+   peer_comms_mode = "none"
+   chat_enabled = false
    question_page = 0
    candidate_page = 0
    asked_questions.clear()
@@ -741,7 +759,30 @@ func _handle(msg: Dictionary) -> void:
     _match_note(_t("الصورة غير متاحة على هذا الجهاز؛ اسم بطاقة المنافس ظاهر بالأعلى.", "Image unavailable on this device; opponent card name appears above."), 14)
    if art_style == "realistic" and ResourceLoader.exists("res://assets/generated/" + opponent_card.to_lower() + ".webp") and not ResourceLoader.exists("res://assets/photos/" + opponent_card.to_lower() + ".jpg"):
     _match_note(_t("صورة واقعية مولدة بالذكاء الاصطناعي", "AI-generated realistic image"), 14)
+   _build_comms_panel()
    _refresh_actions()
+  "comms_state":
+   var modes: Array = msg.get("modes", [])
+   if modes.size() == 2 and player_index in [0, 1]:
+    peer_comms_mode = str(modes[1 - player_index])
+    if str(modes[player_index]) not in ["voice", "both"] or peer_comms_mode not in ["voice", "both"]:
+     _stop_voice_transport()
+    chat_enabled = comms_mode == "text" and peer_comms_mode in ["text", "both"]
+    _refresh_comms_ui()
+  "voice_signal":
+   # Never activate the microphone from an unsolicited network packet.
+   # A native Android WebRTC transport must explicitly handle offers/answers/ICE
+   # only after mutual consent, runtime permission, and age gating.
+   var signal: Variant = msg.get("signal", {})
+   if signal is Dictionary:
+    if str(signal.get("kind", "")) == "hangup":
+     _stop_voice_transport()
+    else:
+     _receive_native_voice_signal(signal)
+  "chat":
+   if is_instance_valid(chat_log):
+    var who := _t("أنت", "You") if int(msg.get("player", -1)) == player_index else _t("المنافس", "Opponent")
+    chat_log.append_text(who + ": " + str(msg.get("text", "")).replace("[", "［") + "\n")
   "turn":
    my_turn = int(msg.get("player", -1)) == _my_index()
    status.text = (_t("دورك", "Your turn") if my_turn else _t("دور المنافس", "Opponent's turn"))
@@ -760,6 +801,7 @@ func _handle(msg: Dictionary) -> void:
    _update_deduction_status()
   "finished":
    finished = true
+   _stop_voice_transport()
    my_turn = false
    var names: Array[String] = []
    for name in msg.get("cards", []):
@@ -872,6 +914,133 @@ func _match_note(value: String, size: int = 16) -> void:
  l.add_theme_font_size_override("font_size", size)
  l.add_theme_color_override("font_color", Color.WHITE)
  match_view.add_child(l)
+
+func _build_comms_panel() -> void:
+ # Adult-only preview; voice awaits WebRTC Android testing and policy review.
+ if audience != "adult":
+  return
+ var panel := VBoxContainer.new()
+ panel.add_theme_constant_override("separation", 6)
+ match_view.add_child(panel)
+ var heading := Label.new()
+ heading.text = _t("💬 التواصل مع المنافس (اختياري)", "💬 Opponent chat (optional)")
+ panel.add_child(heading)
+ var modes := OptionButton.new()
+ modes.add_item(_t("بدون محادثة", "No chat"))
+ modes.add_item(_t("كتابة فقط", "Text only"))
+ modes.add_item(_t("صوت (قريبًا)", "Voice (coming soon)"))
+ modes.set_item_disabled(2, true)
+ modes.add_item(_t("كتابة وصوت (قريبًا)", "Text + voice (coming soon)"))
+ modes.set_item_disabled(3, true)
+ modes.item_selected.connect(func(selected: int) -> void:
+  comms_mode = "text" if selected == 1 else "none"
+  _send({"type":"comms", "mode":comms_mode})
+  _refresh_comms_ui()
+ )
+ panel.add_child(modes)
+ chat_log = RichTextLabel.new()
+ chat_log.custom_minimum_size.y = 125
+ chat_log.scroll_following = true
+ panel.add_child(chat_log)
+ chat_input = LineEdit.new()
+ chat_input.max_length = 180
+ panel.add_child(chat_input)
+ var send_button := Button.new()
+ send_button.text = _t("إرسال", "Send")
+ send_button.pressed.connect(_send_chat)
+ panel.add_child(send_button)
+ var block_button := Button.new()
+ block_button.text = _t("حظر التواصل في المباراة", "Block match communication")
+ block_button.pressed.connect(func() -> void:
+  _send({"type":"comms_block"})
+  comms_mode = "none"
+  chat_enabled = false
+  _refresh_comms_ui()
+ )
+ panel.add_child(block_button)
+ _refresh_comms_ui()
+
+const MICROPHONE_PERMISSION := "android.permission.RECORD_AUDIO"
+
+func _voice_permission_granted() -> bool:
+ # The Android permission must be granted by the OS, not inferred from
+ # the manifest or from mutual match consent.
+ if OS.get_name() != "Android":
+  return false
+ return MICROPHONE_PERMISSION in OS.get_granted_permissions()
+
+func _request_voice_permission() -> bool:
+ # This method is reserved for an explicit user tap after mutual consent.
+ # Never prompt for microphone access on match start or on remote signaling.
+ if audience != "adult" or not Engine.has_singleton("GamingHubVoice"):
+  return false
+ if comms_mode not in ["voice", "both"] or peer_comms_mode not in ["voice", "both"]:
+  return false
+ if not _voice_permission_granted():
+  OS.request_permission(MICROPHONE_PERMISSION)
+  return false
+ return true
+
+func _connect_voice_bridge() -> void:
+ # An optional native Android plugin may expose a WebRTC signal callback.
+ # No microphone access or connection is started by attaching this callback.
+ if not Engine.has_singleton("GamingHubVoice"):
+  return
+ var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+ if voice_bridge.has_signal("local_signal"):
+  var relay := Callable(self, "_relay_native_voice_signal")
+  if not voice_bridge.is_connected("local_signal", relay):
+   voice_bridge.connect("local_signal", relay)
+
+func _relay_native_voice_signal(signal_json: String) -> void:
+ var signal_data: Variant = JSON.parse_string(signal_json)
+ if not signal_data is Dictionary:
+  return
+ # Only relay WebRTC SDP/ICE produced by the native bridge when both
+ # participants have consented and Android has granted microphone access.
+ if not _voice_permission_granted() or not _voice_mutually_enabled():
+  return
+ var kind := str(signal_data.get("kind", ""))
+ if kind not in ["offer", "answer", "ice"]:
+  return
+ _send({"type":"voice_signal", "signal":signal_data})
+
+func _voice_mutually_enabled() -> bool:
+ return audience == "adult" and not room_code.is_empty() and not finished and comms_mode in ["voice", "both"] and peer_comms_mode in ["voice", "both"]
+
+func _receive_native_voice_signal(signal_data: Dictionary) -> void:
+ if not _voice_permission_granted() or not _voice_mutually_enabled():
+  return
+ if not Engine.has_singleton("GamingHubVoice"):
+  return
+ var kind := str(signal_data.get("kind", ""))
+ if kind not in ["offer", "answer", "ice"]:
+  return
+ var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+ if voice_bridge.has_method("receive_signal"):
+  voice_bridge.call("receive_signal", JSON.stringify(signal_data))
+
+func _stop_voice_transport() -> void:
+ # Safe no-op until the Android WebRTC native bridge is installed.
+ # Do not pretend a signaling packet alone can start or stop microphone audio.
+ if Engine.has_singleton("GamingHubVoice"):
+  var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+  if voice_bridge.has_method("stop_call"):
+   voice_bridge.call("stop_call")
+
+func _refresh_comms_ui() -> void:
+ if is_instance_valid(chat_input):
+  chat_input.editable = chat_enabled
+  chat_input.placeholder_text = _t("الشات يتطلب موافقة الطرفين", "Both players must opt in") if not chat_enabled else _t("اكتب سؤالك...", "Type a question...")
+
+func _send_chat() -> void:
+ if not chat_enabled or not is_instance_valid(chat_input):
+  return
+ var value := chat_input.text.strip_edges()
+ if value.is_empty():
+  return
+ _send({"type":"chat", "text":value})
+ chat_input.clear()
 
 func _copy_invite() -> void:
  if room_code.is_empty():

@@ -1,0 +1,53 @@
+name: Gaming Hub v11.8 Optional Comms - Isolated QA
+
+on:
+  push:
+    branches:
+      - feature/gaminghub-v11.8-optional-comms
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comms-protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install WebSocket test dependencies
+        run: python -m pip install -r server/requirements.txt
+      - name: Check Python server and test syntax
+        run: python -m py_compile server/server.py server/test_optional_comms_v118.py
+      - name: Test two-player consent, isolation and safety
+        working-directory: server
+        run: python -m unittest -v test_optional_comms_v118
+      - name: Existing multiplayer regression tests
+        working-directory: server
+        run: python -m unittest -v test_multiplayer test_reconnect_v87
+
+  godot-parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Import project and parse scripts
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee godot-comms-import.log
+      - name: Upload parse log if failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v118-godot-parse-log
+          path: godot-comms-import.log
+          if-no-files-found: ignore

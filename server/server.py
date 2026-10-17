@@ -43,6 +43,10 @@ class Room:
     detached_at: list = field(default_factory=lambda: [None, None])
     history: list = field(default_factory=list)
     winner: int = -1
+    comms: list = field(default_factory=lambda: ["none", "none"])
+    blocked: list = field(default_factory=lambda: [False, False])
+    chat_times: list = field(default_factory=lambda: [[], []])
+    chat_history: list = field(default_factory=list)
 
 rooms = {}
 connections = {}
@@ -52,6 +56,8 @@ WAITING_TTL = int(os.getenv('WAITING_TTL', '300'))
 MATCH_TTL = int(os.getenv('MATCH_TTL', '1200'))
 MAX_ACTIVE_CONNECTIONS = int(os.getenv('MAX_ACTIVE_CONNECTIONS', '1200'))
 MAX_GUESS_LENGTH = 80
+# Off by default until age assurance, reporting/moderation and Android QA are ready.
+COMMS_ENABLED = os.getenv('GAMINGHUB_COMMS_ENABLED', 'false').lower() == 'true'
 RECONNECT_GRACE = max(10, min(300, int(os.getenv('RECONNECT_GRACE', '90'))))
 
 
@@ -75,6 +81,10 @@ async def start_room(room):
     room.detached_at = [None, None]
     room.history = []
     room.winner = -1
+    room.comms = ["none", "none"]
+    room.blocked = [False, False]
+    room.chat_times = [[], []]
+    room.chat_history = []
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -92,6 +102,8 @@ def snapshot(room, index, kind='synced', include_token=False):
              'questions': [q['text'] for q in QUESTIONS],
              'questions_ar': [q['ar'] for q in QUESTIONS],
              'history': room.history.copy(),
+             'comms': room.comms.copy(),
+             'chat_history': room.chat_history.copy(),
              'paused': any(p is None for p in room.players)}
     if include_token:
         state['resume_token'] = room.resume_tokens[index]
@@ -238,6 +250,55 @@ async def process(ws, msg):
     if any(p is None for p in room.players):
         return await send(ws, {'type':'error','message':'Match paused; waiting for reconnect'})
     index = room.players.index(ws)
+    # Optional communications do not consume turns or reveal either secret card.
+    if action in ('comms', 'chat', 'comms_block', 'voice_signal') and not COMMS_ENABLED:
+        return await send(ws, {'type':'error','message':'Communications unavailable'})
+    if action == 'comms':
+        mode = msg.get('mode')
+        if mode not in ('none', 'text', 'voice', 'both'):
+            return await send(ws, {'type':'error','message':'Invalid communication mode'})
+        previous_mode = room.comms[index]
+        room.comms[index] = mode
+        if previous_mode in ('voice', 'both') and mode not in ('voice', 'both'):
+            await send(room.players[1-index], {'type':'voice_signal', 'player':index, 'signal':{'kind':'hangup'}})
+        await broadcast(room, {'type':'comms_state', 'modes':room.comms.copy()})
+        return
+    if action == 'chat':
+        if room.comms[index] not in ('text', 'both') or room.comms[1-index] not in ('text', 'both'):
+            return await send(ws, {'type':'error','message':'Both players must enable text chat'})
+        if any(room.blocked):
+            return await send(ws, {'type':'error','message':'Communication disabled'})
+        body = msg.get('text')
+        if not isinstance(body, str) or not 1 <= len(body.strip()) <= 180 or any(ord(c) < 32 for c in body):
+            return await send(ws, {'type':'error','message':'Invalid chat message'})
+        now = time.monotonic()
+        room.chat_times[index] = [t for t in room.chat_times[index] if now - t < 15]
+        if len(room.chat_times[index]) >= 5:
+            return await send(ws, {'type':'error','message':'Chat rate limit'})
+        room.chat_times[index].append(now)
+        event = {'type':'chat', 'player':index, 'text':body.strip()}
+        room.chat_history.append(event)
+        room.chat_history = room.chat_history[-30:]
+        await broadcast(room, event)
+        return
+    if action == 'comms_block':
+        was_voice = any(mode in ('voice', 'both') for mode in room.comms)
+        room.blocked[index] = True
+        room.comms[index] = 'none'
+        if was_voice:
+            await broadcast(room, {'type':'voice_signal', 'player':index, 'signal':{'kind':'hangup'}})
+        await broadcast(room, {'type':'comms_state', 'modes':room.comms.copy()})
+        return
+    if action == 'voice_signal':
+        if room.comms[index] not in ('voice', 'both') or room.comms[1-index] not in ('voice', 'both') or any(room.blocked):
+            return await send(ws, {'type':'error','message':'Voice requires consent from both players'})
+        signal = msg.get('signal')
+        if not isinstance(signal, dict) or signal.get('kind') not in ('offer', 'answer', 'ice', 'hangup'):
+            return await send(ws, {'type':'error','message':'Invalid voice signal'})
+        if len(json.dumps(signal)) > 4096:
+            return await send(ws, {'type':'error','message':'Voice signal too large'})
+        # WebRTC signaling only; microphone audio is never relayed over WebSocket.
+        return await send(room.players[1-index], {'type':'voice_signal', 'player':index, 'signal':signal})
     if index != room.turn: return await send(ws, {'type':'error','message':'Wait for your turn'})
     if action == 'ask':
         qi = msg.get('question')

@@ -728,6 +728,8 @@ func _sync_voice_microphone() -> void:
  if voice_microphone.start(self, true, true):
   voice_transport.start(self)
   voice_transport_started = true
+ else:
+  push_warning("GamingHub voice: microphone capture could not start")
 
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

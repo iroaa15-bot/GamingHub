@@ -15,6 +15,9 @@ on:
       - 'project.godot'
       - 'export_presets.cfg'
       - '.github/workflows/android-test-apk.yml'
+concurrency:
+  group: gaminghub-voice-android-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:

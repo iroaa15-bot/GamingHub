@@ -481,6 +481,10 @@ func _process(_delta: float) -> void:
  socket.poll()
  if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted():
   _sync_voice_microphone()
+  _update_voice_ui()
+ if voice_microphone.is_capturing() and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
+  voice_microphone.stop()
+  _update_voice_ui()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
   voice_request_started_ms = 0

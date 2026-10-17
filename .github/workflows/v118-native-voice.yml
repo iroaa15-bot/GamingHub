@@ -55,6 +55,8 @@ jobs:
       - name: Stage WebRTC runtime dependencies
         working-directory: android/voice-plugin
         run: gradle --no-daemon --stacktrace stageVoiceRuntime
+      - name: Validate staged native WebRTC libraries
+        run: python3 android/voice-plugin/verify_runtime_stage.py android/voice-plugin/build/voice-runtime-staging
       - name: Upload voice runtime staging
         uses: actions/upload-artifact@v4
         with:

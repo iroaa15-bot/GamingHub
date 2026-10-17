@@ -1,0 +1,14 @@
+name: Android build validation
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/voice-integration-validation]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify export configuration
+        run: grep -q 'com.iroaa15.gaminghub' export_presets.cfg

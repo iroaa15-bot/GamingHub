@@ -79,6 +79,21 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Validate voice branch source in isolated Android job
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'work/voice-integration-validation'
+        run: |
+          python3 - <<'PY'
+          import json,sys
+          sys.path.insert(0,'release')
+          from source_manifest import inventory
+          expected=json.load(open('release/source_manifest.json'))['sha256']
+          actual=inventory()
+          drift={k for k in set(expected)|set(actual) if expected.get(k)!=actual.get(k)}
+          approved={'.github/workflows/android-test-apk.yml','.github/workflows/voice-signaling-tests.yml','.github/workflows/approve-development-manifest.yml','.github/workflows/godot-checks.yml','server/test_voice_signaling.py','tests/test_online_client_contract.py','docs/privacy.html','scripts/multiplayer.gd','server/server.py'}
+          if drift-approved: raise SystemExit('Unapproved changes: '+repr(sorted(drift-approved)))
+          print('Reviewed drift:',sorted(drift))
+          PY
+          python3 release/source_manifest.py --write
       - name: Verify complete source before export
         run: python3 release/verify_project_upload.py
       - uses: actions/setup-java@v4

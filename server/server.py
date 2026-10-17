@@ -180,6 +180,32 @@ async def process(ws, msg):
         if all(p is not None for p in room.players):
             await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
         return
+    # Optional voice signaling only. Audio media must use a native WebRTC client.
+    # No SDP/ICE is stored in room history or server-side databases.
+    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice'):
+        code = connections.get(ws)
+        room = rooms.get(code)
+        if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
+            return await send(ws, {'type':'error','message':'No active voice room'})
+        if any(peer is None for peer in room.players):
+            return await send(ws, {'type':'error','message':'Voice peer unavailable'})
+        index = room.players.index(ws)
+        if action == 'voice_state':
+            enabled = msg.get('enabled')
+            if type(enabled) is not bool:
+                return await send(ws, {'type':'error','message':'Invalid voice state'})
+            await send(room.players[1-index], {'type':'voice_state','player':index,'enabled':enabled})
+            return
+        payload = msg.get('payload')
+        if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
+            return await send(ws, {'type':'error','message':'Invalid voice payload'})
+        if action in ('voice_offer', 'voice_answer'):
+            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 5500:
+                return await send(ws, {'type':'error','message':'Invalid voice SDP'})
+        if action == 'voice_ice' and not isinstance(payload.get('candidate'), str):
+            return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
+        await send(room.players[1-index], {'type':action,'player':index,'payload':payload})
+        return
     if action == 'leave':
         if ws in waiting:
             waiting.remove(ws)

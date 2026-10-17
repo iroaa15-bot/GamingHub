@@ -992,7 +992,10 @@ func _connect_voice_bridge() -> void:
   if not voice_bridge.is_connected("local_signal", relay):
    voice_bridge.connect("local_signal", relay)
 
-func _relay_native_voice_signal(signal_data: Dictionary) -> void:
+func _relay_native_voice_signal(signal_json: String) -> void:
+ var signal_data: Variant = JSON.parse_string(signal_json)
+ if not signal_data is Dictionary:
+  return
  # Only relay WebRTC SDP/ICE produced by the native bridge when both
  # participants have consented and Android has granted microphone access.
  if not _voice_permission_granted() or not _voice_mutually_enabled():

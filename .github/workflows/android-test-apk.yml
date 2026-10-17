@@ -1,6 +1,14 @@
 name: Gaming Hub Android voice integration APK
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/android-test-apk.yml'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'release/source_manifest.json'
+      - 'project.godot'
+      - 'export_presets.cfg'
   push:
     branches: [feature/voice-media-from-validated-client]
     paths:

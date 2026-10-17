@@ -32,6 +32,11 @@ jobs:
           version: 4.5.1
           use-dotnet: false
           include-templates: true
+      - name: Diagnose checkout differences
+        shell: pwsh
+        run: |
+          git status --short
+          git config --get core.autocrlf
       - name: Verify project source
         shell: pwsh
         run: python release/source_manifest.py

@@ -28,6 +28,7 @@ func start(parent: Node) -> void:
  _stream.buffer_length = 0.3
  _out = AudioStreamPlayer.new()
  _out.stream = _stream
+ _out.bus = "Master"
  parent.add_child(_out)
  _out.play()
  _playback = _out.get_stream_playback() as AudioStreamGeneratorPlayback

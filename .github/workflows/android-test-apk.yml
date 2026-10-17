@@ -84,7 +84,8 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p build
-          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
+          godot --headless --path . --install-android-build-template 2>&1 | tee voice-android-template.log
+          godot --headless --path . --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
           test -s build/GamingHub-voice-experimental.apk
       - name: Verify APK signature and permissions
         run: |

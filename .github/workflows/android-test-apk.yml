@@ -2,7 +2,7 @@ name: Gaming Hub Android debug APK
 on:
   workflow_dispatch:
   push:
-    branches: [work/voice-integration-validation]
+    branches: [work/voice-integration-validation, feature/voice-media-from-validated-client]
     paths:
       - 'scripts/**'
       - 'scenes/**'
@@ -40,6 +40,6 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: GamingHub-debug-consent-only-NO-VOICE-AUDIO
+          name: GamingHub-debug-MIC-TEST-NO-VOICE-TRANSMISSION
           path: build/GamingHub-debug.apk
           retention-days: 7

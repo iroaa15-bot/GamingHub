@@ -18,4 +18,6 @@ dependencies {
     // Not yet verified or compiled: pin a compatible Godot Android API
     // and a maintained WebRTC Android binary before enabling compilation.
     compileOnly("org.godotengine:godot:4.5.1.stable")
+    implementation("io.github.webrtc-sdk:android:150.7871.01")
+    implementation("androidx.core:core-ktx:1.13.1")
 }

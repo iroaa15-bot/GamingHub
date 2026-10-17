@@ -20,3 +20,15 @@ Do not ship a placeholder plugin that reports successful calls without audio. Th
 6. Review age gating, abuse reporting, moderation, data safety and Play policy before exposing to users.
 
 No audio is recorded or stored by the existing signaling server.
+
+
+## Gradle module status
+
+The isolated `settings.gradle.kts`, `build.gradle.kts` and `src/main/AndroidManifest.xml` files are present. They **do not produce a working Android plugin yet**. Gradle references two deliberately absent local artifacts:
+
+- `libs/godot-lib.aar` — the Godot 4.5.1 Android library matching the export template.
+- `libs/webrtc.aar` — an audited and pinned Android WebRTC binary, with its transitive dependencies handled.
+
+Do not fabricate or commit either binary. Until both are sourced and verified, this module cannot be reliably compiled or packaged into an APK. The Kotlin source has not been compiled by the existing Godot GitHub Actions workflow.
+
+The current `is_transport_available()` deliberately returns `false`; the Godot feature must remain disabled. Before enabling it, validate Godot plugin API signatures, WebRTC library APIs, plugin registration and dependency packaging, SDP/ICE event delivery, and device-to-device audio.

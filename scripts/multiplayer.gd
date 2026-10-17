@@ -3,6 +3,7 @@ extends Control
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 const VoiceSignalingBridge = preload("res://scripts/voice_signaling_bridge.gd")
 const VoiceMicrophoneCapture = preload("res://scripts/voice_microphone_capture.gd")
+const VoicePCMTransport = preload("res://scripts/voice_pcm_transport.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
@@ -83,6 +84,8 @@ var voice_request_started_ms: int = 0
 const VOICE_REQUEST_TIMEOUT_MS: int = 12000
 var voice_signaling = VoiceSignalingBridge.new()
 var voice_microphone = VoiceMicrophoneCapture.new()
+var voice_transport = VoicePCMTransport.new()
+var voice_transport_started := false
 var voice_permission_requested := false
 var voice_level := 0.0
 var voice_last_meter_ms: int = 0
@@ -490,6 +493,8 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if voice_microphone.is_capturing():
   _poll_voice_microphone()
+ if voice_transport_started:
+  voice_transport.pump()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
   voice_request_started_ms = 0
@@ -654,6 +659,8 @@ func _accept_voice_invite() -> void:
   _toggle_voice_consent()
 
 func _reset_voice() -> void:
+ voice_transport.stop()
+ voice_transport_started = false
  voice_microphone.stop()
  voice_level = 0.0
  voice_permission_requested = false
@@ -686,6 +693,9 @@ func _poll_voice_microphone() -> void:
  for frame in frames:
   peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
  voice_level = peak
+ if voice_transport_started and voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+  for encoded in voice_transport.encode_frames(frames):
+   _send({"type": "voice_audio", "pcm": encoded})
  var now := Time.get_ticks_msec()
  if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):
   voice_last_meter_ms = now
@@ -756,6 +766,9 @@ func _handle(msg: Dictionary) -> void:
     voice_invite_dialog.hide()
   "voice_offer", "voice_answer", "voice_ice":
    voice_signaling.handle_server_message(msg)
+  "voice_audio":
+   if voice_signaling.ready() and voice_transport_started:
+    voice_transport.receive_packet(str(msg.get("pcm", "")))
   "voice_state_ack":
    voice_request_pending = false
    voice_request_started_ms = 0

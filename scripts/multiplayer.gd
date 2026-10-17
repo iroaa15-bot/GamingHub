@@ -958,6 +958,27 @@ func _build_comms_panel() -> void:
  panel.add_child(block_button)
  _refresh_comms_ui()
 
+const MICROPHONE_PERMISSION := "android.permission.RECORD_AUDIO"
+
+func _voice_permission_granted() -> bool:
+ # The Android permission must be granted by the OS, not inferred from
+ # the manifest or from mutual match consent.
+ if OS.get_name() != "Android":
+  return false
+ return MICROPHONE_PERMISSION in OS.get_granted_permissions()
+
+func _request_voice_permission() -> bool:
+ # This method is reserved for an explicit user tap after mutual consent.
+ # Never prompt for microphone access on match start or on remote signaling.
+ if audience != "adult" or not Engine.has_singleton("GamingHubVoice"):
+  return false
+ if comms_mode not in ["voice", "both"] or peer_comms_mode not in ["voice", "both"]:
+  return false
+ if not _voice_permission_granted():
+  OS.request_permission(MICROPHONE_PERMISSION)
+  return false
+ return true
+
 func _stop_voice_transport() -> void:
  # Safe no-op until the Android WebRTC native bridge is installed.
  # Do not pretend a signaling packet alone can start or stop microphone audio.

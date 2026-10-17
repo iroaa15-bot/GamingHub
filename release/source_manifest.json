@@ -692,7 +692,7 @@
     "scripts/poing_admob_bridge.gd.uid": "d63838fbb36b289eab1b9e146fae96e0befb3e5a6fb942eaa7ab05c9522e0b37",
     "scripts/visual_skin.gd": "807ee123224adeb4e7590e0629972cbab38e5682d0f109e2ee8c9923dac5e333",
     "scripts/visual_skin.gd.uid": "72adbe62f5f51a94cfd4419b194a61c59ff967a3dc4e051cfaa5e0c085cfc417",
-    "scripts/voice_microphone_capture.gd": "27ac7031686826befecd6109842d85364121b5271f7b21dbe400b86cb323e955",
+    "scripts/voice_microphone_capture.gd": "bda27975f07043dd4a0affed106a2dfd9e7794b9cbe5506c13a90e95fca16562",
     "scripts/voice_signaling_bridge.gd": "cb346940d5c91576e2589e8fdfa0932d26c093e68bd4345c8a7c310b505bf515",
     "server/Dockerfile": "0653a855bec48461f9c1831d1e686aad1ef76f39eafe7a0aca508575b92795ec",
     "server/cards.json": "215e3f41d3dd6ceacc510c3a48647177eed859ccdddc432a16932581a0b452cc",
@@ -774,7 +774,7 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
-    "scripts/voice_pcm_transport.gd": "47c78fc3c7bc361a7490515c76fe9bffec9b03ae3ac5ccc36e49d23721a7d425",
+    "scripts/voice_pcm_transport.gd": "5947ad4d865a80f7592f9855cddea02474cc6e661fb96280da92dced54fcf142",
     "tests/voice_pcm_smoke.gd": "afdf138dcb6bd280085476441dec93d127f9e944c7d5e6d751de8a1ab3e1a391"
   }
 }

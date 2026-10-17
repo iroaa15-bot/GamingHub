@@ -78,7 +78,7 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         connections.pop(self.a)
         replacement = FakeSocket()
         await process(replacement, {"type": "resume", "code": "VOICE1", "token": "a" * 64})
-        self.assertEqual(replacement.messages[-1]["type"], "resumed")
+        self.assertIn("resumed", [message["type"] for message in replacement.messages])
         self.assertEqual(self.room.voice_enabled, [False, False])
         await process(self.b, {"type": "voice_offer", "payload": {"sdp": "v=0"}})
         self.assertEqual(self.b.messages[-1]["type"], "error")

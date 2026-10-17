@@ -762,6 +762,15 @@ func _handle(msg: Dictionary) -> void:
     peer_comms_mode = str(modes[1 - player_index])
     chat_enabled = comms_mode == "text" and peer_comms_mode in ["text", "both"]
     _refresh_comms_ui()
+  "voice_signal":
+   # Never activate the microphone from an unsolicited network packet.
+   # A native Android WebRTC transport must explicitly handle offers/answers/ICE
+   # only after mutual consent, runtime permission, and age gating.
+   var signal: Variant = msg.get("signal", {})
+   if signal is Dictionary and str(signal.get("kind", "")) == "hangup":
+    # Reserved for the native voice bridge: clear any future active audio
+    # session immediately on remote hangup, even if the UI is hidden.
+    _stop_voice_transport()
   "chat":
    if is_instance_valid(chat_log):
     var who := _t("أنت", "You") if int(msg.get("player", -1)) == player_index else _t("المنافس", "Opponent")
@@ -941,6 +950,14 @@ func _build_comms_panel() -> void:
  )
  panel.add_child(block_button)
  _refresh_comms_ui()
+
+func _stop_voice_transport() -> void:
+ # Safe no-op until the Android WebRTC native bridge is installed.
+ # Do not pretend a signaling packet alone can start or stop microphone audio.
+ if Engine.has_singleton("GamingHubVoice"):
+  var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+  if voice_bridge.has_method("stop_call"):
+   voice_bridge.call("stop_call")
 
 func _refresh_comms_ui() -> void:
  if is_instance_valid(chat_input):

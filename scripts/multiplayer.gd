@@ -75,6 +75,7 @@ var voice_button: Button
 var voice_status: Label
 var voice_opted_in := false
 var peer_voice_opted_in := false
+var voice_request_pending := false
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -623,6 +624,7 @@ func _send(message: Dictionary) -> void:
   status.text = _t("تعذر إرسال الطلب. حاول مجددًا.", "Could not send the request. Try again.")
 
 func _reset_voice() -> void:
+ voice_request_pending = false
  voice_opted_in = false
  peer_voice_opted_in = false
  _update_voice_ui()
@@ -630,15 +632,18 @@ func _reset_voice() -> void:
 func _update_voice_ui() -> void:
  if not is_instance_valid(voice_button):
   return
- voice_button.text = _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
+ voice_button.disabled = voice_request_pending
+ voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
   voice_status.text = _t("الموافقة متبادلة، لكن الصوت غير متاح في هذا الإصدار التجريبي", "Both agreed, but audio is not available in this test build") if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _toggle_voice_consent() -> void:
- if room_code.is_empty() or finished or opponent_paused:
+ if room_code.is_empty() or finished or opponent_paused or voice_request_pending:
   return
- voice_opted_in = not voice_opted_in
- _send({"type": "voice_state", "enabled": voice_opted_in})
+ if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+  return
+ voice_request_pending = true
+ _send({"type": "voice_state", "enabled": not voice_opted_in})
  _update_voice_ui()
 
 func _handle(msg: Dictionary) -> void:
@@ -665,6 +670,9 @@ func _handle(msg: Dictionary) -> void:
    peer_voice_opted_in = bool(msg.get("enabled", false))
    _update_voice_ui()
   "voice_state_ack":
+   voice_request_pending = false
+   voice_opted_in = bool(msg.get("enabled", false))
+   peer_voice_opted_in = bool(msg.get("peer_enabled", false))
    _update_voice_ui()
   "paused":
    _reset_voice()
@@ -817,6 +825,9 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
    _refresh_actions()
   "error":
+   if voice_request_pending:
+    voice_request_pending = false
+    _update_voice_ui()
    if reconnect_pending:
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.

@@ -728,6 +728,7 @@ func _sync_voice_microphone() -> void:
  if voice_microphone.start(self, true, true):
   voice_transport.start(self)
   voice_transport_started = true
+  voice_permission_requested = false
  else:
   push_warning("GamingHub voice: microphone capture could not start")
 

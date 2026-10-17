@@ -6,6 +6,10 @@ on:
     paths:
       - scripts/multiplayer.gd
       - scripts/voice_signaling_bridge.gd
+      - scripts/voice_microphone_capture.gd
+      - tests/voice_microphone_smoke.gd
+      - export_presets.cfg
+      - project.godot
       - tests/voice_client_smoke.gd
       - release/source_manifest.json
       - .github/workflows/voice-client-validation.yml
@@ -33,10 +37,18 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/voice_client_smoke.gd 2>&1 | tee voice-client-smoke.log
           grep -q 'VOICE_CLIENT_SMOKE_PASS' voice-client-smoke.log
+      - name: Run microphone safety smoke
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/voice_microphone_smoke.gd 2>&1 | tee voice-microphone-smoke.log
+          grep -q 'VOICE_MICROPHONE_SMOKE_PASS' voice-microphone-smoke.log
       - name: Upload diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: voice-client-smoke-log
-          path: voice-client-smoke.log
+          path: |
+            voice-client-smoke.log
+            voice-microphone-smoke.log
           if-no-files-found: ignore

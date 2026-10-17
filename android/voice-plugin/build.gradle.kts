@@ -27,7 +27,7 @@ dependencies {
 tasks.register<Copy>("stageVoiceRuntime") {
     dependsOn("assembleDebug")
     from(configurations.named("debugRuntimeClasspath"))
-    from(layout.buildDirectory.file("outputs/aar/voice-plugin-debug.aar"))
+    from(fileTree(layout.buildDirectory.dir("outputs/aar")) { include("*-debug.aar") }) {\n        rename { "voice-plugin-debug.aar" }\n    }
     into(layout.buildDirectory.dir("voice-runtime-staging"))
     duplicatesStrategy = DuplicatesStrategy.FAIL
 }

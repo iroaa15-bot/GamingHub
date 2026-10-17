@@ -1,5 +1,6 @@
 """Isolated consent/signaling regression checks for Gaming Hub room server."""
 import asyncio
+import base64
 import unittest
 from unittest.mock import patch
 
@@ -93,6 +94,37 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         replacement = FakeSocket()
         await process(replacement, {"type": "resume", "code": "VOICE1", "token": "a" * 64})
         self.assertTrue(any(message.get("type") == "voice_state" and message.get("enabled") is False for message in self.b.messages))
+
+    async def test_audio_requires_mutual_consent(self):
+        packet = base64.b64encode(bytes(640)).decode("ascii")
+        await process(self.a, {"type": "voice_audio", "pcm": packet})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        await process(self.a, {"type": "voice_audio", "pcm": packet})
+        self.assertEqual(self.b.messages[-1], {"type": "voice_audio", "pcm": packet})
+        await process(self.b, {"type": "voice_state", "enabled": False})
+        await process(self.a, {"type": "voice_audio", "pcm": packet})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+
+    async def test_audio_rejects_invalid_packet(self):
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        await process(self.a, {"type": "voice_audio", "pcm": "not-base64"})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+        await process(self.a, {"type": "voice_audio", "pcm": "!" * 856})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+        await process(self.a, {"type": "voice_audio", "pcm": base64.b64encode(bytes(638)).decode("ascii")})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+
+    async def test_audio_rate_limit_drops_excess_packets(self):
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        packet = base64.b64encode(bytes(640)).decode("ascii")
+        before = len(self.b.messages)
+        await process(self.a, {"type": "voice_audio", "pcm": packet})
+        await process(self.a, {"type": "voice_audio", "pcm": packet})
+        self.assertEqual(len(self.b.messages), before + 1)
 
     async def test_invalid_ice_is_rejected(self):
         await process(self.a, {"type": "voice_state", "enabled": True})

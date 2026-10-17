@@ -1,0 +1,78 @@
+name: Approve Gaming Hub development source manifest
+on:
+  workflow_dispatch:
+  push:
+    branches: [work/voice-integration-validation]
+    paths:
+      - '.github/workflows/approve-development-manifest.yml'
+      - '.github/workflows/android-test-apk.yml'
+      - '.github/workflows/voice-signaling-tests.yml'
+      - 'scripts/multiplayer.gd'
+      - 'server/server.py'
+      - 'server/test_voice_signaling.py'
+      - 'docs/privacy.html'
+permissions:
+  contents: write
+jobs:
+  review-and-refresh:
+    if: github.ref == 'refs/heads/work/voice-integration-validation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Check expected branch and unchanged protected release
+        run: |
+          test "$GITHUB_REF_NAME" = "work/voice-integration-validation"
+          test -f release/source_manifest.json
+          test -f release/source_manifest.py
+          git status --porcelain
+      - name: Review exact manifest drift before approval
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'release')
+          from source_manifest import inventory
+          import json
+          old=json.load(open('release/source_manifest.json'))['sha256']
+          new=inventory()
+          changed=set(old)^set(new)
+          changed.update(k for k in old.keys() & new.keys() if old[k]!=new[k])
+          allowed={
+            '.github/workflows/android-test-apk.yml',
+            '.github/workflows/voice-signaling-tests.yml',
+            '.github/workflows/approve-development-manifest.yml',
+            'server/test_voice_signaling.py',
+            'docs/privacy.html',
+            'scripts/multiplayer.gd',
+            'server/server.py'
+          }
+          print('Changed files:', *sorted(changed), sep='\n - ')
+          unexpected=changed-allowed
+          if unexpected:
+            raise SystemExit('Refusing unreviewed files: '+', '.join(sorted(unexpected)))
+          if not changed:
+            print('Manifest already up to date')
+          PY
+      - name: Validate Python source and signaling tests
+        run: |
+          python3 -m pip install -r server/requirements.txt
+          python3 -m py_compile server/server.py server/test_voice_signaling.py
+          python3 -m unittest discover -s server -p 'test_voice_signaling.py' -v
+      - name: Regenerate source manifest on development branch
+        run: |
+          python3 release/source_manifest.py --write
+          python3 release/verify_project_upload.py
+          python3 release/source_manifest.py
+      - name: Commit reviewed manifest only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add release/source_manifest.json
+          if git diff --cached --quiet; then
+            echo "No manifest changes"
+          else
+            git commit -m "chore(dev): approve reviewed voice branch source manifest"
+            git push origin HEAD:work/voice-integration-validation
+          fi

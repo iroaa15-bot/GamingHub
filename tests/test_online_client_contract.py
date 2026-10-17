@@ -13,5 +13,5 @@ class OnlineClientContract(unittest.TestCase):
   self.assertIn('url.begins_with("wss://")',SOURCE)
   self.assertIn('url.begins_with("ws://")',SOURCE)
  def test_room_exit_clears_state(self):
-  self.assertIn('"disconnected":\n   _reset_match_state()',SOURCE)
+  self.assertIn('"disconnected":\n   _reset_voice()\n   _reset_match_state()',SOURCE)
 if __name__=="__main__": unittest.main()

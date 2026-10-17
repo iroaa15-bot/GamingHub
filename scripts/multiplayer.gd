@@ -71,6 +71,12 @@ var reconnect_deadline_ms: int = 0
 var reconnect_next_ms: int = 0
 var opponent_paused := false
 var match_view: VBoxContainer
+var voice_button: Button
+var voice_status: Label
+var voice_invite_dialog: ConfirmationDialog
+var voice_opted_in := false
+var peer_voice_opted_in := false
+var voice_request_pending := false
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -618,6 +624,35 @@ func _send(message: Dictionary) -> void:
    return
   status.text = _t("تعذر إرسال الطلب. حاول مجددًا.", "Could not send the request. Try again.")
 
+func _accept_voice_invite() -> void:
+ if not voice_opted_in and not voice_request_pending and peer_voice_opted_in:
+  _toggle_voice_consent()
+
+func _reset_voice() -> void:
+ if is_instance_valid(voice_invite_dialog):
+  voice_invite_dialog.hide()
+ voice_request_pending = false
+ voice_opted_in = false
+ peer_voice_opted_in = false
+ _update_voice_ui()
+
+func _update_voice_ui() -> void:
+ if not is_instance_valid(voice_button):
+  return
+ voice_button.disabled = voice_request_pending
+ voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
+ if is_instance_valid(voice_status):
+  voice_status.text = _t("الموافقة متبادلة، لكن الصوت غير متاح في هذا الإصدار التجريبي", "Both agreed, but audio is not available in this test build") if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+
+func _toggle_voice_consent() -> void:
+ if room_code.is_empty() or finished or opponent_paused or voice_request_pending:
+  return
+ if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+  return
+ voice_request_pending = true
+ _send({"type": "voice_state", "enabled": not voice_opted_in})
+ _update_voice_ui()
+
 func _handle(msg: Dictionary) -> void:
  var kind := str(msg.get("type", ""))
  if leaving and kind not in ["left", "disconnected"]:
@@ -638,11 +673,27 @@ func _handle(msg: Dictionary) -> void:
     ping_waiting = false
     if is_instance_valid(health_label):
      health_label.text = (_t("الشبكة: بطيئة • %d مللي ثانية", "Network: slow • %d ms") if latency_ms > 600 else _t("الشبكة: مستقرة • %d مللي ثانية", "Network: stable • %d ms")) % latency_ms
+  "voice_state":
+   var incoming_enabled := bool(msg.get("enabled", false))
+   var show_invite := incoming_enabled and not peer_voice_opted_in and not voice_opted_in and not voice_request_pending and not finished
+   peer_voice_opted_in = incoming_enabled
+   _update_voice_ui()
+   if show_invite and is_instance_valid(voice_invite_dialog):
+    voice_invite_dialog.popup_centered()
+   elif not incoming_enabled and is_instance_valid(voice_invite_dialog):
+    voice_invite_dialog.hide()
+  "voice_state_ack":
+   voice_request_pending = false
+   voice_opted_in = bool(msg.get("enabled", false))
+   peer_voice_opted_in = bool(msg.get("peer_enabled", false))
+   _update_voice_ui()
   "paused":
+   _reset_voice()
    opponent_paused = true
    status.text = _t("المنافس فقد الاتصال؛ المباراة متوقفة مؤقتًا في انتظار عودته.", "Opponent disconnected; match paused until they return.")
    _refresh_actions()
   "peer_resumed":
+   _reset_voice()
    opponent_paused = false
    my_turn = int(msg.get("turn", -1)) == player_index
    status.text = _t("المنافس رجع؛ المباراة مستمرة.", "Opponent reconnected; match resumed.")
@@ -675,6 +726,7 @@ func _handle(msg: Dictionary) -> void:
     status.text = _t("تمت مزامنة المباراة مع السيرفر", "Match synchronized with server") if kind == "synced" else _t("تم استكمال المباراة بنجاح", "Match restored successfully")
    _refresh_actions()
   "left":
+   _reset_voice()
    _reset_match_state()
    status.text = _t("خرجت من الغرفة", "Left the room")
   "queue":
@@ -691,6 +743,7 @@ func _handle(msg: Dictionary) -> void:
    _update_lobby()
    status.text = _local("ROOM CODE: ") + room_code + " • " + _local(str(msg.get("status", "")))
   "started":
+   _reset_voice()
    pending_action.clear()
    matchmaking_pending = false
    _clear_match_view()
@@ -720,6 +773,21 @@ func _handle(msg: Dictionary) -> void:
    deduction_status.add_theme_font_size_override("font_size", 18)
    deduction_status.add_theme_color_override("font_color", Color("a7f3d0"))
    match_view.add_child(deduction_status)
+   voice_invite_dialog = ConfirmationDialog.new()
+   voice_invite_dialog.title = _t("طلب محادثة صوتية", "Voice chat request")
+   voice_invite_dialog.dialog_text = _t("الطرف الآخر يطلب محادثة صوتية. هل توافق؟", "The other player requests voice chat. Accept?")
+   voice_invite_dialog.ok_button_text = _t("موافقة", "Accept")
+   voice_invite_dialog.cancel_button_text = _t("رفض", "Decline")
+   voice_invite_dialog.confirmed.connect(_accept_voice_invite)
+   add_child(voice_invite_dialog)
+   voice_button = Button.new()
+   voice_button.custom_minimum_size.y = 50
+   voice_button.pressed.connect(_toggle_voice_consent)
+   match_view.add_child(voice_button)
+   voice_status = Label.new()
+   voice_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+   match_view.add_child(voice_status)
+   _update_voice_ui()
    _update_deduction_status()
    var art_frame := PanelContainer.new()
    art_frame.custom_minimum_size.y = 255
@@ -759,6 +827,7 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("تخمين: ", "Guess: ") + str(msg.get("guess", "")) + (" ✓" if msg.get("correct", false) else " ✗"), 16)
    _update_deduction_status()
   "finished":
+   _reset_voice()
    finished = true
    my_turn = false
    var names: Array[String] = []
@@ -771,10 +840,14 @@ func _handle(msg: Dictionary) -> void:
    _update_lobby()
    _refresh_actions()
   "disconnected":
+   _reset_voice()
    _reset_match_state()
    _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
    _refresh_actions()
   "error":
+   if voice_request_pending:
+    voice_request_pending = false
+    _update_voice_ui()
    if reconnect_pending:
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.

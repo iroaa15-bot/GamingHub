@@ -43,6 +43,7 @@ class Room:
     detached_at: list = field(default_factory=lambda: [None, None])
     history: list = field(default_factory=list)
     winner: int = -1
+    voice_enabled: list = field(default_factory=lambda: [False, False])
 
 rooms = {}
 connections = {}
@@ -75,6 +76,7 @@ async def start_room(room):
     room.detached_at = [None, None]
     room.history = []
     room.winner = -1
+    room.voice_enabled = [False, False]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -173,12 +175,46 @@ async def process(ws, msg):
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
+        had_voice_consent = any(room.voice_enabled)
+        room.voice_enabled = [False, False]
         room.detached_at[idx] = None
         connections[ws] = code
         room.last_activity = time.monotonic()
         await send(ws, snapshot(room, idx, 'resumed', include_token=True))
         if all(p is not None for p in room.players):
             await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
+            if had_voice_consent:
+                await broadcast(room, {'type':'voice_state','player':idx,'enabled':False})
+        return
+    # Optional voice signaling only. Audio media must use a native WebRTC client.
+    # No SDP/ICE is stored in room history or server-side databases.
+    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice'):
+        code = connections.get(ws)
+        room = rooms.get(code)
+        if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
+            return await send(ws, {'type':'error','message':'No active voice room'})
+        if any(peer is None for peer in room.players):
+            return await send(ws, {'type':'error','message':'Voice peer unavailable'})
+        index = room.players.index(ws)
+        if action == 'voice_state':
+            enabled = msg.get('enabled')
+            if type(enabled) is not bool:
+                return await send(ws, {'type':'error','message':'Invalid voice state'})
+            room.voice_enabled[index] = enabled
+            await send(room.players[1-index], {'type':'voice_state','player':index,'enabled':enabled})
+            await send(ws, {'type':'voice_state_ack','enabled':enabled,'peer_enabled':room.voice_enabled[1-index]})
+            return
+        if not all(room.voice_enabled):
+            return await send(ws, {'type':'error','message':'Both players must enable voice'})
+        payload = msg.get('payload')
+        if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
+            return await send(ws, {'type':'error','message':'Invalid voice payload'})
+        if action in ('voice_offer', 'voice_answer'):
+            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 5500:
+                return await send(ws, {'type':'error','message':'Invalid voice SDP'})
+        if action == 'voice_ice' and (not isinstance(payload.get('candidate'), str) or not 0 < len(payload['candidate']) <= 4096):
+            return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
+        await send(room.players[1-index], {'type':action,'player':index,'payload':payload})
         return
     if action == 'leave':
         if ws in waiting:
@@ -308,10 +344,15 @@ async def handler(ws):
             idx = room.players.index(ws)
             if len(room.players) == 2 and room.cards:
                 room.players[idx] = None
+                had_voice_consent = any(room.voice_enabled)
+                room.voice_enabled = [False, False]
                 room.detached_at[idx] = time.monotonic()
                 for peer in room.players:
                     if peer is not None:
-                        try: await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
+                        try:
+                            await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
+                            if had_voice_consent:
+                                await send(peer, {'type':'voice_state','player':idx,'enabled':False})
                         except Exception: pass
             else:
                 await cleanup_room(code, 'Opponent disconnected')

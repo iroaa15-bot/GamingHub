@@ -287,7 +287,7 @@ async def process(ws, msg):
         if room.comms[index] not in ('voice', 'both') or room.comms[1-index] not in ('voice', 'both') or any(room.blocked):
             return await send(ws, {'type':'error','message':'Voice requires consent from both players'})
         signal = msg.get('signal')
-        if not isinstance(signal, dict) or signal.get('kind') not in ('offer', 'answer', 'ice'):
+        if not isinstance(signal, dict) or signal.get('kind') not in ('offer', 'answer', 'ice', 'hangup'):
             return await send(ws, {'type':'error','message':'Invalid voice signal'})
         if len(json.dumps(signal)) > 4096:
             return await send(ws, {'type':'error','message':'Voice signal too large'})

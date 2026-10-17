@@ -21,3 +21,13 @@ dependencies {
     implementation("io.github.webrtc-sdk:android:150.7871.01")
     implementation("androidx.core:core-ktx:1.13.1")
 }
+
+ // Stage the exact resolved runtime dependencies for later isolated APK
+ // integration. This does NOT modify the game's current export templates.
+tasks.register<Copy>("stageVoiceRuntime") {
+    dependsOn("assembleDebug")
+    from(configurations.named("debugRuntimeClasspath"))
+    from(layout.buildDirectory.file("outputs/aar/voice-plugin-debug.aar"))
+    into(layout.buildDirectory.dir("voice-runtime-staging"))
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+}

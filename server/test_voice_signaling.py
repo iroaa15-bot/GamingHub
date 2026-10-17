@@ -69,6 +69,20 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.outsider, {"type": "voice_state", "enabled": True})
         self.assertEqual(self.outsider.messages[-1]["type"], "error")
 
+    async def test_reconnect_requires_fresh_consent(self):
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        self.room.resume_tokens = ["a" * 64, "b" * 64]
+        self.room.players[0] = None
+        self.room.detached_at[0] = __import__("time").monotonic()
+        connections.pop(self.a)
+        replacement = FakeSocket()
+        await process(replacement, {"type": "resume", "code": "VOICE1", "token": "a" * 64})
+        self.assertEqual(replacement.messages[-1]["type"], "resumed")
+        self.assertEqual(self.room.voice_enabled, [False, False])
+        await process(self.b, {"type": "voice_offer", "payload": {"sdp": "v=0"}})
+        self.assertEqual(self.b.messages[-1]["type"], "error")
+
     async def test_invalid_ice_is_rejected(self):
         await process(self.a, {"type": "voice_state", "enabled": True})
         await process(self.b, {"type": "voice_state", "enabled": True})

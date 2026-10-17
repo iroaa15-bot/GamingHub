@@ -175,14 +175,16 @@ async def process(ws, msg):
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
+        had_voice_consent = any(room.voice_enabled)
         room.voice_enabled = [False, False]
         room.detached_at[idx] = None
         connections[ws] = code
         room.last_activity = time.monotonic()
         await send(ws, snapshot(room, idx, 'resumed', include_token=True))
         if all(p is not None for p in room.players):
-            await broadcast(room, {'type':'voice_state','player':idx,'enabled':False})
             await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
+            if had_voice_consent:
+                await broadcast(room, {'type':'voice_state','player':idx,'enabled':False})
         return
     # Optional voice signaling only. Audio media must use a native WebRTC client.
     # No SDP/ICE is stored in room history or server-side databases.
@@ -342,13 +344,15 @@ async def handler(ws):
             idx = room.players.index(ws)
             if len(room.players) == 2 and room.cards:
                 room.players[idx] = None
+                had_voice_consent = any(room.voice_enabled)
                 room.voice_enabled = [False, False]
                 room.detached_at[idx] = time.monotonic()
                 for peer in room.players:
                     if peer is not None:
                         try:
-                            await send(peer, {'type':'voice_state','player':idx,'enabled':False})
                             await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
+                            if had_voice_consent:
+                                await send(peer, {'type':'voice_state','player':idx,'enabled':False})
                         except Exception: pass
             else:
                 await cleanup_room(code, 'Opponent disconnected')

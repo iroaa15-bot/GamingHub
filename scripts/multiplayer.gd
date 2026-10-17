@@ -1,6 +1,7 @@
 extends Control
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
+const VoiceSignalingBridge = preload("res://scripts/voice_signaling_bridge.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
@@ -77,6 +78,7 @@ var voice_invite_dialog: ConfirmationDialog
 var voice_opted_in := false
 var peer_voice_opted_in := false
 var voice_request_pending := false
+var voice_signaling = VoiceSignalingBridge.new()
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -93,6 +95,7 @@ func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
 
 func _ready() -> void:
+ voice_signaling.configure(Callable(self, "_voice_signal_send"))
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
@@ -629,6 +632,7 @@ func _accept_voice_invite() -> void:
   _toggle_voice_consent()
 
 func _reset_voice() -> void:
+ voice_signaling.reset()
  if is_instance_valid(voice_invite_dialog):
   voice_invite_dialog.hide()
  voice_request_pending = false
@@ -637,12 +641,17 @@ func _reset_voice() -> void:
  _update_voice_ui()
 
 func _update_voice_ui() -> void:
+ voice_signaling.set_consent(voice_opted_in, peer_voice_opted_in, not room_code.is_empty() and not finished and not opponent_paused)
  if not is_instance_valid(voice_button):
   return
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
   voice_status.text = _t("الموافقة متبادلة، لكن الصوت غير متاح في هذا الإصدار التجريبي", "Both agreed, but audio is not available in this test build") if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+
+func _voice_signal_send(message: Dictionary) -> void:
+ if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+  _send(message)
 
 func _toggle_voice_consent() -> void:
  if room_code.is_empty() or finished or opponent_paused or voice_request_pending:
@@ -682,6 +691,8 @@ func _handle(msg: Dictionary) -> void:
     voice_invite_dialog.popup_centered()
    elif not incoming_enabled and is_instance_valid(voice_invite_dialog):
     voice_invite_dialog.hide()
+  "voice_offer", "voice_answer", "voice_ice":
+   voice_signaling.handle_server_message(msg)
   "voice_state_ack":
    voice_request_pending = false
    voice_opted_in = bool(msg.get("enabled", false))

@@ -73,6 +73,7 @@ var opponent_paused := false
 var match_view: VBoxContainer
 var voice_button: Button
 var voice_status: Label
+var voice_invite_dialog: ConfirmationDialog
 var voice_opted_in := false
 var peer_voice_opted_in := false
 var voice_request_pending := false
@@ -623,7 +624,13 @@ func _send(message: Dictionary) -> void:
    return
   status.text = _t("تعذر إرسال الطلب. حاول مجددًا.", "Could not send the request. Try again.")
 
+func _accept_voice_invite() -> void:
+ if not voice_opted_in and not voice_request_pending and peer_voice_opted_in:
+  _toggle_voice_consent()
+
 func _reset_voice() -> void:
+ if is_instance_valid(voice_invite_dialog):
+  voice_invite_dialog.hide()
  voice_request_pending = false
  voice_opted_in = false
  peer_voice_opted_in = false
@@ -667,8 +674,14 @@ func _handle(msg: Dictionary) -> void:
     if is_instance_valid(health_label):
      health_label.text = (_t("الشبكة: بطيئة • %d مللي ثانية", "Network: slow • %d ms") if latency_ms > 600 else _t("الشبكة: مستقرة • %d مللي ثانية", "Network: stable • %d ms")) % latency_ms
   "voice_state":
-   peer_voice_opted_in = bool(msg.get("enabled", false))
+   var incoming_enabled := bool(msg.get("enabled", false))
+   var show_invite := incoming_enabled and not peer_voice_opted_in and not voice_opted_in and not voice_request_pending and not finished
+   peer_voice_opted_in = incoming_enabled
    _update_voice_ui()
+   if show_invite and is_instance_valid(voice_invite_dialog):
+    voice_invite_dialog.popup_centered()
+   elif not incoming_enabled and is_instance_valid(voice_invite_dialog):
+    voice_invite_dialog.hide()
   "voice_state_ack":
    voice_request_pending = false
    voice_opted_in = bool(msg.get("enabled", false))
@@ -760,6 +773,13 @@ func _handle(msg: Dictionary) -> void:
    deduction_status.add_theme_font_size_override("font_size", 18)
    deduction_status.add_theme_color_override("font_color", Color("a7f3d0"))
    match_view.add_child(deduction_status)
+   voice_invite_dialog = ConfirmationDialog.new()
+   voice_invite_dialog.title = _t("طلب محادثة صوتية", "Voice chat request")
+   voice_invite_dialog.dialog_text = _t("الطرف الآخر يطلب محادثة صوتية. هل توافق؟", "The other player requests voice chat. Accept?")
+   voice_invite_dialog.ok_button_text = _t("موافقة", "Accept")
+   voice_invite_dialog.cancel_button_text = _t("رفض", "Decline")
+   voice_invite_dialog.confirmed.connect(_accept_voice_invite)
+   add_child(voice_invite_dialog)
    voice_button = Button.new()
    voice_button.custom_minimum_size.y = 50
    voice_button.pressed.connect(_toggle_voice_consent)

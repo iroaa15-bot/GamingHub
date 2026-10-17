@@ -56,6 +56,8 @@ WAITING_TTL = int(os.getenv('WAITING_TTL', '300'))
 MATCH_TTL = int(os.getenv('MATCH_TTL', '1200'))
 MAX_ACTIVE_CONNECTIONS = int(os.getenv('MAX_ACTIVE_CONNECTIONS', '1200'))
 MAX_GUESS_LENGTH = 80
+# Off by default until age assurance, reporting/moderation and Android QA are ready.
+COMMS_ENABLED = os.getenv('GAMINGHUB_COMMS_ENABLED', 'false').lower() == 'true'
 RECONNECT_GRACE = max(10, min(300, int(os.getenv('RECONNECT_GRACE', '90'))))
 
 
@@ -249,6 +251,8 @@ async def process(ws, msg):
         return await send(ws, {'type':'error','message':'Match paused; waiting for reconnect'})
     index = room.players.index(ws)
     # Optional communications do not consume turns or reveal either secret card.
+    if action in ('comms', 'chat', 'comms_block', 'voice_signal') and not COMMS_ENABLED:
+        return await send(ws, {'type':'error','message':'Communications unavailable'})
     if action == 'comms':
         mode = msg.get('mode')
         if mode not in ('none', 'text', 'voice', 'both'):

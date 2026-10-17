@@ -1,0 +1,64 @@
+name: Capture real Gaming Hub store screens
+on:
+  push:
+    branches: [codex/v11.7-store-screenshots]
+    paths: ['.github/workflows/capture-store-screens.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Install virtual display
+        run: sudo apt-get update && sudo apt-get install -y xvfb libegl1
+      - name: Import real project assets
+        run: godot --headless --path . --editor --import --quit
+      - name: Capture rendered scenes
+        shell: bash
+        run: |
+          mkdir -p build/store-screens
+          cat > tests/store_capture_temp.gd <<'GD'
+          extends SceneTree
+          func _initialize() -> void:
+              call_deferred("_capture")
+          func _frame(path: String) -> void:
+              for i in range(30):
+                  await process_frame
+              await RenderingServer.frame_post_draw
+              var image := root.get_texture().get_image()
+              var error := image.save_png(path)
+              if error != OK:
+                  push_error("Screenshot failed: " + str(error))
+                  quit(1)
+          func _capture() -> void:
+              var hub := load("res://scenes/Main.tscn").instantiate()
+              root.add_child(hub)
+              await process_frame
+              hub._set_age_group("13to17")
+              hub.selected_language = "en"
+              hub.show_home()
+              await _frame("res://build/store-screens/01-home.png")
+              hub.show_modes(0)
+              await _frame("res://build/store-screens/02-guess-picture.png")
+              hub.start_picture_library()
+              await _frame("res://build/store-screens/03-picture-question.png")
+              print("STORE_SCREENSHOTS_PASS")
+              quit()
+          GD
+          xvfb-run -a -s '-screen 0 1920x1080x24' godot --path . --rendering-method gl_compatibility --resolution 1920x1080 --script res://tests/store_capture_temp.gd 2>&1 | tee build/store-screens/capture.log
+          grep -q STORE_SCREENSHOTS_PASS build/store-screens/capture.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: GamingHub-v11.7-real-rendered-screens
+          path: build/store-screens/
+          if-no-files-found: error
+          retention-days: 14

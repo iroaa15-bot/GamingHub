@@ -49,7 +49,11 @@ class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
 
     async def consent(self, ws, mode):
         await tx(ws, "comms", mode=mode)
-        a, b = await rx(self.a), await rx(self.b)
+        a = await rx(self.a)
+        if mode in ("none", "text") and a.get("type") == "voice_signal":
+            self.assertEqual(a["signal"], {"kind": "hangup"})
+            a = await rx(self.a)
+        b = await rx(self.b)
         self.assertEqual(a["type"], "comms_state")
         self.assertEqual(b["type"], "comms_state")
         return a

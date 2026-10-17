@@ -92,6 +92,7 @@ func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
 
 func _ready() -> void:
+ _connect_voice_bridge()
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))

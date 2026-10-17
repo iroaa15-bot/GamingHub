@@ -78,6 +78,8 @@ var voice_invite_dialog: ConfirmationDialog
 var voice_opted_in := false
 var peer_voice_opted_in := false
 var voice_request_pending := false
+var voice_request_started_ms: int = 0
+const VOICE_REQUEST_TIMEOUT_MS: int = 12000
 var voice_signaling = VoiceSignalingBridge.new()
 var lobby_controls: VBoxContainer
 var match_label: Label
@@ -474,6 +476,12 @@ func _start_reconnect() -> void:
 
 func _process(_delta: float) -> void:
  socket.poll()
+ if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
+  voice_request_pending = false
+  voice_request_started_ms = 0
+  _update_voice_ui()
+  if is_instance_valid(voice_status):
+   voice_status.text = _t("انتهت مهلة طلب الصوت؛ حاول مرة أخرى.", "Voice request timed out; please try again.")
  var state := socket.get_ready_state()
  if reconnecting:
   var reconnect_now: int = Time.get_ticks_msec()
@@ -636,6 +644,7 @@ func _reset_voice() -> void:
  if is_instance_valid(voice_invite_dialog):
   voice_invite_dialog.hide()
  voice_request_pending = false
+ voice_request_started_ms = 0
  voice_opted_in = false
  peer_voice_opted_in = false
  _update_voice_ui()
@@ -659,6 +668,7 @@ func _toggle_voice_consent() -> void:
  if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
   return
  voice_request_pending = true
+ voice_request_started_ms = Time.get_ticks_msec()
  _send({"type": "voice_state", "enabled": not voice_opted_in})
  _update_voice_ui()
 
@@ -695,6 +705,7 @@ func _handle(msg: Dictionary) -> void:
    voice_signaling.handle_server_message(msg)
   "voice_state_ack":
    voice_request_pending = false
+   voice_request_started_ms = 0
    voice_opted_in = bool(msg.get("enabled", false))
    peer_voice_opted_in = bool(msg.get("peer_enabled", false))
    _update_voice_ui()
@@ -858,6 +869,7 @@ func _handle(msg: Dictionary) -> void:
   "error":
    if voice_request_pending:
     voice_request_pending = false
+    voice_request_started_ms = 0
     _update_voice_ui()
    if reconnect_pending:
     if str(msg.get("message", "")) == "Original player still connected":

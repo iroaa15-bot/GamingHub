@@ -50,7 +50,7 @@ class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
     async def consent(self, ws, mode):
         await tx(ws, "comms", mode=mode)
         a = await rx(self.a)
-        if mode in ("none", "text") and a.get("type") == "voice_signal":
+        if a.get("type") == "voice_signal":
             self.assertEqual(a["signal"], {"kind": "hangup"})
             a = await rx(self.a)
         b = await rx(self.b)
@@ -118,8 +118,12 @@ class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
         await self.consent(self.a, "both")
         await self.consent(self.b, "both")
         await tx(self.b, "comms_block")
-        await rx(self.a)
-        await rx(self.b)
+        first = await rx(self.a)
+        if first["type"] == "voice_signal":
+            self.assertEqual(first["signal"], {"kind": "hangup"})
+            first = await rx(self.a)
+        self.assertEqual(first["type"], "comms_state")
+        self.assertEqual((await rx(self.b))["type"], "comms_state")
         await self.consent(self.a, "both")
         await self.consent(self.b, "both")
         await tx(self.a, "chat", text="blocked")

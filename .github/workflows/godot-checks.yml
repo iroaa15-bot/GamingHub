@@ -24,7 +24,7 @@ jobs:
           expected=json.load(open('release/source_manifest.json'))['sha256']
           actual=inventory()
           drift={k for k in set(expected)|set(actual) if expected.get(k)!=actual.get(k)}
-          approved={'.github/workflows/android-test-apk.yml','.github/workflows/voice-signaling-tests.yml','.github/workflows/approve-development-manifest.yml','.github/workflows/godot-checks.yml','server/test_voice_signaling.py','docs/privacy.html','scripts/multiplayer.gd','server/server.py'}
+          approved={'.github/workflows/android-test-apk.yml','.github/workflows/voice-signaling-tests.yml','.github/workflows/approve-development-manifest.yml','.github/workflows/godot-checks.yml','server/test_voice_signaling.py','tests/test_online_client_contract.py','docs/privacy.html','scripts/multiplayer.gd','server/server.py'}
           print('Changed:',sorted(drift))
           if drift-approved: raise SystemExit('Unapproved changes: '+str(sorted(drift-approved)))
           PY

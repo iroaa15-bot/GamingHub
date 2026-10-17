@@ -47,6 +47,24 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.b, {"type": "voice_ice", "payload": {"candidate": "candidate:test"}})
         self.assertEqual(self.b.messages[-1]["type"], "error")
 
+    async def test_peer_only_receives_offer(self):
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        before = len(self.outsider.messages)
+        await process(self.a, {"type": "voice_offer", "payload": {"sdp": "v=0"}})
+        self.assertEqual(self.b.messages[-1]["type"], "voice_offer")
+        self.assertEqual(len(self.outsider.messages), before)
+
+    async def test_finished_match_rejects_voice(self):
+        self.room.over = True
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+
+    async def test_invalid_consent_rejected(self):
+        await process(self.a, {"type": "voice_state", "enabled": "yes"})
+        self.assertEqual(self.a.messages[-1]["type"], "error")
+        self.assertEqual(self.room.voice_enabled, [False, False])
+
     async def test_outsider_cannot_signal(self):
         await process(self.outsider, {"type": "voice_state", "enabled": True})
         self.assertEqual(self.outsider.messages[-1]["type"], "error")

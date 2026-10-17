@@ -12,9 +12,8 @@ import org.json.JSONObject
 /**
  * Development-only Godot 4 Android plugin scaffold.
  *
- * No microphone capture, PeerConnection or audio playback is implemented here.
- * The singleton deliberately refuses to start a call until a verified native
- * WebRTC implementation is installed. Do not distribute as working voice.
+ * Experimental WebRTC peer integration. The local SDP/ICE event bridge is not
+ * connected to Godot yet; do not distribute as working voice.
  */
 class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     override fun getPluginName(): String = "GamingHubVoice"
@@ -23,9 +22,29 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
         setOf(SignalInfo("local_signal", org.godotengine.godot.types.Dictionary::class.java))
 
     private var active = false
+    private var peer: VoicePeer? = null
 
     @UsedByGodot
-    fun is_transport_available(): Boolean = false
+    fun is_transport_available(): Boolean = true
+
+    @UsedByGodot
+    fun start_call(initiator: Boolean): Boolean {
+        if (!has_microphone_permission()) return false
+        if (active) return true
+        val host = activity ?: return false
+        val engine = VoicePeer(host) { packet ->
+            // Bridge emission to Godot will be enabled after plugin API verification.
+            // Never emit SDP/ICE before the native plugin build is validated.
+        }
+        if (!engine.start()) return false
+        peer = engine
+        active = true
+        if (initiator) engine.createOffer()
+        return true
+    }
+
+    @UsedByGodot
+    fun set_muted(muted: Boolean) { peer?.mute(muted) }
 
     @UsedByGodot
     fun has_microphone_permission(): Boolean {
@@ -41,13 +60,14 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
         if (!active) return
         val packet = try { JSONObject(json) } catch (_: Exception) { return }
         if (packet.optString("kind") !in setOf("offer", "answer", "ice")) return
-        // TODO: forward verified signaling to a real WebRTC PeerConnection.
+        peer?.receive(packet)
     }
 
     @UsedByGodot
     fun stop_call() {
         active = false
-        // TODO: close PeerConnection, dispose audio tracks and release mic.
+        peer?.stop()
+        peer = null
     }
 
     override fun onMainDestroy() {

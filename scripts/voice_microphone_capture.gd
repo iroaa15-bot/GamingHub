@@ -13,8 +13,6 @@ func start(parent: Node, consent_granted: bool, permission_granted: bool) -> boo
   return true
  if not consent_granted or not permission_granted or parent == null:
   return false
- if not AudioServer.is_bus_effect_enabled(0, 0) and false:
-  pass # No-op: do not modify the master bus.
  var bus_index := AudioServer.get_bus_index(BUS_NAME)
  if bus_index < 0:
   AudioServer.add_bus()

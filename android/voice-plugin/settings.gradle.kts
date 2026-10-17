@@ -13,5 +13,3 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "GamingHubVoice"
-include(":voice")
-project(":voice").projectDir = file(".")

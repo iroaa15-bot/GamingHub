@@ -5,6 +5,8 @@ extends RefCounted
 const RATE := 16000
 const SAMPLES := 320
 const MAX_QUEUE_PACKETS := 8
+const MAX_PACKETS_PER_POLL := 4
+const PLAYBACK_GAIN := 0.7
 var _source_rate := 48000.0
 var _phase := 0.0
 var _samples := PackedFloat32Array()
@@ -12,6 +14,7 @@ var _out: AudioStreamPlayer
 var _stream: AudioStreamGenerator
 var _playback: AudioStreamGeneratorPlayback
 var _received: Array[PackedVector2Array] = []
+var dropped_packets := 0
 
 func start(parent: Node) -> void:
  stop()
@@ -37,6 +40,7 @@ func stop() -> void:
  _playback = null
  _stream = null
  _received.clear()
+ dropped_packets = 0
  _samples.clear()
  _phase = 0.0
 
@@ -65,6 +69,8 @@ func encode_frames(frames: PackedVector2Array) -> Array[String]:
 func receive_packet(encoded: String) -> bool:
  if _playback == null or encoded.length() != 856:
   return false
+ if not encoded.is_valid_ascii():
+  return false
  var pcm := Marshalls.base64_to_raw(encoded)
  if pcm.size() != SAMPLES * 2:
   return false
@@ -74,15 +80,18 @@ func receive_packet(encoded: String) -> bool:
   var value := int(pcm[i * 2]) | (int(pcm[i * 2 + 1]) << 8)
   if value >= 32768:
    value -= 65536
-  var amplitude := float(value) / 32768.0
+  var amplitude := clampf(float(value) / 32768.0 * PLAYBACK_GAIN, -1.0, 1.0)
   frames[i] = Vector2(amplitude, amplitude)
  if _received.size() >= MAX_QUEUE_PACKETS:
   _received.pop_front()
+  dropped_packets += 1
  _received.append(frames)
  return true
 
 func pump() -> void:
  if _playback == null:
   return
- while not _received.is_empty() and _playback.get_frames_available() >= SAMPLES:
+ var sent := 0
+ while not _received.is_empty() and _playback.get_frames_available() >= SAMPLES and sent < MAX_PACKETS_PER_POLL:
   _playback.push_buffer(_received.pop_front())
+  sent += 1

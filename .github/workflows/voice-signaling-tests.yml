@@ -1,0 +1,25 @@
+name: Voice signaling validation
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work/voice-integration-validation
+    paths:
+      - server/server.py
+      - server/test_voice_signaling.py
+      - .github/workflows/voice-signaling-tests.yml
+permissions:
+  contents: read
+jobs:
+  voice-signaling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install server dependencies
+        run: python -m pip install -r server/requirements.txt
+      - name: Run voice signaling tests
+        run: python server/test_voice_signaling.py

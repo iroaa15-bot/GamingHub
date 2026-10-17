@@ -57,6 +57,33 @@ jobs:
         run: gradle --no-daemon --stacktrace stageVoiceRuntime
       - name: Validate staged native WebRTC libraries
         run: python3 android/voice-plugin/verify_runtime_stage.py android/voice-plugin/build/voice-runtime-staging
+      - name: Install Godot 4.5.1 for isolated addon check
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Verify experimental Godot voice export addon loads
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp project.godot /tmp/gaminghub-project-original.godot
+          trap 'cp /tmp/gaminghub-project-original.godot project.godot' EXIT
+          cp android/voice-plugin/build/voice-runtime-staging/voice-plugin-debug.aar addons/gaminghub_voice/voice-plugin-debug.aar
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("project.godot")
+          data = p.read_text()
+          old = 'enabled=PackedStringArray("res://addons/admob/plugin.cfg")'
+          assert old in data, "unexpected editor plugin configuration"
+          p.write_text(data.replace(old, 'enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/gaminghub_voice/plugin.cfg")'))
+          PY
+          godot --headless --path . --editor --import --quit 2>&1 | tee /tmp/gaminghub-voice-addon-import.log
+          if grep -Ei 'SCRIPT ERROR|Parse Error|Invalid call|Cannot load script' /tmp/gaminghub-voice-addon-import.log; then
+            echo "Experimental voice export addon failed Godot editor import"
+            exit 1
+          fi
+          echo "GODOT_VOICE_ADDON_IMPORT_PASS"
       - name: Upload voice runtime staging
         uses: actions/upload-artifact@v4
         with:

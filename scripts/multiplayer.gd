@@ -2,6 +2,7 @@ extends Control
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 const VoiceSignalingBridge = preload("res://scripts/voice_signaling_bridge.gd")
+const VoiceMicrophoneCapture = preload("res://scripts/voice_microphone_capture.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
@@ -81,6 +82,8 @@ var voice_request_pending := false
 var voice_request_started_ms: int = 0
 const VOICE_REQUEST_TIMEOUT_MS: int = 12000
 var voice_signaling = VoiceSignalingBridge.new()
+var voice_microphone = VoiceMicrophoneCapture.new()
+var voice_permission_requested := false
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -476,6 +479,8 @@ func _start_reconnect() -> void:
 
 func _process(_delta: float) -> void:
  socket.poll()
+ if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted():
+  _sync_voice_microphone()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
   voice_request_started_ms = 0
@@ -640,6 +645,8 @@ func _accept_voice_invite() -> void:
   _toggle_voice_consent()
 
 func _reset_voice() -> void:
+ voice_microphone.stop()
+ voice_permission_requested = false
  voice_signaling.reset()
  if is_instance_valid(voice_invite_dialog):
   voice_invite_dialog.hide()
@@ -651,12 +658,32 @@ func _reset_voice() -> void:
 
 func _update_voice_ui() -> void:
  voice_signaling.set_consent(voice_opted_in, peer_voice_opted_in, not room_code.is_empty() and not finished and not opponent_paused)
+ _sync_voice_microphone()
  if not is_instance_valid(voice_button):
   return
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
-  voice_status.text = _t("الموافقة متبادلة، لكن الصوت غير متاح في هذا الإصدار التجريبي", "Both agreed, but audio is not available in this test build") if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+  voice_status.text = (_t("الميكروفون جاهز للاختبار؛ إرسال الصوت غير متاح بعد", "Microphone ready for testing; audio transmission is not yet available") if voice_microphone.is_capturing() else _t("في انتظار إذن الميكروفون؛ نقل الصوت غير متاح بعد", "Waiting for microphone permission; audio transmission is not yet available")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+
+func _voice_permission_granted() -> bool:
+ if OS.get_name() != "Android":
+  return false
+ return "android.permission.RECORD_AUDIO" in OS.get_granted_permissions()
+
+func _sync_voice_microphone() -> void:
+ if not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+  voice_microphone.stop()
+  voice_permission_requested = false
+  return
+ if voice_microphone.is_capturing():
+  return
+ if not _voice_permission_granted():
+  if not voice_permission_requested:
+   voice_permission_requested = true
+   OS.request_permission("android.permission.RECORD_AUDIO")
+  return
+ voice_microphone.start(self, true, true)
 
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

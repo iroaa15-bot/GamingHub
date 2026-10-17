@@ -28,4 +28,15 @@ jobs:
       - name: Import Godot resources
         run: godot --headless --path . --editor --import --quit
       - name: Run consent and signaling bridge smoke
-        run: godot --headless --path . --script res://tests/voice_client_smoke.gd
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/voice_client_smoke.gd 2>&1 | tee voice-client-smoke.log
+          grep -q 'VOICE_CLIENT_SMOKE_PASS' voice-client-smoke.log
+      - name: Upload diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-client-smoke-log
+          path: voice-client-smoke.log
+          if-no-files-found: ignore

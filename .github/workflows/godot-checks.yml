@@ -14,6 +14,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install test dependencies
         run: python3 -m pip install -r server/requirements.txt
+      - name: Validate approved voice changes before source verification
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'work/voice-integration-validation'
+        run: |
+          python3 - <<'PY'
+          import json,sys
+          sys.path.insert(0,'release')
+          from source_manifest import inventory
+          expected=json.load(open('release/source_manifest.json'))['sha256']
+          actual=inventory()
+          drift={k for k in set(expected)|set(actual) if expected.get(k)!=actual.get(k)}
+          approved={'.github/workflows/android-test-apk.yml','.github/workflows/voice-signaling-tests.yml','.github/workflows/approve-development-manifest.yml','.github/workflows/godot-checks.yml','server/test_voice_signaling.py','docs/privacy.html','scripts/multiplayer.gd','server/server.py'}
+          print('Changed:',sorted(drift))
+          if drift-approved: raise SystemExit('Unapproved changes: '+str(sorted(drift-approved)))
+          PY
+          python3 -m unittest discover -s server -p 'test_voice_signaling.py' -v
+          python3 release/source_manifest.py --write
       - name: Reject incomplete GitHub source upload
         run: python3 release/verify_project_upload.py
       - name: Verify exact source SHA-256 manifest

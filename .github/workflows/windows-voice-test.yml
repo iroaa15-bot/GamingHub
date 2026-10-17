@@ -1,4 +1,4 @@
-name: Gaming Hub Windows voice test
+name: Gaming Hub Windows desktop voice export
 on:
   workflow_dispatch:
   push:
@@ -17,52 +17,41 @@ on:
 permissions:
   contents: read
 jobs:
-  windows-voice:
-    runs-on: windows-latest
+  windows-export:
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Preserve repository bytes on Windows
-        shell: pwsh
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
       - uses: actions/checkout@v4
       - uses: chickensoft-games/setup-godot@v2
         with:
           version: 4.5.1
           use-dotnet: false
           include-templates: true
-      - name: Diagnose checkout differences
-        shell: pwsh
-        run: |
-          git status --short
-          git config --get core.autocrlf
-      - name: Verify project source
-        shell: pwsh
-        run: python release/source_manifest.py
+      - name: Verify protected source on Linux
+        run: python3 release/source_manifest.py
       - name: Import Godot resources
-        shell: pwsh
         run: godot --headless --path . --editor --import --quit
-      - name: Run voice client checks
-        shell: pwsh
+      - name: Run voice client smoke tests
+        shell: bash
         run: |
+          set -euo pipefail
           godot --headless --path . --script res://tests/voice_client_smoke.gd
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           godot --headless --path . --script res://tests/voice_microphone_smoke.gd
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           godot --headless --path . --script res://tests/voice_pcm_smoke.gd
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Export Windows desktop game
-        shell: pwsh
+      - name: Cross-export Windows x86_64 game
+        shell: bash
         run: |
-          New-Item -ItemType Directory -Force build | Out-Null
+          set -euo pipefail
+          mkdir -p build
           godot --headless --path . --export-debug "Windows Desktop" build/GamingHub-Windows-Voice.exe
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (!(Test-Path build/GamingHub-Windows-Voice.exe)) { throw "Missing Windows executable" }
-      - name: Upload Windows test game
+          test -s build/GamingHub-Windows-Voice.exe
+          test -s build/GamingHub-Windows-Voice.pck
+      - name: Upload Windows game and PCK
         uses: actions/upload-artifact@v4
         with:
           name: GamingHub-Windows-Voice-Experimental
-          path: build/GamingHub-Windows-Voice*
+          path: |
+            build/GamingHub-Windows-Voice.exe
+            build/GamingHub-Windows-Voice.pck
           if-no-files-found: error
           retention-days: 14

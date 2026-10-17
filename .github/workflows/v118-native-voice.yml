@@ -84,6 +84,44 @@ jobs:
             exit 1
           fi
           echo "GODOT_VOICE_ADDON_IMPORT_PASS"
+      - name: Prepare isolated voice test Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 android/voice-plugin/prepare_debug_export.py
+          mkdir -p "$HOME/.config/godot" "$HOME/.android" build
+          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" \
+            -storepass android -keypass android -alias androiddebugkey -keyalg RSA \
+            -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+      - name: Install Android export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --silent --show-error \
+            "https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz" \
+            -o /tmp/godot-templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.5.1.stable"
+          unzip -q /tmp/godot-templates.tpz -d /tmp/godot-templates
+          cp -a /tmp/godot-templates/templates/. "$HOME/.local/share/godot/export_templates/4.5.1.stable/"
+      - name: Export isolated v11.8 voice test APK
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-v11.8-voice-test.apk 2>&1 | tee /tmp/gaminghub-voice-apk-export.log
+          test -s build/GamingHub-v11.8-voice-test.apk
+      - name: Upload isolated voice test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-v11.8-voice-test-APK-EXPERIMENTAL
+          path: build/GamingHub-v11.8-voice-test.apk
+          if-no-files-found: error
+          retention-days: 7
       - name: Upload voice runtime staging
         uses: actions/upload-artifact@v4
         with:

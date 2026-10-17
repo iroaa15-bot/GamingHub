@@ -234,6 +234,7 @@ func _request_exit_to_games() -> void:
  )
 
 func _exit_to_games() -> void:
+ _stop_voice_transport()
  if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send({"type": "cancel_queue"})
   _send({"type": "leave"})
@@ -309,6 +310,7 @@ func _update_lobby() -> void:
  share_button.disabled = room_code.is_empty() or leaving
 
 func _reset_match_state() -> void:
+ _stop_voice_transport()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -358,6 +360,7 @@ func _join_room() -> void:
  _request_action({"type":"join", "code":code})
 
 func _leave_match() -> void:
+ _stop_voice_transport()
  if leaving:
   return
  if reconnecting:
@@ -452,6 +455,7 @@ func _connect_server() -> void:
  status.text = _t("جاري الاتصال...", "Connecting...") if err == OK else _t("فشل بدء الاتصال: ", "Connection error: ") + str(err)
 
 func _start_reconnect() -> void:
+ _stop_voice_transport()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -760,6 +764,8 @@ func _handle(msg: Dictionary) -> void:
    var modes: Array = msg.get("modes", [])
    if modes.size() == 2 and player_index in [0, 1]:
     peer_comms_mode = str(modes[1 - player_index])
+    if str(modes[player_index]) not in ["voice", "both"] or peer_comms_mode not in ["voice", "both"]:
+     _stop_voice_transport()
     chat_enabled = comms_mode == "text" and peer_comms_mode in ["text", "both"]
     _refresh_comms_ui()
   "voice_signal":
@@ -793,6 +799,7 @@ func _handle(msg: Dictionary) -> void:
    _update_deduction_status()
   "finished":
    finished = true
+   _stop_voice_transport()
    my_turn = false
    var names: Array[String] = []
    for name in msg.get("cards", []):

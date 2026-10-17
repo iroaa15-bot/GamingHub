@@ -1,0 +1,39 @@
+name: Gaming Hub v11.8 Native Voice Compile
+on:
+  pull_request:
+    paths:
+      - 'android/voice-plugin/**'
+      - '.github/workflows/v118-native-voice.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Compile native WebRTC plugin Kotlin
+        working-directory: android/voice-plugin
+        run: gradle --no-daemon --stacktrace compileDebugKotlin
+      - name: Build Android library AAR
+        working-directory: android/voice-plugin
+        run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Upload debug AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-v11.8-native-voice-aar
+          path: android/voice-plugin/build/outputs/aar/*.aar
+          if-no-files-found: error
+          retention-days: 7

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 766,
+  "file_count": 767,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
@@ -689,6 +689,7 @@
     "scripts/poing_admob_bridge.gd.uid": "d63838fbb36b289eab1b9e146fae96e0befb3e5a6fb942eaa7ab05c9522e0b37",
     "scripts/visual_skin.gd": "807ee123224adeb4e7590e0629972cbab38e5682d0f109e2ee8c9923dac5e333",
     "scripts/visual_skin.gd.uid": "72adbe62f5f51a94cfd4419b194a61c59ff967a3dc4e051cfaa5e0c085cfc417",
+    "scripts/voice_microphone_capture.gd": "27ac7031686826befecd6109842d85364121b5271f7b21dbe400b86cb323e955",
     "scripts/voice_signaling_bridge.gd": "cb346940d5c91576e2589e8fdfa0932d26c093e68bd4345c8a7c310b505bf515",
     "server/Dockerfile": "0653a855bec48461f9c1831d1e686aad1ef76f39eafe7a0aca508575b92795ec",
     "server/cards.json": "215e3f41d3dd6ceacc510c3a48647177eed859ccdddc432a16932581a0b452cc",

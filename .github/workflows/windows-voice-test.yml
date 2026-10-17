@@ -1,0 +1,58 @@
+name: Gaming Hub Windows voice test
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/voice-media-from-validated-client]
+    paths:
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'data/**'
+      - 'assets/**'
+      - 'addons/**'
+      - 'tests/**'
+      - 'project.godot'
+      - 'export_presets.cfg'
+      - 'release/source_manifest.json'
+      - '.github/workflows/windows-voice-test.yml'
+permissions:
+  contents: read
+jobs:
+  windows-voice:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Verify project source
+        shell: pwsh
+        run: python release/source_manifest.py
+      - name: Import Godot resources
+        shell: pwsh
+        run: godot --headless --path . --editor --import --quit
+      - name: Run voice client checks
+        shell: pwsh
+        run: |
+          godot --headless --path . --script res://tests/voice_client_smoke.gd
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          godot --headless --path . --script res://tests/voice_microphone_smoke.gd
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          godot --headless --path . --script res://tests/voice_pcm_smoke.gd
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Export Windows desktop game
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build | Out-Null
+          godot --headless --path . --export-debug "Windows Desktop" build/GamingHub-Windows-Voice.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path build/GamingHub-Windows-Voice.exe)) { throw "Missing Windows executable" }
+      - name: Upload Windows test game
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Windows-Voice-Experimental
+          path: build/GamingHub-Windows-Voice*
+          if-no-files-found: error
+          retention-days: 14

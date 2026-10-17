@@ -1,0 +1,28 @@
+name: Voice client integration validation
+on:
+  push:
+    branches:
+      - feature/voice-media-from-validated-client
+    paths:
+      - scripts/multiplayer.gd
+      - scripts/voice_signaling_bridge.gd
+      - tests/voice_client_smoke.gd
+      - .github/workflows/voice-client-validation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  godot-voice-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Import Godot resources
+        run: godot --headless --path . --editor --import --quit
+      - name: Run consent and signaling bridge smoke
+        run: godot --headless --path . --script res://tests/voice_client_smoke.gd

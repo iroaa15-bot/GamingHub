@@ -209,7 +209,7 @@ async def process(ws, msg):
         if action in ('voice_offer', 'voice_answer'):
             if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 5500:
                 return await send(ws, {'type':'error','message':'Invalid voice SDP'})
-        if action == 'voice_ice' and not isinstance(payload.get('candidate'), str):
+        if action == 'voice_ice' and (not isinstance(payload.get('candidate'), str) or not 0 < len(payload['candidate']) <= 4096):
             return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
         await send(room.players[1-index], {'type':action,'player':index,'payload':payload})
         return

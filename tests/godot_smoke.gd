@@ -92,14 +92,43 @@ func _check_arcade_modes() -> void:
  await process_frame
 
 func _run() -> void:
+ _check_picture_library()
  await _check_scene("res://scenes/Main.tscn")
  await _check_scene("res://scenes/Multiplayer.tscn")
  await _check_offline_picture_round()
  await _check_arcade_modes()
  if failures.is_empty():
-  print("GODOT_SMOKE_PASS: main, multiplayer, picture round and arcade modes")
+  print("GODOT_SMOKE_PASS: main, multiplayer, picture library, picture round and arcade modes")
   quit(0)
  else:
   for failure in failures:
    push_error(failure)
   quit(1)
+
+func _check_picture_library() -> void:
+ var ai = root.get_node_or_null("DailyAI")
+ if ai == null or ai.library_count() != 100:
+  failures.append("Expected 100 standalone pictures in DailyAI's bundled library")
+  return
+ var recent_subjects: Array = []
+ for day in ["2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18"]:
+  var local_pack: Dictionary = ai._library_daily_pack(day)
+  if local_pack.is_empty() or local_pack.get("puzzles", []).size() != 6:
+   failures.append("Picture library did not create six puzzles for " + day)
+   return
+  var today_subjects: Array = []
+  var today_categories: Dictionary = {}
+  for puzzle in local_pack["puzzles"]:
+   if not ResourceLoader.exists(str(puzzle.get("local_image", ""))):
+    failures.append("Bundled picture missing: " + str(puzzle.get("library_id", "")))
+   var asset: Dictionary = ai._library_row(str(puzzle.get("library_id", "")))
+   var subject: String = str(asset.get("subject_key", ""))
+   if subject.is_empty() or subject in today_subjects or subject in recent_subjects:
+    failures.append("Picture subject repeated within three days: " + subject)
+   today_subjects.append(subject)
+   today_categories[str(asset.get("category", ""))] = true
+  if today_categories.size() != 6:
+   failures.append("Picture rotation must contain six categories: " + day)
+  recent_subjects.append_array(today_subjects)
+  if recent_subjects.size() > 18:
+   recent_subjects = recent_subjects.slice(recent_subjects.size() - 18)

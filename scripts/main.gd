@@ -804,6 +804,9 @@ func card_texture(card_name: String) -> Texture2D:
  var illustration: String = "res://assets/cards/" + id + ".png"
  if art_style == "illustration" and ResourceLoader.exists(illustration):
   return cached_texture(illustration)
+ var new_picture: String = "res://assets/picture_library/handoff/" + id + "_new.png"
+ if ResourceLoader.exists(new_picture):
+  return cached_texture(new_picture)
  var photo: String = "res://assets/photos/" + id + ".jpg"
  if ResourceLoader.exists(photo):
   return cached_texture(photo)
@@ -820,6 +823,8 @@ func toggle_art_style() -> void:
 func artwork_note(card_name: String) -> String:
  if art_style == "illustration" and ResourceLoader.exists("res://assets/cards/" + card_name.to_lower() + ".png"):
   return tr_ui("بطاقة مرسومة", "Illustrated card")
+ if ResourceLoader.exists("res://assets/picture_library/handoff/" + card_name.to_lower() + "_new.png"):
+  return tr_ui("رسم أصلي جديد", "New original illustration")
  if ResourceLoader.exists("res://assets/photos/" + card_name.to_lower() + ".jpg"):
   return tr_ui("صورة فوتوغرافية", "Photographic image")
  if ResourceLoader.exists("res://assets/generated/" + card_name.to_lower() + ".webp"):
@@ -1147,6 +1152,50 @@ func confirm_quit_game() -> void:
  )
 
 var daily_ai_screen_active: bool = false
+var picture_library_rows: Array = []
+var picture_library_index: int = 0
+var picture_library_answers: Dictionary = {}
+
+func start_picture_library() -> void:
+ daily_ai_screen_active = false
+ picture_library_rows = DailyAI.library_rows()
+ shuffle_items(picture_library_rows)
+ picture_library_index = 0
+ picture_library_answers.clear()
+ show_picture_library()
+
+func show_picture_library() -> void:
+ clear_ui()
+ label(tr_ui("🖼️ خمن صورتك • مكتبة الصور", "🖼️ GUESS YOUR PICTURE • LIBRARY"), 30)
+ if picture_library_rows.is_empty():
+  label(tr_ui("المكتبة غير متاحة الآن", "Picture library is unavailable"), 18)
+  button(tr_ui("العودة", "BACK"), func(): show_modes(0), PANEL)
+  return
+ var row: Dictionary = picture_library_rows[picture_library_index]
+ label(tr_ui("صورة %d من %d", "PICTURE %d OF %d") % [picture_library_index + 1, picture_library_rows.size()], 17)
+ label(str(row.get("category_ar", "")) if selected_language == "ar" else str(row.get("category_en", "")), 21)
+ label(str(row.get("question_ar", "")) if selected_language == "ar" else str(row.get("question_en", "")), 20)
+ var art := TextureRect.new()
+ art.texture = load(str(row.get("image", ""))) as Texture2D
+ art.custom_minimum_size.y = 245
+ art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+ art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+ root.add_child(art)
+ var options: Array = row.get("choices_ar", []) if selected_language == "ar" else row.get("choices_en", [])
+ var asset_id: String = str(row.get("id", ""))
+ if picture_library_answers.has(asset_id):
+  var answer_index: int = int(row.get("correct_index", -1))
+  var correct: bool = int(picture_library_answers[asset_id]) == answer_index
+  label(tr_ui("إجابة صحيحة!", "Correct!") if correct else (tr_ui("الإجابة: ", "Answer: ") + str(options[answer_index])), 19)
+ elif options.size() == 4:
+  for i in range(4):
+   var chosen: int = i
+   button(str(options[i]), func(): picture_library_answers[asset_id] = chosen; show_picture_library(), GREEN)
+ if asset_id.begins_with("twemoji_"):
+  label("Twemoji by Twitter and contributors • CC BY 4.0", 12)
+ button(tr_ui("الصورة التالية ➡", "NEXT PICTURE ➡"), func(): picture_library_index = (picture_library_index + 1) % picture_library_rows.size(); show_picture_library(), ACCENT)
+ button(tr_ui("تحدي اليوم", "TODAY'S CHALLENGE"), show_ai_daily, GOLD)
+ button(tr_ui("العودة", "BACK"), func(): show_modes(0), PANEL)
 
 func _daily_ai_claims() -> Dictionary:
  var path := "user://ai_daily_claims.json"
@@ -1161,7 +1210,7 @@ func show_ai_daily() -> void:
   DailyAI.changed.connect(_on_daily_ai_changed)
  clear_ui()
  label(tr_ui("🖼️ خمن الصورة • تحديات اليوم", "🖼️ DAILY PICTURE CHALLENGES"), 30)
- label(tr_ui("6 صور جديدة كل يوم • المجموع المحفوظ: %d", "6 NEW DAILY IMAGES • TOTAL ARCHIVED: %d") % [DailyAI.total_pictures()], 17)
+ label(tr_ui("6 صور متجددة اليوم • المكتبة: %d • الأرشيف: %d", "6 ROTATING PICTURES TODAY • LIBRARY: %d • ARCHIVE: %d") % [DailyAI.library_count(), DailyAI.total_pictures()], 17)
  button(tr_ui("🔄 إضافة صور الأيام الجديدة", "🔄 ADD NEW DAILY PICTURES"), func(): DailyAI.refresh(), PANEL)
  button(tr_ui("📚 تحميل 7 أيام أقدم", "📚 LOAD 7 OLDER DAYS"), func(): DailyAI.load_older(), PANEL)
  if DailyAI.item.is_empty():
@@ -1171,6 +1220,8 @@ func show_ai_daily() -> void:
  else:
   label(tr_ui("لغز %d من %d", "PUZZLE %d OF %d") % [DailyAI.current_index + 1, DailyAI.pack.size()], 18)
   label(str(DailyAI.item.get("category_ar", "")) if selected_language == "ar" else str(DailyAI.item.get("category_en", "")), 23)
+  if str(DailyAI.item.get("library_id", "")).begins_with("twemoji_"):
+   label("Twemoji by Twitter and contributors • CC BY 4.0", 12)
   if DailyAI.texture != null:
    var picture := TextureRect.new()
    picture.texture = DailyAI.texture
@@ -1809,6 +1860,7 @@ func show_home() -> void:
  VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
+ button(tr_ui("🖼️ خمن صورتك • صور جديدة وتحدي اليوم", "🖼️ GUESS YOUR PICTURE • NEW IMAGES & TODAY'S CHALLENGE"), func(): show_modes(0), GOLD)
  label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
@@ -1823,7 +1875,7 @@ func show_home() -> void:
   label(tr_ui("🌐 تحديث الجولات اليومية قيد الانتظار • الألعاب الأساسية متاحة", "🌐 Daily refresh pending • built-in games available"), 16)
  button(tr_ui("🔄 جلب تحديات جديدة", "🔄 FETCH NEW CHALLENGES"), func(): DailyRounds.refresh(true), PANEL)
  button(tr_ui("📚 إضافة أسئلة أقدم للأرشيف", "📚 LOAD OLDER QUESTION PACKS"), func(): DailyRounds.load_older(), PANEL)
- button(tr_ui("🖼️ خمن الصورة • 6 ألغاز جديدة يوميًا", "🖼️ GUESS THE PICTURE • 6 NEW DAILY CHALLENGES"), show_ai_daily, GOLD)
+ button(tr_ui("🖼️ تحدي الصور اليومي • 6 صور متجددة", "🖼️ DAILY PICTURE CHALLENGE • 6 ROTATING IMAGES"), show_ai_daily, GOLD)
  label(tr_ui("الأونلاين يحتاج سيرفر متصل. اللعب ضد الكمبيوتر متاح دون سيرفر.", "Online requires a connected server. AI/offline mode works without one."), 16)
  label(tr_ui("ألعاب إضافية", "MORE GAMES"), 23)
  button(tr_ui("🧩 اكتشف الألعاب الأخرى", "🧩 EXPLORE OTHER GAMES"), show_more_games, PANEL)
@@ -1888,6 +1940,9 @@ func show_modes(index: int) -> void:
  button(tr_ui("★ أضف أو أزل من المفضلة", "★ TOGGLE FAVORITE"), toggle_favorite)
  if game in [0, 8]:
   button(tr_ui("البطاقات: ", "CARDS: ") + deck_title(), show_decks)
+ if game == 0:
+  button(tr_ui("🖼️ العب بكل صور المكتبة: %d", "🖼️ PLAY THE FULL PICTURE LIBRARY: %d") % DailyAI.library_count(), start_picture_library, GREEN)
+  button(tr_ui("🖼️ تحدي الصور: 4 اختيارات من المكتبة المتجددة", "🖼️ PICTURE QUIZ: 4 CHOICES FROM THE ROTATING LIBRARY"), show_ai_daily, GOLD)
  if game > 0 and game != 8:
   label(tr_ui("أنشطة متاحة لملفك: %d", "ACTIVITIES FOR YOUR PROFILE: %d") % eligible_questions(game, false).size(), 16)
   if selected_topic != "all" and eligible_questions(game).size() < session_length:
@@ -2994,6 +3049,16 @@ func load_catalog() -> void:
  if data is Dictionary:
   CARDS = data.get("cards", [])
   QUESTIONS = data.get("questions", [])
+ # New picture cards extend the legacy deck; the original catalog is never edited.
+ var additional: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/picture_library_cards.json"))
+ if additional is Dictionary and additional.get("cards", null) is Array:
+  var names: Dictionary = {}
+  for card in CARDS:
+   names[str(card.get("name", ""))] = true
+  for card in additional["cards"]:
+   if card is Dictionary and not names.has(str(card.get("name", ""))):
+    CARDS.append(card)
+    names[str(card["name"])] = true
  CARD_NAMES_AR.clear()
  PICTURE_QUESTIONS_AR.clear()
  for card in CARDS:

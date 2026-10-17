@@ -1,14 +1,43 @@
-name: Android build validation
+name: Gaming Hub Android debug APK
 on:
   workflow_dispatch:
   push:
     branches: [work/voice-integration-validation]
+    paths:
+      - 'scripts/**'
+      - 'scenes/**'
+      - 'data/**'
+      - 'addons/**'
+      - 'assets/**'
+      - 'project.godot'
+      - 'export_presets.cfg'
+      - '.github/workflows/android-test-apk.yml'
 permissions:
   contents: read
 jobs:
-  validate:
+  android-debug:
     runs-on: ubuntu-latest
+    timeout-minutes: 50
+    container:
+      image: ghcr.io/abarichello/godot-ci:4.5.1
     steps:
       - uses: actions/checkout@v4
-      - name: Verify export configuration
+      - name: Validate package identity
         run: grep -q 'com.iroaa15.gaminghub' export_presets.cfg
+      - name: Show Godot environment
+        run: |
+          godot --version
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+      - name: Import Godot assets
+        run: godot --headless --editor --path . --import --quit
+      - name: Export Android debug APK
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug "Android" build/GamingHub-debug.apk
+          test -s build/GamingHub-debug.apk
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-debug-consent-only-NO-VOICE-AUDIO
+          path: build/GamingHub-debug.apk
+          retention-days: 7

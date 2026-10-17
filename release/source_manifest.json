@@ -767,6 +767,6 @@
     ".github/workflows/v118-optional-comms-qa.yml": "9f8dd6339d7f738399f5829190f9476e6ab85936ed174aae8788d0a6f7456b32",
     "docs/V11_8_OPTIONAL_COMMS_STATUS.md": "099beaf5d45018f5ec5904d6aa7dd8ae152a9dfc79981e827e69dce08e641260",
     "server/test_optional_comms_v118.py": "5f0135c5f117dab278d8718631035587e3f93bb0acafcf1278f676b6cedee73e",
-    ".github/workflows/v118-native-voice.yml": "6107cad71f05a0c2ece22f7f534ff3d67b94ba121effd60c630995c734795751"
+    ".github/workflows/v118-native-voice.yml": "05b7e70bd00b44c5845030495572d3e2add8597a17318d087f1c604e76ee5848"
   }
 }

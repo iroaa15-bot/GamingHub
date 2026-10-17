@@ -684,7 +684,7 @@ func _poll_voice_microphone() -> void:
   return
  var peak := 0.0
  for frame in frames:
-  peak = maxf(peak, absf(frame.x), absf(frame.y))
+  peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
  voice_level = peak
  var now := Time.get_ticks_msec()
  if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):

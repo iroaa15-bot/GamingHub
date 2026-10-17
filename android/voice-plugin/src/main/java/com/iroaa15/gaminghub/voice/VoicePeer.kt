@@ -69,10 +69,11 @@ internal class VoicePeer(
     }
 
     fun createOffer() {
-        peer?.createOffer(observer { description ->
-            peer?.setLocalDescription(observer(), description)
-            emit(JSONObject().put("kind", "offer").put("sdp", description.description))
-        }, MediaConstraints())
+        peer?.createOffer(observer(onCreate = { description ->
+            peer?.setLocalDescription(observer(onSet = {
+                emit(JSONObject().put("kind", "offer").put("sdp", description.description))
+            }), description)
+        }), MediaConstraints())
     }
 
     fun receive(message: JSONObject) {
@@ -83,14 +84,15 @@ internal class VoicePeer(
                     SessionDescription.Type.OFFER else SessionDescription.Type.ANSWER
                 val sdp = message.optString("sdp")
                 if (sdp.isBlank()) return
-                connection.setRemoteDescription(observer {
+                connection.setRemoteDescription(observer(onSet = {
                     if (kind == SessionDescription.Type.OFFER) {
-                        connection.createAnswer(observer { answer ->
-                            connection.setLocalDescription(observer(), answer)
-                            emit(JSONObject().put("kind", "answer").put("sdp", answer.description))
-                        }, MediaConstraints())
+                        connection.createAnswer(observer(onCreate = { answer ->
+                            connection.setLocalDescription(observer(onSet = {
+                                emit(JSONObject().put("kind", "answer").put("sdp", answer.description))
+                            }), answer)
+                        }), MediaConstraints())
                     }
-                }, SessionDescription(kind, sdp))
+                }), SessionDescription(kind, sdp))
             }
             "ice" -> {
                 val candidate = message.optString("candidate")
@@ -120,9 +122,12 @@ internal class VoicePeer(
         factory = null
     }
 
-    private fun observer(onSuccess: (SessionDescription) -> Unit = {}) = object : SdpObserver {
-        override fun onCreateSuccess(sdp: SessionDescription?) { if (sdp != null) onSuccess(sdp) }
-        override fun onSetSuccess() {}
+    private fun observer(
+        onCreate: (SessionDescription) -> Unit = {},
+        onSet: () -> Unit = {}
+    ) = object : SdpObserver {
+        override fun onCreateSuccess(sdp: SessionDescription?) { if (sdp != null) onCreate(sdp) }
+        override fun onSetSuccess() { onSet() }
         override fun onCreateFailure(error: String?) {}
         override fun onSetFailure(error: String?) {}
     }

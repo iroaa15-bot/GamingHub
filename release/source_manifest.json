@@ -6,7 +6,7 @@
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
-    ".github/workflows/voice-client-validation.yml": "ed40c6b4ff720bd730565bd18a0a91d1fa2cdb234e9fc6eff7ab0c6c5ede2dd9",
+    ".github/workflows/voice-client-validation.yml": "e442d750c88661ac8caabeb0566a00e34d6ade972cde97c38ff04882cfe22ab2",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
     "README_START_HERE_AR.md": "7d7e16e1b06af8616fdfe41fb3ea2d57a4d80b0aebb8e569dbde0636fa829e22",
     "RELEASE_v10.0_AR.md": "c4e3a9f6cab621688a2c0c45792a9b1d178de0b61b4edfedabdfc517bb67a333",

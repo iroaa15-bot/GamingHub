@@ -52,6 +52,16 @@ jobs:
         run: |
           set -euo pipefail
           python3 android/voice-plugin/verify_aar.py "$(find android/voice-plugin/build/outputs/aar -maxdepth 1 -name '*debug.aar' -print -quit)"
+      - name: Stage WebRTC runtime dependencies
+        working-directory: android/voice-plugin
+        run: gradle --no-daemon --stacktrace stageVoiceRuntime
+      - name: Upload voice runtime staging
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-v11.8-voice-runtime-staging
+          path: android/voice-plugin/build/voice-runtime-staging/
+          if-no-files-found: error
+          retention-days: 7
       - name: Upload debug AAR
         uses: actions/upload-artifact@v4
         with:

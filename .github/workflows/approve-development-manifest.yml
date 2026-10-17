@@ -1,6 +1,16 @@
 name: Approve Gaming Hub development source manifest
 on:
   workflow_dispatch:
+  push:
+    branches: [work/voice-integration-validation]
+    paths:
+      - '.github/workflows/approve-development-manifest.yml'
+      - '.github/workflows/android-test-apk.yml'
+      - '.github/workflows/voice-signaling-tests.yml'
+      - 'scripts/multiplayer.gd'
+      - 'server/server.py'
+      - 'server/test_voice_signaling.py'
+      - 'docs/privacy.html'
 permissions:
   contents: write
 jobs:

@@ -22,13 +22,14 @@ Do not ship a placeholder plugin that reports successful calls without audio. Th
 No audio is recorded or stored by the existing signaling server.
 
 
+## Verified native build and integration status (v11.8)
+
+GitHub Actions native voice compile run #10 successfully compiled the Kotlin Android library and uploaded a debug AAR. The separate Godot Android build run #73 also succeeded. These builds are **not integrated**: Godot's APK does not yet include the voice AAR or its WebRTC runtime dependencies.
+
+The AAR AndroidManifest now declares Godot 4 Android v2 plugin metadata `org.godotengine.plugin.v2.GamingHubVoice`. This is a packaging prerequisite, not evidence that Godot has loaded the plugin.
+
+Before enabling a test APK, wire the AAR and its Maven runtime dependencies into an isolated Android Gradle export, ensure Godot discovers the singleton, implement an explicit call-start UI with runtime permission and mutual consent, then test real audio on two Android phones. Keep `is_transport_available()` false until end-to-end validation.
+
 ## Gradle module status
 
-The isolated `settings.gradle.kts`, `build.gradle.kts` and `src/main/AndroidManifest.xml` files are present. They **do not produce a working Android plugin yet**. Gradle references two deliberately absent local artifacts:
-
-- `libs/godot-lib.aar` — the Godot 4.5.1 Android library matching the export template.
-- `libs/webrtc.aar` — an audited and pinned Android WebRTC binary, with its transitive dependencies handled.
-
-Do not fabricate or commit either binary. Until both are sourced and verified, this module cannot be reliably compiled or packaged into an APK. The Kotlin source has not been compiled by the existing Godot GitHub Actions workflow.
-
-The current `is_transport_available()` deliberately returns `false`; the Godot feature must remain disabled. Before enabling it, validate Godot plugin API signatures, WebRTC library APIs, plugin registration and dependency packaging, SDP/ICE event delivery, and device-to-device audio.
+The Gradle module now uses pinned Maven dependencies for Godot Android and WebRTC and has compiled successfully in CI. Its debug AAR is a GitHub Actions artifact, **not** a ready-to-install APK. The current `is_transport_available()` deliberately returns `false`; the Godot feature must remain disabled. Before enabling it, validate Godot plugin API signatures, WebRTC library APIs, plugin registration and dependency packaging, SDP/ICE event delivery, and device-to-device audio.

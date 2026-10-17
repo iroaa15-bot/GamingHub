@@ -776,6 +776,6 @@
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
     "scripts/voice_pcm_transport.gd": "5947ad4d865a80f7592f9855cddea02474cc6e661fb96280da92dced54fcf142",
     "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2",
-    ".github/workflows/windows-voice-test.yml": "9e69098b740ce58ac540c581c9a4bae282389d8e572a59c6556d622350fec382"
+    ".github/workflows/windows-voice-test.yml": "eebeec4a0fba45e14a699d693b4977723cd068882cf2f006bbf88da6e09b1c23"
   }
 }

@@ -79,6 +79,16 @@ class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await rx(self.b))["signal"], sig)
         self.assertEqual(server.rooms[self.code].moves, 0)
 
+    async def test_mutual_voice_hangup_reaches_peer(self):
+        await self.consent(self.a, "voice")
+        await self.consent(self.b, "voice")
+        await tx(self.a, "voice_signal", signal={"kind": "hangup"})
+        event = await rx(self.b)
+        self.assertEqual(event["type"], "voice_signal")
+        self.assertEqual(event["player"], 0)
+        self.assertEqual(event["signal"], {"kind": "hangup"})
+        self.assertEqual(server.rooms[self.code].moves, 0)
+
     async def test_switching_off_stops_text_and_voice(self):
         await self.consent(self.a, "both")
         await self.consent(self.b, "both")

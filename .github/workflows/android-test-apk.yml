@@ -1,55 +1,99 @@
-name: Gaming Hub Android debug APK
+name: Gaming Hub Android voice integration APK
 on:
   workflow_dispatch:
   push:
-    branches: [work/voice-integration-validation, feature/voice-media-from-validated-client]
+    branches: [feature/voice-media-from-validated-client]
     paths:
       - 'scripts/**'
       - 'scenes/**'
       - 'data/**'
       - 'addons/**'
       - 'assets/**'
+      - 'tests/**'
+      - 'server/**'
+      - 'release/source_manifest.json'
       - 'project.godot'
       - 'export_presets.cfg'
       - '.github/workflows/android-test-apk.yml'
 permissions:
   contents: read
 jobs:
-  android-debug:
+  android-voice-debug:
     runs-on: ubuntu-latest
     timeout-minutes: 50
-    container:
-      image: ghcr.io/abarichello/godot-ci:4.5.1
     steps:
       - uses: actions/checkout@v4
-      - name: Verify exact source manifest
-        run: python3 release/source_manifest.py
-      - name: Validate package identity
-        run: grep -q 'com.iroaa15.gaminghub' export_presets.cfg
-      - name: Show Godot environment
+      - name: Validate source inventory and package identity
         run: |
-          godot --version
-          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
-      - name: Validate reviewed source manifest
-        run: python3 release/verify_project_upload.py
-      - name: Import Godot assets
-        run: godot --headless --editor --path . --import --quit
-      - name: Export Android debug APK
+          python3 release/verify_project_upload.py
+          grep -q 'com.iroaa15.gaminghub' export_presets.cfg
+          grep -q 'permissions/record_audio=true' export_presets.cfg
+      - name: Install Python server dependencies
+        run: python3 -m pip install -r server/requirements.txt
+      - name: Test consent and voice packet relay
+        run: python3 -m unittest discover -s server -p 'test_voice_signaling.py' -v
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android SDK
+        run: sdkmanager 'platform-tools' 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Configure temporary debug signing and SDK
+        shell: bash
         run: |
+          mkdir -p "$HOME/.android" "$HOME/.config/godot"
+          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+      - name: Import and parse Godot project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --editor --import --quit 2>&1 | tee voice-android-import.log
+      - name: Verify voice PCM codec
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --path . --script res://tests/voice_pcm_smoke.gd 2>&1 | tee voice-pcm-smoke.log
+          grep -q VOICE_PCM_SMOKE_PASS voice-pcm-smoke.log
+      - name: Export installable Android APK
+        shell: bash
+        run: |
+          set -o pipefail
           mkdir -p build
-          godot --headless --path . --export-debug "Android" build/GamingHub-debug.apk
-          test -s build/GamingHub-debug.apk
-      - name: Verify microphone permission in exported APK
+          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
+          test -s build/GamingHub-voice-experimental.apk
+      - name: Verify APK signature and permissions
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          data=Path("export_presets.cfg").read_text()
-          assert data.count("permissions/record_audio=true") == 2
-          print("MICROPHONE_PERMISSION_PRESET_PASS")
-          PY
-      - name: Upload debug APK
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify build/GamingHub-voice-experimental.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions build/GamingHub-voice-experimental.apk | tee voice-android-permissions.log
+          grep -q 'android.permission.RECORD_AUDIO' voice-android-permissions.log
+          grep -q 'android.permission.INTERNET' voice-android-permissions.log
+      - name: Upload experimental Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: GamingHub-debug-MIC-TEST-NO-VOICE-TRANSMISSION
-          path: build/GamingHub-debug.apk
-          retention-days: 7
+          name: GamingHub-Voice-Experimental-Android-APK
+          path: build/GamingHub-voice-experimental.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Android-Build-Logs
+          path: |
+            voice-*.log
+          if-no-files-found: ignore
+          retention-days: 14

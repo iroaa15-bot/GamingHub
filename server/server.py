@@ -282,8 +282,11 @@ async def process(ws, msg):
         await broadcast(room, event)
         return
     if action == 'comms_block':
+        was_voice = any(mode in ('voice', 'both') for mode in room.comms)
         room.blocked[index] = True
         room.comms[index] = 'none'
+        if was_voice:
+            await broadcast(room, {'type':'voice_signal', 'player':index, 'signal':{'kind':'hangup'}})
         await broadcast(room, {'type':'comms_state', 'modes':room.comms.copy()})
         return
     if action == 'voice_signal':

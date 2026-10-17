@@ -694,7 +694,7 @@
     "server/liveops_content.py": "7dd3312cc3bb465b24824037760e7c23bf2514969a191cd6ce67fac1e07f59e9",
     "server/liveops_rotation.json": "ab08107b814e860da6089301815d481840df44bc41c8400ef49e5ed3fbf818c7",
     "server/requirements.txt": "2324650b5371efe39ea9417a042cc9eee45c7b771028658a0bd509cde9cdfd94",
-    "server/server.py": "2d9d4a1a8d1cf21f88b8c2ff9fd41cfa35ea617771bd571be63787bf1d8bdd0a",
+    "server/server.py": "b0c68886f246f90f4cf7d07890e8076bf6c6cda4f559fb84ddec1e1f14b77ce7",
     "server/source_bundle.b85": "ca504b130a63825de48e0fc3837ea24616937629a42461bb58f5c21ad0f5e4f6",
     "server/test_additive_history_v114.py": "82edd1728f01c633744f94be49dddd940f272e91bb7f8e19e168982d8dca9ca0",
     "server/test_daily_content.py": "9516e7c8e4cd769ddce74fbe9eda0e107ff32c4c8fff7dc6c34c7744802440b7",
@@ -766,6 +766,6 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     ".github/workflows/v118-optional-comms-qa.yml": "9f8dd6339d7f738399f5829190f9476e6ab85936ed174aae8788d0a6f7456b32",
     "docs/V11_8_OPTIONAL_COMMS_STATUS.md": "099beaf5d45018f5ec5904d6aa7dd8ae152a9dfc79981e827e69dce08e641260",
-    "server/test_optional_comms_v118.py": "7608cd0a7ca2d2b641815d4b9e84828dbba88860a1ceffa5a06abfe20adaf18a"
+    "server/test_optional_comms_v118.py": "767c6b32558e41b508246c52c7225be4d4e8d78b79c6e300386a37122e1dc944"
   }
 }

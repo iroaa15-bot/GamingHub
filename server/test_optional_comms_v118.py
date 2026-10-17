@@ -21,6 +21,8 @@ async def rx(ws):
 
 class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
+        self.old_comms_enabled = server.COMMS_ENABLED
+        server.COMMS_ENABLED = True
         server.rooms.clear()
         server.connections.clear()
         server.waiting.clear()
@@ -43,6 +45,7 @@ class OptionalCommsTests(unittest.IsolatedAsyncioTestCase):
         server.rooms.clear()
         server.connections.clear()
         server.waiting.clear()
+        server.COMMS_ENABLED = self.old_comms_enabled
 
     async def consent(self, ws, mode):
         await tx(ws, "comms", mode=mode)

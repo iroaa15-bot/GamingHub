@@ -39,7 +39,7 @@ jobs:
                   push_error("Screenshot failed: " + str(error))
                   quit(1)
           func _capture() -> void:
-              var hub := load("res://scenes/Main.tscn").instantiate()
+              var hub = load("res://scenes/Main.tscn").instantiate()
               root.add_child(hub)
               await process_frame
               hub._set_age_group("13to17")

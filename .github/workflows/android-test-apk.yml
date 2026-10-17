@@ -22,6 +22,8 @@ jobs:
       image: ghcr.io/abarichello/godot-ci:4.5.1
     steps:
       - uses: actions/checkout@v4
+      - name: Verify exact source manifest
+        run: python3 release/source_manifest.py
       - name: Validate package identity
         run: grep -q 'com.iroaa15.gaminghub' export_presets.cfg
       - name: Show Godot environment
@@ -37,6 +39,14 @@ jobs:
           mkdir -p build
           godot --headless --path . --export-debug "Android" build/GamingHub-debug.apk
           test -s build/GamingHub-debug.apk
+      - name: Verify microphone permission in exported APK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          data=Path("export_presets.cfg").read_text()
+          assert data.count("permissions/record_audio=true") == 2
+          print("MICROPHONE_PERMISSION_PRESET_PASS")
+          PY
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

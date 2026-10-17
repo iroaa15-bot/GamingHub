@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 766,
+  "file_count": 767,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "171d209ac06989ae380f512f52416fe71c7a49195aafabd930c80bd247df7555",

@@ -1,5 +1,5 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
-import asyncio, json, random, secrets, string, os, time, datetime as dt
+import asyncio, json, random, secrets, string, os, time, datetime as dt, base64, binascii
 from urllib.parse import urlsplit, parse_qs
 from liveops_content import daily_rotation
 from daily_content import json_bytes, daily_pack, validate_pack
@@ -44,6 +44,7 @@ class Room:
     history: list = field(default_factory=list)
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
+    voice_packet_at: list = field(default_factory=lambda: [0.0, 0.0])
 
 rooms = {}
 connections = {}
@@ -77,6 +78,7 @@ async def start_room(room):
     room.history = []
     room.winner = -1
     room.voice_enabled = [False, False]
+    room.voice_packet_at = [0.0, 0.0]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -188,7 +190,7 @@ async def process(ws, msg):
         return
     # Optional voice signaling only. Audio media must use a native WebRTC client.
     # No SDP/ICE is stored in room history or server-side databases.
-    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice'):
+    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio'):
         code = connections.get(ws)
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
@@ -206,6 +208,24 @@ async def process(ws, msg):
             return
         if not all(room.voice_enabled):
             return await send(ws, {'type':'error','message':'Both players must enable voice'})
+        if action == 'voice_audio':
+            # 20 ms, 16 kHz mono PCM16: exactly 640 bytes, base64 encoded.
+            # No persistence. Per-sender pacing protects rooms from audio floods.
+            encoded = msg.get('pcm')
+            if not isinstance(encoded, str) or len(encoded) != 856:
+                return await send(ws, {'type':'error','message':'Invalid audio packet'})
+            try:
+                pcm = base64.b64decode(encoded, validate=True)
+            except (ValueError, binascii.Error):
+                return await send(ws, {'type':'error','message':'Invalid audio encoding'})
+            if len(pcm) != 640:
+                return await send(ws, {'type':'error','message':'Invalid audio size'})
+            now = time.monotonic()
+            if now - room.voice_packet_at[index] < 0.012:
+                return  # Drop excess audio instead of buffering it.
+            room.voice_packet_at[index] = now
+            await send(room.players[1-index], {'type':'voice_audio','pcm':encoded})
+            return
         payload = msg.get('payload')
         if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
             return await send(ws, {'type':'error','message':'Invalid voice payload'})

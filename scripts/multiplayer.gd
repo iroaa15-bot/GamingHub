@@ -84,6 +84,8 @@ const VOICE_REQUEST_TIMEOUT_MS: int = 12000
 var voice_signaling = VoiceSignalingBridge.new()
 var voice_microphone = VoiceMicrophoneCapture.new()
 var voice_permission_requested := false
+var voice_level := 0.0
+var voice_last_meter_ms: int = 0
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -484,7 +486,10 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if voice_microphone.is_capturing() and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
   voice_microphone.stop()
+  voice_level = 0.0
   _update_voice_ui()
+ if voice_microphone.is_capturing():
+  _poll_voice_microphone()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
   voice_request_started_ms = 0
@@ -650,6 +655,7 @@ func _accept_voice_invite() -> void:
 
 func _reset_voice() -> void:
  voice_microphone.stop()
+ voice_level = 0.0
  voice_permission_requested = false
  voice_signaling.reset()
  if is_instance_valid(voice_invite_dialog):
@@ -669,6 +675,22 @@ func _update_voice_ui() -> void:
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
   voice_status.text = (_t("الميكروفون جاهز للاختبار؛ إرسال الصوت غير متاح بعد", "Microphone ready for testing; audio transmission is not yet available") if voice_microphone.is_capturing() else _t("في انتظار إذن الميكروفون؛ نقل الصوت غير متاح بعد", "Waiting for microphone permission; audio transmission is not yet available")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+
+func _poll_voice_microphone() -> void:
+ # Drain captured PCM to avoid an ever-growing recording buffer.
+ # No audio is sent or stored; this is a local input-level diagnostic only.
+ var frames: PackedVector2Array = voice_microphone.take_frames(2048)
+ if frames.is_empty():
+  return
+ var peak := 0.0
+ for frame in frames:
+  peak = maxf(peak, absf(frame.x), absf(frame.y))
+ voice_level = peak
+ var now := Time.get_ticks_msec()
+ if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):
+  voice_last_meter_ms = now
+  var bars := clampi(int(peak * 24.0), 0, 8)
+  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + _t(" • الصوت لم يُرسل بعد", " • audio not transmitted yet")
 
 func _voice_permission_granted() -> bool:
  if OS.get_name() != "Android":

@@ -12,20 +12,20 @@ import org.json.JSONObject
 /**
  * Development-only Godot 4 Android plugin scaffold.
  *
- * Experimental WebRTC peer integration. The local SDP/ICE event bridge is not
- * connected to Godot yet; do not distribute as working voice.
+ * Experimental WebRTC peer integration. The SDP/ICE event bridge is wired
+ * in source, but plugin packaging and real-device tests are still missing.
  */
 class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     override fun getPluginName(): String = "GamingHubVoice"
 
     override fun getPluginSignals(): Set<SignalInfo> =
-        setOf(SignalInfo("local_signal", org.godotengine.godot.types.Dictionary::class.java))
+        setOf(SignalInfo("local_signal", String::class.java))
 
     private var active = false
     private var peer: VoicePeer? = null
 
     @UsedByGodot
-    fun is_transport_available(): Boolean = true
+    fun is_transport_available(): Boolean = false
 
     @UsedByGodot
     fun start_call(initiator: Boolean): Boolean {
@@ -33,8 +33,11 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
         if (active) return true
         val host = activity ?: return false
         val engine = VoicePeer(host) { packet ->
-            // Bridge emission to Godot will be enabled after plugin API verification.
-            // Never emit SDP/ICE before the native plugin build is validated.
+            // WebRTC callbacks can arrive on a worker thread. Marshal into
+            // Godot's main thread before emitting the plugin signal.
+            host.runOnUiThread {
+                if (active) emitSignal("local_signal", packet.toString())
+            }
         }
         if (!engine.start()) return false
         peer = engine

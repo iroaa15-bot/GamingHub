@@ -83,6 +83,17 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.b, {"type": "voice_offer", "payload": {"sdp": "v=0"}})
         self.assertEqual(self.b.messages[-1]["type"], "error")
 
+    async def test_resume_notifies_peer_voice_is_off(self):
+        await process(self.a, {"type": "voice_state", "enabled": True})
+        await process(self.b, {"type": "voice_state", "enabled": True})
+        self.room.resume_tokens = ["a" * 64, "b" * 64]
+        self.room.players[0] = None
+        self.room.detached_at[0] = __import__("time").monotonic()
+        connections.pop(self.a)
+        replacement = FakeSocket()
+        await process(replacement, {"type": "resume", "code": "VOICE1", "token": "a" * 64})
+        self.assertTrue(any(message.get("type") == "voice_state" and message.get("enabled") is False for message in self.b.messages))
+
     async def test_invalid_ice_is_rejected(self):
         await process(self.a, {"type": "voice_state", "enabled": True})
         await process(self.b, {"type": "voice_state", "enabled": True})

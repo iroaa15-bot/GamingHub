@@ -766,6 +766,6 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     ".github/workflows/v118-optional-comms-qa.yml": "9f8dd6339d7f738399f5829190f9476e6ab85936ed174aae8788d0a6f7456b32",
     "docs/V11_8_OPTIONAL_COMMS_STATUS.md": "099beaf5d45018f5ec5904d6aa7dd8ae152a9dfc79981e827e69dce08e641260",
-    "server/test_optional_comms_v118.py": "062eca41b55d79cf698407e98f5b1ac8ebb3a357433193bd45cb1ff5a1cc79e9"
+    "server/test_optional_comms_v118.py": "d00778a8af2d82f0ab8b1de39ac1293d93f4f085df8153d2ae24b6106185c68d"
   }
 }

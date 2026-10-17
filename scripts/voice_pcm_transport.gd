@@ -46,8 +46,6 @@ func stop() -> void:
 
 func encode_frames(frames: PackedVector2Array) -> Array[String]:
  var packets: Array[String] = []
- if _out == null:
-  return packets
  var stride := _source_rate / float(RATE)
  for frame in frames:
   _phase += 1.0

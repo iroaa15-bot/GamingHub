@@ -705,9 +705,11 @@ func _poll_voice_microphone() -> void:
   voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + _t(" • صوت تجريبي", " • experimental audio")
 
 func _voice_permission_granted() -> bool:
- if OS.get_name() != "Android":
-  return false
- return "android.permission.RECORD_AUDIO" in OS.get_granted_permissions()
+ if OS.get_name() == "Windows":
+  return true
+ if OS.get_name() == "Android":
+  return "android.permission.RECORD_AUDIO" in OS.get_granted_permissions()
+ return false
 
 func _sync_voice_microphone() -> void:
  if not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
@@ -719,7 +721,7 @@ func _sync_voice_microphone() -> void:
  if voice_microphone.is_capturing():
   return
  if not _voice_permission_granted():
-  if not voice_permission_requested:
+  if OS.get_name() == "Android" and not voice_permission_requested:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
   return

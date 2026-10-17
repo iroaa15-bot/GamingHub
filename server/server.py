@@ -181,6 +181,7 @@ async def process(ws, msg):
         room.last_activity = time.monotonic()
         await send(ws, snapshot(room, idx, 'resumed', include_token=True))
         if all(p is not None for p in room.players):
+            await broadcast(room, {'type':'voice_state','player':idx,'enabled':False})
             await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
         return
     # Optional voice signaling only. Audio media must use a native WebRTC client.
@@ -345,7 +346,9 @@ async def handler(ws):
                 room.detached_at[idx] = time.monotonic()
                 for peer in room.players:
                     if peer is not None:
-                        try: await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
+                        try:
+                            await send(peer, {'type':'voice_state','player':idx,'enabled':False})
+                            await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
                         except Exception: pass
             else:
                 await cleanup_room(code, 'Opponent disconnected')

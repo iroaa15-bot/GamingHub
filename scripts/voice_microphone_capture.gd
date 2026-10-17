@@ -18,7 +18,9 @@ func start(parent: Node, consent_granted: bool, permission_granted: bool) -> boo
   AudioServer.add_bus()
   bus_index = AudioServer.bus_count - 1
   AudioServer.set_bus_name(bus_index, BUS_NAME)
- AudioServer.set_bus_mute(bus_index, true)
+ # Keep capture effect processing active while preventing mic monitoring feedback.
+ AudioServer.set_bus_mute(bus_index, false)
+ AudioServer.set_bus_volume_db(bus_index, -80.0)
  _capture = AudioEffectCapture.new()
  AudioServer.add_bus_effect(bus_index, _capture)
  _player = AudioStreamPlayer.new()

@@ -25,6 +25,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p build/store-screens
+          sed -i 's/window\/size\/viewport_width=420/window\/size\/viewport_width=450/; s/window\/size\/viewport_height=840/window\/size\/viewport_height=800/' project.godot
           cat > tests/store_capture_temp.gd <<'GD'
           extends SceneTree
           func _initialize() -> void:
@@ -53,7 +54,7 @@ jobs:
               print("STORE_SCREENSHOTS_PASS")
               quit()
           GD
-          xvfb-run -a -s '-screen 0 1920x1080x24' godot --path . --rendering-method gl_compatibility --resolution 1920x1080 --script res://tests/store_capture_temp.gd 2>&1 | tee build/store-screens/capture.log
+          xvfb-run -a -s '-screen 0 1080x1920x24' godot --path . --rendering-method gl_compatibility --resolution 1080x1920 --script res://tests/store_capture_temp.gd 2>&1 | tee build/store-screens/capture.log
           grep -q STORE_SCREENSHOTS_PASS build/store-screens/capture.log
       - uses: actions/upload-artifact@v4
         if: always()

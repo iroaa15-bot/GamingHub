@@ -43,6 +43,7 @@ class Room:
     detached_at: list = field(default_factory=lambda: [None, None])
     history: list = field(default_factory=list)
     winner: int = -1
+    voice_enabled: list = field(default_factory=lambda: [False, False])
 
 rooms = {}
 connections = {}
@@ -75,6 +76,7 @@ async def start_room(room):
     room.detached_at = [None, None]
     room.history = []
     room.winner = -1
+    room.voice_enabled = [False, False]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -173,6 +175,7 @@ async def process(ws, msg):
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
+        room.voice_enabled = [False, False]
         room.detached_at[idx] = None
         connections[ws] = code
         room.last_activity = time.monotonic()
@@ -194,8 +197,12 @@ async def process(ws, msg):
             enabled = msg.get('enabled')
             if type(enabled) is not bool:
                 return await send(ws, {'type':'error','message':'Invalid voice state'})
+            room.voice_enabled[index] = enabled
             await send(room.players[1-index], {'type':'voice_state','player':index,'enabled':enabled})
+            await send(ws, {'type':'voice_state_ack','enabled':enabled,'peer_enabled':room.voice_enabled[1-index]})
             return
+        if not all(room.voice_enabled):
+            return await send(ws, {'type':'error','message':'Both players must enable voice'})
         payload = msg.get('payload')
         if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
             return await send(ws, {'type':'error','message':'Invalid voice payload'})
@@ -334,6 +341,7 @@ async def handler(ws):
             idx = room.players.index(ws)
             if len(room.players) == 2 and room.cards:
                 room.players[idx] = None
+                room.voice_enabled = [False, False]
                 room.detached_at[idx] = time.monotonic()
                 for peer in room.players:
                     if peer is not None:

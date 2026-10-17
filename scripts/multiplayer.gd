@@ -489,6 +489,8 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if voice_microphone.is_capturing() and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
   voice_microphone.stop()
+  voice_transport.stop()
+  voice_transport_started = false
   voice_level = 0.0
   _update_voice_ui()
  if voice_microphone.is_capturing():
@@ -681,7 +683,7 @@ func _update_voice_ui() -> void:
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
-  voice_status.text = (_t("الميكروفون جاهز للاختبار؛ إرسال الصوت غير متاح بعد", "Microphone ready for testing; audio transmission is not yet available") if voice_microphone.is_capturing() else _t("في انتظار إذن الميكروفون؛ نقل الصوت غير متاح بعد", "Waiting for microphone permission; audio transmission is not yet available")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if voice_microphone.is_capturing() else _t("في انتظار إذن الميكروفون؛ نقل الصوت غير متاح بعد", "Waiting for microphone permission; audio transmission is not yet available")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _poll_voice_microphone() -> void:
  # Drain captured PCM to avoid an ever-growing recording buffer.
@@ -700,7 +702,7 @@ func _poll_voice_microphone() -> void:
  if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):
   voice_last_meter_ms = now
   var bars := clampi(int(peak * 24.0), 0, 8)
-  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + _t(" • الصوت لم يُرسل بعد", " • audio not transmitted yet")
+  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + _t(" • صوت تجريبي", " • experimental audio")
 
 func _voice_permission_granted() -> bool:
  if OS.get_name() != "Android":
@@ -710,6 +712,8 @@ func _voice_permission_granted() -> bool:
 func _sync_voice_microphone() -> void:
  if not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
   voice_microphone.stop()
+  voice_transport.stop()
+  voice_transport_started = false
   voice_permission_requested = false
   return
  if voice_microphone.is_capturing():
@@ -719,7 +723,9 @@ func _sync_voice_microphone() -> void:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
   return
- voice_microphone.start(self, true, true)
+ if voice_microphone.start(self, true, true):
+  voice_transport.start(self)
+  voice_transport_started = true
 
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

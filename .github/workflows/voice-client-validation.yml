@@ -7,6 +7,9 @@ on:
       - scripts/multiplayer.gd
       - scripts/voice_signaling_bridge.gd
       - scripts/voice_microphone_capture.gd
+      - scripts/voice_pcm_transport.gd
+      - server/server.py
+      - server/test_voice_signaling.py
       - tests/voice_microphone_smoke.gd
       - export_presets.cfg
       - project.godot
@@ -29,6 +32,10 @@ jobs:
           include-templates: false
       - name: Verify protected source manifest
         run: python3 release/source_manifest.py
+      - name: Install server test dependencies
+        run: python3 -m pip install -r server/requirements.txt
+      - name: Test server consent and audio relay
+        run: python3 -m unittest discover -s server -p 'test_voice_signaling.py' -v
       - name: Import Godot resources
         run: godot --headless --path . --editor --import --quit
       - name: Run consent and signaling bridge smoke

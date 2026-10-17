@@ -7,7 +7,7 @@ extends EditorExportPlugin
 const AAR_PATH := "res://addons/gaminghub_voice/voice-plugin-debug.aar"
 
 func _supports_platform(platform: EditorExportPlatform) -> bool:
-    return platform is EditorExportPlatformAndroid
+    return platform.get_os_name() == "Android"
 
 func _get_android_libraries(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
     if not _supports_platform(platform):

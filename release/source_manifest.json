@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 773,
+  "file_count": 774,
   "sha256": {
     ".github/workflows/android-test-apk.yml": "8aeb5476e118b12152695bf09c8a6749c30a502ee0ccbab9da697d279e1ff1af",
     ".github/workflows/approve-development-manifest.yml": "4dc431063ce9266084c5083e40c9a02cd15591125f42a2bd327df81c7d45cc19",
@@ -8,7 +8,7 @@
     ".github/workflows/godot-checks.yml": "811ae6cd803233e178b22e9cef2782f782a9ff641617a29c7b716c105e825199",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
-    ".github/workflows/voice-client-validation.yml": "ce4e46ff2797f5ceb2c21883919b85a80e5b90ccd8c06ad035b6493b380576c4",
+    ".github/workflows/voice-client-validation.yml": "ffeb6671371f833f0d7bab92a56b013fa191c14a3484c9997cb8e5a78f445259",
     ".github/workflows/voice-signaling-tests.yml": "d7603ee3afb39d4587d56e4d304c4eee7b2f9f0282361cf57725e2a301dc8141",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
     "README_START_HERE_AR.md": "7d7e16e1b06af8616fdfe41fb3ea2d57a4d80b0aebb8e569dbde0636fa829e22",
@@ -774,6 +774,7 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
-    "scripts/voice_pcm_transport.gd": "7150eec0a3ced4ef00cd4c81d08f9c38416f20715472c8136d242b9382e5fc1c"
+    "scripts/voice_pcm_transport.gd": "47c78fc3c7bc361a7490515c76fe9bffec9b03ae3ac5ccc36e49d23721a7d425",
+    "tests/voice_pcm_smoke.gd": "afdf138dcb6bd280085476441dec93d127f9e944c7d5e6d751de8a1ab3e1a391"
   }
 }

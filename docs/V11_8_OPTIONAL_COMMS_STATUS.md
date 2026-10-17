@@ -11,6 +11,12 @@ Branch: `feature/gaminghub-v11.8-optional-comms`. This branch is intentionally i
 - Godot Arabic/English text chat UI for adult audience; defaults off, and both players must opt in.
 - Voice choices deliberately disabled in the UI: signaling alone does NOT implement microphone capture, WebRTC peer connection, NAT traversal or TURN.
 
+## Added in the next development step
+- Added `server/test_optional_comms_v118.py` with seven local two-player WebSocket integration cases: consent, voice signaling, opt-out, block, limits, outsiders, and secret-safe snapshots.
+- Server communications are disabled by default through `GAMINGHUB_COMMS_ENABLED=false`; tests temporarily enable the gate in process.
+- Existing client audience state currently resolves to `all`, so the adult-only chat panel is intentionally not exposed until trustworthy age gating is designed.
+- These tests are committed but **have not been executed or validated in CI** in this step.
+
 ## Required before any release
 1. Integrate a working Godot Android WebRTC audio transport (with microphone runtime permission, push-to-talk/mute, both-player consent, STUN/TURN and reconnect cleanup); test on two real Android devices and mobile data/Wi-Fi.
 2. Implement enforceable reporting/moderation workflow, abuse response, privacy retention rules, age-appropriate access restrictions and blocking for text/voice; current block control alone is insufficient for public release.

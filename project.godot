@@ -43,6 +43,10 @@ enabled=PackedStringArray("res://addons/admob/plugin.cfg")
 
 theme/default_font_size=21
 
+[audio]
+
+driver/enable_input=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

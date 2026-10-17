@@ -773,10 +773,11 @@ func _handle(msg: Dictionary) -> void:
    # A native Android WebRTC transport must explicitly handle offers/answers/ICE
    # only after mutual consent, runtime permission, and age gating.
    var signal: Variant = msg.get("signal", {})
-   if signal is Dictionary and str(signal.get("kind", "")) == "hangup":
-    # Reserved for the native voice bridge: clear any future active audio
-    # session immediately on remote hangup, even if the UI is hidden.
-    _stop_voice_transport()
+   if signal is Dictionary:
+    if str(signal.get("kind", "")) == "hangup":
+     _stop_voice_transport()
+    else:
+     _receive_native_voice_signal(signal)
   "chat":
    if is_instance_valid(chat_log):
     var who := _t("أنت", "You") if int(msg.get("player", -1)) == player_index else _t("المنافس", "Opponent")
@@ -978,6 +979,42 @@ func _request_voice_permission() -> bool:
   OS.request_permission(MICROPHONE_PERMISSION)
   return false
  return true
+
+func _connect_voice_bridge() -> void:
+ # An optional native Android plugin may expose a WebRTC signal callback.
+ # No microphone access or connection is started by attaching this callback.
+ if not Engine.has_singleton("GamingHubVoice"):
+  return
+ var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+ if voice_bridge.has_signal("local_signal"):
+  var relay := Callable(self, "_relay_native_voice_signal")
+  if not voice_bridge.is_connected("local_signal", relay):
+   voice_bridge.connect("local_signal", relay)
+
+func _relay_native_voice_signal(signal_data: Dictionary) -> void:
+ # Only relay WebRTC SDP/ICE produced by the native bridge when both
+ # participants have consented and Android has granted microphone access.
+ if not _voice_permission_granted() or not _voice_mutually_enabled():
+  return
+ var kind := str(signal_data.get("kind", ""))
+ if kind not in ["offer", "answer", "ice"]:
+  return
+ _send({"type":"voice_signal", "signal":signal_data})
+
+func _voice_mutually_enabled() -> bool:
+ return audience == "adult" and not room_code.is_empty() and not finished and comms_mode in ["voice", "both"] and peer_comms_mode in ["voice", "both"]
+
+func _receive_native_voice_signal(signal_data: Dictionary) -> void:
+ if not _voice_permission_granted() or not _voice_mutually_enabled():
+  return
+ if not Engine.has_singleton("GamingHubVoice"):
+  return
+ var kind := str(signal_data.get("kind", ""))
+ if kind not in ["offer", "answer", "ice"]:
+  return
+ var voice_bridge: Object = Engine.get_singleton("GamingHubVoice")
+ if voice_bridge.has_method("receive_signal"):
+  voice_bridge.call("receive_signal", JSON.stringify(signal_data))
 
 func _stop_voice_transport() -> void:
  # Safe no-op until the Android WebRTC native bridge is installed.

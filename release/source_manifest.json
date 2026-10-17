@@ -774,6 +774,6 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
-    "scripts/voice_pcm_transport.gd": "561726e36265ff1700d4a4eab13dc0d8a0baf0cd92c984a1a6e35c65af94af9b"
+    "scripts/voice_pcm_transport.gd": "7150eec0a3ced4ef00cd4c81d08f9c38416f20715472c8136d242b9382e5fc1c"
   }
 }

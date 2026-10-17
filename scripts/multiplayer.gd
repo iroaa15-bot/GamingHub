@@ -16,6 +16,11 @@ var address_input: LineEdit
 var code_input: LineEdit
 var guess_input: LineEdit
 var action_area: VBoxContainer
+var comms_mode := "none"
+var peer_comms_mode := "none"
+var chat_enabled := false
+var chat_input: LineEdit
+var chat_log: RichTextLabel
 var card_art: TextureRect
 var status: Label
 var language: String = "ar"
@@ -335,6 +340,11 @@ func _reset_match_state() -> void:
  possible_cards.clear()
  asked_questions.clear()
  candidate_page = 0
+ comms_mode = "none"
+ peer_comms_mode = "none"
+ chat_enabled = false
+ chat_input = null
+ chat_log = null
  if is_instance_valid(action_area):
   _refresh_actions()
  _clear_match_view()
@@ -694,6 +704,9 @@ func _handle(msg: Dictionary) -> void:
    pending_action.clear()
    matchmaking_pending = false
    _clear_match_view()
+   comms_mode = "none"
+   peer_comms_mode = "none"
+   chat_enabled = false
    question_page = 0
    candidate_page = 0
    asked_questions.clear()
@@ -741,7 +754,18 @@ func _handle(msg: Dictionary) -> void:
     _match_note(_t("الصورة غير متاحة على هذا الجهاز؛ اسم بطاقة المنافس ظاهر بالأعلى.", "Image unavailable on this device; opponent card name appears above."), 14)
    if art_style == "realistic" and ResourceLoader.exists("res://assets/generated/" + opponent_card.to_lower() + ".webp") and not ResourceLoader.exists("res://assets/photos/" + opponent_card.to_lower() + ".jpg"):
     _match_note(_t("صورة واقعية مولدة بالذكاء الاصطناعي", "AI-generated realistic image"), 14)
+   _build_comms_panel()
    _refresh_actions()
+  "comms_state":
+   var modes: Array = msg.get("modes", [])
+   if modes.size() == 2 and player_index in [0, 1]:
+    peer_comms_mode = str(modes[1 - player_index])
+    chat_enabled = comms_mode == "text" and peer_comms_mode in ["text", "both"]
+    _refresh_comms_ui()
+  "chat":
+   if is_instance_valid(chat_log):
+    var who := _t("أنت", "You") if int(msg.get("player", -1)) == player_index else _t("المنافس", "Opponent")
+    chat_log.append_text(who + ": " + str(msg.get("text", "")).replace("[", "［") + "\n")
   "turn":
    my_turn = int(msg.get("player", -1)) == _my_index()
    status.text = (_t("دورك", "Your turn") if my_turn else _t("دور المنافس", "Opponent's turn"))
@@ -872,6 +896,65 @@ func _match_note(value: String, size: int = 16) -> void:
  l.add_theme_font_size_override("font_size", size)
  l.add_theme_color_override("font_color", Color.WHITE)
  match_view.add_child(l)
+
+func _build_comms_panel() -> void:
+ # Adult-only preview; voice awaits WebRTC Android testing and policy review.
+ if audience != "adult":
+  return
+ var panel := VBoxContainer.new()
+ panel.add_theme_constant_override("separation", 6)
+ match_view.add_child(panel)
+ var heading := Label.new()
+ heading.text = _t("💬 التواصل مع المنافس (اختياري)", "💬 Opponent chat (optional)")
+ panel.add_child(heading)
+ var modes := OptionButton.new()
+ modes.add_item(_t("بدون محادثة", "No chat"))
+ modes.add_item(_t("كتابة فقط", "Text only"))
+ modes.add_item(_t("صوت (قريبًا)", "Voice (coming soon)"))
+ modes.set_item_disabled(2, true)
+ modes.add_item(_t("كتابة وصوت (قريبًا)", "Text + voice (coming soon)"))
+ modes.set_item_disabled(3, true)
+ modes.item_selected.connect(func(selected: int) -> void:
+  comms_mode = "text" if selected == 1 else "none"
+  _send({"type":"comms", "mode":comms_mode})
+  _refresh_comms_ui()
+ )
+ panel.add_child(modes)
+ chat_log = RichTextLabel.new()
+ chat_log.custom_minimum_size.y = 125
+ chat_log.scroll_following = true
+ panel.add_child(chat_log)
+ chat_input = LineEdit.new()
+ chat_input.max_length = 180
+ panel.add_child(chat_input)
+ var send_button := Button.new()
+ send_button.text = _t("إرسال", "Send")
+ send_button.pressed.connect(_send_chat)
+ panel.add_child(send_button)
+ var block_button := Button.new()
+ block_button.text = _t("حظر التواصل في المباراة", "Block match communication")
+ block_button.pressed.connect(func() -> void:
+  _send({"type":"comms_block"})
+  comms_mode = "none"
+  chat_enabled = false
+  _refresh_comms_ui()
+ )
+ panel.add_child(block_button)
+ _refresh_comms_ui()
+
+func _refresh_comms_ui() -> void:
+ if is_instance_valid(chat_input):
+  chat_input.editable = chat_enabled
+  chat_input.placeholder_text = _t("الشات يتطلب موافقة الطرفين", "Both players must opt in") if not chat_enabled else _t("اكتب سؤالك...", "Type a question...")
+
+func _send_chat() -> void:
+ if not chat_enabled or not is_instance_valid(chat_input):
+  return
+ var value := chat_input.text.strip_edges()
+ if value.is_empty():
+  return
+ _send({"type":"chat", "text":value})
+ chat_input.clear()
 
 func _copy_invite() -> void:
  if room_code.is_empty():

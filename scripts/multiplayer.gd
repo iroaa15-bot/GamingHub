@@ -87,6 +87,8 @@ var voice_microphone = VoiceMicrophoneCapture.new()
 var voice_transport = VoicePCMTransport.new()
 var voice_transport_started := false
 var voice_permission_requested := false
+var voice_capture_failed := false
+var voice_retry_after_ms := 0
 var voice_level := 0.0
 var voice_last_meter_ms: int = 0
 var lobby_controls: VBoxContainer
@@ -484,7 +486,7 @@ func _start_reconnect() -> void:
 
 func _process(_delta: float) -> void:
  socket.poll()
- if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted():
+ if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
  if voice_microphone.is_capturing() and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
@@ -683,7 +685,7 @@ func _update_voice_ui() -> void:
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
-  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if voice_microphone.is_capturing() else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if voice_microphone.is_capturing() else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _poll_voice_microphone() -> void:
  # Drain captured PCM to avoid an ever-growing recording buffer.
@@ -717,6 +719,8 @@ func _sync_voice_microphone() -> void:
   voice_transport.stop()
   voice_transport_started = false
   voice_permission_requested = false
+  voice_capture_failed = false
+  voice_retry_after_ms = 0
   return
  if voice_microphone.is_capturing():
   return
@@ -729,8 +733,12 @@ func _sync_voice_microphone() -> void:
   voice_transport.start(self)
   voice_transport_started = true
   voice_permission_requested = false
+  voice_capture_failed = false
+  voice_retry_after_ms = 0
  else:
-  push_warning("GamingHub voice: microphone capture could not start")
+  voice_capture_failed = true
+  voice_retry_after_ms = Time.get_ticks_msec() + 3000
+  push_warning("GamingHub voice: microphone capture could not start; retrying in 3s")
 
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

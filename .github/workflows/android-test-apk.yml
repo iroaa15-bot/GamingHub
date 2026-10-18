@@ -116,7 +116,11 @@ jobs:
           timeout 90s unzip -q "$template" -d android/build
           test -s android/build/build.gradle
           test -s android/build/settings.gradle
-          echo 'Godot Android Gradle template installed in android/build'
+          # Godot 4.5.1 checks android/.build_version against GODOT_VERSION_FULL_CONFIG.
+          printf '4.5.1.stable\n' > android/.build_version
+          touch android/build/.gdignore
+          test "$(cat android/.build_version)" = '4.5.1.stable'
+          echo 'Godot Android Gradle template installed with matching version marker'
       - name: Build and embed native speakerphone plugin
         shell: bash
         run: |

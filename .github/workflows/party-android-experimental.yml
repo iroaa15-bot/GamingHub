@@ -35,7 +35,9 @@ jobs:
           mkdir -p /tmp/godot-export-tpl "$HOME/.local/share/godot/export_templates/4.5.1.stable"
           unzip -q /tmp/godot-export-templates.tpz -d /tmp/godot-export-tpl
           cp -a /tmp/godot-export-tpl/templates/. "$HOME/.local/share/godot/export_templates/4.5.1.stable/"
-          godot --headless --path . --install-android-build-template --quit
+          test -s "$HOME/.local/share/godot/export_templates/4.5.1.stable/android_source.zip"
+          mkdir -p android
+          unzip -qo "$HOME/.local/share/godot/export_templates/4.5.1.stable/android_source.zip" -d android
           test -f android/build/build.gradle
       - name: Import and validate
         run: godot --headless --path . --editor --import --quit

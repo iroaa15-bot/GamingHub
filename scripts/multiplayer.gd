@@ -4,6 +4,7 @@ const VisualSkin = preload("res://scripts/visual_skin.gd")
 const VoiceSignalingBridge = preload("res://scripts/voice_signaling_bridge.gd")
 const VoiceMicrophoneCapture = preload("res://scripts/voice_microphone_capture.gd")
 const VoicePCMTransport = preload("res://scripts/voice_pcm_transport.gd")
+const AndroidVoiceBridge = preload("res://scripts/android_voice_bridge.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
@@ -85,6 +86,8 @@ const VOICE_REQUEST_TIMEOUT_MS: int = 12000
 var voice_signaling = VoiceSignalingBridge.new()
 var voice_microphone = VoiceMicrophoneCapture.new()
 var voice_transport = VoicePCMTransport.new()
+var android_voice = AndroidVoiceBridge.new()
+var native_voice_active := false
 var voice_transport_started := false
 var voice_permission_requested := false
 var voice_capture_failed := false
@@ -548,19 +551,24 @@ func _start_reconnect() -> void:
 func _process(_delta: float) -> void:
  _process_local_voice_test()
  socket.poll()
- if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
+ if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
- if voice_microphone.is_capturing() and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
+ if (voice_microphone.is_capturing() or native_voice_active) and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
+  android_voice.stop()
+  native_voice_active = false
   voice_microphone.stop()
   voice_transport.stop()
   voice_transport_started = false
   voice_level = 0.0
   _update_voice_ui()
- if voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
+ if native_voice_active and not reconnecting and not reconnect_pending and not opponent_paused:
+  _poll_native_voice()
+ elif voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_voice_microphone()
- if voice_transport_started:
+ if voice_transport_started and not native_voice_active:
   voice_transport.pump()
+ if voice_transport_started:
   _refresh_voice_diagnostics()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
@@ -728,6 +736,8 @@ func _accept_voice_invite() -> void:
 func _reset_voice() -> void:
  voice_transport.stop()
  voice_transport_started = false
+ android_voice.stop()
+ native_voice_active = false
  voice_microphone.stop()
  voice_level = 0.0
  voice_sent_packets = 0
@@ -752,7 +762,7 @@ func _update_voice_ui() -> void:
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
-  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if voice_microphone.is_capturing() else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if (voice_microphone.is_capturing() or native_voice_active) else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _refresh_voice_diagnostics() -> void:
  var now := Time.get_ticks_msec()
@@ -761,10 +771,29 @@ func _refresh_voice_diagnostics() -> void:
  voice_last_meter_ms = now
  var bars := clampi(int(voice_level * 24.0), 0, 8)
  var indicator := "▮".repeat(bars) + "▯".repeat(8 - bars)
+ if native_voice_active:
+  var effects := android_voice.diagnostics()
+  indicator = "AEC:%s NS:%s AGC:%s" % [str(effects.get("aec", false)), str(effects.get("ns", false)), str(effects.get("agc", false))]
  if voice_capture_frames == 0 and voice_capture_started_ms > 0 and now - voice_capture_started_ms > 3500:
   voice_status.text = _t("لا تصل عينات من الميكروفون", "No microphone samples detected") + (" | PCM: 0 | TX: 0 | RX: %d" % voice_received_packets)
  else:
   voice_status.text = _t("الميكروفون: ", "Microphone: ") + indicator + (" | PCM: %d | TX: %d | RX: %d" % [voice_capture_frames, voice_sent_packets, voice_received_packets])
+
+func _poll_native_voice() -> void:
+ # One native 20 ms packet per poll, with Android AEC/NS/AGC processing.
+ # Never start Godot microphone/playback in parallel with this engine.
+ if not native_voice_active or not voice_signaling.ready():
+  return
+ for _i in range(3):
+  var encoded: String = android_voice.poll_pcm()
+  if encoded.is_empty():
+   break
+  voice_capture_frames += 320
+  if socket.get_current_outbound_buffered_amount() > 16384:
+   break
+  if socket.send_text(JSON.stringify({"type": "voice_audio", "pcm": encoded})) == OK:
+   voice_sent_packets += 1
+
 
 func _poll_voice_microphone() -> void:
  # Drain captured PCM to avoid an ever-growing recording buffer.
@@ -777,7 +806,7 @@ func _poll_voice_microphone() -> void:
  for frame in frames:
   peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
  voice_level = peak
- if voice_transport_started and voice_signaling.ready() and not reconnecting and not reconnect_pending and not opponent_paused and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+ if voice_transport_started and not native_voice_active and voice_signaling.ready() and not reconnecting and not reconnect_pending and not opponent_paused and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   for encoded in voice_transport.encode_frames(frames):
    # Audio is best-effort; do not let queued voice block match messages.
    if socket.get_current_outbound_buffered_amount() > 16384:
@@ -795,6 +824,8 @@ func _voice_permission_granted() -> bool:
 
 func _sync_voice_microphone() -> void:
  if not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+  android_voice.stop()
+  native_voice_active = false
   voice_microphone.stop()
   voice_transport.stop()
   voice_transport_started = false
@@ -802,12 +833,20 @@ func _sync_voice_microphone() -> void:
   voice_capture_failed = false
   voice_retry_after_ms = 0
   return
- if voice_microphone.is_capturing():
+ if voice_microphone.is_capturing() or native_voice_active:
   return
  if not _voice_permission_granted():
   if OS.get_name() == "Android" and not voice_permission_requested:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
+  return
+ if OS.get_name() == "Android" and android_voice.available() and android_voice.start_after_consent():
+  native_voice_active = true
+  voice_transport_started = true
+  voice_capture_started_ms = Time.get_ticks_msec()
+  voice_permission_requested = false
+  voice_capture_failed = false
+  voice_retry_after_ms = 0
   return
  if voice_microphone.start(self, true, true):
   voice_transport.start(self)
@@ -868,7 +907,7 @@ func _handle(msg: Dictionary) -> void:
    voice_signaling.handle_server_message(msg)
   "voice_audio":
    if voice_signaling.ready() and voice_transport_started:
-    if voice_transport.receive_packet(str(msg.get("pcm", ""))):
+    if (android_voice.push_pcm(str(msg.get("pcm", ""))) if native_voice_active else voice_transport.receive_packet(str(msg.get("pcm", "")))):
      voice_received_packets += 1
   "voice_state_ack":
    voice_request_pending = false

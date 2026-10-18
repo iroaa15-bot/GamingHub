@@ -1,0 +1,112 @@
+package com.iroaa15.gaminghub.voice;
+
+import android.content.Context;
+import org.webrtc.AudioSource;
+import org.webrtc.AudioTrack;
+import org.webrtc.Camera1Enumerator;
+import org.webrtc.DefaultVideoDecoderFactory;
+import org.webrtc.EglBase;
+import org.webrtc.IceCandidate;
+import org.webrtc.MediaConstraints;
+import org.webrtc.PeerConnection;
+import org.webrtc.PeerConnectionFactory;
+import org.webrtc.SdpObserver;
+import org.webrtc.SessionDescription;
+import org.webrtc.audio.JavaAudioDeviceModule;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+/** Isolated WebRTC/Opus voice peer. Does not start until both players consent. */
+public final class WebRtcAudioPeer {
+    private final Context context;
+    private PeerConnectionFactory factory;
+    private PeerConnection peer;
+    private AudioSource source;
+    private AudioTrack track;
+    private JavaAudioDeviceModule audioModule;
+    private final ConcurrentLinkedQueue<String> events = new ConcurrentLinkedQueue<>();
+    private boolean started;
+
+    public WebRtcAudioPeer(Context context) { this.context = context.getApplicationContext(); }
+
+    public synchronized boolean start() {
+        if (started) return true;
+        try {
+            PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).createInitializationOptions());
+            audioModule = JavaAudioDeviceModule.builder(context)
+                .setUseHardwareAcousticEchoCanceler(true)
+                .setUseHardwareNoiseSuppressor(true).createAudioDeviceModule();
+            factory = PeerConnectionFactory.builder()
+                .setAudioDeviceModule(audioModule)
+                .createPeerConnectionFactory();
+            source = factory.createAudioSource(new MediaConstraints());
+            track = factory.createAudioTrack("gaminghub_voice", source);
+            List<PeerConnection.IceServer> ice = new ArrayList<>();
+            ice.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer());
+            PeerConnection.RTCConfiguration config = new PeerConnection.RTCConfiguration(ice);
+            peer = factory.createPeerConnection(config, new PeerConnection.Observer() {
+                @Override public void onSignalingChange(PeerConnection.SignalingState state) {}
+                @Override public void onIceConnectionChange(PeerConnection.IceConnectionState state) { events.add("state|" + state.name()); }
+                @Override public void onIceConnectionReceivingChange(boolean receiving) {}
+                @Override public void onIceGatheringChange(PeerConnection.IceGatheringState state) {}
+                @Override public void onIceCandidate(IceCandidate c) {
+                    events.add("ice|" + c.sdpMid + "|" + c.sdpMLineIndex + "|" + c.sdp);
+                }
+                @Override public void onIceCandidatesRemoved(IceCandidate[] candidates) {}
+                @Override public void onAddStream(org.webrtc.MediaStream stream) {}
+                @Override public void onRemoveStream(org.webrtc.MediaStream stream) {}
+                @Override public void onDataChannel(org.webrtc.DataChannel channel) {}
+                @Override public void onRenegotiationNeeded() {}
+                @Override public void onAddTrack(org.webrtc.RtpReceiver receiver, org.webrtc.MediaStream[] streams) {}
+            });
+            if (peer == null) throw new IllegalStateException("PeerConnection unavailable");
+            peer.addTrack(track, Collections.singletonList("gaminghub_audio"));
+            started = true;
+            return true;
+        } catch (RuntimeException ex) {
+            stop();
+            return false;
+        }
+    }
+
+    private SdpObserver observer(String type) {
+        return new SdpObserver() {
+            @Override public void onCreateSuccess(SessionDescription sdp) {
+                if (peer == null) return;
+                peer.setLocalDescription(observer("local"), sdp);
+                events.add(type + "|" + sdp.description);
+            }
+            @Override public void onSetSuccess() { if ("remote_offer".equals(type)) createAnswer(); }
+            @Override public void onCreateFailure(String error) { events.add("error|" + error); }
+            @Override public void onSetFailure(String error) { events.add("error|" + error); }
+        };
+    }
+
+    public synchronized void createOffer() {
+        if (peer != null) peer.createOffer(observer("offer"), new MediaConstraints());
+    }
+    private synchronized void createAnswer() {
+        if (peer != null) peer.createAnswer(observer("answer"), new MediaConstraints());
+    }
+    public synchronized void remoteDescription(String kind, String sdp) {
+        if (peer == null) return;
+        if (!"offer".equals(kind) && !"answer".equals(kind)) return;
+        peer.setRemoteDescription(observer("offer".equals(kind) ? "remote_offer" : "remote_answer"),
+            new SessionDescription("offer".equals(kind) ? SessionDescription.Type.OFFER : SessionDescription.Type.ANSWER, sdp));
+    }
+    public synchronized void remoteCandidate(String candidate, String mid, int line) {
+        if (peer != null) peer.addIceCandidate(new IceCandidate(mid, line, candidate));
+    }
+    public String pollEvent() { String event = events.poll(); return event == null ? "" : event; }
+    public synchronized void stop() {
+        started = false;
+        if (peer != null) { peer.dispose(); peer = null; }
+        if (track != null) { track.dispose(); track = null; }
+        if (source != null) { source.dispose(); source = null; }
+        if (factory != null) { factory.dispose(); factory = null; }
+        if (audioModule != null) { audioModule.release(); audioModule = null; }
+        events.clear();
+    }
+}

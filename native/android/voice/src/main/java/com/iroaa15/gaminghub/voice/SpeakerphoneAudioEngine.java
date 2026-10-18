@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioDeviceInfo;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.media.audiofx.AcousticEchoCanceler;
@@ -32,6 +33,7 @@ public final class SpeakerphoneAudioEngine {
     private int previousMode = AudioManager.MODE_NORMAL;
     private boolean previousSpeakerphone;
     private boolean running;
+    private boolean changedCommunicationDevice;
 
     public SpeakerphoneAudioEngine(Context context) {
         this.context = context.getApplicationContext();
@@ -45,9 +47,18 @@ public final class SpeakerphoneAudioEngine {
         previousSpeakerphone = manager.isSpeakerphoneOn();
         try {
             manager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            // On modern Android, a plugin should select a communication device
-            // via setCommunicationDevice(); this fallback does not guarantee route.
-            if (Build.VERSION.SDK_INT < 31) manager.setSpeakerphoneOn(true);
+            // Route through the handset speaker, not Bluetooth/headset by default.
+            // Only restore a communication route if this engine selected it.
+            if (Build.VERSION.SDK_INT >= 31) {
+                for (AudioDeviceInfo device : manager.getAvailableCommunicationDevices()) {
+                    if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+                        changedCommunicationDevice = manager.setCommunicationDevice(device);
+                        break;
+                    }
+                }
+            } else {
+                manager.setSpeakerphoneOn(true);
+            }
             int inputMin = AudioRecord.getMinBufferSize(SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
             int outputMin = AudioTrack.getMinBufferSize(SAMPLE_RATE,
@@ -127,6 +138,10 @@ public final class SpeakerphoneAudioEngine {
         if (ns != null) { ns.release(); ns = null; }
         if (agc != null) { agc.release(); agc = null; }
         if (manager != null) {
+            if (Build.VERSION.SDK_INT >= 31 && changedCommunicationDevice) {
+                manager.clearCommunicationDevice();
+                changedCommunicationDevice = false;
+            }
             manager.setMode(previousMode);
             if (Build.VERSION.SDK_INT < 31) manager.setSpeakerphoneOn(previousSpeakerphone);
             manager = null;

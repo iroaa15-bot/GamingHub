@@ -88,6 +88,8 @@ var voice_microphone = VoiceMicrophoneCapture.new()
 var voice_transport = VoicePCMTransport.new()
 var android_voice = AndroidVoiceBridge.new()
 var native_voice_active := false
+var native_voice_failed_this_call := false
+const NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS := 3500
 var voice_transport_started := false
 var voice_permission_requested := false
 var voice_capture_failed := false
@@ -564,6 +566,8 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if native_voice_active and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_native_voice()
+  if native_voice_active and voice_sent_packets == 0 and Time.get_ticks_msec() - voice_capture_started_ms > NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS:
+   _fallback_from_silent_native_voice()
  elif voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_voice_microphone()
  if voice_transport_started and not native_voice_active:
@@ -738,6 +742,7 @@ func _reset_voice() -> void:
  voice_transport_started = false
  android_voice.stop()
  native_voice_active = false
+ native_voice_failed_this_call = false
  voice_microphone.stop()
  voice_level = 0.0
  voice_sent_packets = 0
@@ -778,6 +783,20 @@ func _refresh_voice_diagnostics() -> void:
   voice_status.text = _t("لا تصل عينات من الميكروفون", "No microphone samples detected") + (" | PCM: 0 | TX: 0 | RX: %d" % voice_received_packets)
  else:
   voice_status.text = _t("الميكروفون: ", "Microphone: ") + indicator + (" | PCM: %d | TX: %d | RX: %d" % [voice_capture_frames, voice_sent_packets, voice_received_packets])
+
+func _fallback_from_silent_native_voice() -> void:
+ # Never let an initialized-but-silent Android plugin permanently mute the call.
+ push_warning("GamingHub voice: native engine produced no outgoing packets; reverting to Godot audio for this call")
+ android_voice.stop()
+ native_voice_active = false
+ native_voice_failed_this_call = true
+ voice_transport_started = false
+ voice_capture_failed = false
+ voice_retry_after_ms = 0
+ _sync_voice_microphone()
+ if is_instance_valid(voice_status):
+  voice_status.text = _t("الصوت الأصلي لم يرسل عينات؛ تم التحويل تلقائيًا للصوت الاحتياطي", "Native voice sent no samples; switched to backup audio")
+
 
 func _poll_native_voice() -> void:
  # One native 20 ms packet per poll, with Android AEC/NS/AGC processing.
@@ -840,7 +859,7 @@ func _sync_voice_microphone() -> void:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
   return
- if OS.get_name() == "Android" and android_voice.available() and android_voice.start_after_consent():
+ if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true
   voice_transport_started = true
   voice_capture_started_ms = Time.get_ticks_msec()

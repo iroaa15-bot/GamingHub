@@ -139,8 +139,10 @@ public final class SpeakerphoneAudioEngine {
                         }
                         primed = true;
                         short[] frame = playbackQueue.poll(60, TimeUnit.MILLISECONDS);
-                        if (frame == null) { primed = false; continue; }
-                        if (frame == null) continue;
+                        if (frame == null) {
+                            primed = false;
+                            continue;
+                        }
                         int offset = 0;
                         while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
                             int written = playbackTrack.write(frame, offset, frame.length - offset, AudioTrack.WRITE_BLOCKING);

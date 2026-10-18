@@ -125,6 +125,7 @@ public final class SpeakerphoneAudioEngine {
             }, "GamingHubVoiceCapture");
             captureWorker.setDaemon(true);
             captureWorker.start();
+            final AudioTrack playbackTrack = player;
             playbackWorker = new Thread(() -> {
                 boolean primed = false;
                 while (!Thread.currentThread().isInterrupted()) {
@@ -140,7 +141,7 @@ public final class SpeakerphoneAudioEngine {
                         if (frame == null) continue;
                         int offset = 0;
                         while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
-                            int written = player.write(frame, offset, frame.length - offset, AudioTrack.WRITE_BLOCKING);
+                            int written = playbackTrack.write(frame, offset, frame.length - offset, AudioTrack.WRITE_BLOCKING);
                             if (written <= 0) break;
                             offset += written;
                         }

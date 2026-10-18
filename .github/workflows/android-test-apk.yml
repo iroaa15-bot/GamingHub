@@ -99,7 +99,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          godot --headless --path . --install-android-build-template
+          # Avoid the interactive Godot editor template installer hanging in CI.
+          template="$(find "$HOME/.local/share/godot/export_templates" -name android_source.zip -type f -print -quit)"
+          test -s "$template"
+          mkdir -p android
+          timeout 90s unzip -q "$template" -d android
           test -f android/build/build.gradle
       - name: Build and embed native speakerphone plugin
         shell: bash

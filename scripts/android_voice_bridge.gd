@@ -45,3 +45,30 @@ func push_pcm(encoded: String) -> bool:
  if encoded.length() != 856 or not bool(_plugin.call("isRunning")):
   return false
  return bool(_plugin.call("pushPcm", encoded))
+
+## WebRTC signaling interface. Call only after mutual room consent.
+func start_webrtc() -> bool:
+ if not available() or not _plugin.has_method("startWebRtc"):
+  return false
+ return bool(_plugin.call("startWebRtc"))
+
+func stop_webrtc() -> void:
+ if _plugin != null and is_instance_valid(_plugin) and _plugin.has_method("stopWebRtc"):
+  _plugin.call("stopWebRtc")
+
+func offer_webrtc() -> void:
+ if _plugin != null and is_instance_valid(_plugin):
+  _plugin.call("webRtcOffer")
+
+func remote_webrtc_description(kind: String, sdp: String) -> void:
+ if _plugin != null and is_instance_valid(_plugin):
+  _plugin.call("webRtcRemoteDescription", kind, sdp)
+
+func remote_webrtc_candidate(candidate: String, mid: String, line: int) -> void:
+ if _plugin != null and is_instance_valid(_plugin):
+  _plugin.call("webRtcRemoteCandidate", candidate, mid, line)
+
+func poll_webrtc_event() -> String:
+ if _plugin == null or not is_instance_valid(_plugin):
+  return ""
+ return str(_plugin.call("pollWebRtcEvent"))

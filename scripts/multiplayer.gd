@@ -91,6 +91,9 @@ var voice_capture_failed := false
 var voice_retry_after_ms := 0
 var voice_level := 0.0
 var voice_last_meter_ms: int = 0
+var voice_sent_packets: int = 0
+var voice_received_packets: int = 0
+var voice_capture_frames: int = 0
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -667,6 +670,9 @@ func _reset_voice() -> void:
  voice_transport_started = false
  voice_microphone.stop()
  voice_level = 0.0
+ voice_sent_packets = 0
+ voice_received_packets = 0
+ voice_capture_frames = 0
  voice_permission_requested = false
  voice_signaling.reset()
  if is_instance_valid(voice_invite_dialog):
@@ -693,6 +699,7 @@ func _poll_voice_microphone() -> void:
  var frames: PackedVector2Array = voice_microphone.take_frames(2048)
  if frames.is_empty():
   return
+ voice_capture_frames += frames.size()
  var peak := 0.0
  for frame in frames:
   peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
@@ -700,11 +707,12 @@ func _poll_voice_microphone() -> void:
  if voice_transport_started and voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   for encoded in voice_transport.encode_frames(frames):
    _send({"type": "voice_audio", "pcm": encoded})
+   voice_sent_packets += 1
  var now := Time.get_ticks_msec()
  if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):
   voice_last_meter_ms = now
   var bars := clampi(int(peak * 24.0), 0, 8)
-  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + _t(" • صوت تجريبي", " • experimental audio")
+  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + (" | PCM: %d | TX: %d | RX: %d" % [voice_capture_frames, voice_sent_packets, voice_received_packets])
 
 func _voice_permission_granted() -> bool:
  if OS.get_name() == "Windows":
@@ -787,7 +795,8 @@ func _handle(msg: Dictionary) -> void:
    voice_signaling.handle_server_message(msg)
   "voice_audio":
    if voice_signaling.ready() and voice_transport_started:
-    voice_transport.receive_packet(str(msg.get("pcm", "")))
+    if voice_transport.receive_packet(str(msg.get("pcm", ""))):
+     voice_received_packets += 1
   "voice_state_ack":
    voice_request_pending = false
    voice_request_started_ms = 0

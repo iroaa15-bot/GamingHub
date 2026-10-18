@@ -34,6 +34,7 @@ public final class SpeakerphoneAudioEngine {
     private short[] pendingCapture;
     private int pendingCaptureOffset;
     private static final float PLAYBACK_GAIN = 1.8f;
+    private float smoothedPlaybackGain = PLAYBACK_GAIN;
     private Thread playbackWorker;
     private AcousticEchoCanceler aec;
     private NoiseSuppressor ns;
@@ -107,12 +108,13 @@ public final class SpeakerphoneAudioEngine {
             recorder.startRecording();
             player.play();
             running = true;
+            final AudioRecord captureRecord = recorder;
             captureWorker = new Thread(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
                     short[] frame = new short[PACKET_SAMPLES];
                     int offset = 0;
                     while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
-                        int read = recorder.read(frame, offset, frame.length - offset, AudioRecord.READ_BLOCKING);
+                        int read = captureRecord.read(frame, offset, frame.length - offset, AudioRecord.READ_BLOCKING);
                         if (read <= 0) break;
                         offset += read;
                     }
@@ -184,9 +186,16 @@ public final class SpeakerphoneAudioEngine {
         // The Godot main thread only enqueues. A worker performs full blocking writes,
         // preventing truncated 20 ms packets and UI-thread AudioTrack stalls.
         short[] copy = new short[count];
-        // Gentle receive gain: increase quiet speech without PCM16 wraparound distortion.
+        // Adaptive receive gain: boost quiet speech but limit peaks before clipping.
+        int peak = 0;
+        for (int i = 0; i < count; i++) peak = Math.max(peak, Math.abs((int) packet[i]));
+        float safeGain = peak == 0 ? PLAYBACK_GAIN : Math.min(PLAYBACK_GAIN, 30000.0f / peak);
+        // Fast attack when a loud frame arrives; slower release for natural speech.
+        float smoothing = safeGain < smoothedPlaybackGain ? 0.85f : 0.08f;
+        smoothedPlaybackGain += (safeGain - smoothedPlaybackGain) * smoothing;
         for (int i = 0; i < count; i++) {
-            int boosted = Math.round(packet[i] * PLAYBACK_GAIN);
+            // Per-frame peak limiting avoids hard clipping on loud voices.
+            int boosted = Math.round(packet[i] * smoothedPlaybackGain);
             copy[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, boosted));
         }
         if (!playbackQueue.offer(copy)) {
@@ -207,6 +216,7 @@ public final class SpeakerphoneAudioEngine {
         captureQueue.clear();
         pendingCapture = null;
         pendingCaptureOffset = 0;
+        smoothedPlaybackGain = PLAYBACK_GAIN;
         if (captureWorker != null) {
             captureWorker.interrupt();
             captureWorker = null;

@@ -114,8 +114,13 @@ public final class SpeakerphoneAudioEngine {
                     short[] frame = new short[PACKET_SAMPLES];
                     int offset = 0;
                     while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
-                        int read = captureRecord.read(frame, offset, frame.length - offset, AudioRecord.READ_BLOCKING);
-                        if (read <= 0) break;
+                        int read;
+                        try {
+                            read = captureRecord.read(frame, offset, frame.length - offset, AudioRecord.READ_BLOCKING);
+                        } catch (IllegalStateException ex) {
+                            return;
+                        }
+                        if (read <= 0) return;
                         offset += read;
                     }
                     if (offset != frame.length) break;

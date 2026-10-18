@@ -583,7 +583,7 @@ func _process(_delta: float) -> void:
   native_voice_failed_this_call = true
   _stop_webrtc_voice()
   _update_voice_ui()
- if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
+ if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active) and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
  if (voice_microphone.is_capturing() or native_voice_active) and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):

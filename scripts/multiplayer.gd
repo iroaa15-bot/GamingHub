@@ -375,7 +375,7 @@ func _stop_local_voice_test() -> void:
 func _process_local_voice_test() -> void:
  if not local_voice_test:
   return
- var frames := local_voice_capture.take_frames(512)
+ var frames := local_voice_capture.take_frames(2048)
  local_voice_frames += frames.size()
  for packet in local_voice_transport.encode_frames(frames):
   if local_voice_transport.receive_packet(packet):

@@ -822,7 +822,7 @@ func _handle(msg: Dictionary) -> void:
    _reset_voice()
    opponent_paused = true
    var remaining_seconds := maxi(0, int(msg.get("seconds", 90)))
-    status.text = (_t("انقطع اتصال المنافس؛ المباراة محفوظة مؤقتًا لمدة %d ثانية في انتظار عودته.", "Opponent disconnected; match reserved for %d seconds while they reconnect.") % remaining_seconds)
+   status.text = (_t("انقطع اتصال المنافس؛ المباراة محفوظة مؤقتًا لمدة %d ثانية في انتظار عودته.", "Opponent disconnected; match reserved for %d seconds while they reconnect.") % remaining_seconds)
    _refresh_actions()
   "peer_resumed":
    _reset_voice()
@@ -992,8 +992,8 @@ func _handle(msg: Dictionary) -> void:
      reconnect_next_ms = Time.get_ticks_msec() + 2500
      return
     var resume_reason := str(msg.get("message", "Unknown server error"))
-     push_warning("GamingHub resume rejected: " + resume_reason)
-     _abort_stalled_session(_t("فشل استكمال المباراة: ", "Match resume failed: ") + resume_reason)
+    push_warning("GamingHub resume rejected: " + resume_reason)
+    _abort_stalled_session(_t("فشل استكمال المباراة: ", "Match resume failed: ") + resume_reason)
     return
    action_in_flight = false
    _refresh_actions()

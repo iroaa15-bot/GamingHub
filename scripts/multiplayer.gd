@@ -97,6 +97,8 @@ const WEBRTC_DISCONNECT_GRACE_MS := 5000
 var webrtc_started_ms := 0
 var webrtc_answer_wait_ms := 0
 var webrtc_failed_this_call := false
+var webrtc_failure_code := ""
+var webrtc_stage := "idle"
 var webrtc_pending_remote_ice: Array[Dictionary] = []
 var webrtc_pending_offer := ""
 var webrtc_ice_config_requested := false
@@ -575,6 +577,7 @@ func _process(_delta: float) -> void:
  if voice_signaling.ready() and webrtc_ice_config_requested and not webrtc_ice_config_received and Time.get_ticks_msec() - webrtc_ice_config_requested_ms >= WEBRTC_ICE_CONFIG_TIMEOUT_MS:
   # Never start with unverified relay settings after the configuration request times out.
   webrtc_failed_this_call = true
+  webrtc_failure_code = "ICE_CONFIG_TIMEOUT"
   native_voice_failed_this_call = true
   webrtc_ice_config_requested = false
   _update_voice_ui()
@@ -811,6 +814,9 @@ func _update_voice_ui() -> void:
   if webrtc_voice_active and webrtc_disconnected_since_ms > 0:
    voice_status.text = _t("انقطع الصوت مؤقتًا؛ نحاول استعادة الاتصال...", "Voice interrupted; attempting to reconnect...")
    return
+  if webrtc_failed_this_call and not webrtc_failure_code.is_empty():
+   voice_status.text = _t("تعذر اتصال الصوت • رمز: ", "Voice connection failed • code: ") + webrtc_failure_code
+   return
   voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if (voice_microphone.is_capturing() or native_voice_active or webrtc_connected) else _t("تعذر اتصال WebRTC؛ أوقف الصوت وأعد طلبه", "WebRTC connection failed; disable and re-enable voice") if webrtc_failed_this_call else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _refresh_voice_diagnostics() -> void:
@@ -903,6 +909,7 @@ func _sync_voice_microphone() -> void:
   return
  if OS.get_name() == "Android" and not webrtc_ice_config_received:
   if not webrtc_ice_config_requested:
+   webrtc_stage = "ice_config"
    webrtc_ice_config_requested = true
    webrtc_ice_config_requested_ms = Time.get_ticks_msec()
    _send({"type": "voice_ice_config"})
@@ -921,6 +928,7 @@ func _sync_voice_microphone() -> void:
  if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call:
   if android_voice.start_webrtc():
    webrtc_voice_active = true
+   webrtc_stage = "offer"
    android_voice.set_webrtc_muted(voice_muted)
    webrtc_connected = false
    webrtc_started_ms = Time.get_ticks_msec()
@@ -972,6 +980,7 @@ func _stop_webrtc_voice() -> void:
  webrtc_ice_config_requested = false
  webrtc_ice_config_requested_ms = 0
  webrtc_ice_config_received = false
+ webrtc_stage = "idle"
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
  if not voice_signaling.ready() or webrtc_failed_this_call:
@@ -988,6 +997,7 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   voice_transport.stop()
   voice_transport_started = false
   webrtc_voice_active = android_voice.start_webrtc()
+  webrtc_stage = "answer"
   webrtc_started_ms = Time.get_ticks_msec()
   if webrtc_voice_active:
    android_voice.set_webrtc_muted(voice_muted)
@@ -1029,6 +1039,8 @@ func _poll_webrtc_signaling() -> void:
   elif event == "state|CONNECTED" or event == "state|COMPLETED":
    var was_connected := webrtc_connected
    webrtc_connected = true
+   webrtc_stage = "connected"
+   webrtc_failure_code = ""
    webrtc_disconnected_since_ms = 0
    if not was_connected:
     _update_voice_ui()
@@ -1045,6 +1057,7 @@ func _poll_webrtc_signaling() -> void:
     webrtc_disconnected_since_ms = Time.get_ticks_msec()
    _update_voice_ui()
   elif event == "state|FAILED" or event.begins_with("error|"):
+   webrtc_failure_code = "ICE_FAILED" if event == "state|FAILED" else "WEBRTC_NATIVE_ERROR"
    native_voice_failed_this_call = true
    webrtc_failed_this_call = true
    _stop_webrtc_voice()
@@ -1122,6 +1135,7 @@ func _handle(msg: Dictionary) -> void:
      if ice_urls.size() == urls_value.size():
       android_voice.configure_webrtc_ice_servers(ice_urls, str(ice_payload.get("username", "")), str(ice_payload.get("credential", "")))
    webrtc_ice_config_received = true
+   webrtc_stage = "permission"
    if not webrtc_pending_offer.is_empty() and _voice_permission_granted():
     _on_webrtc_remote_description("offer", webrtc_pending_offer)
    else:

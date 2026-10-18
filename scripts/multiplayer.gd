@@ -99,6 +99,8 @@ var webrtc_answer_wait_ms := 0
 var webrtc_failed_this_call := false
 var webrtc_pending_remote_ice: Array[Dictionary] = []
 var webrtc_pending_offer := ""
+var webrtc_ice_config_requested := false
+var webrtc_ice_config_received := false
 const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
 const NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS := 3500
@@ -891,6 +893,11 @@ func _sync_voice_microphone() -> void:
   return
  if voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active or webrtc_failed_this_call:
   return
+ if OS.get_name() == "Android" and not webrtc_ice_config_received:
+  if not webrtc_ice_config_requested:
+   webrtc_ice_config_requested = true
+   _send({"type": "voice_ice_config"})
+  return
  if not _voice_permission_granted():
   if OS.get_name() == "Android" and not voice_permission_requested:
    voice_permission_requested = true
@@ -953,6 +960,8 @@ func _stop_webrtc_voice() -> void:
  webrtc_answer_wait_ms = 0
  webrtc_pending_remote_ice.clear()
  webrtc_pending_offer = ""
+ webrtc_ice_config_requested = false
+ webrtc_ice_config_received = false
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
  if not voice_signaling.ready() or webrtc_failed_this_call:
@@ -1085,6 +1094,21 @@ func _handle(msg: Dictionary) -> void:
     voice_invite_dialog.popup_centered()
    elif not incoming_enabled and is_instance_valid(voice_invite_dialog):
     voice_invite_dialog.hide()
+  "voice_ice_config":
+   if not voice_signaling.ready():
+    return
+   var ice_payload: Variant = msg.get("payload", {})
+   if ice_payload is Dictionary:
+    var urls_value: Variant = ice_payload.get("urls", [])
+    if urls_value is Array and urls_value.size() > 0 and urls_value.size() <= 8:
+     var ice_urls := PackedStringArray()
+     for ice_url in urls_value:
+      if ice_url is String:
+       ice_urls.append(ice_url)
+     if ice_urls.size() == urls_value.size():
+      android_voice.configure_webrtc_ice_servers(ice_urls, str(ice_payload.get("username", "")), str(ice_payload.get("credential", "")))
+   webrtc_ice_config_received = true
+   _sync_voice_microphone()
   "voice_offer", "voice_answer", "voice_ice":
    voice_signaling.handle_server_message(msg)
   "voice_audio":

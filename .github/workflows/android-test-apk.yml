@@ -111,8 +111,16 @@ jobs:
           fi
           test -s "$template"
           mkdir -p android
+          echo 'Android template archive entries:'
+          unzip -Z1 "$template" | head -n 18 || true
           timeout 90s unzip -q "$template" -d android
-          test -f android/build/build.gradle
+          echo 'Extracted Gradle build files:'
+          find android -maxdepth 5 -type f \( -name build.gradle -o -name build.gradle.kts -o -name settings.gradle \) -print | head -n 30
+          if [ ! -f android/build/build.gradle ] && [ ! -f android/build/build.gradle.kts ]; then
+            echo 'ERROR: expected Godot Gradle build file missing; inspecting extracted tree'
+            find android -maxdepth 3 -type d -print | head -n 50
+            exit 1
+          fi
       - name: Build and embed native speakerphone plugin
         shell: bash
         run: |

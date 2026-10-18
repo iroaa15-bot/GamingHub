@@ -679,7 +679,7 @@
     "scenes/Multiplayer.tscn": "8b0ec587fc2412e87402af2e50ac767ae9abe233218a3bcd71cbaeda4a55aa2b",
     "scripts/ad_manager.gd": "5dd9616a2023a2056e06bca813c6d88a83f2fa70374538a714c24ba3083cbdfa",
     "scripts/ad_manager.gd.uid": "d9807e0f54a8e0281ec65c73d7cb0af25d3df224bc4607175954eee619da2431",
-    "scripts/android_voice_bridge.gd": "1454e03801a85b616a3573b26d68425eacaeef54b4f2cf5a32a783edd957dd71",
+    "scripts/android_voice_bridge.gd": "8ee1ea17c1eba46cd53c1452e903a0a8cf0f197b38781857e41f4cbfaa82ae19",
     "scripts/celebration_fx.gd": "ee41b91f461fe95e711770f1320d6585fe5970f25361157389287984ff849a1c",
     "scripts/celebration_fx.gd.uid": "6408e2ec9e8591fc36c0df2a557480fa364d82f820e976a5fe2587383161ab88",
     "scripts/daily_ai.gd": "b680b9bbbf7ccd0bf85cb7065cfd060946b27fecefd94634d9222299518e6151",

@@ -475,6 +475,7 @@ func _start_reconnect() -> void:
   health_label.text = _t("الشبكة: جاري الاستعادة", "Network: reconnecting")
  if reconnecting or resume_token.is_empty() or room_code.is_empty() or finished or leaving:
   return
+ _reset_voice()
  socket.close()
  socket = WebSocketPeer.new()
  connected = false
@@ -499,7 +500,7 @@ func _process(_delta: float) -> void:
   voice_transport_started = false
   voice_level = 0.0
   _update_voice_ui()
- if voice_microphone.is_capturing():
+ if voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_voice_microphone()
  if voice_transport_started:
   voice_transport.pump()
@@ -719,7 +720,7 @@ func _poll_voice_microphone() -> void:
  for frame in frames:
   peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
  voice_level = peak
- if voice_transport_started and voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+ if voice_transport_started and voice_signaling.ready() and not reconnecting and not reconnect_pending and not opponent_paused and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   for encoded in voice_transport.encode_frames(frames):
    # Audio is best-effort; do not let queued voice block match messages.
    if socket.get_current_outbound_buffered_amount() > 16384:
@@ -981,6 +982,10 @@ func _handle(msg: Dictionary) -> void:
    if server_error in ["No active voice room", "Voice peer unavailable", "Both players must enable voice", "Invalid audio packet", "Invalid audio encoding", "Invalid audio size", "Invalid voice state", "Invalid voice payload", "Invalid voice SDP", "Invalid voice ICE"]:
     voice_request_pending = false
     voice_request_started_ms = 0
+    # Tell the server to clear our consent too; a local-only reset leaves
+    # server and peer with stale permission and causes repeated voice errors.
+    if socket.get_ready_state() == WebSocketPeer.STATE_OPEN and not reconnecting and not room_code.is_empty():
+     _send({"type": "voice_state", "enabled": false})
     _reset_voice()
     if is_instance_valid(voice_status):
      voice_status.text = _t("تعذر تشغيل الصوت: ", "Voice unavailable: ") + server_error

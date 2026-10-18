@@ -717,7 +717,7 @@
     "server/test_network_sync_v88.py": "9a4395685cc081f97d5e30700e63f7b148b656da097a1aa65584ce43aad5ab6f",
     "server/test_reconnect_v87.py": "e464dd8c3d87afc2b1485830200a5352828969d47a9fd68a2db1ca1ce4d63a55",
     "server/test_recovery_v86.py": "31f3182d91db1d65e18a22aa5186aba0ef0210294658e1029ff819c7df82922f",
-    "server/test_voice_signaling.py": "0eabf0f36d4f483b5c9dc56d066e0666c20bf84e0966a3e18817d2130274d011",
+    "server/test_voice_signaling.py": "482282b8562623432c61ce04de3d1514a99b5d99ff23fc2685ae4fa3fb1418f8",
     "tests/activities.gd": "bb91340d606bff7f9c1f1819a6ba22508e8e1a725828a7b84037f966d8502ba6",
     "tests/activities.gd.uid": "d344cdceaa817e03de8e3f680e563ab20321a509b92757826c92791432810599",
     "tests/android_voice_bridge_smoke.gd": "12bc8f64e672d50963c19c06a4393983ccacaa042048610fd4bba87d87c4090c",

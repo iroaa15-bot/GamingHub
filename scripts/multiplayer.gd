@@ -95,6 +95,13 @@ var voice_sent_packets: int = 0
 var voice_received_packets: int = 0
 var voice_capture_frames: int = 0
 var voice_capture_started_ms: int = 0
+var local_voice_test := false
+var local_voice_capture = VoiceMicrophoneCapture.new()
+var local_voice_transport = VoicePCMTransport.new()
+var local_voice_status: Label
+var local_voice_button: Button
+var local_voice_frames := 0
+var local_voice_packets := 0
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -212,6 +219,14 @@ func _ready() -> void:
  share_button.pressed.connect(_copy_invite)
  _style_button(share_button)
  lobby_controls.add_child(share_button)
+ local_voice_button = Button.new()
+ local_voice_button.text = _t("اختبار الميكروفون والسماعة (سماعات رأس)", "Test microphone and speaker (headphones)")
+ local_voice_button.custom_minimum_size.y = 52
+ local_voice_button.pressed.connect(_toggle_local_voice_test)
+ _style_button(local_voice_button)
+ lobby_controls.add_child(local_voice_button)
+ local_voice_status = _label(_t("اختبار صوت محلي بدون إنترنت أو منافس", "Offline local audio loopback test"), 14)
+ local_voice_status.reparent(lobby_controls)
  _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
  var advanced_toggle := Button.new()
  advanced_toggle.text = _t("إعدادات الاتصال (متقدمة)", "Connection settings (advanced)")
@@ -327,6 +342,47 @@ func _update_lobby() -> void:
  match_button.disabled = active
  code_input.editable = not active
  share_button.disabled = room_code.is_empty() or leaving
+
+func _toggle_local_voice_test() -> void:
+ if local_voice_test:
+  _stop_local_voice_test()
+  return
+ if not room_code.is_empty() or voice_microphone.is_capturing():
+  local_voice_status.text = _t("أنهِ المحادثة والمباراة قبل الاختبار المحلي", "End voice chat and match before local test")
+  return
+ if OS.get_name() == "Android" and not _voice_permission_granted():
+  OS.request_permission("android.permission.RECORD_AUDIO")
+  local_voice_status.text = _t("اسمح بالميكروفون واضغط الاختبار مرة أخرى", "Grant microphone access, then tap test again")
+  return
+ local_voice_frames = 0
+ local_voice_packets = 0
+ local_voice_transport.start(self)
+ if not local_voice_capture.start(self, true, _voice_permission_granted()):
+  local_voice_transport.stop()
+  local_voice_status.text = _t("فشل تشغيل الميكروفون محليًا", "Local microphone start failed")
+  return
+ local_voice_test = true
+ local_voice_button.text = _t("إيقاف اختبار الصوت المحلي", "Stop local audio test")
+ local_voice_status.text = _t("اتكلم في الميكروفون بسماعات رأس لتجنب الصفير", "Speak using headphones to avoid feedback")
+
+func _stop_local_voice_test() -> void:
+ local_voice_test = false
+ local_voice_capture.stop()
+ local_voice_transport.stop()
+ if is_instance_valid(local_voice_button):
+  local_voice_button.text = _t("اختبار الميكروفون والسماعة (سماعات رأس)", "Test microphone and speaker (headphones)")
+
+func _process_local_voice_test() -> void:
+ if not local_voice_test:
+  return
+ var frames := local_voice_capture.take_frames(512)
+ local_voice_frames += frames.size()
+ for packet in local_voice_transport.encode_frames(frames):
+  if local_voice_transport.receive_packet(packet):
+   local_voice_packets += 1
+ local_voice_transport.pump()
+ if is_instance_valid(local_voice_status):
+  local_voice_status.text = "LOCAL PCM: %d | LOOPBACK: %d" % [local_voice_frames, local_voice_packets]
 
 func _reset_match_state() -> void:
  sync_pending = false
@@ -490,6 +546,7 @@ func _start_reconnect() -> void:
  status.text = _t("انقطع الاتصال؛ جاري استكمال نفس المباراة...", "Connection lost; restoring your match...")
 
 func _process(_delta: float) -> void:
+ _process_local_voice_test()
  socket.poll()
  if voice_signaling.ready() and not voice_microphone.is_capturing() and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()

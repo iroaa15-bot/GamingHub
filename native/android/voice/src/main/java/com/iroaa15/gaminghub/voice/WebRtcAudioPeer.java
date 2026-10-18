@@ -3,9 +3,6 @@ package com.iroaa15.gaminghub.voice;
 import android.content.Context;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
-import org.webrtc.Camera1Enumerator;
-import org.webrtc.DefaultVideoDecoderFactory;
-import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
 import org.webrtc.PeerConnection;
@@ -28,6 +25,8 @@ public final class WebRtcAudioPeer {
     private JavaAudioDeviceModule audioModule;
     private final ConcurrentLinkedQueue<String> events = new ConcurrentLinkedQueue<>();
     private boolean started;
+    private boolean remoteSdpReady;
+    private final List<IceCandidate> pendingCandidates = new ArrayList<>();
 
     public WebRtcAudioPeer(Context context) { this.context = context.getApplicationContext(); }
 
@@ -78,7 +77,18 @@ public final class WebRtcAudioPeer {
                 peer.setLocalDescription(observer("local"), sdp);
                 events.add(type + "|" + sdp.description);
             }
-            @Override public void onSetSuccess() { if ("remote_offer".equals(type)) createAnswer(); }
+            @Override public void onSetSuccess() {
+                if (type.startsWith("remote_")) {
+                    synchronized (WebRtcAudioPeer.this) {
+                        remoteSdpReady = true;
+                        if (peer != null) {
+                            for (IceCandidate candidate : pendingCandidates) peer.addIceCandidate(candidate);
+                        }
+                        pendingCandidates.clear();
+                    }
+                }
+                if ("remote_offer".equals(type)) createAnswer();
+            }
             @Override public void onCreateFailure(String error) { events.add("error|" + error); }
             @Override public void onSetFailure(String error) { events.add("error|" + error); }
         };
@@ -97,11 +107,16 @@ public final class WebRtcAudioPeer {
             new SessionDescription("offer".equals(kind) ? SessionDescription.Type.OFFER : SessionDescription.Type.ANSWER, sdp));
     }
     public synchronized void remoteCandidate(String candidate, String mid, int line) {
-        if (peer != null) peer.addIceCandidate(new IceCandidate(mid, line, candidate));
+        if (peer == null || candidate == null || candidate.isEmpty() || line < 0) return;
+        IceCandidate ice = new IceCandidate(mid, line, candidate);
+        if (remoteSdpReady) peer.addIceCandidate(ice);
+        else if (pendingCandidates.size() < 64) pendingCandidates.add(ice);
     }
     public String pollEvent() { String event = events.poll(); return event == null ? "" : event; }
     public synchronized void stop() {
         started = false;
+        remoteSdpReady = false;
+        pendingCandidates.clear();
         if (peer != null) { peer.dispose(); peer = null; }
         if (track != null) { track.dispose(); track = null; }
         if (source != null) { source.dispose(); source = null; }

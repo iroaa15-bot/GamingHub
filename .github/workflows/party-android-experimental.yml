@@ -28,6 +28,15 @@ jobs:
         with:
           version: 4.5.1
           use-dotnet: false
+      - name: Install Android export templates and Gradle build template
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 -o /tmp/godot-export-templates.tpz https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz
+          mkdir -p /tmp/godot-export-tpl "$HOME/.local/share/godot/export_templates/4.5.1.stable"
+          unzip -q /tmp/godot-export-templates.tpz -d /tmp/godot-export-tpl
+          cp -a /tmp/godot-export-tpl/templates/. "$HOME/.local/share/godot/export_templates/4.5.1.stable/"
+          godot --headless --path . --install-android-build-template --quit
+          test -f android/build/build.gradle
       - name: Import and validate
         run: godot --headless --path . --editor --import --quit
       - name: Attempt Android debug export

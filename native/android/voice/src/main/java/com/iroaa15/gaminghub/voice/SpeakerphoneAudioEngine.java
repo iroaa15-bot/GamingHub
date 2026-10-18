@@ -29,6 +29,11 @@ public final class SpeakerphoneAudioEngine {
     private AudioRecord recorder;
     private AudioTrack player;
     private final ArrayBlockingQueue<short[]> playbackQueue = new ArrayBlockingQueue<>(12);
+    private final ArrayBlockingQueue<short[]> captureQueue = new ArrayBlockingQueue<>(12);
+    private Thread captureWorker;
+    private short[] pendingCapture;
+    private int pendingCaptureOffset;
+    private static final float PLAYBACK_GAIN = 1.8f;
     private Thread playbackWorker;
     private AcousticEchoCanceler aec;
     private NoiseSuppressor ns;
@@ -102,10 +107,36 @@ public final class SpeakerphoneAudioEngine {
             recorder.startRecording();
             player.play();
             running = true;
+            captureWorker = new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    short[] frame = new short[PACKET_SAMPLES];
+                    int offset = 0;
+                    while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
+                        int read = recorder.read(frame, offset, frame.length - offset, AudioRecord.READ_BLOCKING);
+                        if (read <= 0) break;
+                        offset += read;
+                    }
+                    if (offset != frame.length) break;
+                    if (!captureQueue.offer(frame)) {
+                        captureQueue.poll();
+                        captureQueue.offer(frame);
+                    }
+                }
+            }, "GamingHubVoiceCapture");
+            captureWorker.setDaemon(true);
+            captureWorker.start();
             playbackWorker = new Thread(() -> {
+                boolean primed = false;
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        short[] frame = playbackQueue.poll(100, TimeUnit.MILLISECONDS);
+                        // 40 ms of jitter protection before first playback or after a gap.
+                        if (!primed && playbackQueue.size() < 2) {
+                            Thread.sleep(5);
+                            continue;
+                        }
+                        primed = true;
+                        short[] frame = playbackQueue.poll(60, TimeUnit.MILLISECONDS);
+                        if (frame == null) { primed = false; continue; }
                         if (frame == null) continue;
                         int offset = 0;
                         while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
@@ -131,7 +162,19 @@ public final class SpeakerphoneAudioEngine {
     /** Read one 20 ms PCM16 packet; invoke on a dedicated worker thread. */
     public synchronized int readPcm(short[] packet) {
         if (!running || packet == null || packet.length < PACKET_SAMPLES) return -1;
-        return recorder.read(packet, 0, PACKET_SAMPLES, AudioRecord.READ_NON_BLOCKING);
+        if (pendingCapture == null) {
+            pendingCapture = captureQueue.poll();
+            pendingCaptureOffset = 0;
+        }
+        if (pendingCapture == null) return 0;
+        int count = Math.min(packet.length, pendingCapture.length - pendingCaptureOffset);
+        System.arraycopy(pendingCapture, pendingCaptureOffset, packet, 0, count);
+        pendingCaptureOffset += count;
+        if (pendingCaptureOffset >= pendingCapture.length) {
+            pendingCapture = null;
+            pendingCaptureOffset = 0;
+        }
+        return count;
     }
 
     /** Play PCM16 samples; invoke on a dedicated worker thread. */
@@ -140,7 +183,11 @@ public final class SpeakerphoneAudioEngine {
         // The Godot main thread only enqueues. A worker performs full blocking writes,
         // preventing truncated 20 ms packets and UI-thread AudioTrack stalls.
         short[] copy = new short[count];
-        System.arraycopy(packet, 0, copy, 0, count);
+        // Gentle receive gain: increase quiet speech without PCM16 wraparound distortion.
+        for (int i = 0; i < count; i++) {
+            int boosted = Math.round(packet[i] * PLAYBACK_GAIN);
+            copy[i] = (short) Math.max(Short.MIN_VALUE, Math.min(Short.MAX_VALUE, boosted));
+        }
         if (!playbackQueue.offer(copy)) {
             playbackQueue.poll(); // Drop oldest audio instead of building audible latency.
             if (!playbackQueue.offer(copy)) return -1;
@@ -156,6 +203,13 @@ public final class SpeakerphoneAudioEngine {
     public synchronized void stop() {
         running = false;
         playbackQueue.clear();
+        captureQueue.clear();
+        pendingCapture = null;
+        pendingCaptureOffset = 0;
+        if (captureWorker != null) {
+            captureWorker.interrupt();
+            captureWorker = null;
+        }
         if (playbackWorker != null) {
             playbackWorker.interrupt();
             playbackWorker = null;

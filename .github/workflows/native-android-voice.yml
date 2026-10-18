@@ -30,21 +30,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Download Godot 4.5.1 Android plugin API library
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build/godot-api
-          curl -fL --retry 3 --connect-timeout 20 \
-            -o build/godot-api/godot-lib.release.aar \
-            'https://repo.godotengine.org/artifactory/godot-maven/org/godotengine/godot/4.5.1.stable/godot-4.5.1.stable.aar'
-          test -s build/godot-api/godot-lib.release.aar
       - name: Build full native Android Godot plugin AAR
         shell: bash
         run: |
           set -euo pipefail
           cd native/android/voice
-          gradle assembleRelease -PgodotAar="$GITHUB_WORKSPACE/build/godot-api/godot-lib.release.aar" --no-daemon
+          gradle assembleRelease --no-daemon
           test -s build/outputs/aar/voice-release.aar
       - name: Upload experimental plugin AAR
         uses: actions/upload-artifact@v4

@@ -30,3 +30,18 @@ func diagnostics() -> Dictionary:
   "ns": bool(_plugin.call("isNsEnabled")),
   "agc": bool(_plugin.call("isAgcEnabled"))
  }
+
+## Empty packet means the native recorder has not produced a full 20ms frame.
+func poll_pcm() -> String:
+ if _plugin == null or not is_instance_valid(_plugin):
+  return ""
+ if not bool(_plugin.call("isRunning")):
+  return ""
+ return str(_plugin.call("pollPcm"))
+
+func push_pcm(encoded: String) -> bool:
+ if _plugin == null or not is_instance_valid(_plugin):
+  return false
+ if encoded.length() != 856 or not bool(_plugin.call("isRunning")):
+  return false
+ return bool(_plugin.call("pushPcm", encoded))

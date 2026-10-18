@@ -18,6 +18,7 @@ import org.godotengine.godot.plugin.UsedByGodot;
  */
 public final class GamingHubVoicePlugin extends GodotPlugin {
     private SpeakerphoneAudioEngine engine;
+    private WebRtcAudioPeer rtc;
     private final short[] capture = new short[SpeakerphoneAudioEngine.PACKET_SAMPLES];
     private int capturedSamples = 0;
 
@@ -85,6 +86,34 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
         for (int i = 0; i < samples.length; i++) samples[i] = data.getShort();
         return engine.writePcm(samples, samples.length) == samples.length;
     }
+
+    @UsedByGodot
+    public boolean startWebRtc() {
+        Activity activity = getActivity();
+        if (activity == null || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) return false;
+        if (rtc == null) rtc = new WebRtcAudioPeer(activity);
+        return rtc.start();
+    }
+
+    @UsedByGodot
+    public void stopWebRtc() { if (rtc != null) rtc.stop(); }
+
+    @UsedByGodot
+    public void webRtcOffer() { if (rtc != null) rtc.createOffer(); }
+
+    @UsedByGodot
+    public void webRtcRemoteDescription(String kind, String sdp) {
+        if (rtc != null) rtc.remoteDescription(kind, sdp);
+    }
+
+    @UsedByGodot
+    public void webRtcRemoteCandidate(String candidate, String mid, int line) {
+        if (rtc != null) rtc.remoteCandidate(candidate, mid, line);
+    }
+
+    @UsedByGodot
+    public String pollWebRtcEvent() { return rtc == null ? "" : rtc.pollEvent(); }
 
     @UsedByGodot
     public boolean isRunning() {

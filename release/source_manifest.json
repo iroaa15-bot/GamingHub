@@ -2,7 +2,7 @@
   "schema": 1,
   "file_count": 779,
   "sha256": {
-    ".github/workflows/android-test-apk.yml": "5b88b785a9a716e17c5426dda93ad698d81c1049bb77c32087d571ed9bdf528a",
+    ".github/workflows/android-test-apk.yml": "49cb07d57957575b9a474973bd44620c05e1ec8e1f772a9a930dfb24c4c6cfdb",
     ".github/workflows/approve-development-manifest.yml": "4dc431063ce9266084c5083e40c9a02cd15591125f42a2bd327df81c7d45cc19",
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "811ae6cd803233e178b22e9cef2782f782a9ff641617a29c7b716c105e825199",
@@ -638,7 +638,7 @@
     "docs/index.html": "c9a6f3763fb012870dc8dbf59f42662e2fd94b2e6d13e88286a69efbaf0a54f3",
     "docs/privacy.html": "ad27eed6660c48aa71398c8dcd906502a3916103520ecca753d9dadbbe234914",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
-    "export_presets.cfg": "b89aa9d5cc1a5e5a6fde64d2df8497ea3929faddc1615cf827a45acf69e2cadd",
+    "export_presets.cfg": "168396476a9270dbebe172ff81c3855f90a8525f8a04fa5cd845f0e928b202a3",
     "liveops/remote_example.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
     "liveops/rotation.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
     "monetization/ANDROID_NATIVE_BRIDGE_CONTRACT.md": "a5f7bea1e7a39e9647a5857a0cc1fcd7b1edbc8aef87270f126675cc00127d31",

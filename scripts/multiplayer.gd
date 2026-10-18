@@ -1006,8 +1006,11 @@ func _voice_signal_send(message: Dictionary) -> void:
 func _toggle_voice_mute() -> void:
  if not voice_signaling.ready():
   return
- voice_muted = not voice_muted
- android_voice.set_webrtc_muted(voice_muted)
+ var requested_mute := not voice_muted
+ if webrtc_voice_active and not android_voice.set_webrtc_muted(requested_mute):
+  # Do not show "muted" unless the actual WebRTC audio track changed.
+  return
+ voice_muted = requested_mute
  _update_voice_ui()
 
 func _toggle_voice_consent() -> void:

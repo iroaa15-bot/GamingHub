@@ -74,10 +74,12 @@ public final class WebRtcAudioPeer {
         return new SdpObserver() {
             @Override public void onCreateSuccess(SessionDescription sdp) {
                 if (peer == null) return;
-                peer.setLocalDescription(observer("local"), sdp);
-                events.add(type + "|" + sdp.description);
+                peer.setLocalDescription(observer("local_" + type + "|" + sdp.description), sdp);
             }
             @Override public void onSetSuccess() {
+                if (type.startsWith("local_offer|") || type.startsWith("local_answer|")) {
+                    events.add(type.substring(6));
+                }
                 if (type.startsWith("remote_")) {
                     synchronized (WebRtcAudioPeer.this) {
                         remoteSdpReady = true;

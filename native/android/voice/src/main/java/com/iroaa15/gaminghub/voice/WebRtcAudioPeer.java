@@ -36,6 +36,26 @@ public final class WebRtcAudioPeer {
     private boolean localSdpReady;
     private final List<IceCandidate> pendingLocalCandidates = new ArrayList<>();
     private final List<IceCandidate> pendingCandidates = new ArrayList<>();
+    private static final int MAX_ICE_SERVERS = 8;
+    private final List<PeerConnection.IceServer> configuredIceServers = new ArrayList<>();
+
+    /** Configure relay credentials at runtime; never persist them in game files. */
+    public synchronized boolean configureIceServers(String[] urls, String username, String credential) {
+        if (started || urls == null || urls.length == 0 || urls.length > MAX_ICE_SERVERS) return false;
+        List<PeerConnection.IceServer> candidateServers = new ArrayList<>();
+        for (String url : urls) {
+            if (url == null || !(url.startsWith("stun:") || url.startsWith("stuns:") || url.startsWith("turn:") || url.startsWith("turns:")) || url.length() > 512) return false;
+            PeerConnection.IceServer.Builder builder = PeerConnection.IceServer.builder(url);
+            if (url.startsWith("turn:") || url.startsWith("turns:")) {
+                if (username == null || username.isEmpty() || credential == null || credential.isEmpty()) return false;
+                builder.setUsername(username).setPassword(credential);
+            }
+            candidateServers.add(builder.createIceServer());
+        }
+        configuredIceServers.clear();
+        configuredIceServers.addAll(candidateServers);
+        return true;
+    }
 
     public WebRtcAudioPeer(Context context) { this.context = context.getApplicationContext(); }
 
@@ -53,7 +73,11 @@ public final class WebRtcAudioPeer {
             source = factory.createAudioSource(new MediaConstraints());
             track = factory.createAudioTrack("gaminghub_voice", source);
             List<PeerConnection.IceServer> ice = new ArrayList<>();
-            ice.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer());
+            if (configuredIceServers.isEmpty()) {
+                ice.add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer());
+            } else {
+                ice.addAll(configuredIceServers);
+            }
             PeerConnection.RTCConfiguration config = new PeerConnection.RTCConfiguration(ice);
             peer = factory.createPeerConnection(config, new PeerConnection.Observer() {
                 @Override public void onSignalingChange(PeerConnection.SignalingState state) {}

@@ -35,6 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           cd native/android/voice
+          printf 'android.useAndroidX=true\n' > gradle.properties
           gradle assembleRelease --no-daemon
           test -s build/outputs/aar/voice-release.aar
       - name: Upload experimental plugin AAR

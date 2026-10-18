@@ -39,3 +39,5 @@ jobs:
           grep -q 'public String pollPcm()' native/android/voice/src/main/java/com/iroaa15/gaminghub/voice/GamingHubVoicePlugin.java
           grep -q 'public boolean pushPcm(String encoded)' native/android/voice/src/main/java/com/iroaa15/gaminghub/voice/GamingHubVoicePlugin.java
           grep -q 'public static final int PACKET_SAMPLES = 320' native/android/voice/src/main/java/com/iroaa15/gaminghub/voice/SpeakerphoneAudioEngine.java
+          test -s native/android/voice/src/main/AndroidManifest.xml
+          grep -q 'org.godotengine.plugin.v2.GamingHubVoice' native/android/voice/src/main/AndroidManifest.xml

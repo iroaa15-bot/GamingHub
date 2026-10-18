@@ -1,6 +1,9 @@
 package com.iroaa15.gaminghub.voice;
 
 import android.content.Context;
+import android.media.AudioManager;
+import android.media.AudioDeviceInfo;
+import android.os.Build;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.IceCandidate;
@@ -25,6 +28,10 @@ public final class WebRtcAudioPeer {
     private JavaAudioDeviceModule audioModule;
     private final ConcurrentLinkedQueue<String> events = new ConcurrentLinkedQueue<>();
     private boolean started;
+    private AudioManager audioManager;
+    private int previousAudioMode = AudioManager.MODE_NORMAL;
+    private boolean previousSpeakerphoneOn;
+    private boolean routingConfigured;
     private boolean remoteSdpReady;
     private boolean localSdpReady;
     private final List<IceCandidate> pendingLocalCandidates = new ArrayList<>();
@@ -35,6 +42,7 @@ public final class WebRtcAudioPeer {
     public synchronized boolean start() {
         if (started) return true;
         try {
+            configureSpeakerphone();
             PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).createInitializationOptions());
             audioModule = JavaAudioDeviceModule.builder(context)
                 .setUseHardwareAcousticEchoCanceler(true)
@@ -76,6 +84,33 @@ public final class WebRtcAudioPeer {
             stop();
             return false;
         }
+    }
+
+    private void configureSpeakerphone() {
+        audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager == null) return;
+        previousAudioMode = audioManager.getMode();
+        previousSpeakerphoneOn = audioManager.isSpeakerphoneOn();
+        routingConfigured = true;
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            for (AudioDeviceInfo device : audioManager.getAvailableCommunicationDevices()) {
+                if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
+                    audioManager.setCommunicationDevice(device);
+                    return;
+                }
+            }
+        }
+        audioManager.setSpeakerphoneOn(true);
+    }
+
+    private void restoreAudioRouting() {
+        if (!routingConfigured || audioManager == null) return;
+        routingConfigured = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) audioManager.clearCommunicationDevice();
+        else audioManager.setSpeakerphoneOn(previousSpeakerphoneOn);
+        audioManager.setMode(previousAudioMode);
+        audioManager = null;
     }
 
     private SdpObserver observer(String type) {
@@ -142,5 +177,6 @@ public final class WebRtcAudioPeer {
         if (factory != null) { factory.dispose(); factory = null; }
         if (audioModule != null) { audioModule.release(); audioModule = null; }
         events.clear();
+        restoreAudioRouting();
     }
 }

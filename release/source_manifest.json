@@ -774,7 +774,7 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
-    "scripts/voice_pcm_transport.gd": "7720e21cddf17d0c3a94124e9e39fcae4316bf65cc9400e36b431040213e5262",
+    "scripts/voice_pcm_transport.gd": "880255e9c72c0a4e0620b403d089b613be69b42649fbef721468a4e5d1d9276c",
     "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2",
     ".github/workflows/windows-voice-test.yml": "ca1ab67d4f31c6ef9794b63b40950d3d04d7f25903a0a8de82c64b9930fd58cf"
   }

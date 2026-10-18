@@ -100,6 +100,8 @@ var webrtc_failed_this_call := false
 var webrtc_pending_remote_ice: Array[Dictionary] = []
 var webrtc_pending_offer := ""
 var webrtc_ice_config_requested := false
+var webrtc_ice_config_requested_ms := 0
+const WEBRTC_ICE_CONFIG_TIMEOUT_MS := 6000
 var webrtc_ice_config_received := false
 const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
@@ -570,6 +572,12 @@ func _process(_delta: float) -> void:
  _process_local_voice_test()
  socket.poll()
  _poll_webrtc_signaling()
+ if voice_signaling.ready() and webrtc_ice_config_requested and not webrtc_ice_config_received and Time.get_ticks_msec() - webrtc_ice_config_requested_ms >= WEBRTC_ICE_CONFIG_TIMEOUT_MS:
+  # Never start with unverified relay settings after the configuration request times out.
+  webrtc_failed_this_call = true
+  native_voice_failed_this_call = true
+  webrtc_ice_config_requested = false
+  _update_voice_ui()
  if webrtc_voice_active and webrtc_disconnected_since_ms > 0 and Time.get_ticks_msec() - webrtc_disconnected_since_ms >= WEBRTC_DISCONNECT_GRACE_MS:
   webrtc_failed_this_call = true
   native_voice_failed_this_call = true
@@ -896,6 +904,7 @@ func _sync_voice_microphone() -> void:
  if OS.get_name() == "Android" and not webrtc_ice_config_received:
   if not webrtc_ice_config_requested:
    webrtc_ice_config_requested = true
+   webrtc_ice_config_requested_ms = Time.get_ticks_msec()
    _send({"type": "voice_ice_config"})
   return
  if not _voice_permission_granted():
@@ -961,6 +970,7 @@ func _stop_webrtc_voice() -> void:
  webrtc_pending_remote_ice.clear()
  webrtc_pending_offer = ""
  webrtc_ice_config_requested = false
+ webrtc_ice_config_requested_ms = 0
  webrtc_ice_config_received = false
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
@@ -1095,6 +1105,10 @@ func _handle(msg: Dictionary) -> void:
    elif not incoming_enabled and is_instance_valid(voice_invite_dialog):
     voice_invite_dialog.hide()
   "voice_ice_config":
+   if not voice_signaling.ready() or not webrtc_ice_config_requested or webrtc_failed_this_call:
+    return
+   webrtc_ice_config_requested_ms = 0
+   webrtc_ice_config_requested = false
    if not voice_signaling.ready():
     return
    var ice_payload: Variant = msg.get("payload", {})

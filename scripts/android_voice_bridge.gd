@@ -56,9 +56,10 @@ func stop_webrtc() -> void:
  if _plugin != null and is_instance_valid(_plugin) and _plugin.has_method("stopWebRtc"):
   _plugin.call("stopWebRtc")
 
-func set_webrtc_muted(muted: bool) -> void:
+func set_webrtc_muted(muted: bool) -> bool:
  if _plugin != null and is_instance_valid(_plugin) and _plugin.has_method("setWebRtcMuted"):
-  _plugin.call("setWebRtcMuted", muted)
+  return bool(_plugin.call("setWebRtcMuted", muted))
+ return false
 
 func offer_webrtc() -> void:
  if _plugin != null and is_instance_valid(_plugin):

@@ -99,7 +99,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          template="$(find "$HOME/.local/share/godot/export_templates" -name android_source.zip -type f -print -quit)"
+          # setup-godot does not always create this directory; absence is normal.
+          template="$(find "$HOME/.local/share/godot/export_templates" -name android_source.zip -type f -print -quit 2>/dev/null || true)"
+          echo "Cached Android Gradle template: ${template:-not present}"
           if [ -z "$template" ]; then
             echo 'Downloading official Godot 4.5.1 export templates for Android Gradle'
             curl -fL --retry 2 --connect-timeout 15 --max-time 150 -o /tmp/godot-android-templates.tpz https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz

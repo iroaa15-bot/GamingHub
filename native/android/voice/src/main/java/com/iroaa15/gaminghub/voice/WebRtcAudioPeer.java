@@ -108,7 +108,7 @@ public final class WebRtcAudioPeer {
         if (!routingConfigured || audioManager == null) return;
         routingConfigured = false;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) audioManager.clearCommunicationDevice();
-        else audioManager.setSpeakerphoneOn(previousSpeakerphoneOn);
+        audioManager.setSpeakerphoneOn(previousSpeakerphoneOn);
         audioManager.setMode(previousAudioMode);
         audioManager = null;
     }

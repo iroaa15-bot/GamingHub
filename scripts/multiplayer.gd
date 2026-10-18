@@ -897,9 +897,19 @@ func _stop_webrtc_voice() -> void:
  webrtc_started_ms = 0
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
- if not voice_signaling.ready() or not webrtc_voice_active:
+ if not voice_signaling.ready():
   return
- android_voice.remote_webrtc_description(kind, sdp)
+ # A remote offer can bootstrap the callee without opening a second recorder.
+ if not webrtc_voice_active and kind == "offer" and OS.get_name() == "Android" and _voice_permission_granted():
+  android_voice.stop()
+  native_voice_active = false
+  voice_microphone.stop()
+  voice_transport.stop()
+  voice_transport_started = false
+  webrtc_voice_active = android_voice.start_webrtc()
+  webrtc_started_ms = Time.get_ticks_msec()
+ if webrtc_voice_active:
+  android_voice.remote_webrtc_description(kind, sdp)
 
 func _on_webrtc_remote_candidate(candidate: String, mid: String, line: int) -> void:
  if voice_signaling.ready() and webrtc_voice_active:

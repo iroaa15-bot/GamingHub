@@ -1,0 +1,8 @@
+[config]
+name="GamingHubVoice"
+binary_type="local"
+binary="GamingHubVoice.aar"
+
+[dependencies]
+local=[]
+remote=[]

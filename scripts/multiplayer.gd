@@ -572,7 +572,9 @@ func _process(_delta: float) -> void:
   voice_level = 0.0
   _update_voice_ui()
  if webrtc_voice_active and not webrtc_connected and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
+  native_voice_failed_this_call = true
   _stop_webrtc_voice()
+  _sync_voice_microphone()
  if native_voice_active and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_native_voice()
   if native_voice_active and voice_sent_packets == 0 and Time.get_ticks_msec() - voice_capture_started_ms > NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS:
@@ -941,7 +943,9 @@ func _poll_webrtc_signaling() -> void:
   elif event == "state|CONNECTED" or event == "state|COMPLETED":
    webrtc_connected = true
   elif event == "state|FAILED" or event == "state|DISCONNECTED":
+   native_voice_failed_this_call = true
    _stop_webrtc_voice()
+   _sync_voice_microphone()
    break
 
 func _voice_signal_send(message: Dictionary) -> void:

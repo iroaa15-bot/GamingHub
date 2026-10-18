@@ -92,6 +92,7 @@ var webrtc_voice_active := false
 var webrtc_connected := false
 var webrtc_started_ms := 0
 var webrtc_answer_wait_ms := 0
+var webrtc_failed_this_call := false
 var webrtc_pending_remote_ice: Array[Dictionary] = []
 const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
@@ -574,6 +575,7 @@ func _process(_delta: float) -> void:
   voice_level = 0.0
   _update_voice_ui()
  if webrtc_voice_active and not webrtc_connected and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
+  webrtc_failed_this_call = true
   native_voice_failed_this_call = true
   _stop_webrtc_voice()
   _sync_voice_microphone()
@@ -757,6 +759,7 @@ func _reset_voice() -> void:
  android_voice.stop()
  native_voice_active = false
  native_voice_failed_this_call = false
+ webrtc_failed_this_call = false
  voice_microphone.stop()
  voice_level = 0.0
  voice_sent_packets = 0
@@ -781,7 +784,7 @@ func _update_voice_ui() -> void:
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
-  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if (voice_microphone.is_capturing() or native_voice_active) else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
+  voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if (voice_microphone.is_capturing() or native_voice_active or webrtc_connected) else _t("تعذر اتصال WebRTC؛ أوقف الصوت وأعد طلبه", "WebRTC connection failed; disable and re-enable voice") if webrtc_failed_this_call else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _refresh_voice_diagnostics() -> void:
  var now := Time.get_ticks_msec()
@@ -867,7 +870,7 @@ func _sync_voice_microphone() -> void:
   voice_capture_failed = false
   voice_retry_after_ms = 0
   return
- if voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active:
+ if voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active or webrtc_failed_this_call:
   return
  if not _voice_permission_granted():
   if OS.get_name() == "Android" and not voice_permission_requested:
@@ -890,6 +893,8 @@ func _sync_voice_microphone() -> void:
   if Time.get_ticks_msec() - webrtc_answer_wait_ms < WEBRTC_CONNECT_TIMEOUT_MS:
    return
   native_voice_failed_this_call = true
+  webrtc_failed_this_call = true
+  return
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true
   voice_transport_started = true
@@ -967,8 +972,9 @@ func _poll_webrtc_signaling() -> void:
    voice_microphone.stop()
    voice_transport.stop()
    voice_transport_started = false
-  elif event == "state|FAILED" or event == "state|DISCONNECTED":
+  elif event == "state|FAILED" or event == "state|DISCONNECTED" or event.begins_with("error|"):
    native_voice_failed_this_call = true
+   webrtc_failed_this_call = true
    _stop_webrtc_voice()
    _sync_voice_microphone()
    break

@@ -32,7 +32,7 @@ func send_description(kind: String, sdp: String) -> bool:
   return false
  if kind != "offer" and kind != "answer":
   return false
- if sdp.is_empty() or sdp.length() > 5500:
+ if sdp.is_empty() or sdp.length() > 16000:
   return false
  _send_message.call({"type": "voice_" + kind, "payload": {"sdp": sdp}})
  return true
@@ -57,7 +57,7 @@ func handle_server_message(msg: Dictionary) -> void:
   return
  if kind == "voice_offer" or kind == "voice_answer":
   var sdp: Variant = payload.get("sdp", null)
-  if not (sdp is String) or sdp.is_empty() or sdp.length() > 5500:
+  if not (sdp is String) or sdp.is_empty() or sdp.length() > 16000:
    signaling_rejected.emit("Invalid SDP")
    return
   remote_description.emit("offer" if kind == "voice_offer" else "answer", sdp)

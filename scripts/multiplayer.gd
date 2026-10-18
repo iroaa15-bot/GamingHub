@@ -91,6 +91,8 @@ var native_voice_active := false
 var webrtc_voice_active := false
 var webrtc_connected := false
 var webrtc_started_ms := 0
+var webrtc_answer_wait_ms := 0
+var webrtc_pending_remote_ice: Array[Dictionary] = []
 const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
 const NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS := 3500
@@ -880,6 +882,14 @@ func _sync_voice_microphone() -> void:
   webrtc_started_ms = Time.get_ticks_msec()
   android_voice.offer_webrtc()
   return
+ # Answerer waits for the remote WebRTC offer before opening legacy PCM.
+ # Fall back after the same timeout if the offer never arrives.
+ if OS.get_name() == "Android" and player_index == 1 and not native_voice_failed_this_call:
+  if webrtc_answer_wait_ms == 0:
+   webrtc_answer_wait_ms = Time.get_ticks_msec()
+  if Time.get_ticks_msec() - webrtc_answer_wait_ms < WEBRTC_CONNECT_TIMEOUT_MS:
+   return
+  native_voice_failed_this_call = true
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true
   voice_transport_started = true
@@ -905,6 +915,8 @@ func _stop_webrtc_voice() -> void:
  webrtc_voice_active = false
  webrtc_connected = false
  webrtc_started_ms = 0
+ webrtc_answer_wait_ms = 0
+ webrtc_pending_remote_ice.clear()
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
  if not voice_signaling.ready():
@@ -920,10 +932,17 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   webrtc_started_ms = Time.get_ticks_msec()
  if webrtc_voice_active:
   android_voice.remote_webrtc_description(kind, sdp)
+  for pending in webrtc_pending_remote_ice:
+   android_voice.remote_webrtc_candidate(str(pending["candidate"]), str(pending["mid"]), int(pending["line"]))
+  webrtc_pending_remote_ice.clear()
 
 func _on_webrtc_remote_candidate(candidate: String, mid: String, line: int) -> void:
- if voice_signaling.ready() and webrtc_voice_active:
+ if not voice_signaling.ready():
+  return
+ if webrtc_voice_active:
   android_voice.remote_webrtc_candidate(candidate, mid, line)
+ elif OS.get_name() == "Android" and webrtc_pending_remote_ice.size() < 64:
+  webrtc_pending_remote_ice.append({"candidate": candidate, "mid": mid, "line": line})
 
 func _poll_webrtc_signaling() -> void:
  if not webrtc_voice_active or not voice_signaling.ready():

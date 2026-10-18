@@ -38,7 +38,9 @@ jobs:
           test -s "$HOME/.local/share/godot/export_templates/4.5.1.stable/android_source.zip"
           mkdir -p android
           unzip -qo "$HOME/.local/share/godot/export_templates/4.5.1.stable/android_source.zip" -d android
-          test -f android/build/build.gradle
+          echo "Android template contents:"
+          find android -maxdepth 4 -name build.gradle -o -name settings.gradle | head -30
+          test -f android/build/build.gradle || test -f android/build/gradle/build.gradle || test -f android/build/settings.gradle
       - name: Import and validate
         run: godot --headless --path . --editor --import --quit
       - name: Attempt Android debug export

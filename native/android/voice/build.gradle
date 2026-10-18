@@ -1,3 +1,4 @@
+// AndroidX is required by androidx.core in this standalone plugin.
 plugins {
     id 'com.android.library' version '8.7.3'
 }

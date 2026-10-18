@@ -12,6 +12,8 @@ import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.AutomaticGainControl;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Experimental native 16 kHz speakerphone audio engine.
@@ -26,6 +28,8 @@ public final class SpeakerphoneAudioEngine {
     private AudioManager manager;
     private AudioRecord recorder;
     private AudioTrack player;
+    private final ArrayBlockingQueue<short[]> playbackQueue = new ArrayBlockingQueue<>(12);
+    private Thread playbackWorker;
     private AcousticEchoCanceler aec;
     private NoiseSuppressor ns;
     private AutomaticGainControl agc;
@@ -98,6 +102,26 @@ public final class SpeakerphoneAudioEngine {
             recorder.startRecording();
             player.play();
             running = true;
+            playbackWorker = new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        short[] frame = playbackQueue.poll(100, TimeUnit.MILLISECONDS);
+                        if (frame == null) continue;
+                        int offset = 0;
+                        while (offset < frame.length && !Thread.currentThread().isInterrupted()) {
+                            int written = player.write(frame, offset, frame.length - offset, AudioTrack.WRITE_BLOCKING);
+                            if (written <= 0) break;
+                            offset += written;
+                        }
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    } catch (IllegalStateException ex) {
+                        break;
+                    }
+                }
+            }, "GamingHubVoicePlayback");
+            playbackWorker.setDaemon(true);
+            playbackWorker.start();
         } catch (RuntimeException e) {
             stop();
             throw e;
@@ -113,7 +137,15 @@ public final class SpeakerphoneAudioEngine {
     /** Play PCM16 samples; invoke on a dedicated worker thread. */
     public synchronized int writePcm(short[] packet, int count) {
         if (!running || packet == null || count < 0 || count > packet.length) return -1;
-        return player.write(packet, 0, count, AudioTrack.WRITE_NON_BLOCKING);
+        // The Godot main thread only enqueues. A worker performs full blocking writes,
+        // preventing truncated 20 ms packets and UI-thread AudioTrack stalls.
+        short[] copy = new short[count];
+        System.arraycopy(packet, 0, copy, 0, count);
+        if (!playbackQueue.offer(copy)) {
+            playbackQueue.poll(); // Drop oldest audio instead of building audible latency.
+            if (!playbackQueue.offer(copy)) return -1;
+        }
+        return count;
     }
 
     public synchronized boolean isRunning() { return running; }
@@ -123,6 +155,11 @@ public final class SpeakerphoneAudioEngine {
 
     public synchronized void stop() {
         running = false;
+        playbackQueue.clear();
+        if (playbackWorker != null) {
+            playbackWorker.interrupt();
+            playbackWorker = null;
+        }
         if (recorder != null) {
             try { if (recorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) recorder.stop(); }
             catch (IllegalStateException ignored) {}

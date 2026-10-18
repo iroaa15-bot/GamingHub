@@ -99,14 +99,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Avoid the interactive Godot editor template installer hanging in CI.
           template="$(find "$HOME/.local/share/godot/export_templates" -name android_source.zip -type f -print -quit)"
           if [ -z "$template" ]; then
-            echo 'Android Gradle source missing from setup-godot templates; retrieving official Godot 4.5.1 archive'
-            curl -fL --retry 2 --connect-timeout 15 --max-time 150 \
-              -o /tmp/godot-android-templates.tpz \
-              'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz'
-            entry="$(unzip -Z1 /tmp/godot-android-templates.tpz | grep '/android_source.zip
+            echo 'Downloading official Godot 4.5.1 export templates for Android Gradle'
+            curl -fL --retry 2 --connect-timeout 15 --max-time 150 -o /tmp/godot-android-templates.tpz https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz
+            unzip -p /tmp/godot-android-templates.tpz templates/android_source.zip > /tmp/android_source.zip
+            template=/tmp/android_source.zip
+            rm -f /tmp/godot-android-templates.tpz
+          fi
+          test -s "$template"
+          mkdir -p android
+          timeout 90s unzip -q "$template" -d android
+          test -f android/build/build.gradle
       - name: Build and embed native speakerphone plugin
         shell: bash
         run: |

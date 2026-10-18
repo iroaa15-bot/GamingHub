@@ -96,6 +96,7 @@ var webrtc_started_ms := 0
 var webrtc_answer_wait_ms := 0
 var webrtc_failed_this_call := false
 var webrtc_pending_remote_ice: Array[Dictionary] = []
+var webrtc_pending_offer := ""
 const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
 const NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS := 3500
@@ -885,6 +886,10 @@ func _sync_voice_microphone() -> void:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
   return
+ if OS.get_name() == "Android" and player_index == 1 and not webrtc_pending_offer.is_empty():
+  var offer := webrtc_pending_offer
+  _on_webrtc_remote_description("offer", offer)
+  return
  # Player zero initiates the offer; player one answers when it arrives.
  # Preserve PCM fallback if WebRTC cannot start or establish media.
  if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call:
@@ -936,9 +941,14 @@ func _stop_webrtc_voice() -> void:
  webrtc_started_ms = 0
  webrtc_answer_wait_ms = 0
  webrtc_pending_remote_ice.clear()
+ webrtc_pending_offer = ""
 
 func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
  if not voice_signaling.ready() or webrtc_failed_this_call:
+  return
+ # Keep the offer while Android is showing the runtime microphone permission prompt.
+ if kind == "offer" and OS.get_name() == "Android" and not webrtc_voice_active and not _voice_permission_granted():
+  webrtc_pending_offer = sdp
   return
  # A remote offer can bootstrap the callee without opening a second recorder.
  if not webrtc_voice_active and kind == "offer" and OS.get_name() == "Android" and _voice_permission_granted():
@@ -957,6 +967,8 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
    return
  if webrtc_voice_active:
   android_voice.remote_webrtc_description(kind, sdp)
+  if kind == "offer":
+   webrtc_pending_offer = ""
   for pending in webrtc_pending_remote_ice:
    android_voice.remote_webrtc_candidate(str(pending["candidate"]), str(pending["mid"]), int(pending["line"]))
   webrtc_pending_remote_ice.clear()

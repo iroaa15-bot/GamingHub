@@ -967,7 +967,7 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
  if not voice_signaling.ready() or webrtc_failed_this_call:
   return
  # Keep the offer while Android is showing the runtime microphone permission prompt.
- if kind == "offer" and OS.get_name() == "Android" and not webrtc_voice_active and not _voice_permission_granted():
+ if kind == "offer" and OS.get_name() == "Android" and not webrtc_voice_active and (not _voice_permission_granted() or not webrtc_ice_config_received):
   webrtc_pending_offer = sdp
   return
  # A remote offer can bootstrap the callee without opening a second recorder.
@@ -1108,7 +1108,10 @@ func _handle(msg: Dictionary) -> void:
      if ice_urls.size() == urls_value.size():
       android_voice.configure_webrtc_ice_servers(ice_urls, str(ice_payload.get("username", "")), str(ice_payload.get("credential", "")))
    webrtc_ice_config_received = true
-   _sync_voice_microphone()
+   if not webrtc_pending_offer.is_empty() and _voice_permission_granted():
+    _on_webrtc_remote_description("offer", webrtc_pending_offer)
+   else:
+    _sync_voice_microphone()
   "voice_offer", "voice_answer", "voice_ice":
    voice_signaling.handle_server_message(msg)
   "voice_audio":

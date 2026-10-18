@@ -977,6 +977,14 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("انتهت جلسة المنافس أو مهلة عودته؛ يمكنك بدء مباراة جديدة.", "Opponent session or reconnection window ended; you can start a new match."), 18)
    _refresh_actions()
   "error":
+   var server_error := str(msg.get("message", "Server error"))
+   if server_error in ["No active voice room", "Voice peer unavailable", "Both players must enable voice", "Invalid audio packet", "Invalid audio encoding", "Invalid audio size", "Invalid voice state", "Invalid voice payload", "Invalid voice SDP", "Invalid voice ICE"]:
+    voice_request_pending = false
+    voice_request_started_ms = 0
+    _reset_voice()
+    if is_instance_valid(voice_status):
+     voice_status.text = _t("تعذر تشغيل الصوت: ", "Voice unavailable: ") + server_error
+    return
    if voice_request_pending:
     voice_request_pending = false
     voice_request_started_ms = 0

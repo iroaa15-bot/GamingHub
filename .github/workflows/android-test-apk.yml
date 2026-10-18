@@ -101,6 +101,76 @@ jobs:
           set -euo pipefail
           # Avoid the interactive Godot editor template installer hanging in CI.
           template="$(find "$HOME/.local/share/godot/export_templates" -name android_source.zip -type f -print -quit)"
+          if [ -z "$template" ]; then
+            echo 'Android Gradle source missing from setup-godot templates; retrieving official Godot 4.5.1 archive'
+            curl -fL --retry 2 --connect-timeout 15 --max-time 150 \
+              -o /tmp/godot-android-templates.tpz \
+              'https://github.com/godotengine/godot-builds/releases/download/4.5.1-stable/Godot_v4.5.1-stable_export_templates.tpz'
+            entry="$(unzip -Z1 /tmp/godot-android-templates.tpz | grep '/android_source.zip
+      - name: Build and embed native speakerphone plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'android.useAndroidX=true\n' > native/android/voice/gradle.properties
+          cd native/android/voice
+          gradle assembleRelease --no-daemon
+          mkdir -p ../../../android/plugins
+          aar="$(find build/outputs/aar -maxdepth 1 -name '*.aar' -type f | head -n 1)"
+          test -s "$aar"
+          cp "$aar" ../../../android/plugins/GamingHubVoice.aar
+          cp GamingHubVoice.gdap ../../../android/plugins/GamingHubVoice.gdap
+          test -s ../../../android/plugins/GamingHubVoice.aar
+      - name: Export native speakerphone Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          timeout 12m godot --headless --path . --export-debug 'Android Voice Native' build/GamingHub-voice-native.apk 2>&1 | tee voice-native-export.log
+          test -s build/GamingHub-voice-native.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify build/GamingHub-voice-native.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions build/GamingHub-voice-native.apk | grep -q android.permission.RECORD_AUDIO
+      - name: Upload native speakerphone APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Native-Speakerphone-APK
+          path: build/GamingHub-voice-native.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Export installable Android APK
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p build
+          timeout 12m godot --headless --path . --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
+          test -s build/GamingHub-voice-experimental.apk
+      - name: Verify APK signature and permissions
+        run: |
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify build/GamingHub-voice-experimental.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions build/GamingHub-voice-experimental.apk | tee voice-android-permissions.log
+          grep -q 'android.permission.RECORD_AUDIO' voice-android-permissions.log
+          grep -q 'android.permission.INTERNET' voice-android-permissions.log
+      - name: Upload experimental Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Experimental-Android-APK
+          path: build/GamingHub-voice-experimental.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Android-Build-Logs
+          path: |
+            voice-*.log
+          if-no-files-found: ignore
+          retention-days: 14
+ | head -n 1)"
+            test -n "$entry"
+            unzip -p /tmp/godot-android-templates.tpz "$entry" > /tmp/android_source.zip
+            template=/tmp/android_source.zip
+            rm -f /tmp/godot-android-templates.tpz
+          fi
           test -s "$template"
           mkdir -p android
           timeout 90s unzip -q "$template" -d android

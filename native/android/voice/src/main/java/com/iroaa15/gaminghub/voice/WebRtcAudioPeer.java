@@ -26,6 +26,8 @@ public final class WebRtcAudioPeer {
     private final ConcurrentLinkedQueue<String> events = new ConcurrentLinkedQueue<>();
     private boolean started;
     private boolean remoteSdpReady;
+    private boolean localSdpReady;
+    private final List<IceCandidate> pendingLocalCandidates = new ArrayList<>();
     private final List<IceCandidate> pendingCandidates = new ArrayList<>();
 
     public WebRtcAudioPeer(Context context) { this.context = context.getApplicationContext(); }
@@ -51,7 +53,13 @@ public final class WebRtcAudioPeer {
                 @Override public void onIceConnectionReceivingChange(boolean receiving) {}
                 @Override public void onIceGatheringChange(PeerConnection.IceGatheringState state) {}
                 @Override public void onIceCandidate(IceCandidate c) {
-                    events.add("ice|" + c.sdpMid + "|" + c.sdpMLineIndex + "|" + c.sdp);
+                    synchronized (WebRtcAudioPeer.this) {
+                        if (localSdpReady) {
+                            events.add("ice|" + c.sdpMid + "|" + c.sdpMLineIndex + "|" + c.sdp);
+                        } else if (pendingLocalCandidates.size() < 64) {
+                            pendingLocalCandidates.add(c);
+                        }
+                    }
                 }
                 @Override public void onIceCandidatesRemoved(IceCandidate[] candidates) {}
                 @Override public void onAddStream(org.webrtc.MediaStream stream) {}
@@ -78,7 +86,14 @@ public final class WebRtcAudioPeer {
             }
             @Override public void onSetSuccess() {
                 if (type.startsWith("local_offer|") || type.startsWith("local_answer|")) {
-                    events.add(type.substring(6));
+                    synchronized (WebRtcAudioPeer.this) {
+                        events.add(type.substring(6));
+                        localSdpReady = true;
+                        for (IceCandidate c : pendingLocalCandidates) {
+                            events.add("ice|" + c.sdpMid + "|" + c.sdpMLineIndex + "|" + c.sdp);
+                        }
+                        pendingLocalCandidates.clear();
+                    }
                 }
                 if (type.startsWith("remote_")) {
                     synchronized (WebRtcAudioPeer.this) {
@@ -118,7 +133,9 @@ public final class WebRtcAudioPeer {
     public synchronized void stop() {
         started = false;
         remoteSdpReady = false;
+        localSdpReady = false;
         pendingCandidates.clear();
+        pendingLocalCandidates.clear();
         if (peer != null) { peer.dispose(); peer = null; }
         if (track != null) { track.dispose(); track = null; }
         if (source != null) { source.dispose(); source = null; }

@@ -581,7 +581,7 @@ func _process(_delta: float) -> void:
    _fallback_from_silent_native_voice()
  elif voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_voice_microphone()
- if voice_transport_started and not native_voice_active:
+ if voice_transport_started and not native_voice_active and not webrtc_connected:
   voice_transport.pump()
  if voice_transport_started:
   _refresh_voice_diagnostics()
@@ -994,7 +994,7 @@ func _handle(msg: Dictionary) -> void:
   "voice_offer", "voice_answer", "voice_ice":
    voice_signaling.handle_server_message(msg)
   "voice_audio":
-   if voice_signaling.ready() and voice_transport_started:
+   if voice_signaling.ready() and voice_transport_started and not webrtc_connected:
     if (android_voice.push_pcm(str(msg.get("pcm", ""))) if native_voice_active else voice_transport.receive_packet(str(msg.get("pcm", "")))):
      voice_received_packets += 1
   "voice_state_ack":

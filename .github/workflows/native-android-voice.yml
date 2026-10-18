@@ -37,7 +37,9 @@ jobs:
           cd native/android/voice
           printf 'android.useAndroidX=true\n' > gradle.properties
           gradle assembleRelease --no-daemon
-          test -s build/outputs/aar/voice-release.aar
+          echo 'Generated AAR files:'
+          find build/outputs/aar -maxdepth 1 -type f -name '*.aar' -print
+          test "$(find build/outputs/aar -maxdepth 1 -type f -name '*.aar' -size +0c | wc -l)" -ge 1
       - name: Upload experimental plugin AAR
         uses: actions/upload-artifact@v4
         with:

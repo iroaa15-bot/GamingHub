@@ -250,7 +250,7 @@ async def process(ws, msg):
             await send(room.players[1-index], {'type':'voice_audio','pcm':encoded})
             return
         payload = msg.get('payload')
-        if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
+        if not isinstance(payload, dict) or len(json.dumps(payload)) > (18000 if action in ('voice_offer', 'voice_answer') else 6000):
             return await send(ws, {'type':'error','message':'Invalid voice payload'})
         if action in ('voice_offer', 'voice_answer'):
             if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 16000:

@@ -991,7 +991,9 @@ func _handle(msg: Dictionary) -> void:
      connect_started_ms = 0
      reconnect_next_ms = Time.get_ticks_msec() + 2500
      return
-    _abort_stalled_session(_t("السيرفر رفض استكمال المباراة. يمكنك بدء مباراة جديدة.", "Server rejected resume. Start a new match."))
+    var resume_reason := str(msg.get("message", "Unknown server error"))
+     push_warning("GamingHub resume rejected: " + resume_reason)
+     _abort_stalled_session(_t("فشل استكمال المباراة: ", "Match resume failed: ") + resume_reason)
     return
    action_in_flight = false
    _refresh_actions()

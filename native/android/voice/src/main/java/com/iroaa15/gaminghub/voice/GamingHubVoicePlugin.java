@@ -88,6 +88,14 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
     }
 
     @UsedByGodot
+    public boolean configureWebRtcIceServers(String[] urls, String username, String credential) {
+        Activity activity = getActivity();
+        if (activity == null) return false;
+        if (rtc == null) rtc = new WebRtcAudioPeer(activity);
+        return rtc.configureIceServers(urls, username, credential);
+    }
+
+    @UsedByGodot
     public boolean startWebRtc() {
         Activity activity = getActivity();
         if (activity == null || ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO)

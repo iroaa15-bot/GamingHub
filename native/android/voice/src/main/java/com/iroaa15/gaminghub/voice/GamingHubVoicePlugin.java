@@ -100,6 +100,9 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
     public void stopWebRtc() { if (rtc != null) rtc.stop(); }
 
     @UsedByGodot
+    public void setWebRtcMuted(boolean muted) { if (rtc != null) rtc.setMuted(muted); }
+
+    @UsedByGodot
     public void webRtcOffer() { if (rtc != null) rtc.createOffer(); }
 
     @UsedByGodot

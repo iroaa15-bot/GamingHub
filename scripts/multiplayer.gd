@@ -560,7 +560,7 @@ func _process(_delta: float) -> void:
  _process_local_voice_test()
  socket.poll()
  _poll_webrtc_signaling()
- if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
+ if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
  if (voice_microphone.is_capturing() or native_voice_active) and (not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN):
@@ -575,11 +575,11 @@ func _process(_delta: float) -> void:
   native_voice_failed_this_call = true
   _stop_webrtc_voice()
   _sync_voice_microphone()
- if native_voice_active and not reconnecting and not reconnect_pending and not opponent_paused:
+ if native_voice_active and not webrtc_connected and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_native_voice()
   if native_voice_active and voice_sent_packets == 0 and Time.get_ticks_msec() - voice_capture_started_ms > NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS:
    _fallback_from_silent_native_voice()
- elif voice_microphone.is_capturing() and not reconnecting and not reconnect_pending and not opponent_paused:
+ elif voice_microphone.is_capturing() and not webrtc_connected and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_voice_microphone()
  if voice_transport_started and not native_voice_active and not webrtc_connected:
   voice_transport.pump()
@@ -942,6 +942,12 @@ func _poll_webrtc_signaling() -> void:
     voice_signaling.send_candidate(fields[3], fields[1], int(fields[2]))
   elif event == "state|CONNECTED" or event == "state|COMPLETED":
    webrtc_connected = true
+   # Only one audio device pipeline may own the microphone/speaker.
+   android_voice.stop()
+   native_voice_active = false
+   voice_microphone.stop()
+   voice_transport.stop()
+   voice_transport_started = false
   elif event == "state|FAILED" or event == "state|DISCONNECTED":
    native_voice_failed_this_call = true
    _stop_webrtc_voice()

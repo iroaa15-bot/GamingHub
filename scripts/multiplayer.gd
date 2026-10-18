@@ -583,6 +583,7 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if webrtc_voice_active and webrtc_disconnected_since_ms > 0 and Time.get_ticks_msec() - webrtc_disconnected_since_ms >= WEBRTC_DISCONNECT_GRACE_MS:
   webrtc_failed_this_call = true
+  webrtc_failure_code = "ICE_RECONNECT_TIMEOUT"
   native_voice_failed_this_call = true
   _stop_webrtc_voice()
   _update_voice_ui()
@@ -599,6 +600,7 @@ func _process(_delta: float) -> void:
   _update_voice_ui()
  if webrtc_voice_active and not webrtc_connected and webrtc_disconnected_since_ms == 0 and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
   webrtc_failed_this_call = true
+  webrtc_failure_code = "WEBRTC_HANDSHAKE_TIMEOUT"
   native_voice_failed_this_call = true
   _stop_webrtc_voice()
   _sync_voice_microphone()
@@ -783,6 +785,8 @@ func _reset_voice() -> void:
  native_voice_active = false
  native_voice_failed_this_call = false
  webrtc_failed_this_call = false
+ webrtc_failure_code = ""
+ webrtc_stage = "idle"
  voice_microphone.stop()
  voice_level = 0.0
  voice_sent_packets = 0
@@ -936,6 +940,7 @@ func _sync_voice_microphone() -> void:
   else:
    # Never silently use PCM while the other device expects Opus.
    webrtc_failed_this_call = true
+   webrtc_failure_code = "WEBRTC_START_FAILED"
    native_voice_failed_this_call = true
   return
  # Answerer waits for the remote WebRTC offer before opening legacy PCM.
@@ -947,6 +952,7 @@ func _sync_voice_microphone() -> void:
    return
   native_voice_failed_this_call = true
   webrtc_failed_this_call = true
+  webrtc_failure_code = "WEBRTC_OFFER_TIMEOUT"
   return
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true
@@ -1002,6 +1008,7 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   if webrtc_voice_active:
    android_voice.set_webrtc_muted(voice_muted)
   if not webrtc_voice_active:
+   webrtc_failure_code = "WEBRTC_ANSWER_START_FAILED"
    webrtc_failed_this_call = true
    native_voice_failed_this_call = true
    return

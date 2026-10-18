@@ -3,7 +3,9 @@ package com.iroaa15.gaminghub.voice;
 import android.app.Activity;
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.util.Base64;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import androidx.core.content.ContextCompat;
 import org.godotengine.godot.Godot;
 import org.godotengine.godot.plugin.GodotPlugin;
@@ -16,6 +18,7 @@ import org.godotengine.godot.plugin.UsedByGodot;
  */
 public final class GamingHubVoicePlugin extends GodotPlugin {
     private SpeakerphoneAudioEngine engine;
+    private final short[] capture = new short[SpeakerphoneAudioEngine.PACKET_SAMPLES];
 
     public GamingHubVoicePlugin(Godot godot) {
         super(godot);
@@ -44,6 +47,34 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
     @UsedByGodot
     public void stopVoice() {
         if (engine != null) engine.stop();
+    }
+
+    /** Poll 20ms mono PCM16; empty means no complete packet available. */
+    @UsedByGodot
+    public String pollPcm() {
+        if (engine == null || !engine.isRunning()) return "";
+        int count = engine.readPcm(capture);
+        if (count != capture.length) return "";
+        ByteBuffer bytes = ByteBuffer.allocate(capture.length * 2).order(ByteOrder.LITTLE_ENDIAN);
+        for (short sample : capture) bytes.putShort(sample);
+        return Base64.encodeToString(bytes.array(), Base64.NO_WRAP);
+    }
+
+    /** Accept only the existing 640-byte voice protocol packet. */
+    @UsedByGodot
+    public boolean pushPcm(String encoded) {
+        if (engine == null || !engine.isRunning() || encoded == null || encoded.length() != 856) return false;
+        byte[] bytes;
+        try {
+            bytes = Base64.decode(encoded, Base64.NO_WRAP);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        if (bytes.length != SpeakerphoneAudioEngine.PACKET_SAMPLES * 2) return false;
+        ByteBuffer data = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+        short[] samples = new short[SpeakerphoneAudioEngine.PACKET_SAMPLES];
+        for (int i = 0; i < samples.length; i++) samples[i] = data.getShort();
+        return engine.writePcm(samples, samples.length) == samples.length;
     }
 
     @UsedByGodot

@@ -88,6 +88,10 @@ var voice_microphone = VoiceMicrophoneCapture.new()
 var voice_transport = VoicePCMTransport.new()
 var android_voice = AndroidVoiceBridge.new()
 var native_voice_active := false
+var webrtc_voice_active := false
+var webrtc_connected := false
+var webrtc_started_ms := 0
+const WEBRTC_CONNECT_TIMEOUT_MS := 10000
 var native_voice_failed_this_call := false
 const NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS := 3500
 var voice_transport_started := false
@@ -124,6 +128,8 @@ func _t(ar: String, en: String) -> String:
 
 func _ready() -> void:
  voice_signaling.configure(Callable(self, "_voice_signal_send"))
+ voice_signaling.remote_description.connect(_on_webrtc_remote_description)
+ voice_signaling.remote_candidate.connect(_on_webrtc_remote_candidate)
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
@@ -553,6 +559,7 @@ func _start_reconnect() -> void:
 func _process(_delta: float) -> void:
  _process_local_voice_test()
  socket.poll()
+ _poll_webrtc_signaling()
  if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
@@ -564,6 +571,8 @@ func _process(_delta: float) -> void:
   voice_transport_started = false
   voice_level = 0.0
   _update_voice_ui()
+ if webrtc_voice_active and not webrtc_connected and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
+  _stop_webrtc_voice()
  if native_voice_active and not reconnecting and not reconnect_pending and not opponent_paused:
   _poll_native_voice()
   if native_voice_active and voice_sent_packets == 0 and Time.get_ticks_msec() - voice_capture_started_ms > NATIVE_VOICE_FIRST_PACKET_TIMEOUT_MS:
@@ -740,6 +749,7 @@ func _accept_voice_invite() -> void:
 func _reset_voice() -> void:
  voice_transport.stop()
  voice_transport_started = false
+ _stop_webrtc_voice()
  android_voice.stop()
  native_voice_active = false
  native_voice_failed_this_call = false
@@ -843,6 +853,7 @@ func _voice_permission_granted() -> bool:
 
 func _sync_voice_microphone() -> void:
  if not voice_signaling.ready() or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
+  _stop_webrtc_voice()
   android_voice.stop()
   native_voice_active = false
   voice_microphone.stop()
@@ -852,7 +863,7 @@ func _sync_voice_microphone() -> void:
   voice_capture_failed = false
   voice_retry_after_ms = 0
   return
- if voice_microphone.is_capturing() or native_voice_active:
+ if voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active:
   return
  if not _voice_permission_granted():
   if OS.get_name() == "Android" and not voice_permission_requested:
@@ -878,6 +889,42 @@ func _sync_voice_microphone() -> void:
   voice_capture_failed = true
   voice_retry_after_ms = Time.get_ticks_msec() + 3000
   push_warning("GamingHub voice: microphone capture could not start; retrying in 3s")
+
+func _stop_webrtc_voice() -> void:
+ android_voice.stop_webrtc()
+ webrtc_voice_active = false
+ webrtc_connected = false
+ webrtc_started_ms = 0
+
+func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
+ if not voice_signaling.ready() or not webrtc_voice_active:
+  return
+ android_voice.remote_webrtc_description(kind, sdp)
+
+func _on_webrtc_remote_candidate(candidate: String, mid: String, line: int) -> void:
+ if voice_signaling.ready() and webrtc_voice_active:
+  android_voice.remote_webrtc_candidate(candidate, mid, line)
+
+func _poll_webrtc_signaling() -> void:
+ if not webrtc_voice_active or not voice_signaling.ready():
+  return
+ for _i in range(16):
+  var event := android_voice.poll_webrtc_event()
+  if event.is_empty():
+   break
+  if event.begins_with("offer|"):
+   voice_signaling.send_description("offer", event.substr(6))
+  elif event.begins_with("answer|"):
+   voice_signaling.send_description("answer", event.substr(7))
+  elif event.begins_with("ice|"):
+   var fields := event.split("|", false, 3)
+   if fields.size() == 4:
+    voice_signaling.send_candidate(fields[3], fields[1], int(fields[2]))
+  elif event == "state|CONNECTED" or event == "state|COMPLETED":
+   webrtc_connected = true
+  elif event == "state|FAILED" or event == "state|DISCONNECTED":
+   _stop_webrtc_voice()
+   break
 
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

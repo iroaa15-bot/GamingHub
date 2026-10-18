@@ -706,7 +706,7 @@
     "server/liveops_content.py": "7dd3312cc3bb465b24824037760e7c23bf2514969a191cd6ce67fac1e07f59e9",
     "server/liveops_rotation.json": "ab08107b814e860da6089301815d481840df44bc41c8400ef49e5ed3fbf818c7",
     "server/requirements.txt": "2324650b5371efe39ea9417a042cc9eee45c7b771028658a0bd509cde9cdfd94",
-    "server/server.py": "6c5a241c74a4ffe26e5af6ccc959a9750bec06bf5505be3109d7a5f18c9460a1",
+    "server/server.py": "639760cd2c29f6a13bb35e31f4ffdb0b9e02ccac703b6cc112085d70c1395acc",
     "server/source_bundle.b85": "ca504b130a63825de48e0fc3837ea24616937629a42461bb58f5c21ad0f5e4f6",
     "server/test_additive_history_v114.py": "82edd1728f01c633744f94be49dddd940f272e91bb7f8e19e168982d8dca9ca0",
     "server/test_daily_content.py": "9516e7c8e4cd769ddce74fbe9eda0e107ff32c4c8fff7dc6c34c7744802440b7",

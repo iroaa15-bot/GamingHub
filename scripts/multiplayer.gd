@@ -798,6 +798,9 @@ func _update_voice_ui() -> void:
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
+  if webrtc_voice_active and webrtc_disconnected_since_ms > 0:
+   voice_status.text = _t("انقطع الصوت مؤقتًا؛ نحاول استعادة الاتصال...", "Voice interrupted; attempting to reconnect...")
+   return
   voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if (voice_microphone.is_capturing() or native_voice_active or webrtc_connected) else _t("تعذر اتصال WebRTC؛ أوقف الصوت وأعد طلبه", "WebRTC connection failed; disable and re-enable voice") if webrtc_failed_this_call else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
 func _refresh_voice_diagnostics() -> void:
@@ -1005,8 +1008,11 @@ func _poll_webrtc_signaling() -> void:
    if fields.size() == 4:
     voice_signaling.send_candidate(fields[3], fields[1], int(fields[2]))
   elif event == "state|CONNECTED" or event == "state|COMPLETED":
+   var was_connected := webrtc_connected
    webrtc_connected = true
    webrtc_disconnected_since_ms = 0
+   if not was_connected:
+    _update_voice_ui()
    # Only one audio device pipeline may own the microphone/speaker.
    android_voice.stop()
    native_voice_active = false
@@ -1014,9 +1020,11 @@ func _poll_webrtc_signaling() -> void:
    voice_transport.stop()
    voice_transport_started = false
   elif event == "state|DISCONNECTED":
-   # ICE can recover after a brief Wi-Fi/mobile network transition.
+   # Do not report a live voice link while ICE media is interrupted.
+   webrtc_connected = false
    if webrtc_disconnected_since_ms == 0:
     webrtc_disconnected_since_ms = Time.get_ticks_msec()
+   _update_voice_ui()
   elif event == "state|FAILED" or event.begins_with("error|"):
    native_voice_failed_this_call = true
    webrtc_failed_this_call = true

@@ -17,12 +17,7 @@ android {
 }
 
 dependencies {
-    // Match the Godot 4.5 Android plugin API against a local godot-lib AAR.
-    // Pass -PgodotAar=/absolute/path/to/godot-lib.release.aar to Gradle.
-    def godotAar = providers.gradleProperty('godotAar').orNull
-    if (godotAar == null) {
-        throw new GradleException('Missing Godot API: pass -PgodotAar=/path/to/godot-lib.release.aar')
-    }
-    compileOnly files(godotAar)
+    // Use the official Godot 4.5.1 Android API published on Maven Central.
+    compileOnly 'org.godotengine:godot:4.5.1.stable'
     implementation 'androidx.core:core:1.13.1'
 }

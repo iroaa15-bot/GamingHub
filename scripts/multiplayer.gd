@@ -879,11 +879,16 @@ func _sync_voice_microphone() -> void:
   return
  # Player zero initiates the offer; player one answers when it arrives.
  # Preserve PCM fallback if WebRTC cannot start or establish media.
- if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call and android_voice.start_webrtc():
-  webrtc_voice_active = true
-  webrtc_connected = false
-  webrtc_started_ms = Time.get_ticks_msec()
-  android_voice.offer_webrtc()
+ if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call:
+  if android_voice.start_webrtc():
+   webrtc_voice_active = true
+   webrtc_connected = false
+   webrtc_started_ms = Time.get_ticks_msec()
+   android_voice.offer_webrtc()
+  else:
+   # Never silently use PCM while the other device expects Opus.
+   webrtc_failed_this_call = true
+   native_voice_failed_this_call = true
   return
  # Answerer waits for the remote WebRTC offer before opening legacy PCM.
  # Fall back after the same timeout if the offer never arrives.
@@ -935,6 +940,10 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   voice_transport_started = false
   webrtc_voice_active = android_voice.start_webrtc()
   webrtc_started_ms = Time.get_ticks_msec()
+  if not webrtc_voice_active:
+   webrtc_failed_this_call = true
+   native_voice_failed_this_call = true
+   return
  if webrtc_voice_active:
   android_voice.remote_webrtc_description(kind, sdp)
   for pending in webrtc_pending_remote_ice:

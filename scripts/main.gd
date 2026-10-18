@@ -1,6 +1,7 @@
 extends Control
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
+const HomeLayoutCatalog = preload("res://scripts/home_layout_catalog.gd")
 
 const AUDIENCES: Array[String] = ["all"]
 var audience: String = "all"
@@ -1800,6 +1801,57 @@ func world_art_card(world_index: int, title_value: String, progress_value: Strin
  stack.add_child(title_label)
 
 func show_home() -> void:
+ if HomeLayoutCatalog.enabled():
+  show_home_v2()
+  return
+ show_home_legacy()
+
+func show_home_v2() -> void:
+ if age_group == "unknown":
+  show_age_group_selection()
+  return
+ daily_ai_screen_active = false
+ game = -1
+ clear_ui()
+ VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
+ xp_progress()
+ stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
+ label(tr_ui("خمن صورتك", "GUESS YOUR PICTURE"), 30)
+ if age_group != "under13":
+  button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
+  button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
+ button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
+ button(tr_ui("🎮 قائمة الألعاب", "🎮 GAMES LIST"), show_games_list_v2, GOLD)
+ label(tr_ui("الغرف والاتصال", "ROOMS & CONNECTION"), 23)
+ if age_group != "under13":
+  button(tr_ui("👥 إنشاء غرفة أو الانضمام بكود", "👥 CREATE OR JOIN ROOM"), open_guess_multiplayer, ACCENT)
+ label(tr_ui("المحادثة والصوت متاحان داخل الغرف المدعومة فقط", "Chat and voice are available in supported rooms only"), 16)
+ button(tr_ui("🔄 جلب تحديات جديدة", "🔄 FETCH NEW CHALLENGES"), func(): DailyRounds.refresh(true), PANEL)
+ button("العربية / English", show_languages, PANEL)
+ button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
+ button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
+ button(tr_ui("↩ الواجهة الأصلية", "↩ ORIGINAL HOME"), func(): HomeLayoutCatalog.set_enabled(false); show_home(), PANEL)
+
+func show_games_list_v2() -> void:
+ clear_ui()
+ label(tr_ui("🎮 قائمة الألعاب", "🎮 GAMES LIST"), 30)
+ label(tr_ui("كل الألعاب الحالية في مكان واحد", "ALL CURRENT GAMES IN ONE PLACE"), 17)
+ var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
+ var favorites: Array = profile.get("favorites", [])
+ var grid := GridContainer.new()
+ grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 650 else 2
+ root.add_child(grid)
+ for i in range(GAMES.size()):
+  grid.add_child(make_game_tile(i, previews[i % previews.size()], i in favorites))
+ button(tr_ui("⚡ سباق السرعة ورحلة الكنز", "⚡ BLITZ & TREASURE"), func(): show_modes(5), GOLD)
+ button(tr_ui("🎲 مفاجأة الجولة", "🎲 SURPRISE ME"), start_surprise_arcade, ACCENT)
+ button(tr_ui("🏆 بطولة الأبطال", "🏆 CHAMPIONSHIP"), start_championship, GOLD)
+ button(tr_ui("🖼️ تحديات الصور اليومية", "🖼️ DAILY PICTURE CHALLENGES"), show_ai_daily, GOLD)
+ button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
+ button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements, PANEL)
+ button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)
+
+func show_home_legacy() -> void:
  if age_group == "unknown":
   show_age_group_selection()
   return

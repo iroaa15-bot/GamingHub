@@ -80,6 +80,15 @@ jobs:
           set -o pipefail
           godot --headless --path . --script res://tests/voice_pcm_smoke.gd 2>&1 | tee voice-pcm-smoke.log
           grep -q VOICE_PCM_SMOKE_PASS voice-pcm-smoke.log
+      - name: Guard native voice plugin integration status
+        shell: bash
+        run: |
+          # The standard export is not a native-voice build. Keep this explicit.
+          test -f native/android/voice/GamingHubVoice.gdap
+          if grep -q '^gradle_build/use_gradle_build=false' export_presets.cfg; then
+            echo 'NOTICE: APK uses standard Godot export; native AAR is NOT embedded.'
+            echo 'Native speakerphone AEC/AGC cannot be validated with this APK.'
+          fi
       - name: Export installable Android APK
         shell: bash
         run: |

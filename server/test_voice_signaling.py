@@ -117,14 +117,19 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.a, {"type": "voice_audio", "pcm": base64.b64encode(bytes(638)).decode("ascii")})
         self.assertEqual(self.a.messages[-1]["type"], "error")
 
-    async def test_audio_rate_limit_drops_excess_packets(self):
+    async def test_audio_burst_frames_are_preserved_and_flood_limited(self):
         await process(self.a, {"type": "voice_state", "enabled": True})
         await process(self.b, {"type": "voice_state", "enabled": True})
         packet = base64.b64encode(bytes(640)).decode("ascii")
         before = len(self.b.messages)
+        # A mobile scheduling stall may deliver multiple legitimate frames together.
         await process(self.a, {"type": "voice_audio", "pcm": packet})
         await process(self.a, {"type": "voice_audio", "pcm": packet})
-        self.assertEqual(len(self.b.messages), before + 1)
+        self.assertEqual(len(self.b.messages), before + 2)
+        # Sustained floods are still limited to 80 frames per rolling second.
+        for _ in range(100):
+            await process(self.a, {"type": "voice_audio", "pcm": packet})
+        self.assertEqual(len(self.b.messages), before + 80)
 
     async def test_invalid_ice_is_rejected(self):
         await process(self.a, {"type": "voice_state", "enabled": True})

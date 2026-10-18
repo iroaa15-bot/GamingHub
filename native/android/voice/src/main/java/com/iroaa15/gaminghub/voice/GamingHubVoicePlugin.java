@@ -19,6 +19,7 @@ import org.godotengine.godot.plugin.UsedByGodot;
 public final class GamingHubVoicePlugin extends GodotPlugin {
     private SpeakerphoneAudioEngine engine;
     private final short[] capture = new short[SpeakerphoneAudioEngine.PACKET_SAMPLES];
+    private int capturedSamples = 0;
 
     public GamingHubVoicePlugin(Godot godot) {
         super(godot);
@@ -46,6 +47,7 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
 
     @UsedByGodot
     public void stopVoice() {
+        capturedSamples = 0;
         if (engine != null) engine.stop();
     }
 
@@ -53,8 +55,15 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
     @UsedByGodot
     public String pollPcm() {
         if (engine == null || !engine.isRunning()) return "";
-        int count = engine.readPcm(capture);
-        if (count != capture.length) return "";
+        short[] remaining = new short[capture.length - capturedSamples];
+        int count = engine.readPcm(remaining);
+        if (count < 0) return "";
+        if (count > 0) {
+            System.arraycopy(remaining, 0, capture, capturedSamples, count);
+            capturedSamples += count;
+        }
+        if (capturedSamples < capture.length) return "";
+        capturedSamples = 0;
         ByteBuffer bytes = ByteBuffer.allocate(capture.length * 2).order(ByteOrder.LITTLE_ENDIAN);
         for (short sample : capture) bytes.putShort(sample);
         return Base64.encodeToString(bytes.array(), Base64.NO_WRAP);

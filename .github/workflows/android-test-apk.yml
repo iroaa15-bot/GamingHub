@@ -9,6 +9,7 @@ on:
       - 'release/source_manifest.json'
       - 'project.godot'
       - 'export_presets.cfg'
+      - 'native/android/voice/**'
   push:
     branches: [feature/voice-media-from-validated-client]
     paths:
@@ -22,6 +23,7 @@ on:
       - 'release/source_manifest.json'
       - 'project.godot'
       - 'export_presets.cfg'
+      - 'native/android/voice/**'
       - '.github/workflows/android-test-apk.yml'
 concurrency:
   group: gaminghub-voice-android-${{ github.ref }}
@@ -89,6 +91,45 @@ jobs:
             echo 'NOTICE: APK uses standard Godot export; native AAR is NOT embedded.'
             echo 'Native speakerphone AEC/AGC cannot be validated with this APK.'
           fi
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Install Android Gradle export template
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot --headless --path . --install-android-build-template
+          test -f android/build/build.gradle
+      - name: Build and embed native speakerphone plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'android.useAndroidX=true\n' > native/android/voice/gradle.properties
+          cd native/android/voice
+          gradle assembleRelease --no-daemon
+          mkdir -p ../../../android/plugins
+          aar="$(find build/outputs/aar -maxdepth 1 -name '*.aar' -type f | head -n 1)"
+          test -s "$aar"
+          cp "$aar" ../../../android/plugins/GamingHubVoice.aar
+          cp GamingHubVoice.gdap ../../../android/plugins/GamingHubVoice.gdap
+          test -s ../../../android/plugins/GamingHubVoice.aar
+      - name: Export native speakerphone Android APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          timeout 12m godot --headless --path . --export-debug 'Android Voice Native' build/GamingHub-voice-native.apk 2>&1 | tee voice-native-export.log
+          test -s build/GamingHub-voice-native.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify build/GamingHub-voice-native.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump permissions build/GamingHub-voice-native.apk | grep -q android.permission.RECORD_AUDIO
+      - name: Upload native speakerphone APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Native-Speakerphone-APK
+          path: build/GamingHub-voice-native.apk
+          if-no-files-found: error
+          retention-days: 14
       - name: Export installable Android APK
         shell: bash
         run: |

@@ -342,16 +342,20 @@ async def handler(ws):
     try:
         async for raw in ws:
             now = time.monotonic()
-            timestamps = [t for t in timestamps if now - t < 10]
-            timestamps.append(now)
-            if len(timestamps) > 35:
-                await send(ws, {'type':'error','message':'Too many requests'})
-                await ws.close(code=1008, reason='Rate limit')
-                break
             try:
                 if len(raw) > 8192: raise ValueError('Oversized message')
                 msg = json.loads(raw)
                 if not isinstance(msg, dict): raise ValueError('Expected object')
+                # Voice packets have their own strict validation and pacing in
+                # process(). Counting ~50 PCM packets/second as game actions
+                # disconnected both players within a second of enabling voice.
+                if msg.get('type') != 'voice_audio':
+                    timestamps = [t for t in timestamps if now - t < 10]
+                    timestamps.append(now)
+                    if len(timestamps) > 35:
+                        await send(ws, {'type':'error','message':'Too many requests'})
+                        await ws.close(code=1008, reason='Rate limit')
+                        break
                 await process(ws, msg)
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})

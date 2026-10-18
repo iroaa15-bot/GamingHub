@@ -31,7 +31,7 @@ permissions:
 jobs:
   android-voice-debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Validate source inventory and package identity
@@ -84,8 +84,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p build
-          godot --headless --path . --install-android-build-template 2>&1 | tee voice-android-template.log
-          godot --headless --path . --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
+          timeout 12m godot --headless --path . --export-debug Android build/GamingHub-voice-experimental.apk 2>&1 | tee voice-android-export.log
           test -s build/GamingHub-voice-experimental.apk
       - name: Verify APK signature and permissions
         run: |

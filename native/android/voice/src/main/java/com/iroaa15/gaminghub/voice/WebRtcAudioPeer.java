@@ -164,6 +164,9 @@ public final class WebRtcAudioPeer {
         if (remoteSdpReady) peer.addIceCandidate(ice);
         else if (pendingCandidates.size() < 64) pendingCandidates.add(ice);
     }
+    public synchronized void setMuted(boolean muted) {
+        if (track != null) track.setEnabled(!muted);
+    }
     public String pollEvent() { String event = events.poll(); return event == null ? "" : event; }
     public synchronized void stop() {
         started = false;

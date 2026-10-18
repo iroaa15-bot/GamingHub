@@ -4,7 +4,8 @@ extends RefCounted
 
 const RATE := 16000
 const SAMPLES := 320
-const MAX_QUEUE_PACKETS := 8
+const MAX_QUEUE_PACKETS := 12
+const JITTER_START_PACKETS := 3
 const MAX_PACKETS_PER_POLL := 4
 const PLAYBACK_GAIN := 1.2
 const TARGET_PEAK := 0.65
@@ -19,6 +20,7 @@ var _stream: AudioStreamGenerator
 var _playback: AudioStreamGeneratorPlayback
 var _received: Array[PackedVector2Array] = []
 var dropped_packets := 0
+var _jitter_primed := false
 
 func start(parent: Node) -> void:
  stop()
@@ -46,6 +48,7 @@ func stop() -> void:
  _stream = null
  _received.clear()
  dropped_packets = 0
+ _jitter_primed = false
  _samples.clear()
  _phase = 0.0
  _smoothed_gain = 1.0
@@ -104,6 +107,12 @@ func receive_packet(encoded: String) -> bool:
 func pump() -> void:
  if _playback == null:
   return
+ # Do not start playback from a single network packet: wait for ~60ms
+ # of audio to absorb ordinary WebSocket/mobile scheduling jitter.
+ if not _jitter_primed:
+  if _received.size() < JITTER_START_PACKETS:
+   return
+  _jitter_primed = true
  var sent := 0
  while not _received.is_empty() and _playback.get_frames_available() >= SAMPLES and sent < MAX_PACKETS_PER_POLL:
   _playback.push_buffer(_received.pop_front())

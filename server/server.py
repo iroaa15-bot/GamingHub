@@ -1,5 +1,5 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
-import asyncio, json, random, secrets, string, os, time, datetime as dt, base64, binascii
+import asyncio, json, random, secrets, string, os, time, datetime as dt, base64, binascii, hmac, hashlib
 from urllib.parse import urlsplit, parse_qs
 from liveops_content import daily_rotation
 from daily_content import json_bytes, daily_pack, validate_pack
@@ -17,6 +17,20 @@ if not catalog_path.exists():
 catalog = json.loads(catalog_path.read_text(encoding='utf-8'))
 CARDS = catalog['cards']
 QUESTIONS = catalog['questions']
+
+def ephemeral_turn_credentials(room_code, player_index):
+    """Coturn REST-auth credentials, scoped to a consenting room player."""
+    secret = os.environ.get('GAMINGHUB_TURN_SECRET', '')
+    urls = [item.strip() for item in os.environ.get('GAMINGHUB_TURN_URLS', '').split(',') if item.strip()]
+    if not secret or not urls or len(urls) > 8:
+        return None
+    if any(not url.startswith(('turn:', 'turns:')) or len(url) > 512 for url in urls):
+        return None
+    expiry = int(time.time()) + 600
+    username = f"{expiry}:gh-{room_code}-{player_index}"
+    digest = hmac.new(secret.encode('utf-8'), username.encode('utf-8'), hashlib.sha1).digest()
+    return {'urls': urls, 'username': username, 'credential': base64.b64encode(digest).decode('ascii'), 'expires_at': expiry}
+
 
 def normalize_guess(value):
     value = str(value).strip().casefold()
@@ -190,7 +204,7 @@ async def process(ws, msg):
         return
     # Optional voice signaling only. Audio media must use a native WebRTC client.
     # No SDP/ICE is stored in room history or server-side databases.
-    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio'):
+    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio', 'voice_ice_config'):
         code = connections.get(ws)
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
@@ -208,6 +222,10 @@ async def process(ws, msg):
             return
         if not all(room.voice_enabled):
             return await send(ws, {'type':'error','message':'Both players must enable voice'})
+        if action == 'voice_ice_config':
+            config = ephemeral_turn_credentials(code, index)
+            # No credentials unless both players explicitly enabled voice.
+            return await send(ws, {'type': 'voice_ice_config', 'payload': config or {}})
         if action == 'voice_audio':
             # 20 ms, 16 kHz mono PCM16: exactly 640 bytes, base64 encoded.
             # No persistence. Per-sender pacing protects rooms from audio floods.

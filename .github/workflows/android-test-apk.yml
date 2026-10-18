@@ -111,16 +111,12 @@ jobs:
           fi
           test -s "$template"
           mkdir -p android
-          echo 'Android template archive entries:'
-          unzip -Z1 "$template" | head -n 18 || true
-          timeout 90s unzip -q "$template" -d android
-          echo 'Extracted Gradle build files:'
-          find android -maxdepth 5 -type f \( -name build.gradle -o -name build.gradle.kts -o -name settings.gradle \) -print | head -n 30
-          if [ ! -f android/build/build.gradle ] && [ ! -f android/build/build.gradle.kts ]; then
-            echo 'ERROR: expected Godot Gradle build file missing; inspecting extracted tree'
-            find android -maxdepth 3 -type d -print | head -n 50
-            exit 1
-          fi
+          # android_source.zip stores build.gradle at its root. Godot expects it under android/build/.
+          mkdir -p android/build
+          timeout 90s unzip -q "$template" -d android/build
+          test -s android/build/build.gradle
+          test -s android/build/settings.gradle
+          echo 'Godot Android Gradle template installed in android/build'
       - name: Build and embed native speakerphone plugin
         shell: bash
         run: |

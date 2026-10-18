@@ -1031,7 +1031,18 @@ func _handle(msg: Dictionary) -> void:
   "voice_state_ack":
    voice_request_pending = false
    voice_request_started_ms = 0
-   voice_opted_in = bool(msg.get("enabled", false))
+   var next_local_voice := bool(msg.get("enabled", false))
+   if not next_local_voice:
+    # A fresh consent cycle must not inherit a failed negotiation.
+    _stop_webrtc_voice()
+    android_voice.stop()
+    native_voice_active = false
+    voice_microphone.stop()
+    voice_transport.stop()
+    voice_transport_started = false
+    webrtc_failed_this_call = false
+    native_voice_failed_this_call = false
+   voice_opted_in = next_local_voice
    peer_voice_opted_in = bool(msg.get("peer_enabled", false))
    _update_voice_ui()
   "paused":

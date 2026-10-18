@@ -890,6 +890,7 @@ func _sync_voice_microphone() -> void:
  if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call:
   if android_voice.start_webrtc():
    webrtc_voice_active = true
+   android_voice.set_webrtc_muted(voice_muted)
    webrtc_connected = false
    webrtc_started_ms = Time.get_ticks_msec()
    android_voice.offer_webrtc()

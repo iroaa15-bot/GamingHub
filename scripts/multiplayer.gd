@@ -584,7 +584,7 @@ func _process(_delta: float) -> void:
   voice_transport_started = false
   voice_level = 0.0
   _update_voice_ui()
- if webrtc_voice_active and not webrtc_connected and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
+ if webrtc_voice_active and not webrtc_connected and webrtc_disconnected_since_ms == 0 and Time.get_ticks_msec() - webrtc_started_ms > WEBRTC_CONNECT_TIMEOUT_MS:
   webrtc_failed_this_call = true
   native_voice_failed_this_call = true
   _stop_webrtc_voice()

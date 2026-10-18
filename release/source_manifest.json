@@ -1,15 +1,17 @@
 {
   "schema": 1,
-  "file_count": 775,
+  "file_count": 779,
   "sha256": {
-    ".github/workflows/android-test-apk.yml": "997ff954df308aa05913eea7c8a55800fd9b72008c39ffdb43dcda5d367f83d5",
+    ".github/workflows/android-test-apk.yml": "cc33ba442c4b56b4b32983b24b2a5610d861e78b5370fd03b9081f72b8fcc6d4",
     ".github/workflows/approve-development-manifest.yml": "4dc431063ce9266084c5083e40c9a02cd15591125f42a2bd327df81c7d45cc19",
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "811ae6cd803233e178b22e9cef2782f782a9ff641617a29c7b716c105e825199",
+    ".github/workflows/native-android-voice.yml": "f1f8dff584a4ba229dfa3aec384aa49501645db081e5f62d4ee9fe7445f4d8db",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
     ".github/workflows/voice-client-validation.yml": "ffeb6671371f833f0d7bab92a56b013fa191c14a3484c9997cb8e5a78f445259",
     ".github/workflows/voice-signaling-tests.yml": "d7603ee3afb39d4587d56e4d304c4eee7b2f9f0282361cf57725e2a301dc8141",
+    ".github/workflows/windows-voice-test.yml": "ca1ab67d4f31c6ef9794b63b40950d3d04d7f25903a0a8de82c64b9930fd58cf",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
     "README_START_HERE_AR.md": "7d7e16e1b06af8616fdfe41fb3ea2d57a4d80b0aebb8e569dbde0636fa829e22",
     "RELEASE_v10.0_AR.md": "c4e3a9f6cab621688a2c0c45792a9b1d178de0b61b4edfedabdfc517bb67a333",
@@ -632,6 +634,7 @@
     "data/ui_tr.json": "393570f7a7989b41f0e3b84be1226d0a8d7156ffe01ea1329086bcc2883cfbdf",
     "docs/CONTENT_SETUP.md": "dc96b2d74154b626ea7a8adebf3c0ac3cd15713d1d2ce69b64e39019a988f8e8",
     "docs/VOICE_MEDIA_BASELINE.md": "ec98441bc3d9fd7c13130d4e2fceec2e96a238e3b9f328fbcc6e36d37c8f1d8f",
+    "docs/android-speakerphone-voice-contract.md": "e8e10d3b921d9fc5f249978d913180229086fb1587fc68766ec2cb378515e076",
     "docs/index.html": "c9a6f3763fb012870dc8dbf59f42662e2fd94b2e6d13e88286a69efbaf0a54f3",
     "docs/privacy.html": "ad27eed6660c48aa71398c8dcd906502a3916103520ecca753d9dadbbe234914",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
@@ -676,6 +679,7 @@
     "scenes/Multiplayer.tscn": "8b0ec587fc2412e87402af2e50ac767ae9abe233218a3bcd71cbaeda4a55aa2b",
     "scripts/ad_manager.gd": "5dd9616a2023a2056e06bca813c6d88a83f2fa70374538a714c24ba3083cbdfa",
     "scripts/ad_manager.gd.uid": "d9807e0f54a8e0281ec65c73d7cb0af25d3df224bc4607175954eee619da2431",
+    "scripts/android_voice_bridge.gd": "0a58c7e9df05ba5fcad017d1e8133e26cdfbe0303c727099a5b60a955724ebb2",
     "scripts/celebration_fx.gd": "ee41b91f461fe95e711770f1320d6585fe5970f25361157389287984ff849a1c",
     "scripts/celebration_fx.gd.uid": "6408e2ec9e8591fc36c0df2a557480fa364d82f820e976a5fe2587383161ab88",
     "scripts/daily_ai.gd": "b680b9bbbf7ccd0bf85cb7065cfd060946b27fecefd94634d9222299518e6151",
@@ -693,6 +697,7 @@
     "scripts/visual_skin.gd": "807ee123224adeb4e7590e0629972cbab38e5682d0f109e2ee8c9923dac5e333",
     "scripts/visual_skin.gd.uid": "72adbe62f5f51a94cfd4419b194a61c59ff967a3dc4e051cfaa5e0c085cfc417",
     "scripts/voice_microphone_capture.gd": "bda27975f07043dd4a0affed106a2dfd9e7794b9cbe5506c13a90e95fca16562",
+    "scripts/voice_pcm_transport.gd": "ec9712f23c4f44eaa4cf099d168e490f855ddfb099d05027dd3238b40e9db6d2",
     "scripts/voice_signaling_bridge.gd": "cb346940d5c91576e2589e8fdfa0932d26c093e68bd4345c8a7c310b505bf515",
     "server/Dockerfile": "0653a855bec48461f9c1831d1e686aad1ef76f39eafe7a0aca508575b92795ec",
     "server/cards.json": "215e3f41d3dd6ceacc510c3a48647177eed859ccdddc432a16932581a0b452cc",
@@ -715,6 +720,7 @@
     "server/test_voice_signaling.py": "948c6629e36b49adc1ea1add39cb9ec760051e8621cfc875a30fad728b16ddb8",
     "tests/activities.gd": "bb91340d606bff7f9c1f1819a6ba22508e8e1a725828a7b84037f966d8502ba6",
     "tests/activities.gd.uid": "d344cdceaa817e03de8e3f680e563ab20321a509b92757826c92791432810599",
+    "tests/android_voice_bridge_smoke.gd": "12bc8f64e672d50963c19c06a4393983ccacaa042048610fd4bba87d87c4090c",
     "tests/expansion.gd": "109a7de58ddff6b619425c84f87a4ec142424ff61134940063fd33bf16ecc3ef",
     "tests/expansion.gd.uid": "42d577e9ded926949334ebd5629af187c2734cb1f6db405578456a7ca61184e9",
     "tests/godot_smoke.gd": "dd0cf9fd60ae27792524e12c344c07fb9d7e6012468d42884618e72e86682a9f",
@@ -774,8 +780,6 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/voice_client_smoke.gd": "05b328ccbf364804fe201365d8fb1183744d3f2190b5c56b56f7e71b0fcbf076",
     "tests/voice_microphone_smoke.gd": "4d607297e136bdbcc4de5593ba74a2b8369c791824c5974aaccf79d4ff441eb4",
-    "scripts/voice_pcm_transport.gd": "ec9712f23c4f44eaa4cf099d168e490f855ddfb099d05027dd3238b40e9db6d2",
-    "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2",
-    ".github/workflows/windows-voice-test.yml": "ca1ab67d4f31c6ef9794b63b40950d3d04d7f25903a0a8de82c64b9930fd58cf"
+    "tests/voice_pcm_smoke.gd": "f147efe41199709f38a49d05a3d9a64c9977ddc442ea7725fd4c5a959b3125b2"
   }
 }

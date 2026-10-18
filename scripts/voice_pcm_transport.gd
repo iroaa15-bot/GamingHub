@@ -130,6 +130,12 @@ func pump() -> void:
   sent += 1
  # Rebuild a small reserve after a network stall instead of repeatedly
  # playing isolated 20ms fragments separated by audible gaps.
- if _received.is_empty() and _playback.get_frames_available() >= SAMPLES and _playback.get_skips() >= 0:
+ # Only rebuffer once the generator itself is almost empty. An empty
+ # network queue is normal between packets and must NOT restart the jitter
+ # prebuffer on every 20ms packet (which caused repeated speech dropouts).
+ var generator_capacity := int(_stream.buffer_length * float(RATE))
+ var buffered_frames := maxi(0, generator_capacity - _playback.get_frames_available())
+ if _received.is_empty() and buffered_frames < SAMPLES:
+  if _jitter_primed:
+   jitter_rebuffers += 1
   _jitter_primed = false
-  jitter_rebuffers += 1

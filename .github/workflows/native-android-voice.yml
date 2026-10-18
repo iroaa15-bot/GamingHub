@@ -18,9 +18,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
-      - name: Install Android platform
-        run: sdkmanager 'platforms;android-36'
+      - name: Install Android platform using runner SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?Android SDK is required on the runner}"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36'
+          test -s "$ANDROID_HOME/platforms/android-36/android.jar"
       - name: Compile Android voice engine against Android API
         shell: bash
         run: |

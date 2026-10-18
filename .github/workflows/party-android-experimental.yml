@@ -1,0 +1,38 @@
+name: Party Home Experimental Android
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'scenes/**'
+      - '.github/workflows/party-android-experimental.yml'
+permissions:
+  contents: read
+jobs:
+  experimental:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Godot 4.5.1
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+      - name: Import and validate
+        run: godot --headless --path . --editor --import --quit
+      - name: Attempt Android debug export
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-debug Android build/GamingHub-PartyRoom-experimental.apk
+          test -s build/GamingHub-PartyRoom-experimental.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-PartyRoom-experimental
+          path: build/GamingHub-PartyRoom-experimental.apk
+          if-no-files-found: error

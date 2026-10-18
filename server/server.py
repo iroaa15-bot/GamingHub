@@ -253,7 +253,7 @@ async def process(ws, msg):
         if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
             return await send(ws, {'type':'error','message':'Invalid voice payload'})
         if action in ('voice_offer', 'voice_answer'):
-            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 5500:
+            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 16000:
                 return await send(ws, {'type':'error','message':'Invalid voice SDP'})
         if action == 'voice_ice' and (not isinstance(payload.get('candidate'), str) or not 0 < len(payload['candidate']) <= 4096):
             return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
@@ -486,7 +486,7 @@ async def http_health(connection, request):
 async def main():
     host = os.getenv('HOST','0.0.0.0')
     port = int(os.getenv('PORT','8765'))
-    async with serve(handler, host, port, max_size=8192, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
+    async with serve(handler, host, port, max_size=32768, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
         print(f'Gaming Hub server on {host}:{port}')
         task = asyncio.create_task(expiry_loop())
         try:

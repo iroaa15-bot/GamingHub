@@ -6,8 +6,12 @@ const RATE := 16000
 const SAMPLES := 320
 const MAX_QUEUE_PACKETS := 8
 const MAX_PACKETS_PER_POLL := 4
-const PLAYBACK_GAIN := 0.7
+const PLAYBACK_GAIN := 1.0
+const TARGET_PEAK := 0.65
+const MAX_AUTO_GAIN := 3.0
+const NOISE_GATE := 0.012
 var _source_rate := 48000.0
+var _smoothed_gain := 1.0
 var _phase := 0.0
 var _samples := PackedFloat32Array()
 var _out: AudioStreamPlayer
@@ -44,6 +48,7 @@ func stop() -> void:
  dropped_packets = 0
  _samples.clear()
  _phase = 0.0
+ _smoothed_gain = 1.0
 
 func encode_frames(frames: PackedVector2Array) -> Array[String]:
  var packets: Array[String] = []
@@ -53,12 +58,21 @@ func encode_frames(frames: PackedVector2Array) -> Array[String]:
   if _phase < stride:
    continue
   _phase -= stride
-  _samples.append(clampf((frame.x + frame.y) * 0.5, -1.0, 1.0))
+  var sample := clampf((frame.x + frame.y) * 0.5, -1.0, 1.0)
+  _samples.append(sample)
   if _samples.size() == SAMPLES:
+   var peak := 0.0
+   for sample in _samples:
+    peak = maxf(peak, absf(sample))
+   var target_gain := clampf(TARGET_PEAK / maxf(peak, 0.001), 1.0, MAX_AUTO_GAIN) if peak >= NOISE_GATE else 1.0
+   _smoothed_gain = lerpf(_smoothed_gain, target_gain, 0.15)
    var pcm := PackedByteArray()
    pcm.resize(SAMPLES * 2)
    for i in range(SAMPLES):
-    var value := clampi(int(round(_samples[i] * 32767.0)), -32768, 32767)
+    var sample := _samples[i]
+    if absf(sample) < NOISE_GATE:
+     sample *= 0.15
+    var value := clampi(int(round(clampf(sample * _smoothed_gain, -0.95, 0.95) * 32767.0)), -32768, 32767)
     pcm[i * 2] = value & 255
     pcm[i * 2 + 1] = (value >> 8) & 255
    packets.append(Marshalls.raw_to_base64(pcm))

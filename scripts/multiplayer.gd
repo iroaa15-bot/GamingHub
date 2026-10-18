@@ -76,6 +76,8 @@ var reconnect_next_ms: int = 0
 var opponent_paused := false
 var match_view: VBoxContainer
 var voice_button: Button
+var voice_mute_button: Button
+var voice_muted := false
 var voice_status: Label
 var voice_invite_dialog: ConfirmationDialog
 var voice_opted_in := false
@@ -768,6 +770,7 @@ func _reset_voice() -> void:
  voice_capture_started_ms = 0
  voice_permission_requested = false
  voice_signaling.reset()
+ voice_muted = false
  if is_instance_valid(voice_invite_dialog):
   voice_invite_dialog.hide()
  voice_request_pending = false
@@ -781,6 +784,9 @@ func _update_voice_ui() -> void:
  _sync_voice_microphone()
  if not is_instance_valid(voice_button):
   return
+ if is_instance_valid(voice_mute_button):
+  voice_mute_button.visible = voice_signaling.ready()
+  voice_mute_button.text = _t("تشغيل الميكروفون", "Unmute microphone") if voice_muted else _t("كتم الميكروفون", "Mute microphone")
  voice_button.disabled = voice_request_pending
  voice_button.text = _t("جاري تأكيد الطلب...", "Confirming request...") if voice_request_pending else _t("إلغاء طلب الصوت", "Cancel voice request") if voice_opted_in else _t("طلب المحادثة الصوتية", "Request voice chat")
  if is_instance_valid(voice_status):
@@ -825,6 +831,8 @@ func _poll_native_voice() -> void:
   if encoded.is_empty():
    break
   voice_capture_frames += 320
+  if voice_muted:
+   continue
   if socket.get_current_outbound_buffered_amount() > 16384:
    break
   if socket.send_text(JSON.stringify({"type": "voice_audio", "pcm": encoded})) == OK:
@@ -842,7 +850,7 @@ func _poll_voice_microphone() -> void:
  for frame in frames:
   peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
  voice_level = peak
- if voice_transport_started and not native_voice_active and voice_signaling.ready() and not reconnecting and not reconnect_pending and not opponent_paused and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+ if voice_transport_started and not voice_muted and not native_voice_active and voice_signaling.ready() and not reconnecting and not reconnect_pending and not opponent_paused and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   for encoded in voice_transport.encode_frames(frames):
    # Audio is best-effort; do not let queued voice block match messages.
    if socket.get_current_outbound_buffered_amount() > 16384:
@@ -940,6 +948,8 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   voice_transport_started = false
   webrtc_voice_active = android_voice.start_webrtc()
   webrtc_started_ms = Time.get_ticks_msec()
+  if webrtc_voice_active:
+   android_voice.set_webrtc_muted(voice_muted)
   if not webrtc_voice_active:
    webrtc_failed_this_call = true
    native_voice_failed_this_call = true
@@ -991,6 +1001,13 @@ func _poll_webrtc_signaling() -> void:
 func _voice_signal_send(message: Dictionary) -> void:
  if voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send(message)
+
+func _toggle_voice_mute() -> void:
+ if not voice_signaling.ready():
+  return
+ voice_muted = not voice_muted
+ android_voice.set_webrtc_muted(voice_muted)
+ _update_voice_ui()
 
 func _toggle_voice_consent() -> void:
  if room_code.is_empty() or finished or opponent_paused or voice_request_pending:
@@ -1051,6 +1068,7 @@ func _handle(msg: Dictionary) -> void:
     voice_transport_started = false
     webrtc_failed_this_call = false
     native_voice_failed_this_call = false
+    voice_muted = false
    voice_opted_in = next_local_voice
    peer_voice_opted_in = bool(msg.get("peer_enabled", false))
    _update_voice_ui()
@@ -1152,6 +1170,10 @@ func _handle(msg: Dictionary) -> void:
    voice_button.custom_minimum_size.y = 50
    voice_button.pressed.connect(_toggle_voice_consent)
    match_view.add_child(voice_button)
+   voice_mute_button = Button.new()
+   voice_mute_button.custom_minimum_size.y = 48
+   voice_mute_button.pressed.connect(_toggle_voice_mute)
+   match_view.add_child(voice_mute_button)
    voice_status = Label.new()
    voice_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
    match_view.add_child(voice_status)

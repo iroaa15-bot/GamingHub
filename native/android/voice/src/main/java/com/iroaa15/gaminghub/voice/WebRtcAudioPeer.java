@@ -205,6 +205,8 @@ public final class WebRtcAudioPeer {
         if (factory != null) { factory.dispose(); factory = null; }
         if (audioModule != null) { audioModule.release(); audioModule = null; }
         events.clear();
+        // Relay credentials belong to one call only; discard them on shutdown.
+        configuredIceServers.clear();
         restoreAudioRouting();
     }
 }

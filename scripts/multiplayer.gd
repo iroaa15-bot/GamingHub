@@ -797,7 +797,8 @@ func _handle(msg: Dictionary) -> void:
   "paused":
    _reset_voice()
    opponent_paused = true
-   status.text = _t("المنافس فقد الاتصال؛ المباراة متوقفة مؤقتًا في انتظار عودته.", "Opponent disconnected; match paused until they return.")
+   var remaining_seconds := maxi(0, int(msg.get("seconds", 90)))
+    status.text = (_t("انقطع اتصال المنافس؛ المباراة محفوظة مؤقتًا لمدة %d ثانية في انتظار عودته.", "Opponent disconnected; match reserved for %d seconds while they reconnect.") % remaining_seconds)
    _refresh_actions()
   "peer_resumed":
    _reset_voice()
@@ -949,7 +950,7 @@ func _handle(msg: Dictionary) -> void:
   "disconnected":
    _reset_voice()
    _reset_match_state()
-   _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
+   _match_note(_t("انتهت جلسة المنافس أو مهلة عودته؛ يمكنك بدء مباراة جديدة.", "Opponent session or reconnection window ended; you can start a new match."), 18)
    _refresh_actions()
   "error":
    if voice_request_pending:

@@ -1,0 +1,26 @@
+plugins {
+    id 'com.android.library' version '8.7.3'
+}
+
+android {
+    namespace 'com.iroaa15.gaminghub.voice'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Match the Godot 4.5 Android plugin API against a local godot-lib AAR.
+    // Pass -PgodotAar=/absolute/path/to/godot-lib.release.aar to Gradle.
+    def godotAar = providers.gradleProperty('godotAar').orNull
+    if (godotAar != null) {
+        compileOnly files(godotAar)
+    }
+}

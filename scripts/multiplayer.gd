@@ -92,6 +92,8 @@ var android_voice = AndroidVoiceBridge.new()
 var native_voice_active := false
 var webrtc_voice_active := false
 var webrtc_connected := false
+var webrtc_disconnected_since_ms := 0
+const WEBRTC_DISCONNECT_GRACE_MS := 5000
 var webrtc_started_ms := 0
 var webrtc_answer_wait_ms := 0
 var webrtc_failed_this_call := false
@@ -566,6 +568,11 @@ func _process(_delta: float) -> void:
  _process_local_voice_test()
  socket.poll()
  _poll_webrtc_signaling()
+ if webrtc_voice_active and webrtc_disconnected_since_ms > 0 and Time.get_ticks_msec() - webrtc_disconnected_since_ms >= WEBRTC_DISCONNECT_GRACE_MS:
+  webrtc_failed_this_call = true
+  native_voice_failed_this_call = true
+  _stop_webrtc_voice()
+  _update_voice_ui()
  if voice_signaling.ready() and not (voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active) and _voice_permission_granted() and Time.get_ticks_msec() >= voice_retry_after_ms:
   _sync_voice_microphone()
   _update_voice_ui()
@@ -938,6 +945,7 @@ func _stop_webrtc_voice() -> void:
  android_voice.stop_webrtc()
  webrtc_voice_active = false
  webrtc_connected = false
+ webrtc_disconnected_since_ms = 0
  webrtc_started_ms = 0
  webrtc_answer_wait_ms = 0
  webrtc_pending_remote_ice.clear()
@@ -998,13 +1006,18 @@ func _poll_webrtc_signaling() -> void:
     voice_signaling.send_candidate(fields[3], fields[1], int(fields[2]))
   elif event == "state|CONNECTED" or event == "state|COMPLETED":
    webrtc_connected = true
+   webrtc_disconnected_since_ms = 0
    # Only one audio device pipeline may own the microphone/speaker.
    android_voice.stop()
    native_voice_active = false
    voice_microphone.stop()
    voice_transport.stop()
    voice_transport_started = false
-  elif event == "state|FAILED" or event == "state|DISCONNECTED" or event.begins_with("error|"):
+  elif event == "state|DISCONNECTED":
+   # ICE can recover after a brief Wi-Fi/mobile network transition.
+   if webrtc_disconnected_since_ms == 0:
+    webrtc_disconnected_since_ms = Time.get_ticks_msec()
+  elif event == "state|FAILED" or event.begins_with("error|"):
    native_voice_failed_this_call = true
    webrtc_failed_this_call = true
    _stop_webrtc_voice()

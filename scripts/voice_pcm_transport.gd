@@ -6,6 +6,8 @@ const RATE := 16000
 const SAMPLES := 320
 const MAX_QUEUE_PACKETS := 12
 const JITTER_START_PACKETS := 3
+const JITTER_RECOVERY_PACKETS := 4
+const PLAYBACK_LOW_WATER_FRAMES := SAMPLES
 const MAX_PACKETS_PER_POLL := 4
 const PLAYBACK_GAIN := 1.2
 const TARGET_PEAK := 0.65
@@ -20,7 +22,10 @@ var _stream: AudioStreamGenerator
 var _playback: AudioStreamGeneratorPlayback
 var _received: Array[PackedVector2Array] = []
 var dropped_packets := 0
+var received_packets := 0
+var jitter_rebuffers := 0
 var _jitter_primed := false
+var _playback_started := false
 
 func start(parent: Node) -> void:
  stop()
@@ -48,7 +53,10 @@ func stop() -> void:
  _stream = null
  _received.clear()
  dropped_packets = 0
+ received_packets = 0
+ jitter_rebuffers = 0
  _jitter_primed = false
+ _playback_started = false
  _samples.clear()
  _phase = 0.0
  _smoothed_gain = 1.0
@@ -102,6 +110,7 @@ func receive_packet(encoded: String) -> bool:
   _received.pop_front()
   dropped_packets += 1
  _received.append(frames)
+ received_packets += 1
  return true
 
 func pump() -> void:
@@ -110,10 +119,17 @@ func pump() -> void:
  # Do not start playback from a single network packet: wait for ~60ms
  # of audio to absorb ordinary WebSocket/mobile scheduling jitter.
  if not _jitter_primed:
-  if _received.size() < JITTER_START_PACKETS:
+  var required_packets := JITTER_RECOVERY_PACKETS if _playback_started else JITTER_START_PACKETS
+  if _received.size() < required_packets:
    return
   _jitter_primed = true
+  _playback_started = true
  var sent := 0
  while not _received.is_empty() and _playback.get_frames_available() >= SAMPLES and sent < MAX_PACKETS_PER_POLL:
   _playback.push_buffer(_received.pop_front())
   sent += 1
+ # Rebuild a small reserve after a network stall instead of repeatedly
+ # playing isolated 20ms fragments separated by audible gaps.
+ if _received.is_empty() and _playback.get_frames_available() >= SAMPLES and _playback.get_skips() >= 0:
+  _jitter_primed = false
+  jitter_rebuffers += 1

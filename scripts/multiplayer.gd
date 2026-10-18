@@ -721,8 +721,11 @@ func _poll_voice_microphone() -> void:
  voice_level = peak
  if voice_transport_started and voice_signaling.ready() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   for encoded in voice_transport.encode_frames(frames):
-   _send({"type": "voice_audio", "pcm": encoded})
-   voice_sent_packets += 1
+   # Audio is best-effort; do not let queued voice block match messages.
+   if socket.get_current_outbound_buffered_amount() > 16384:
+    break
+   if socket.send_text(JSON.stringify({"type": "voice_audio", "pcm": encoded})) == OK:
+    voice_sent_packets += 1
 
 
 func _voice_permission_granted() -> bool:

@@ -870,6 +870,14 @@ func _sync_voice_microphone() -> void:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
   return
+ # Player zero initiates the offer; player one answers when it arrives.
+ # Preserve PCM fallback if WebRTC cannot start or establish media.
+ if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call and android_voice.start_webrtc():
+  webrtc_voice_active = true
+  webrtc_connected = false
+  webrtc_started_ms = Time.get_ticks_msec()
+  android_voice.offer_webrtc()
+  return
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true
   voice_transport_started = true

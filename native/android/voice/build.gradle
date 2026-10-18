@@ -21,4 +21,7 @@ dependencies {
     // Use the official Godot 4.5.1 Android API published on Maven Central.
     compileOnly 'org.godotengine:godot:4.5.1.stable'
     implementation 'androidx.core:core:1.13.1'
+    // WebRTC audio media foundation: Opus, jitter buffer, echo cancellation.
+    // Keep the existing PCM path until end-to-end SDP/ICE is validated.
+    implementation 'org.webrtc:google-webrtc:1.0.32006'
 }

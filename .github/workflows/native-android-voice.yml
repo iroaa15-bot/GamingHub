@@ -1,0 +1,33 @@
+name: Gaming Hub native Android voice compile
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/voice-media-from-validated-client]
+    paths:
+      - 'native/android/voice/**'
+      - '.github/workflows/native-android-voice.yml'
+permissions:
+  contents: read
+jobs:
+  compile-native-voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-36'
+      - name: Compile Android voice engine against Android API
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/native-voice-classes
+          javac -Xlint:deprecation -source 8 -target 8 \
+            -classpath "$ANDROID_HOME/platforms/android-36/android.jar" \
+            -d build/native-voice-classes \
+            native/android/voice/src/main/java/com/iroaa15/gaminghub/voice/SpeakerphoneAudioEngine.java
+          test -s build/native-voice-classes/com/iroaa15/gaminghub/voice/SpeakerphoneAudioEngine.class

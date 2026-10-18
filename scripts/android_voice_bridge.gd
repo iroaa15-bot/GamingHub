@@ -46,6 +46,12 @@ func push_pcm(encoded: String) -> bool:
   return false
  return bool(_plugin.call("pushPcm", encoded))
 
+## Optional ICE relay settings must be obtained securely at runtime, not embedded in builds.
+func configure_webrtc_ice_servers(urls: PackedStringArray, username: String = "", credential: String = "") -> bool:
+ if not available() or not _plugin.has_method("configureWebRtcIceServers"):
+  return false
+ return bool(_plugin.call("configureWebRtcIceServers", urls, username, credential))
+
 ## WebRTC signaling interface. Call only after mutual room consent.
 func start_webrtc() -> bool:
  if not available() or not _plugin.has_method("startWebRtc"):

@@ -12,7 +12,6 @@ import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.AutomaticGainControl;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.Build;
-import android.os.Process;
 
 /**
  * Experimental native 16 kHz speakerphone audio engine.
@@ -34,6 +33,7 @@ public final class SpeakerphoneAudioEngine {
     private boolean previousSpeakerphone;
     private boolean running;
     private boolean changedCommunicationDevice;
+    private AudioDeviceInfo previousCommunicationDevice;
 
     public SpeakerphoneAudioEngine(Context context) {
         this.context = context.getApplicationContext();
@@ -45,6 +45,7 @@ public final class SpeakerphoneAudioEngine {
         if (manager == null) throw new IllegalStateException("No AudioManager");
         previousMode = manager.getMode();
         previousSpeakerphone = manager.isSpeakerphoneOn();
+        if (Build.VERSION.SDK_INT >= 31) previousCommunicationDevice = manager.getCommunicationDevice();
         try {
             manager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             // Route through the handset speaker, not Bluetooth/headset by default.
@@ -139,7 +140,11 @@ public final class SpeakerphoneAudioEngine {
         if (agc != null) { agc.release(); agc = null; }
         if (manager != null) {
             if (Build.VERSION.SDK_INT >= 31 && changedCommunicationDevice) {
-                manager.clearCommunicationDevice();
+                if (previousCommunicationDevice != null) {
+                    manager.setCommunicationDevice(previousCommunicationDevice);
+                } else {
+                    manager.clearCommunicationDevice();
+                }
                 changedCommunicationDevice = false;
             }
             manager.setMode(previousMode);

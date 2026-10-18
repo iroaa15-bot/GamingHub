@@ -44,7 +44,7 @@ class Room:
     history: list = field(default_factory=list)
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
-    voice_packet_at: list = field(default_factory=lambda: [0.0, 0.0])
+    voice_packet_at: list = field(default_factory=lambda: [[], []])
 
 rooms = {}
 connections = {}
@@ -78,7 +78,7 @@ async def start_room(room):
     room.history = []
     room.winner = -1
     room.voice_enabled = [False, False]
-    room.voice_packet_at = [0.0, 0.0]
+    room.voice_packet_at = [[], []]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -220,10 +220,15 @@ async def process(ws, msg):
                 return await send(ws, {'type':'error','message':'Invalid audio encoding'})
             if len(pcm) != 640:
                 return await send(ws, {'type':'error','message':'Invalid audio size'})
+            # Legitimate 20 ms frames can arrive in bursts when the mobile UI
+            # catches up. A 12 ms inter-arrival gate dropped those frames and
+            # caused audible missing syllables. Limit the rolling rate instead.
             now = time.monotonic()
-            if now - room.voice_packet_at[index] < 0.012:
-                return  # Drop excess audio instead of buffering it.
-            room.voice_packet_at[index] = now
+            recent = room.voice_packet_at[index]
+            recent[:] = [t for t in recent if now - t < 1.0]
+            if len(recent) >= 80:
+                return  # Reject sustained >80 packets/s; expected rate is 50.
+            recent.append(now)
             await send(room.players[1-index], {'type':'voice_audio','pcm':encoded})
             return
         payload = msg.get('payload')

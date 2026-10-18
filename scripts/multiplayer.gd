@@ -94,6 +94,7 @@ var voice_last_meter_ms: int = 0
 var voice_sent_packets: int = 0
 var voice_received_packets: int = 0
 var voice_capture_frames: int = 0
+var voice_capture_started_ms: int = 0
 var lobby_controls: VBoxContainer
 var match_label: Label
 var question_page: int = 0
@@ -502,6 +503,7 @@ func _process(_delta: float) -> void:
   _poll_voice_microphone()
  if voice_transport_started:
   voice_transport.pump()
+  _refresh_voice_diagnostics()
  if voice_request_pending and voice_request_started_ms > 0 and Time.get_ticks_msec() - voice_request_started_ms > VOICE_REQUEST_TIMEOUT_MS:
   voice_request_pending = false
   voice_request_started_ms = 0
@@ -673,6 +675,7 @@ func _reset_voice() -> void:
  voice_sent_packets = 0
  voice_received_packets = 0
  voice_capture_frames = 0
+ voice_capture_started_ms = 0
  voice_permission_requested = false
  voice_signaling.reset()
  if is_instance_valid(voice_invite_dialog):
@@ -693,6 +696,18 @@ func _update_voice_ui() -> void:
  if is_instance_valid(voice_status):
   voice_status.text = (_t("الصوت التجريبي نشط", "Experimental voice chat active") if voice_microphone.is_capturing() else _t("اسمح بالميكروفون من إعدادات التطبيق ثم ارجع للعبة", "Allow microphone in app settings, then return to the game") if OS.get_name() == "Android" and voice_permission_requested and not _voice_permission_granted() else _t("تعذر بدء الميكروفون؛ إعادة المحاولة تلقائيًا", "Microphone failed to start; retrying automatically") if voice_capture_failed else _t("جارٍ تجهيز الميكروفون", "Preparing microphone")) if voice_opted_in and peer_voice_opted_in else _t("في انتظار موافقة الطرف الآخر", "Waiting for the other player") if voice_opted_in else _t("الصوت اختياري ومتوقف افتراضيًا", "Voice is optional and off by default")
 
+func _refresh_voice_diagnostics() -> void:
+ var now := Time.get_ticks_msec()
+ if now - voice_last_meter_ms < 400 or not is_instance_valid(voice_status):
+  return
+ voice_last_meter_ms = now
+ var bars := clampi(int(voice_level * 24.0), 0, 8)
+ var indicator := "▮".repeat(bars) + "▯".repeat(8 - bars)
+ if voice_capture_frames == 0 and voice_capture_started_ms > 0 and now - voice_capture_started_ms > 3500:
+  voice_status.text = _t("لا تصل عينات من الميكروفون", "No microphone samples detected") + (" | PCM: 0 | TX: 0 | RX: %d" % voice_received_packets)
+ else:
+  voice_status.text = _t("الميكروفون: ", "Microphone: ") + indicator + (" | PCM: %d | TX: %d | RX: %d" % [voice_capture_frames, voice_sent_packets, voice_received_packets])
+
 func _poll_voice_microphone() -> void:
  # Drain captured PCM to avoid an ever-growing recording buffer.
  # No audio is sent or stored; this is a local input-level diagnostic only.
@@ -708,11 +723,7 @@ func _poll_voice_microphone() -> void:
   for encoded in voice_transport.encode_frames(frames):
    _send({"type": "voice_audio", "pcm": encoded})
    voice_sent_packets += 1
- var now := Time.get_ticks_msec()
- if now - voice_last_meter_ms >= 300 and is_instance_valid(voice_status):
-  voice_last_meter_ms = now
-  var bars := clampi(int(peak * 24.0), 0, 8)
-  voice_status.text = _t("الميكروفون: ", "Microphone: ") + ("▮".repeat(bars) + "▯".repeat(8 - bars)) + (" | PCM: %d | TX: %d | RX: %d" % [voice_capture_frames, voice_sent_packets, voice_received_packets])
+
 
 func _voice_permission_granted() -> bool:
  if OS.get_name() == "Windows":
@@ -740,6 +751,7 @@ func _sync_voice_microphone() -> void:
  if voice_microphone.start(self, true, true):
   voice_transport.start(self)
   voice_transport_started = true
+  voice_capture_started_ms = Time.get_ticks_msec()
   voice_permission_requested = false
   voice_capture_failed = false
   voice_retry_after_ms = 0

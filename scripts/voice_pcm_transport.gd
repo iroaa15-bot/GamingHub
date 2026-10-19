@@ -12,6 +12,8 @@ const MAX_PACKETS_PER_POLL := 4
 const PLAYBACK_GAIN := 1.2
 const TARGET_PEAK := 0.65
 const MAX_AUTO_GAIN := 3.0
+# Use an actual low-pass average before 48 kHz -> 16 kHz decimation.
+# Taking one sample per 3-frame block aliases high-frequency noise into speech.
 const NOISE_GATE := 0.012
 var _source_rate := 48000.0
 var _smoothed_gain := 1.0
@@ -19,6 +21,8 @@ var _smoothed_gain := 1.0
 var suppress_silence := false
 const LOCAL_SILENCE_PEAK := 0.025
 var _phase := 0.0
+var _downsample_sum := 0.0
+var _downsample_count := 0
 var _samples := PackedFloat32Array()
 var _out: AudioStreamPlayer
 var _stream: AudioStreamGenerator
@@ -62,17 +66,23 @@ func stop() -> void:
  _playback_started = false
  _samples.clear()
  _phase = 0.0
+ _downsample_sum = 0.0
+ _downsample_count = 0
  _smoothed_gain = 1.0
 
 func encode_frames(frames: PackedVector2Array) -> Array[String]:
  var packets: Array[String] = []
  var stride := _source_rate / float(RATE)
  for frame in frames:
+  _downsample_sum += (frame.x + frame.y) * 0.5
+  _downsample_count += 1
   _phase += 1.0
   if _phase < stride:
    continue
   _phase -= stride
-  var sample := clampf((frame.x + frame.y) * 0.5, -1.0, 1.0)
+  var sample := clampf(_downsample_sum / float(maxi(_downsample_count, 1)), -1.0, 1.0)
+  _downsample_sum = 0.0
+  _downsample_count = 0
   _samples.append(sample)
   if _samples.size() == SAMPLES:
    var peak := 0.0

@@ -67,7 +67,13 @@ public final class WebRtcAudioPeer {
         startupError = "";
         startupStage = "audio_route";
         try {
-            configureSpeakerphone();
+            // Audio routing is best-effort: a device-specific route failure must not
+            // prevent the peer connection from starting.
+            try {
+                configureSpeakerphone();
+            } catch (RuntimeException routeError) {
+                android.util.Log.w("GamingHubVoice", "Speaker routing unavailable; continuing with system route", routeError);
+            }
             startupStage = "factory_init";
             PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).createInitializationOptions());
             startupStage = "audio_module";

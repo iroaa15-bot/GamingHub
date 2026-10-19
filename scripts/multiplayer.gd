@@ -913,49 +913,14 @@ func _sync_voice_microphone() -> void:
   return
  if voice_microphone.is_capturing() or native_voice_active or webrtc_voice_active or webrtc_failed_this_call:
   return
- if OS.get_name() == "Android" and not webrtc_ice_config_received:
-  if not webrtc_ice_config_requested:
-   webrtc_stage = "ice_config"
-   webrtc_ice_config_requested = true
-   webrtc_ice_config_requested_ms = Time.get_ticks_msec()
-   _send({"type": "voice_ice_config"})
-  return
+ # Restore the previously functional, mutually compatible PCM media protocol.
+ # Both peers choose the same protocol without SDP, ICE or a native plugin.
+ # Android native AEC is optional; Godot microphone is the guaranteed fallback.
+ # WebRTC remains isolated until plugin registration and real-device calls pass.
  if not _voice_permission_granted():
   if OS.get_name() == "Android" and not voice_permission_requested:
    voice_permission_requested = true
    OS.request_permission("android.permission.RECORD_AUDIO")
-  return
- if OS.get_name() == "Android" and player_index == 1 and not webrtc_pending_offer.is_empty():
-  var offer := webrtc_pending_offer
-  _on_webrtc_remote_description("offer", offer)
-  return
- # Player zero initiates the offer; player one answers when it arrives.
- # Preserve PCM fallback if WebRTC cannot start or establish media.
- if OS.get_name() == "Android" and player_index == 0 and not native_voice_failed_this_call:
-  if android_voice.start_webrtc():
-   webrtc_voice_active = true
-   webrtc_stage = "offer"
-   android_voice.set_webrtc_muted(voice_muted)
-   webrtc_connected = false
-   webrtc_started_ms = Time.get_ticks_msec()
-   android_voice.offer_webrtc()
-  else:
-   # Never silently use PCM while the other device expects Opus.
-   webrtc_failed_this_call = true
-   webrtc_failure_code = "WEBRTC_START_FAILED:" + android_voice.webrtc_startup_error()
-   native_voice_failed_this_call = true
-  return
- # Answerer waits for the remote WebRTC offer before opening legacy PCM.
- # Fall back after the same timeout if the offer never arrives.
- if OS.get_name() == "Android" and player_index == 1 and not native_voice_failed_this_call:
-  if webrtc_answer_wait_ms == 0:
-   webrtc_answer_wait_ms = Time.get_ticks_msec()
-  if Time.get_ticks_msec() - webrtc_answer_wait_ms < WEBRTC_CONNECT_TIMEOUT_MS:
-   return
-  native_voice_failed_this_call = true
-  webrtc_failed_this_call = true
-  # Include the assigned role to distinguish missing offers from role desync.
-  webrtc_failure_code = "WEBRTC_OFFER_TIMEOUT:P%d" % player_index
   return
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true

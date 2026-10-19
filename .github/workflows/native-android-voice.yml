@@ -2,7 +2,7 @@ name: Gaming Hub native Android voice compile
 on:
   workflow_dispatch:
   push:
-    branches: [feature/voice-media-from-validated-client]
+    branches: [feature/voice-media-from-validated-client, release/voice-complete-play-candidate]
     paths:
       - 'native/android/voice/**'
       - '.github/workflows/native-android-voice.yml'

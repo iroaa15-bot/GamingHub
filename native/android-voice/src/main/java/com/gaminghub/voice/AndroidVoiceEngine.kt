@@ -9,6 +9,7 @@ import android.media.audiofx.AutomaticGainControl
 import android.media.audiofx.NoiseSuppressor
 import android.os.Process
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.ArrayDeque
 
 /**
  * Android audio I/O foundation. PCM16 mono, 16 kHz, 20 ms frames (640 bytes).
@@ -24,6 +25,7 @@ class AndroidVoiceEngine(private val context: Context) {
     private var noise: NoiseSuppressor? = null
     private var gain: AutomaticGainControl? = null
     private var captureThread: Thread? = null
+    private var playbackThread: Thread? = null
     private val frameBytes = 640
     private val rate = 16000
     private val playbackLock = Any()
@@ -60,6 +62,13 @@ class AndroidVoiceEngine(private val context: Context) {
             track.play()
         } catch (_: IllegalStateException) { stop(); return false }
         running.set(true)
+        playbackThread = Thread({
+            Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
+            while (running.get()) {
+                pumpPlayback()
+                Thread.sleep(5)
+            }
+        }, "GamingHubVoicePlayback").also { it.start() }
         captureThread = Thread({
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
             val frame = ByteArray(frameBytes)
@@ -97,6 +106,8 @@ class AndroidVoiceEngine(private val context: Context) {
         try { recorder?.stop() } catch (_: IllegalStateException) {}
         captureThread?.join(500)
         captureThread = null
+        playbackThread?.join(500)
+        playbackThread = null
         echo?.release(); echo = null
         noise?.release(); noise = null
         gain?.release(); gain = null

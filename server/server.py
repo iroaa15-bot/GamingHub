@@ -1,5 +1,5 @@
 """Gaming Hub v0.4 authoritative room server. Python 3.10+, websockets >= 12."""
-import asyncio, json, random, secrets, string, os, time, datetime as dt, base64, binascii
+import asyncio, json, random, secrets, string, os, time, datetime as dt, base64, binascii, hmac, hashlib
 from urllib.parse import urlsplit, parse_qs
 from liveops_content import daily_rotation
 from daily_content import json_bytes, daily_pack, validate_pack
@@ -17,6 +17,20 @@ if not catalog_path.exists():
 catalog = json.loads(catalog_path.read_text(encoding='utf-8'))
 CARDS = catalog['cards']
 QUESTIONS = catalog['questions']
+
+def ephemeral_turn_credentials(room_code, player_index):
+    """Coturn REST-auth credentials, scoped to a consenting room player."""
+    secret = os.environ.get('GAMINGHUB_TURN_SECRET', '')
+    urls = [item.strip() for item in os.environ.get('GAMINGHUB_TURN_URLS', '').split(',') if item.strip()]
+    if not secret or not urls or len(urls) > 8:
+        return None
+    if any(not url.startswith(('turn:', 'turns:')) or len(url) > 512 for url in urls):
+        return None
+    expiry = int(time.time()) + 600
+    username = f"{expiry}:gh-{room_code}-{player_index}"
+    digest = hmac.new(secret.encode('utf-8'), username.encode('utf-8'), hashlib.sha1).digest()
+    return {'urls': urls, 'username': username, 'credential': base64.b64encode(digest).decode('ascii'), 'expires_at': expiry}
+
 
 def normalize_guess(value):
     value = str(value).strip().casefold()
@@ -44,7 +58,7 @@ class Room:
     history: list = field(default_factory=list)
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
-    voice_packet_at: list = field(default_factory=lambda: [0.0, 0.0])
+    voice_packet_at: list = field(default_factory=lambda: [[], []])
 
 rooms = {}
 connections = {}
@@ -78,7 +92,7 @@ async def start_room(room):
     room.history = []
     room.winner = -1
     room.voice_enabled = [False, False]
-    room.voice_packet_at = [0.0, 0.0]
+    room.voice_packet_at = [[], []]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -190,7 +204,7 @@ async def process(ws, msg):
         return
     # Optional voice signaling only. Audio media must use a native WebRTC client.
     # No SDP/ICE is stored in room history or server-side databases.
-    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio'):
+    if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio', 'voice_ice_config'):
         code = connections.get(ws)
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
@@ -208,6 +222,10 @@ async def process(ws, msg):
             return
         if not all(room.voice_enabled):
             return await send(ws, {'type':'error','message':'Both players must enable voice'})
+        if action == 'voice_ice_config':
+            config = ephemeral_turn_credentials(code, index)
+            # No credentials unless both players explicitly enabled voice.
+            return await send(ws, {'type': 'voice_ice_config', 'payload': config or {}})
         if action == 'voice_audio':
             # 20 ms, 16 kHz mono PCM16: exactly 640 bytes, base64 encoded.
             # No persistence. Per-sender pacing protects rooms from audio floods.
@@ -220,17 +238,22 @@ async def process(ws, msg):
                 return await send(ws, {'type':'error','message':'Invalid audio encoding'})
             if len(pcm) != 640:
                 return await send(ws, {'type':'error','message':'Invalid audio size'})
+            # Legitimate 20 ms frames can arrive in bursts when the mobile UI
+            # catches up. A 12 ms inter-arrival gate dropped those frames and
+            # caused audible missing syllables. Limit the rolling rate instead.
             now = time.monotonic()
-            if now - room.voice_packet_at[index] < 0.012:
-                return  # Drop excess audio instead of buffering it.
-            room.voice_packet_at[index] = now
+            recent = room.voice_packet_at[index]
+            recent[:] = [t for t in recent if now - t < 1.0]
+            if len(recent) >= 80:
+                return  # Reject sustained >80 packets/s; expected rate is 50.
+            recent.append(now)
             await send(room.players[1-index], {'type':'voice_audio','pcm':encoded})
             return
         payload = msg.get('payload')
-        if not isinstance(payload, dict) or len(json.dumps(payload)) > 6000:
+        if not isinstance(payload, dict) or len(json.dumps(payload)) > (18000 if action in ('voice_offer', 'voice_answer') else 6000):
             return await send(ws, {'type':'error','message':'Invalid voice payload'})
         if action in ('voice_offer', 'voice_answer'):
-            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 5500:
+            if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 16000:
                 return await send(ws, {'type':'error','message':'Invalid voice SDP'})
         if action == 'voice_ice' and (not isinstance(payload.get('candidate'), str) or not 0 < len(payload['candidate']) <= 4096):
             return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
@@ -342,20 +365,16 @@ async def handler(ws):
     try:
         async for raw in ws:
             now = time.monotonic()
+            timestamps = [t for t in timestamps if now - t < 10]
+            timestamps.append(now)
+            if len(timestamps) > 35:
+                await send(ws, {'type':'error','message':'Too many requests'})
+                await ws.close(code=1008, reason='Rate limit')
+                break
             try:
                 if len(raw) > 8192: raise ValueError('Oversized message')
                 msg = json.loads(raw)
                 if not isinstance(msg, dict): raise ValueError('Expected object')
-                # Voice packets have their own strict validation and pacing in
-                # process(). Counting ~50 PCM packets/second as game actions
-                # disconnected both players within a second of enabling voice.
-                if msg.get('type') != 'voice_audio':
-                    timestamps = [t for t in timestamps if now - t < 10]
-                    timestamps.append(now)
-                    if len(timestamps) > 35:
-                        await send(ws, {'type':'error','message':'Too many requests'})
-                        await ws.close(code=1008, reason='Rate limit')
-                        break
                 await process(ws, msg)
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})
@@ -467,7 +486,7 @@ async def http_health(connection, request):
 async def main():
     host = os.getenv('HOST','0.0.0.0')
     port = int(os.getenv('PORT','8765'))
-    async with serve(handler, host, port, max_size=8192, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
+    async with serve(handler, host, port, max_size=32768, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
         print(f'Gaming Hub server on {host}:{port}')
         task = asyncio.create_task(expiry_loop())
         try:

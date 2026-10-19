@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 763,
+  "file_count": 764,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
@@ -694,7 +694,7 @@
     "server/liveops_content.py": "7dd3312cc3bb465b24824037760e7c23bf2514969a191cd6ce67fac1e07f59e9",
     "server/liveops_rotation.json": "ab08107b814e860da6089301815d481840df44bc41c8400ef49e5ed3fbf818c7",
     "server/requirements.txt": "2324650b5371efe39ea9417a042cc9eee45c7b771028658a0bd509cde9cdfd94",
-    "server/server.py": "57dbd1e5a9499e5f27be65065809b4869e56820186e82f5a47de43cffc1f80df",
+    "server/server.py": "639760cd2c29f6a13bb35e31f4ffdb0b9e02ccac703b6cc112085d70c1395acc",
     "server/source_bundle.b85": "ca504b130a63825de48e0fc3837ea24616937629a42461bb58f5c21ad0f5e4f6",
     "server/test_additive_history_v114.py": "82edd1728f01c633744f94be49dddd940f272e91bb7f8e19e168982d8dca9ca0",
     "server/test_daily_content.py": "9516e7c8e4cd769ddce74fbe9eda0e107ff32c4c8fff7dc6c34c7744802440b7",
@@ -705,7 +705,7 @@
     "server/test_network_sync_v88.py": "9a4395685cc081f97d5e30700e63f7b148b656da097a1aa65584ce43aad5ab6f",
     "server/test_reconnect_v87.py": "e464dd8c3d87afc2b1485830200a5352828969d47a9fd68a2db1ca1ce4d63a55",
     "server/test_recovery_v86.py": "31f3182d91db1d65e18a22aa5186aba0ef0210294658e1029ff819c7df82922f",
-    "server/test_voice_signaling.py": "948c6629e36b49adc1ea1add39cb9ec760051e8621cfc875a30fad728b16ddb8",
+    "server/test_voice_signaling.py": "482282b8562623432c61ce04de3d1514a99b5d99ff23fc2685ae4fa3fb1418f8",
     "tests/activities.gd": "bb91340d606bff7f9c1f1819a6ba22508e8e1a725828a7b84037f966d8502ba6",
     "tests/activities.gd.uid": "d344cdceaa817e03de8e3f680e563ab20321a509b92757826c92791432810599",
     "tests/expansion.gd": "109a7de58ddff6b619425c84f87a4ec142424ff61134940063fd33bf16ecc3ef",
@@ -764,6 +764,7 @@
     "tests/test_v108_vault.py": "c7d579e8df3ce30c47d1f4700683805c8ea21cb64bb46818c029d81eca146288",
     "tests/test_visual_mystery_v45.py": "4d05ef49c1d6f43de3582763886f351f6fead42adea75488c882ae9baadd51a8",
     "tests/test_visual_results_sync_v85.py": "2a7f78c560ada217bfb287f31610e2448874c1799fb8c0c0ee7ca5c73b38ab16",
-    "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f"
+    "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
+    ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993"
   }
 }

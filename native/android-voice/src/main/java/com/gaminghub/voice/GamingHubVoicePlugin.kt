@@ -7,6 +7,7 @@ import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.UsedByGodot
 import org.godotengine.godot.plugin.SignalInfo
+import android.os.Build
 
 /**
  * Godot 4 Android plugin interface for the PCM voice engine.
@@ -25,6 +26,16 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
         val activity = activity ?: return false
         return activity.checkSelfPermission(Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
+    }
+
+    @UsedByGodot
+    fun requestMicrophonePermission() {
+        val host = activity ?: return
+        if (!hasMicrophonePermission() && Build.VERSION.SDK_INT >= 23) {
+            host.runOnUiThread {
+                host.requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 7821)
+            }
+        }
     }
 
     @UsedByGodot

@@ -19,6 +19,8 @@ import kotlin.collections.ArrayDeque
  */
 class AndroidVoiceEngine(private val context: Context) {
     private val running = AtomicBoolean(false)
+    private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    private var previousAudioMode = AudioManager.MODE_NORMAL
     private var recorder: AudioRecord? = null
     private var speaker: AudioTrack? = null
     private var echo: AcousticEchoCanceler? = null
@@ -52,6 +54,8 @@ class AndroidVoiceEngine(private val context: Context) {
             .setBufferSizeInBytes(maxOf(minPlay, frameBytes * 4))
             .setTransferMode(AudioTrack.MODE_STREAM).build()
         if (track.state != AudioTrack.STATE_INITIALIZED) { record.release(); track.release(); return false }
+        previousAudioMode = audioManager.mode
+        audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
         recorder = record
         speaker = track
         echo = if (AcousticEchoCanceler.isAvailable()) AcousticEchoCanceler.create(record.audioSessionId)?.also { it.enabled = true } else null
@@ -65,8 +69,15 @@ class AndroidVoiceEngine(private val context: Context) {
         playbackThread = Thread({
             Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
             while (running.get()) {
-                pumpPlayback()
-                Thread.sleep(5)
+                try {
+                    pumpPlayback()
+                    Thread.sleep(5)
+                } catch (_: InterruptedException) {
+                    break
+                } catch (_: IllegalStateException) {
+                    running.set(false)
+                    break
+                }
             }
         }, "GamingHubVoicePlayback").also { it.start() }
         captureThread = Thread({
@@ -79,7 +90,10 @@ class AndroidVoiceEngine(private val context: Context) {
                     if (read <= 0) { running.set(false); break }
                     offset += read
                 }
-                if (running.get() && offset == frameBytes) onCapture?.invoke(frame.copyOf())
+                if (running.get() && offset == frameBytes) {
+                    try { onCapture?.invoke(frame.copyOf()) }
+                    catch (_: Exception) { /* transport failures must not crash audio I/O */ }
+                }
             }
         }, "GamingHubVoiceCapture").also { it.start() }
         return true
@@ -115,5 +129,6 @@ class AndroidVoiceEngine(private val context: Context) {
         try { speaker?.pause(); speaker?.flush(); speaker?.stop() } catch (_: IllegalStateException) {}
         speaker?.release(); speaker = null
         synchronized(playbackLock) { playbackQueue.clear() }
+        audioManager.mode = previousAudioMode
     }
 }

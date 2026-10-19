@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - feature/voice-media-from-validated-client
+      - release/voice-complete-play-candidate
     paths:
       - scripts/multiplayer.gd
       - scripts/voice_signaling_bridge.gd

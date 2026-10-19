@@ -791,10 +791,16 @@ func _handle(msg: Dictionary) -> void:
      return
     _abort_stalled_session(_t("السيرفر رفض استكمال المباراة. يمكنك بدء مباراة جديدة.", "Server rejected resume. Start a new match."))
     return
-   action_in_flight = false
-   _refresh_actions()
-   matchmaking_pending = false
-   _update_lobby()
+   # Generic server errors have no request ID. An error may belong to
+   # signaling while a gameplay move is still awaiting acknowledgement.
+   # Keep that move pending until authoritative sync resolves its outcome.
+   if lobby_request_pending:
+    lobby_request_pending = false
+    lobby_request_started_ms = 0
+    matchmaking_pending = false
+    _update_lobby()
+   if not action_in_flight:
+    _refresh_actions()
    status.text = _local(str(msg.get("message", "Server error")))
 
 var deduction_status: Label

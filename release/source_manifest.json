@@ -10,7 +10,7 @@
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
     ".github/workflows/voice-client-validation.yml": "ffeb6671371f833f0d7bab92a56b013fa191c14a3484c9997cb8e5a78f445259",
-    ".github/workflows/voice-signaling-tests.yml": "d7603ee3afb39d4587d56e4d304c4eee7b2f9f0282361cf57725e2a301dc8141",
+    ".github/workflows/voice-signaling-tests.yml": "d69ad447535b68333141036fc1ef889982d4e5e1a8e989458251c5482668f1a5",
     ".github/workflows/windows-voice-test.yml": "ca1ab67d4f31c6ef9794b63b40950d3d04d7f25903a0a8de82c64b9930fd58cf",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
     "README_START_HERE_AR.md": "7d7e16e1b06af8616fdfe41fb3ea2d57a4d80b0aebb8e569dbde0636fa829e22",

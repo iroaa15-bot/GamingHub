@@ -779,7 +779,7 @@ func _handle(msg: Dictionary) -> void:
    _refresh_actions()
   "error":
    # Do not cancel unrelated gameplay operations on an uncorrelated error.
-   if reconnect_pending and str(msg.get("message", "")) in ["Original player still connected", "Invalid resume credentials", "Match unavailable", "Reconnection expired", "Already in a room"]:
+   if reconnect_pending and str(msg.get("scope", "")) == "resume":
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.
      socket.close()

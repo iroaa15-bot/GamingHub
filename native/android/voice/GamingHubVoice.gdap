@@ -5,4 +5,4 @@ binary="GamingHubVoice.aar"
 
 [dependencies]
 local=[]
-remote=[]
+remote=["io.github.webrtc-sdk:android:137.7151.05"]

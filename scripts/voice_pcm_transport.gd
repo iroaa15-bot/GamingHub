@@ -15,6 +15,9 @@ const MAX_AUTO_GAIN := 3.0
 const NOISE_GATE := 0.012
 var _source_rate := 48000.0
 var _smoothed_gain := 1.0
+## Local loopback diagnostic only: suppress background hiss while the mic is idle.
+var suppress_silence := false
+const LOCAL_SILENCE_PEAK := 0.025
 var _phase := 0.0
 var _samples := PackedFloat32Array()
 var _out: AudioStreamPlayer
@@ -76,13 +79,14 @@ func encode_frames(frames: PackedVector2Array) -> Array[String]:
    for peak_sample in _samples:
     peak = maxf(peak, absf(peak_sample))
    var target_gain: float = 1.0
-   if peak >= NOISE_GATE:
+   var quiet_local_packet := suppress_silence and peak < LOCAL_SILENCE_PEAK
+   if peak >= NOISE_GATE and not quiet_local_packet:
     target_gain = clampf(TARGET_PEAK / maxf(peak, 0.001), 1.0, MAX_AUTO_GAIN)
    _smoothed_gain = lerpf(_smoothed_gain, target_gain, 0.15)
    var pcm := PackedByteArray()
    pcm.resize(SAMPLES * 2)
    for i in range(SAMPLES):
-    var pcm_sample: float = _samples[i]
+    var pcm_sample: float = 0.0 if quiet_local_packet else _samples[i]
     if absf(pcm_sample) < NOISE_GATE:
      pcm_sample *= 0.15
     var value := clampi(int(round(clampf(pcm_sample * _smoothed_gain, -0.95, 0.95) * 32767.0)), -32768, 32767)

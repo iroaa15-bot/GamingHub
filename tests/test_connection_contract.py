@@ -30,6 +30,17 @@ class ConnectionContract(unittest.TestCase):
         for language in ('questions', 'questions_ar', 'questions_tr'):
             self.assertIn(repr(language) + ':', snapshot)
 
+    def test_snapshot_never_sends_own_secret_card(self):
+        snapshot = self.server.split('def snapshot(', 1)[1].split('async def cleanup_room(', 1)[0]
+        self.assertIn('public_card(room.cards[1-index])', snapshot)
+        self.assertNotIn('public_card(room.cards[index])', snapshot)
+        self.assertNotIn("'cards': room.cards", snapshot)
+
+    def test_resume_resets_voice_consent(self):
+        resume = self.server.split("if action == 'resume':", 1)[1].split('# Optional voice signaling only.', 1)[0]
+        self.assertIn('room.voice_enabled = [False, False]', resume)
+        self.assertIn("snapshot(room, idx, 'resumed', include_token=True)", resume)
+
     def test_voice_requires_both_peers(self):
         self.assertIn('if not all(room.voice_enabled):', self.server)
 

@@ -435,7 +435,8 @@ func _connect_server() -> void:
  _update_lobby()
  connect_started_ms = Time.get_ticks_msec()
  socket = WebSocketPeer.new()
- var err := socket.connect_to_url(url)
+ server_url = url
+ var err := socket.connect_to_url(server_url)
  if err != OK:
   pending_action.clear()
   _update_lobby()
@@ -492,7 +493,7 @@ func _process(_delta: float) -> void:
    return
   if state == WebSocketPeer.STATE_CLOSED and reconnect_now >= reconnect_next_ms:
    socket = WebSocketPeer.new()
-   var err := socket.connect_to_url(address_input.text.strip_edges())
+   var err := socket.connect_to_url(server_url)
    connect_started_ms = reconnect_now if err == OK else 0
    reconnect_next_ms = reconnect_now + 2500
    return

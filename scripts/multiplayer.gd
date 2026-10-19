@@ -381,6 +381,7 @@ func _toggle_local_voice_test() -> void:
   return
  local_voice_frames = 0
  local_voice_packets = 0
+ local_voice_transport.suppress_silence = true
  local_voice_transport.start(self)
  if not local_voice_capture.start(self, true, _voice_permission_granted()):
   local_voice_transport.stop()
@@ -394,6 +395,7 @@ func _stop_local_voice_test() -> void:
  local_voice_test = false
  local_voice_capture.stop()
  local_voice_transport.stop()
+ local_voice_transport.suppress_silence = false
  if is_instance_valid(local_voice_button):
   local_voice_button.text = _t("اختبار الميكروفون والسماعة (سماعات رأس)", "Test microphone and speaker (headphones)")
 

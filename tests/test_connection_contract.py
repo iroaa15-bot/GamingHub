@@ -25,6 +25,11 @@ class ConnectionContract(unittest.TestCase):
         self.assertIn('started_message["resume_token"] = resume_token', self.client)
         self.assertIn('"type":"resume", "code":room_code, "token":resume_token', self.client)
 
+    def test_snapshot_preserves_question_languages(self):
+        snapshot = self.server.split('def snapshot(', 1)[1].split('async def cleanup_room(', 1)[0]
+        for language in ('questions', 'questions_ar', 'questions_tr'):
+            self.assertIn(repr(language) + ':', snapshot)
+
     def test_voice_requires_both_peers(self):
         self.assertIn('if not all(room.voice_enabled):', self.server)
 

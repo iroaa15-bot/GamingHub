@@ -173,22 +173,22 @@ async def process(ws, msg):
         code = msg.get('code')
         token = msg.get('token')
         if ws in connections or ws in waiting:
-            return await send(ws, {'type':'error','message':'Already in a room'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Already in a room'})
         if not isinstance(code, str) or not isinstance(token, str) or len(token) != 64:
-            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Invalid resume credentials'})
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards:
-            return await send(ws, {'type':'error','message':'Match unavailable'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Match unavailable'})
         idx = next((i for i, expected in enumerate(room.resume_tokens)
                     if expected and secrets.compare_digest(expected, token)), -1)
         if idx < 0:
-            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Invalid resume credentials'})
         disconnected_at = room.detached_at[idx]
         if disconnected_at is None:
-            return await send(ws, {'type':'error','message':'Original player still connected'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Original player still connected'})
         if time.monotonic() - disconnected_at >= RECONNECT_GRACE:
             await cleanup_room(code, 'Reconnection window expired')
-            return await send(ws, {'type':'error','message':'Reconnection expired'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Reconnection expired'})
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws

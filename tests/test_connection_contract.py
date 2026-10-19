@@ -46,6 +46,12 @@ class ConnectionContract(unittest.TestCase):
         self.assertEqual(resume.count("'scope':'resume'"), 6)
         self.assertIn('str(msg.get("scope", "")) == "resume"', self.client)
 
+    def test_audio_is_not_counted_as_gameplay_rate(self):
+        handler = self.server.split('async def handler(ws):', 1)[1].split('# Additive historical library.', 1)[0]
+        self.assertIn("if action != 'voice_audio':", handler)
+        self.assertIn("if len(raw) > 20000:", handler)
+        self.assertIn("if len(recent) >= 80:", self.server)
+
     def test_voice_requires_both_peers(self):
         self.assertIn('if not all(room.voice_enabled):', self.server)
 

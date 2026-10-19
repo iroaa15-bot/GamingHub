@@ -365,17 +365,23 @@ async def handler(ws):
     timestamps = []
     try:
         async for raw in ws:
-            now = time.monotonic()
-            timestamps = [t for t in timestamps if now - t < 10]
-            timestamps.append(now)
-            if len(timestamps) > 35:
-                await send(ws, {'type':'error','message':'Too many requests'})
-                await ws.close(code=1008, reason='Rate limit')
-                break
             try:
-                if len(raw) > 8192: raise ValueError('Oversized message')
+                # Parse before rate classification. Voice PCM is separately paced
+                # at 80 packets/second per room in process().
+                if len(raw) > 20000:
+                    raise ValueError('Oversized message')
                 msg = json.loads(raw)
-                if not isinstance(msg, dict): raise ValueError('Expected object')
+                if not isinstance(msg, dict):
+                    raise ValueError('Expected object')
+                action = msg.get('type')
+                if action != 'voice_audio':
+                    now = time.monotonic()
+                    timestamps = [t for t in timestamps if now - t < 10]
+                    timestamps.append(now)
+                    if len(timestamps) > 35:
+                        await send(ws, {'type':'error','message':'Too many requests'})
+                        await ws.close(code=1008, reason='Rate limit')
+                        break
                 await process(ws, msg)
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})

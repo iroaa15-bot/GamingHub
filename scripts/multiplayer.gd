@@ -284,6 +284,14 @@ func _ready() -> void:
  var network_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/network_config.json"))
  if network_settings is Dictionary:
   server_url = str(network_settings.get("server_url", "")).strip_edges()
+ # Only an explicitly enabled local staging profile can override production.
+ # Exported release builds have no staging profile by default.
+ if FileAccess.file_exists("res://data/voice_staging.json"):
+  var staging_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/voice_staging.json"))
+  if staging_settings is Dictionary and staging_settings.get("enabled", false) == true:
+   var staging_url := str(staging_settings.get("server_url", "")).strip_edges()
+   if staging_url == "wss://gaminghub-voice-staging.onrender.com":
+    server_url = staging_url
  _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
  # The active match is placed ABOVE lobby actions for portrait phones.
  status = _label(_t("جاهز للاتصال", "Ready to connect"), 18)

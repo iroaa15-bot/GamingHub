@@ -41,6 +41,11 @@ class ConnectionContract(unittest.TestCase):
         self.assertIn('room.voice_enabled = [False, False]', resume)
         self.assertIn("snapshot(room, idx, 'resumed', include_token=True)", resume)
 
+    def test_resume_errors_are_scoped(self):
+        resume = self.server.split("if action == 'resume':", 1)[1].split('# Optional voice signaling only.', 1)[0]
+        self.assertEqual(resume.count("'scope':'resume'"), 6)
+        self.assertIn('str(msg.get("scope", "")) == "resume"', self.client)
+
     def test_voice_requires_both_peers(self):
         self.assertIn('if not all(room.voice_enabled):', self.server)
 

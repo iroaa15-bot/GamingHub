@@ -109,6 +109,7 @@ def snapshot(room, index, kind='synced', include_token=False):
              'finished': room.over,
              'questions': [q['text'] for q in QUESTIONS],
              'questions_ar': [q['ar'] for q in QUESTIONS],
+             'questions_tr': [q['tr'] for q in QUESTIONS],
              'history': room.history.copy(),
              'paused': any(p is None for p in room.players)}
     if include_token:

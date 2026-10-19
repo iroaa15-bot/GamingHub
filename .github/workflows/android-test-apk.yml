@@ -11,7 +11,7 @@ on:
       - 'export_presets.cfg'
       - 'native/android/voice/**'
   push:
-    branches: [feature/voice-media-from-validated-client]
+    branches: [feature/voice-media-from-validated-client, release/voice-complete-play-candidate]
     paths:
       - 'scripts/**'
       - 'scenes/**'

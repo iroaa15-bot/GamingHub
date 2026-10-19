@@ -1,3 +1,5 @@
+> Historical audit before the native implementation. See [current implementation and verified limits](ANDROID_VOICE_HANDOFF_AR.md).
+
 # Gaming Hub — Voice root-cause audit (pre-APK)
 
 ## Verified in main

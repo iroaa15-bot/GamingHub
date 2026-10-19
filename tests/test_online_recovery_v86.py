@@ -7,7 +7,7 @@ class OnlineRecoveryV86(unittest.TestCase):
  def test_lobby_pending_blocks_double_room_requests(self):
   self.assertIn('or lobby_request_pending or leaving:', S)
   self.assertIn('lobby_request_pending = true', S)
-  self.assertIn('"room", "queue", "started", "error", "left", "disconnected"', S)
+  self.assertIn('"room", "queue", "started", "left", "disconnected"', S)
  def test_cancel_ignores_stale_room_start(self):
   self.assertIn('if leaving and kind not in ["left", "disconnected"]:', S)
   self.assertIn('_send({"type":"leave"})', S)

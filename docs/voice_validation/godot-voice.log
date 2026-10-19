@@ -1,0 +1,5 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+VOICE_CAPABILITIES {}
+VOICE_CAPABILITIES {}
+VOICE_RUNTIME_PASS: bridge lifecycle, permission, async state, native PCM boundary, consent, epochs, reconnect reset, gameplay isolation

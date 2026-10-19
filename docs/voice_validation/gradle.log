@@ -1,0 +1,105 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :generateVoiceBuildInfo
+> Task :preBuild
+> Task :preDebugBuild
+> Task :generateDebugResValues UP-TO-DATE
+> Task :generateDebugResources UP-TO-DATE
+> Task :packageDebugResources UP-TO-DATE
+> Task :parseDebugLocalResources UP-TO-DATE
+> Task :generateDebugRFile UP-TO-DATE
+> Task :javaPreCompileDebug UP-TO-DATE
+> Task :preDebugUnitTestBuild
+> Task :generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :mergeDebugJniLibFolders UP-TO-DATE
+> Task :mergeDebugNativeLibs NO-SOURCE
+> Task :stripDebugDebugSymbols NO-SOURCE
+> Task :copyDebugJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :extractDeepLinksForAarDebug UP-TO-DATE
+> Task :mergeDebugShaders UP-TO-DATE
+> Task :compileDebugShaders NO-SOURCE
+> Task :generateDebugAssets UP-TO-DATE
+> Task :mergeDebugAssets
+> Task :prepareDebugArtProfile UP-TO-DATE
+> Task :prepareLintJarForPublish UP-TO-DATE
+> Task :processDebugManifest UP-TO-DATE
+> Task :writeDebugAarMetadata UP-TO-DATE
+> Task :preDebugAndroidTestBuild
+> Task :generateDebugAndroidTestResValues UP-TO-DATE
+> Task :writeDebugLintModelMetadata UP-TO-DATE
+> Task :extractProguardFiles UP-TO-DATE
+> Task :preReleaseBuild
+> Task :generateReleaseResValues UP-TO-DATE
+> Task :generateReleaseResources UP-TO-DATE
+> Task :packageReleaseResources UP-TO-DATE
+> Task :parseReleaseLocalResources UP-TO-DATE
+> Task :generateReleaseRFile UP-TO-DATE
+> Task :compileReleaseKotlin
+> Task :javaPreCompileRelease UP-TO-DATE
+> Task :compileReleaseJavaWithJavac NO-SOURCE
+> Task :processReleaseManifest UP-TO-DATE
+> Task :generateReleaseLintReportModel
+> Task :mergeReleaseJniLibFolders UP-TO-DATE
+> Task :mergeReleaseNativeLibs NO-SOURCE
+> Task :stripReleaseDebugSymbols NO-SOURCE
+> Task :copyReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :extractDeepLinksForAarRelease UP-TO-DATE
+> Task :extractReleaseAnnotations
+> Task :mergeReleaseShaders UP-TO-DATE
+> Task :compileReleaseShaders NO-SOURCE
+> Task :generateReleaseAssets UP-TO-DATE
+> Task :mergeReleaseAssets
+> Task :mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :mergeReleaseConsumerProguardFiles UP-TO-DATE
+> Task :prepareReleaseArtProfile UP-TO-DATE
+> Task :processReleaseJavaRes UP-TO-DATE
+> Task :mergeReleaseJavaResource UP-TO-DATE
+> Task :syncReleaseLibJars
+> Task :writeReleaseAarMetadata UP-TO-DATE
+> Task :bundleReleaseLocalLintAar
+> Task :bundleLibRuntimeToJarRelease
+> Task :createFullJarRelease
+> Task :preReleaseUnitTestBuild
+> Task :writeReleaseLintModelMetadata UP-TO-DATE
+> Task :generateReleaseUnitTestLintModel
+> Task :compileDebugKotlin
+> Task :compileDebugJavaWithJavac NO-SOURCE
+> Task :bundleLibRuntimeToJarDebug
+> Task :bundleLibCompileToJarDebug
+> Task :compileDebugUnitTestKotlin
+> Task :compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :processDebugJavaRes UP-TO-DATE
+> Task :processDebugUnitTestJavaRes UP-TO-DATE
+> Task :testDebugUnitTest
+> Task :extractDebugAnnotations
+> Task :mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :mergeDebugJavaResource UP-TO-DATE
+> Task :syncDebugLibJars
+> Task :bundleDebugLocalLintAar
+> Task :createFullJarDebug
+> Task :generateDebugAndroidTestLintModel
+> Task :generateDebugLintReportModel
+> Task :generateDebugUnitTestLintModel
+> Task :lintAnalyzeDebug
+> Task :lintAnalyzeDebugAndroidTest
+> Task :lintAnalyzeDebugUnitTest
+> Task :lintReportDebug
+> Task :lintDebug
+> Task :lintAnalyzeReleaseUnitTest
+> Task :bundleDebugAar
+> Task :assembleDebug
+> Task :bundleReleaseAar
+> Task :mapReleaseSourceSetPaths UP-TO-DATE
+> Task :mergeReleaseResources UP-TO-DATE
+> Task :verifyReleaseResources UP-TO-DATE
+> Task :assembleRelease
+> Task :installPlugin
+> Task :lintAnalyzeRelease
+> Task :lintReportRelease
+> Task :lintRelease
+
+BUILD SUCCESSFUL in 1m 8s
+80 actionable tasks: 35 executed, 45 up-to-date

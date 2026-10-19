@@ -1,0 +1,28 @@
+
+$ python tests/project_preflight.py
+Preflight: 10 scripts, 6 JSON files
+PASS: static source checks (Godot runtime still untested)
+
+$ python -m unittest discover -s tests -p test_*.py
+.....................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 213 tests in 4.496s
+
+OK
+PASS: static state-machine safety checks (not a device/SDK test)
+
+$ python -m unittest discover -s server -p test_*.py
+...........................................................................
+----------------------------------------------------------------------
+Ran 75 tests in 4.802s
+
+OK
+
+$ python -m unittest discover -s ai_daily -p test_*.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.357s
+
+OK
+
+RESULT: PASS

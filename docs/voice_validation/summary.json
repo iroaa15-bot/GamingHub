@@ -1,0 +1,33 @@
+{
+  "base_commit": "1586d38fa16dd0b3d4531abd03428a45ac6dbd70",
+  "branch": "fix/android-voice-root-cause",
+  "tools": {
+    "godot": "4.5.1",
+    "gradle": "8.11.1",
+    "agp": "8.10.1",
+    "kotlin": "2.1.20",
+    "jdk": "17.0.20.1",
+    "compile_sdk": 36
+  },
+  "python_tests": {
+    "offline": 213,
+    "server": 75,
+    "daily": 3
+  },
+  "jvm_tests": 14,
+  "native_source_sha256": "b597cf4a7f570440097c0022d0444a1f5b6dc19c61bdd1f0efbd34c503b20fb3",
+  "device_tests_run": false,
+  "apk_built": false,
+  "production_server_deployed": false,
+  "sha256": {
+    "project.godot": "86440bb2f0e42f310aa392a46292241e7dbff94db27a4a1741faff41ead35834",
+    "export_presets.cfg": "2fd4bcc167c715428f3273f63251c195bf2fbe64e5dd4b81ef1db63d39c461a0",
+    "scripts/android_voice_bridge.gd": "0f6878b2863cb9fd4f17057e3f73cfb744d0513c658db9945e2c9329b5673663",
+    "scripts/multiplayer.gd": "81b81841336525b92911cb23725735fc4741d957ba545f33d4ac3d154dd5c635",
+    "server/server.py": "2c9957ab75f18bb843252e60589c3fe9f5074b00bb71e24d9c16e68a1df903d3",
+    "addons/gaminghub_voice/bin/gaminghub-voice-debug.aar": "60a563a8c8785b0dfac45d2691193fd17ad882617e40f50174ed0cbccce74fba",
+    "addons/gaminghub_voice/bin/gaminghub-voice-release.aar": "02a088d22cd7a5367a21cc2cfb11692900a67db850a42a0901d5c245ad7806c4"
+  },
+  "upload_archive_tests_pass": true,
+  "validated_archive_file_count": 816
+}

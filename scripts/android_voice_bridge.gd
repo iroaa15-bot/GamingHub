@@ -58,6 +58,11 @@ func start_webrtc() -> bool:
   return false
  return bool(_plugin.call("startWebRtc"))
 
+func webrtc_startup_error() -> String:
+ if _plugin != null and is_instance_valid(_plugin) and _plugin.has_method("getWebRtcStartupError"):
+  return str(_plugin.call("getWebRtcStartupError"))
+ return "plugin_unavailable"
+
 func stop_webrtc() -> void:
  if _plugin != null and is_instance_valid(_plugin) and _plugin.has_method("stopWebRtc"):
   _plugin.call("stopWebRtc")

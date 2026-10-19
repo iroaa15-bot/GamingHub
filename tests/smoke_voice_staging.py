@@ -58,6 +58,11 @@ async def main():
             audio = await receive_type(b, "voice_audio")
             assert audio["pcm"] == frame and audio["epoch"] == epoch
             assert audio["seq"] == 1 and audio["player"] == start_a["player_index"]
+            # Verify reverse direction with the same active consent epoch.
+            await b.send(json.dumps({"type": "voice_audio", "pcm": frame, "epoch": epoch, "seq": 1}))
+            reverse = await receive_type(a, "voice_audio")
+            assert reverse["pcm"] == frame and reverse["epoch"] == epoch
+            assert reverse["seq"] == 1 and reverse["player"] == start_b["player_index"]
             # A duplicate sequence must not be relayed.
             await a.send(json.dumps({"type": "voice_audio", "pcm": frame, "epoch": epoch, "seq": 1}))
             try:
@@ -65,9 +70,17 @@ async def main():
                 raise AssertionError(f"Duplicate audio was relayed: {unexpected}")
             except asyncio.TimeoutError:
                 pass
+            # Revocation must disable relaying without closing the match.
+            await b.send(json.dumps({"type": "voice_state", "enabled": False, "request_id": 3}))
+            off_ack = await receive_type(b, "voice_state_ack")
+            off_peer = await receive_type(a, "voice_state")
+            assert not off_ack["local_enabled"] and not off_peer["peer_enabled"]
+            await a.send(json.dumps({"type": "voice_audio", "pcm": frame, "epoch": epoch, "seq": 2}))
+            error = json.loads(await asyncio.wait_for(a.recv(), 5))
+            assert error.get("type") == "error" and error.get("scope") == "voice", error
             await a.send(json.dumps({"type": "ping", "id": 420}))
             assert (await receive_type(a, "pong"))["id"] == 420
-            print("STAGING_SMOKE_PASS: ping, room, join, consent, PCM relay and duplicate rejection protocol=2")
+            print("STAGING_SMOKE_PASS: ping, room, join, consent, bidirectional PCM, duplicate rejection and revocation protocol=2")
 
 
 if __name__ == "__main__":

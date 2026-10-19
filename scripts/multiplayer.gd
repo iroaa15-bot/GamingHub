@@ -653,6 +653,11 @@ func _send(message: Dictionary) -> void:
 
 func _handle(msg: Dictionary) -> void:
  var kind := str(msg.get("type", ""))
+ if kind == "voice_state_ack":
+  voice_local_enabled = bool(msg.get("enabled", false))
+  voice_peer_enabled = bool(msg.get("peer_enabled", false))
+  _refresh_native_voice()
+  return
  if kind == "voice_state":
   voice_peer_enabled = bool(msg.get("enabled", false))
   _refresh_native_voice()

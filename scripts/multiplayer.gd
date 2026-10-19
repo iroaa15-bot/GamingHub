@@ -5,6 +5,9 @@ const VisualSkin = preload("res://scripts/visual_skin.gd")
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
 var socket := WebSocketPeer.new()
+var android_voice_bridge: Node = null
+var voice_local_enabled := false
+var voice_peer_enabled := false
 var connected := false
 var room_code := ""
 var opponent_card := ""
@@ -85,6 +88,35 @@ const CANDIDATES_PER_PAGE: int = 6
 
 func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
+
+func _setup_native_voice() -> void:
+ if android_voice_bridge != null:
+  return
+ android_voice_bridge = load("res://scripts/android_voice_bridge.gd").new()
+ add_child(android_voice_bridge)
+ android_voice_bridge.outgoing_pcm.connect(_send_native_voice_pcm)
+
+func _send_native_voice_pcm(pcm: String) -> void:
+ if voice_local_enabled and voice_peer_enabled and connected and not reconnecting and not finished and not room_code.is_empty():
+  _send({"type":"voice_audio", "pcm":pcm})
+
+func set_voice_opt_in(enabled: bool) -> void:
+ _setup_native_voice()
+ voice_local_enabled = enabled
+ if not enabled:
+  android_voice_bridge.stop_voice()
+ if connected and not room_code.is_empty():
+  _send({"type":"voice_state", "enabled":enabled})
+ _refresh_native_voice()
+
+func _refresh_native_voice() -> void:
+ if android_voice_bridge != null:
+  android_voice_bridge.set_consent(voice_local_enabled, voice_peer_enabled)
+
+func _reset_voice_on_connection_loss() -> void:
+ voice_peer_enabled = false
+ voice_local_enabled = false
+ _refresh_native_voice()
 
 func _ready() -> void:
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
@@ -621,6 +653,14 @@ func _send(message: Dictionary) -> void:
 
 func _handle(msg: Dictionary) -> void:
  var kind := str(msg.get("type", ""))
+ if kind == "voice_state":
+  voice_peer_enabled = bool(msg.get("enabled", false))
+  _refresh_native_voice()
+  return
+ if kind == "voice_audio":
+  if android_voice_bridge != null and voice_local_enabled and voice_peer_enabled:
+   android_voice_bridge.receive_pcm(str(msg.get("pcm", "")))
+  return
  if leaving and kind not in ["left", "disconnected"]:
   # A create/matchmake request can race with leave; never resurrect its UI.
   return

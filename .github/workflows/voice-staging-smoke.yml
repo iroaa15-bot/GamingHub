@@ -1,6 +1,11 @@
 name: Voice Staging Smoke (manual only)
 
 on:
+  push:
+    branches:
+      - fix/android-voice-root-cause
+    paths:
+      - .github/workflows/voice-staging-smoke.yml
   workflow_dispatch:
 
 permissions:
@@ -22,8 +27,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
-          cache-dependency-path: server/requirements.txt
       - name: Check staging export isolation
         run: python -m unittest discover -s tests -p test_prepare_voice_staging.py -v
       - name: Install WebSocket test dependency

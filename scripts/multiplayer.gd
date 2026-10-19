@@ -1142,7 +1142,12 @@ func _handle(msg: Dictionary) -> void:
       if ice_url is String:
        ice_urls.append(ice_url)
      if ice_urls.size() == urls_value.size():
-      android_voice.configure_webrtc_ice_servers(ice_urls, str(ice_payload.get("username", "")), str(ice_payload.get("credential", "")))
+      if not android_voice.configure_webrtc_ice_servers(ice_urls, str(ice_payload.get("username", "")), str(ice_payload.get("credential", ""))):
+       webrtc_failure_code = "ICE_CONFIG_APPLY_FAILED"
+       webrtc_failed_this_call = true
+       native_voice_failed_this_call = true
+       _update_voice_ui()
+       return
    webrtc_ice_config_received = true
    webrtc_stage = "permission"
    if not webrtc_pending_offer.is_empty() and _voice_permission_granted():

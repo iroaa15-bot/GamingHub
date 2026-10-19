@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 763,
+  "file_count": 764,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
@@ -764,6 +764,7 @@
     "tests/test_v108_vault.py": "c7d579e8df3ce30c47d1f4700683805c8ea21cb64bb46818c029d81eca146288",
     "tests/test_visual_mystery_v45.py": "4d05ef49c1d6f43de3582763886f351f6fead42adea75488c882ae9baadd51a8",
     "tests/test_visual_results_sync_v85.py": "2a7f78c560ada217bfb287f31610e2448874c1799fb8c0c0ee7ca5c73b38ab16",
-    "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f"
+    "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
+    ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993"
   }
 }

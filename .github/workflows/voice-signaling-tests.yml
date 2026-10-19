@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - work/voice-integration-validation
+      - feature/voice-media-from-validated-client
     paths:
       - server/server.py
       - server/test_voice_signaling.py

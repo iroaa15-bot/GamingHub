@@ -954,7 +954,8 @@ func _sync_voice_microphone() -> void:
    return
   native_voice_failed_this_call = true
   webrtc_failed_this_call = true
-  webrtc_failure_code = "WEBRTC_OFFER_TIMEOUT"
+  # Include the assigned role to distinguish missing offers from role desync.
+  webrtc_failure_code = "WEBRTC_OFFER_TIMEOUT:P%d" % player_index
   return
  if OS.get_name() == "Android" and not native_voice_failed_this_call and android_voice.available() and android_voice.start_after_consent():
   native_voice_active = true

@@ -105,6 +105,9 @@ public final class GamingHubVoicePlugin extends GodotPlugin {
     }
 
     @UsedByGodot
+    public String getWebRtcStartupError() { return rtc == null ? "not_initialized" : rtc.getStartupError(); }
+
+    @UsedByGodot
     public void stopWebRtc() { if (rtc != null) rtc.stop(); }
 
     @UsedByGodot

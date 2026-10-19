@@ -697,7 +697,7 @@
     "scripts/visual_skin.gd": "807ee123224adeb4e7590e0629972cbab38e5682d0f109e2ee8c9923dac5e333",
     "scripts/visual_skin.gd.uid": "72adbe62f5f51a94cfd4419b194a61c59ff967a3dc4e051cfaa5e0c085cfc417",
     "scripts/voice_microphone_capture.gd": "bda27975f07043dd4a0affed106a2dfd9e7794b9cbe5506c13a90e95fca16562",
-    "scripts/voice_pcm_transport.gd": "af202ada664b63368891ed6701482a3e3c0b58cbbd5fec680f0b07b60f8199a8",
+    "scripts/voice_pcm_transport.gd": "2a72d952f3b84997c26798791d4f074cbefcf9ff9954ff4278cb88cbc0877b39",
     "scripts/voice_signaling_bridge.gd": "f1c21f9106eeeeff55eda00bfc56e9ba1441675bb8668a56d77ae9351c081ae5",
     "server/Dockerfile": "0653a855bec48461f9c1831d1e686aad1ef76f39eafe7a0aca508575b92795ec",
     "server/cards.json": "215e3f41d3dd6ceacc510c3a48647177eed859ccdddc432a16932581a0b452cc",

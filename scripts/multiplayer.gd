@@ -942,7 +942,7 @@ func _sync_voice_microphone() -> void:
   else:
    # Never silently use PCM while the other device expects Opus.
    webrtc_failed_this_call = true
-   webrtc_failure_code = "WEBRTC_START_FAILED"
+   webrtc_failure_code = "WEBRTC_START_FAILED:" + android_voice.webrtc_startup_error()
    native_voice_failed_this_call = true
   return
  # Answerer waits for the remote WebRTC offer before opening legacy PCM.
@@ -1010,7 +1010,7 @@ func _on_webrtc_remote_description(kind: String, sdp: String) -> void:
   if webrtc_voice_active:
    android_voice.set_webrtc_muted(voice_muted)
   if not webrtc_voice_active:
-   webrtc_failure_code = "WEBRTC_ANSWER_START_FAILED"
+   webrtc_failure_code = "WEBRTC_ANSWER_START_FAILED:" + android_voice.webrtc_startup_error()
    webrtc_failed_this_call = true
    native_voice_failed_this_call = true
    return

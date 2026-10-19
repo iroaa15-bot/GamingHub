@@ -28,6 +28,9 @@ public final class WebRtcAudioPeer {
     private JavaAudioDeviceModule audioModule;
     private final ConcurrentLinkedQueue<String> events = new ConcurrentLinkedQueue<>();
     private boolean started;
+    private String startupStage = "idle";
+    private String startupError = "";
+    public synchronized String getStartupError() { return startupError; }
     private AudioManager audioManager;
     private int previousAudioMode = AudioManager.MODE_NORMAL;
     private boolean previousSpeakerphoneOn;
@@ -61,16 +64,23 @@ public final class WebRtcAudioPeer {
 
     public synchronized boolean start() {
         if (started) return true;
+        startupError = "";
+        startupStage = "audio_route";
         try {
             configureSpeakerphone();
+            startupStage = "factory_init";
             PeerConnectionFactory.initialize(PeerConnectionFactory.InitializationOptions.builder(context).createInitializationOptions());
+            startupStage = "audio_module";
             audioModule = JavaAudioDeviceModule.builder(context)
                 .setUseHardwareAcousticEchoCanceler(true)
                 .setUseHardwareNoiseSuppressor(true).createAudioDeviceModule();
+            startupStage = "factory";
             factory = PeerConnectionFactory.builder()
                 .setAudioDeviceModule(audioModule)
                 .createPeerConnectionFactory();
+            startupStage = "audio_source";
             source = factory.createAudioSource(new MediaConstraints());
+            startupStage = "audio_track";
             track = factory.createAudioTrack("gaminghub_voice", source);
             List<PeerConnection.IceServer> ice = new ArrayList<>();
             if (configuredIceServers.isEmpty()) {
@@ -79,6 +89,7 @@ public final class WebRtcAudioPeer {
                 ice.addAll(configuredIceServers);
             }
             PeerConnection.RTCConfiguration config = new PeerConnection.RTCConfiguration(ice);
+            startupStage = "peer_connection";
             peer = factory.createPeerConnection(config, new PeerConnection.Observer() {
                 @Override public void onSignalingChange(PeerConnection.SignalingState state) {}
                 @Override public void onIceConnectionChange(PeerConnection.IceConnectionState state) { events.add("state|" + state.name()); }
@@ -101,10 +112,15 @@ public final class WebRtcAudioPeer {
                 @Override public void onAddTrack(org.webrtc.RtpReceiver receiver, org.webrtc.MediaStream[] streams) {}
             });
             if (peer == null) throw new IllegalStateException("PeerConnection unavailable");
+            startupStage = "add_track";
             peer.addTrack(track, Collections.singletonList("gaminghub_audio"));
+            startupStage = "running";
             started = true;
             return true;
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException | LinkageError ex) {
+            // Expose only a bounded stage/type diagnostic; never expose credentials or SDP.
+            startupError = startupStage + ":" + ex.getClass().getSimpleName();
+            android.util.Log.e("GamingHubVoice", "WebRTC startup failed at " + startupStage, ex);
             stop();
             return false;
         }

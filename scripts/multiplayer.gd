@@ -624,12 +624,14 @@ func _handle(msg: Dictionary) -> void:
  if leaving and kind not in ["left", "disconnected"]:
   # A create/matchmake request can race with leave; never resurrect its UI.
   return
- if kind in ["turn", "finished", "error", "left", "disconnected"]:
+ # A generic error can be unrelated to an in-flight move (e.g. voice).
+ # Do not discard a move awaiting authoritative sync because of that error.
+ if kind in ["turn", "finished", "left", "disconnected"]:
   action_in_flight = false
   move_started_ms = 0
   sync_pending = false
   sync_started_ms = 0
- if kind in ["room", "queue", "started", "error", "left", "disconnected"]:
+ if kind in ["room", "queue", "started", "left", "disconnected"]:
   lobby_request_pending = false
   lobby_request_started_ms = 0
  match kind:
@@ -776,6 +778,7 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
    _refresh_actions()
   "error":
+   # Do not cancel unrelated gameplay operations on an uncorrelated error.
    if reconnect_pending:
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.

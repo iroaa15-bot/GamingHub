@@ -37,6 +37,18 @@ def prepare(source: Path, destination: Path) -> Path:
             if n in SKIP_FILES or (n in SKIP_DIRS and (Path(_dir) / n).is_dir())
         ],
     )
+    # Separate Android application ID prevents replacing the installed production app.
+    presets_path = destination / "export_presets.cfg"
+    presets = presets_path.read_text(encoding="utf-8")
+    original_id = 'package/unique_name="com.iroaa15.gaminghub"'
+    if presets.count(original_id) != 2:
+        raise ValueError("Unexpected Android export presets; refusing unsafe staging export")
+    presets = presets.replace(original_id, 'package/unique_name="com.iroaa15.gaminghub.voicestaging"')
+    presets = presets.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Voice Test"')
+    presets = presets.replace('build/GamingHub-debug.apk', 'build/GamingHub-voice-staging-debug.apk')
+    presets = presets.replace('build/GamingHub-release.aab', 'build/GamingHub-voice-staging-release.aab')
+    presets_path.write_text(presets, encoding="utf-8")
+    assert 'package/unique_name="com.iroaa15.gaminghub"' not in presets
     config = destination / "data/voice_staging.json"
     config.write_text(json.dumps({
         "enabled": True,
@@ -48,6 +60,7 @@ def prepare(source: Path, destination: Path) -> Path:
     print(f"STAGING_PREPARED: {destination}")
     print(f"Production endpoint preserved: {production_url}")
     print(f"Staging endpoint: {STAGING_URL}")
+    print("Staging Android package: com.iroaa15.gaminghub.voicestaging")
     return destination
 
 

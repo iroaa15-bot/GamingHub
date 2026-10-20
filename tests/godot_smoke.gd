@@ -91,7 +91,42 @@ func _check_arcade_modes() -> void:
  hub.queue_free()
  await process_frame
 
+func _check_home_navigation() -> void:
+ var scene := load("res://scenes/Main.tscn") as PackedScene
+ if scene == null:
+  failures.append("Navigation: Main scene missing")
+  return
+ var hub = scene.instantiate()
+ root.add_child(hub)
+ await process_frame
+ # Exercise the exact offline button callback path, not only start_game().
+ hub.start_guess_offline()
+ await process_frame
+ await process_frame
+ if hub.game != 0 or not is_instance_valid(hub.root):
+  failures.append("Navigation: offline entry did not create a mode screen")
+ elif hub.root.get_child_count() < 2 or not hub.root.is_visible_in_tree():
+  failures.append("Navigation: offline mode is blank/hidden")
+ hub.queue_free()
+ await process_frame
+ # Exercise friend navigation to the real Multiplayer scene and verify UI content.
+ var online := load("res://scenes/Multiplayer.tscn") as PackedScene
+ if online == null:
+  failures.append("Navigation: Multiplayer scene missing")
+  return
+ var client = online.instantiate()
+ root.add_child(client)
+ await process_frame
+ await process_frame
+ if not is_instance_valid(client) or not is_instance_valid(client.output):
+  failures.append("Navigation: Multiplayer did not build its UI")
+ elif client.output.get_child_count() < 5 or not client.output.is_visible_in_tree():
+  failures.append("Navigation: Multiplayer screen is blank/hidden")
+ client.queue_free()
+ await process_frame
+
 func _run() -> void:
+ await _check_home_navigation()
  await _check_scene("res://scenes/Main.tscn")
  await _check_scene("res://scenes/Multiplayer.tscn")
  await _check_offline_picture_round()

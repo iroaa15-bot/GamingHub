@@ -1,0 +1,38 @@
+{
+  "deployment": {
+    "commit": {
+      "createdAt": "2026-10-20T16:15:13Z",
+      "id": "e10537da4205673ea2cecb3c1c3957b485f63766",
+      "message": "test(recovery): verify staging APK and publish reproducible recovery evidence [skip ci] [skip render]"
+    },
+    "createdAt": "2026-10-20T21:06:06.860615Z",
+    "finishedAt": "2026-10-20T21:06:35.288998Z",
+    "id": "dep-dbbtffgm7kps73d6n4o0",
+    "startedAt": "2026-10-20T21:06:06.833941Z",
+    "status": "live",
+    "trigger": "manual",
+    "updatedAt": "2026-10-20T21:07:10.20737Z"
+  },
+  "staging": {
+    "id": "srv-dbb7i1dg1s2s738gccbg",
+    "name": "gaminghub-voice-staging",
+    "branch": "fix/android-voice-root-cause",
+    "autoDeploy": "no",
+    "plan": "free",
+    "url": "https://gaminghub-voice-staging.onrender.com"
+  },
+  "main": {
+    "sha": "39162256ccbea20151b6bb66a129baad1fd0bd42",
+    "unchanged": true
+  },
+  "production": {
+    "id": "srv-db6r5eou01pc73b91f90",
+    "branch": "main",
+    "updatedAt": "2026-10-19T08:00:39.127287Z",
+    "operations": "read-only",
+    "unchanged_since_before_task": true
+  },
+  "physical_android_devices_tested": 0,
+  "github_actions_dispatched": 0,
+  "new_services_created": 0
+}

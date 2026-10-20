@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 859,
+  "file_count": 865,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/gameplay-recovery-apk.yml": "33821ee78d6fa61f28db53dd8d1becae4e316666133ecb1474641f98200c5c66",
@@ -679,6 +679,11 @@
     "docs/recovery/evidence/webrtc-media-local.log": "be044ac3e5a5570e5e87ca9264c74f53b84d662ee67b1d4bc91befd36ccfa1c4",
     "docs/recovery/evidence/webrtc-media-staging.log": "303b29a58d48aaaf1afb549aadd5e151f7c661d2b4c76586fbf6cbbe5a4b5b89",
     "docs/recovery/evidence/webrtc-room.log": "f46ad9fbb7751cb15831c1924ddfa561daefba1aaf8307a890becf4c59b60cfc",
+    "docs/recovery/postdeploy-e10537d/REPORT_AR.md": "9b2478f979f3775f60633df651b49315f896711ec733fa197e8551464f30c2ee",
+    "docs/recovery/postdeploy-e10537d/deployment.json": "d242cc0a42e8bacc680b834332e016d0e974d469ecb4e13415f4d75b038af8eb",
+    "docs/recovery/postdeploy-e10537d/rooms-consent-pcm.log": "ee9653beb5770c4c90a949db2bd6691f03e7604aff04d48e61fff5e5de893a47",
+    "docs/recovery/postdeploy-e10537d/transport-recovery-isolation.log": "665380c4f1bb7ae19b2c4c961d708f006d7a65999e17194499ddc7be68252411",
+    "docs/recovery/postdeploy-e10537d/webrtc-media.log": "303b29a58d48aaaf1afb549aadd5e151f7c661d2b4c76586fbf6cbbe5a4b5b89",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
     "export_presets.cfg": "cd7f9d23c5593be5da59b2e5bdd19f12e685fbf2fc7e2de157198dc34680bc0e",
     "liveops/remote_example.json": "d3b6bfc117504e82f4007c4654d8df71c232599c860de737bcda2f65de61003a",
@@ -798,6 +803,7 @@
     "tests/smoke.gd": "05e7a3edacef3f940979ecec6a0ae1d9b29b7d3c84741743865ee5aad2b11a14",
     "tests/smoke.gd.uid": "fc0ca27c50353f773d924b86c1c9a7fa2dd11b2db7a7086f7dd62902d1c0dfe5",
     "tests/smoke_voice_staging.py": "19e28b6c78fb899c9ccc80c6224786c0c5a625dd53a457a2161214f7979c87ca",
+    "tests/staging_recovery_transport.py": "00897c2fcf26f4d63a764310c80f87e09421ef74d327827e1dc409390a10e5d0",
     "tests/test_additive_client_v114.py": "4618791525e450151014f075d9ee4703fd2df683791a769dc8128dad1ea944e7",
     "tests/test_adventure_chain_contract.py": "b19fcfd4694f21ba645c5c39c7e4f65c46c4d37add422ed984106e24bdc990fd",
     "tests/test_android_ci_v89.py": "a55bd510d69aa47b2a5eef265dba3fe867b985aeed6b9d54107a7dd3bd4bc6c8",

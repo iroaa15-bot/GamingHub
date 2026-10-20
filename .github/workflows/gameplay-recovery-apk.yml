@@ -7,6 +7,7 @@ on:
       - scripts/main.gd
       - scripts/multiplayer.gd
       - tests/godot_smoke.gd
+      - tests/recovery_runtime.gd
   workflow_dispatch:
 permissions:
   contents: read
@@ -44,6 +45,10 @@ jobs:
           grep -q "NAV_OFFLINE_VISIBLE" "$RUNNER_TEMP/gameplay-smoke.log"
           grep -q "NAV_FRIEND_VISIBLE" "$RUNNER_TEMP/gameplay-smoke.log"
           grep -q "GODOT_SMOKE_PASS" "$RUNNER_TEMP/gameplay-smoke.log"
+          # Work's deeper real-button navigation test also checks voice stays off
+          # until a player explicitly opts in.
+          timeout 180s godot --headless --path . --script res://tests/recovery_runtime.gd 2>&1 | tee "$RUNNER_TEMP/recovery-navigation.log"
+          grep -q "RECOVERY_RUNTIME_PASS" "$RUNNER_TEMP/recovery-navigation.log"
       - name: Prepare isolated Android recovery package
         shell: bash
         run: |
@@ -96,6 +101,7 @@ jobs:
           name: GamingHub-Recovery-Test-Logs
           path: |
             ${{ runner.temp }}/gameplay-smoke.log
+            ${{ runner.temp }}/recovery-navigation.log
             ${{ runner.temp }}/apk-badging.txt
           if-no-files-found: ignore
           retention-days: 7

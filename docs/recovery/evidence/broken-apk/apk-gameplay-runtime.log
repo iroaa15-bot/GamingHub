@@ -1,0 +1,30 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+SCRIPT ERROR: Trying to assign an array of type "Array" to a variable of type "Array[Dictionary]".
+          at: advance_rival (res://scripts/main.gd:2955)
+          GDScript backtrace (most recent call first):
+              [0] advance_rival (res://scripts/main.gd:2955)
+              [1] ask_picture_question (res://scripts/main.gd:2870)
+              [2] run (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:36)
+              [3] frames (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:20)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "bridge_ready" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://scripts/multiplayer.gd:384)
+          GDScript backtrace (most recent call first):
+              [0] open_guess_multiplayer (res://scripts/main.gd:3458)
+              [1] run (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:61)
+              [2] frames (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:20)
+ERROR: Failed to load script "res://scripts/multiplayer.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3041)
+   GDScript backtrace (most recent call first):
+       [0] open_guess_multiplayer (res://scripts/main.gd:3458)
+       [1] run (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:61)
+       [2] frames (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:20)
+ERROR: Multiplayer controller missing
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] run (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:63)
+       [1] frames (/workspace/scratch/4b73d9626291/GamingHub/tests/recovery_runtime.gd:20)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2514)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

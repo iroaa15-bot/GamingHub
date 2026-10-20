@@ -14,7 +14,7 @@ import json
 import shutil
 from pathlib import Path
 
-STAGING_URL = "wss://gaminghub-recovery-staging.onrender.com"
+STAGING_URL = "wss://gaminghub-voice-staging.onrender.com"
 SKIP_DIRS = {".git", ".godot", ".gradle", ".idea", ".venv", "__pycache__", "build"}
 SKIP_FILES = {".DS_Store"}
 

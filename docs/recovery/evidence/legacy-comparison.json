@@ -1,0 +1,38 @@
+[
+  {
+    "project": "baseline",
+    "test": "smoke",
+    "exit": 124,
+    "assertion_failure": true
+  },
+  {
+    "project": "baseline",
+    "test": "journeys",
+    "exit": 124,
+    "assertion_failure": true
+  },
+  {
+    "project": "baseline",
+    "test": "languages",
+    "exit": 124,
+    "assertion_failure": true
+  },
+  {
+    "project": "GamingHub",
+    "test": "smoke",
+    "exit": 124,
+    "assertion_failure": true
+  },
+  {
+    "project": "GamingHub",
+    "test": "journeys",
+    "exit": 124,
+    "assertion_failure": true
+  },
+  {
+    "project": "GamingHub",
+    "test": "languages",
+    "exit": 124,
+    "assertion_failure": true
+  }
+]

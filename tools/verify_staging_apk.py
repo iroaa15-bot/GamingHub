@@ -11,7 +11,7 @@ from zipfile import ZipFile
 
 from verify_voice_aar import native_fingerprint
 
-STAGING_URL = 'wss://gaminghub-recovery-staging.onrender.com'
+STAGING_URL = 'wss://gaminghub-voice-staging.onrender.com'
 APPLICATION_ID = 'com.iroaa15.gaminghub.recoverystaging'
 
 

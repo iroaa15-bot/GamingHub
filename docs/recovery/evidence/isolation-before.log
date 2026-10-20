@@ -1,0 +1,81 @@
+EE
+======================================================================
+ERROR: test_ice_burst_preserves_gameplay_connection (test_webrtc_isolation.WebRtcIsolationTests.test_ice_burst_preserves_gameplay_connection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/websockets/asyncio/connection.py", line 305, in recv
+    return await self.recv_messages.get(decode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/websockets/asyncio/messages.py", line 158, in get
+    frame = await self.frames.get(not self.closed)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/websockets/asyncio/messages.py", line 51, in get
+    await self.get_waiter
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/test_webrtc_isolation.py", line 27, in test_ice_burst_preserves_gameplay_connection
+    self.assertEqual((await receive(a,'pong'))['id'],442)
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/test_webrtc_isolation.py", line 18, in receive
+    packet=json.loads(await asyncio.wait_for(ws.recv(),3))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+======================================================================
+ERROR: test_slow_peer_never_blocks_gameplay_receive (test_webrtc_isolation.WebRtcIsolationTests.test_slow_peer_never_blocks_gameplay_receive)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/server.py", line 360, in process
+    await send(room.players[1-index], {'type':action,'player':index,'payload':payload})
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/server.py", line 79, in send
+    await ws.send(json.dumps(payload))
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/test_webrtc_isolation.py", line 32, in send
+    if self.slow:await asyncio.sleep(5)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py", line 665, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/server/test_webrtc_isolation.py", line 37, in test_slow_peer_never_blocks_gameplay_receive
+    await asyncio.wait_for(app.process(a,{'type':'voice_offer','payload':{'sdp':'v=0'}}),.1)
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+
+----------------------------------------------------------------------
+Ran 2 tests in 13.141s
+
+FAILED (errors=2)

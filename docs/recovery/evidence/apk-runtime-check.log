@@ -1,0 +1,2 @@
+GODOT_GATE_PASS: RECOVERY_RUNTIME_PASS; exit=0
+{"result": "APK_RUNTIME_PASS", "apk_sha256": "99721911d8956f5bf7105037b7c9d5eb66fc6844df78a08d358d2abdc070081e", "execution": "Godot 4.5.1 headless on extracted APK resources", "android_jni_executed": false, "physical_device_tested": false}

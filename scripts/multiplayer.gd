@@ -327,7 +327,7 @@ func _ready() -> void:
   var staging_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/voice_staging.json"))
   if staging_settings is Dictionary and staging_settings.get("enabled", false) == true:
    var staging_url := str(staging_settings.get("server_url", "")).strip_edges()
-   if staging_url == "wss://gaminghub-recovery-staging.onrender.com":
+   if staging_url == "wss://gaminghub-voice-staging.onrender.com":
     server_url = staging_url
  _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
  # The active match is placed ABOVE lobby actions for portrait phones.
@@ -419,7 +419,7 @@ func _voice_diagnostics_text() -> String:
   if plugin != null and plugin.has_method("hasMicrophonePermission"):
    permission = str(plugin.call("hasMicrophonePermission"))
  var bridge_ready: bool = android_voice_bridge != null and bool(android_voice_bridge.is_available())
- var endpoint_kind := "staging" if server_url == "wss://gaminghub-recovery-staging.onrender.com" else "other"
+ var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
  return "\n".join(PackedStringArray([
   "Gaming Hub Voice Diagnostics v1",
   "os=" + OS.get_name(),

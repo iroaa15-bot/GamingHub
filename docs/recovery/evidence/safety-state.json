@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-10-20T16:12:58.218976+00:00",
+  "repository": "iroaa15-bot/GamingHub",
+  "working_branch": "recovery/android-gameplay-voice-20261020",
+  "main_sha": "39162256ccbea20151b6bb66a129baad1fd0bd42",
+  "production_service": {
+    "id": "srv-db6r5eou01pc73b91f90",
+    "branch": "main",
+    "updatedAt": "2026-10-19T08:00:39.127287Z",
+    "operations_in_this_task": "read-only"
+  },
+  "staging_service": {
+    "id": "srv-dbb7i1dg1s2s738gccbg",
+    "branch": "fix/android-voice-root-cause",
+    "autoDeploy": "no",
+    "recovery_server_deployed": false
+  },
+  "actions_dispatched_by_this_task": 0,
+  "physical_devices": 0
+}

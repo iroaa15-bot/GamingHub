@@ -11,8 +11,8 @@ from urllib.parse import urlparse
 
 import websockets
 
-URL = os.environ.get("GAMINGHUB_STAGING_WS", "wss://gaminghub-recovery-staging.onrender.com")
-if urlparse(URL).hostname != "gaminghub-recovery-staging.onrender.com":
+URL = os.environ.get("GAMINGHUB_STAGING_WS", "wss://gaminghub-voice-staging.onrender.com")
+if urlparse(URL).hostname != "gaminghub-voice-staging.onrender.com":
     raise SystemExit("Refusing to test non-staging host")
 
 

@@ -81,7 +81,7 @@ async def media_test(url):
         for task in tasks:
             if not task.done():task.cancel()
 async def main(staging):
-    if staging:await media_test('wss://gaminghub-recovery-staging.onrender.com')
+    if staging:await media_test('wss://gaminghub-voice-staging.onrender.com')
     else:
         sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'server'));import server as app
         async with serve(app.handler,'127.0.0.1',0,ping_interval=None,compression=None) as server:

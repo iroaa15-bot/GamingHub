@@ -6,7 +6,7 @@ func run() -> void:
 	var game = load("res://scenes/Multiplayer.tscn").instantiate()
 	root.add_child(game)
 	await process_frame
-	if game.server_url != "wss://gaminghub-recovery-staging.onrender.com":
+	if game.server_url != "wss://gaminghub-voice-staging.onrender.com":
 		push_error("Staging profile did not select the staging voice server")
 		quit(1)
 		return

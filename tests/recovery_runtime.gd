@@ -62,6 +62,9 @@ func run() -> void:
  var online = current_scene
  if not online.has_method("_request_action"): push_error("Multiplayer controller missing"); quit(1); return
  visible_screen(online.output, "Friend lobby")
+ # Entering online is a gameplay operation, not a voice-consent event.
+ # No native voice engine should be initialized until explicit opt-in.
+ check(online.android_voice_bridge == null, "Online entry unexpectedly initialized native audio")
  check(online.output.size.x > 0 and online.output.size.y > 0, "Friend layout collapsed")
  check(is_instance_valid(online.create_button) and is_instance_valid(online.join_button) and is_instance_valid(online.match_button), "Room controls missing")
  check("bridge_available=" in online._voice_diagnostics_text(), "Voice diagnostics failed")

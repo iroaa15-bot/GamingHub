@@ -91,7 +91,43 @@ func _check_arcade_modes() -> void:
  hub.queue_free()
  await process_frame
 
+func _check_gameplay_navigation() -> void:
+ var scene := load("res://scenes/Main.tscn") as PackedScene
+ if scene == null:
+  failures.append("Gameplay navigation: main scene missing")
+  return
+ var hub = scene.instantiate()
+ root.add_child(hub)
+ await process_frame
+ hub.start_guess_offline()
+ await process_frame
+ if hub.game != 0 or not is_instance_valid(hub.root):
+  failures.append("Gameplay navigation: Play vs Computer failed")
+ elif not hub.root.is_visible_in_tree() or hub.root.modulate.a < 0.95 or hub.root.get_child_count() < 3:
+  failures.append("Gameplay navigation: computer screen blank or transparent")
+ else:
+  print("NAV_OFFLINE_VISIBLE")
+ hub.queue_free()
+ await process_frame
+ var online := load("res://scenes/Multiplayer.tscn") as PackedScene
+ if online == null:
+  failures.append("Gameplay navigation: friend scene missing")
+  return
+ var client = online.instantiate()
+ root.add_child(client)
+ await process_frame
+ await process_frame
+ if not is_instance_valid(client) or not is_instance_valid(client.output):
+  failures.append("Gameplay navigation: Play with Friend failed to initialize")
+ elif not client.output.is_visible_in_tree() or client.output.modulate.a < 0.95 or client.output.get_child_count() < 3:
+  failures.append("Gameplay navigation: friend screen blank or transparent")
+ else:
+  print("NAV_FRIEND_VISIBLE")
+ client.queue_free()
+ await process_frame
+
 func _run() -> void:
+ await _check_gameplay_navigation()
  await _check_scene("res://scenes/Main.tscn")
  await _check_scene("res://scenes/Multiplayer.tscn")
  await _check_offline_picture_round()

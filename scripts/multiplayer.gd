@@ -305,6 +305,10 @@ func _ready() -> void:
  output.add_child(voice_button)
  voice_label = _label("", 14)
  _update_voice_ui()
+ # Local-only diagnostics for staging; never collect audio, room codes or resume tokens.
+ if OS.get_name() == "Android" and FileAccess.file_exists("res://data/voice_staging.json"):
+  _button(_t("تشخيص الصوت (نسخ التقرير)", "Voice diagnostics (copy report)"), _show_voice_diagnostics)
+
  match_view = VBoxContainer.new()
  match_view.add_theme_constant_override("separation", 10)
  output.add_child(match_view)
@@ -365,6 +369,47 @@ func _ready() -> void:
  _button(_t("اتصال يدوي", "Connect manually"), _connect_server, advanced_panel)
  _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
  _update_lobby()
+
+func _voice_diagnostics_text() -> String:
+ _setup_native_voice()
+ var plugin_found := Engine.has_singleton("GamingHubVoice")
+ var api_version := -1
+ var permission := "unknown"
+ if plugin_found:
+  var plugin := Engine.get_singleton("GamingHubVoice")
+  if plugin != null and plugin.has_method("getVoiceApiVersion"):
+   api_version = int(plugin.call("getVoiceApiVersion"))
+  if plugin != null and plugin.has_method("hasMicrophonePermission"):
+   permission = str(plugin.call("hasMicrophonePermission"))
+ var bridge_ready := android_voice_bridge != null and android_voice_bridge.is_available()
+ var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
+ return "\n".join([
+  "Gaming Hub Voice Diagnostics v1",
+  "os=" + OS.get_name(),
+  "os_version=" + OS.get_version(),
+  "app_debug=" + str(OS.is_debug_build()),
+  "native_singleton=" + str(plugin_found),
+  "native_api_version=" + str(api_version),
+  "bridge_available=" + str(bridge_ready),
+  "mic_permission=" + permission,
+  "endpoint=" + endpoint_kind,
+  "ws_state=" + str(socket.get_ready_state()),
+  "game_connected=" + str(connected),
+  "voice_active=" + str(android_voice_bridge.active if android_voice_bridge != null else false)
+ ])
+
+func _show_voice_diagnostics() -> void:
+ var report := _voice_diagnostics_text()
+ var dialog := AcceptDialog.new()
+ dialog.title = _t("تشخيص المحادثة الصوتية", "Voice diagnostics")
+ dialog.dialog_text = report
+ dialog.ok_button_text = _t("إغلاق", "Close")
+ add_child(dialog)
+ dialog.popup_centered_ratio(0.92)
+ DisplayServer.clipboard_set(report)
+ # This report is copied locally; the app never sends diagnostics to a server.
+ dialog.confirmed.connect(dialog.queue_free)
+ dialog.canceled.connect(dialog.queue_free)
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:

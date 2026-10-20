@@ -68,6 +68,7 @@ func _check_arcade_modes() -> void:
   failures.append("Blitz did not create 5+ rounds and an active clock")
  else:
   hub.finish_round(true, hub.correct_answer_text(hub.round_bank[0]))
+  await create_timer(0.33).timeout
   if hub.blitz_total_bonus <= 0:
    failures.append("Blitz win did not earn a time-based score bonus")
  hub.match_style = "treasure"
@@ -77,15 +78,18 @@ func _check_arcade_modes() -> void:
  else:
   for index in range(4):
    hub.finish_round(true, hub.correct_answer_text(hub.round_bank[hub.question_index]))
+   await create_timer(0.33).timeout
    hub.next_round()
   if hub.treasure_keys != 4 or hub.question_index != 4:
    failures.append("Treasure chest was not reached with four earned keys")
   else:
    hub.claim_treasure("double")
+   await create_timer(0.33).timeout
    if hub.treasure_keys != 2 or hub.treasure_doubles != 1 or hub.treasure_claims != 1:
     failures.append("Treasure claim incorrectly charged keys or applied reward")
    else:
     hub.finish_round(true, hub.correct_answer_text(hub.round_bank[hub.question_index]))
+    await create_timer(0.33).timeout
     if not hub.treasure_doubled_this_round or hub.treasure_doubles != 0:
      failures.append("Treasure double-points boost was not consumed on correct answer")
  hub.queue_free()

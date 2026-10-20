@@ -1925,7 +1925,7 @@ func show_modes(index: int) -> void:
    button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
  label(tr_ui("أفضل نتيجة: %d", "Personal best: %d") % int(profile.get("best_" + str(game), 0)), 17)
  if game == 0 and audience != "children":
-  button(tr_ui("غرفة الأصدقاء • تجريبي", "FRIENDS ROOM • experimental"), func(): get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn"), ACCENT)
+  button(tr_ui("غرفة الأصدقاء • تجريبي", "FRIENDS ROOM • experimental"), open_guess_multiplayer, ACCENT)
  else:
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
@@ -2509,8 +2509,8 @@ func claim_treasure(reward: String) -> void:
    treasure_doubles += 1
   "shield":
    treasure_shields += 1
- play_feedback("success")
  show_round()
+ play_feedback("success")
 
 func finish_round(correct: bool, answer: String) -> void:
  if round_finished:
@@ -2946,7 +2946,7 @@ func advance_rival() -> void:
  var truth: bool = rival_secret[question["key"]] == question["value"]
  conversation.append("RIVAL: " + str(question["text"]))
  conversation.append("YOU (auto): " + ("YES" if truth else "NO"))
- var remaining: Array = []
+ var remaining: Array[Dictionary] = []
  for candidate in rival_candidates:
   if (candidate[question["key"]] == question["value"]) == truth:
    remaining.append(candidate)
@@ -3453,5 +3453,14 @@ func open_guess_multiplayer() -> void:
  if age_group == "under13" or age_group == "unknown":
   show_home()
   return
- get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn")
+ # PackedScene can still load when its attached script is invalid.
+ var controller := load("res://scripts/multiplayer.gd") as Script
+ if controller == null or not controller.can_instantiate():
+  label(tr_ui("تعذر فتح الغرفة؛ ارجع وحاول مجددًا.", "Unable to open the room. Go back and try again."), 18)
+  push_error("NAVIGATION_FAILED: Multiplayer controller unavailable")
+  return
+ var result := get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn")
+ if result != OK:
+  label(tr_ui("تعذر فتح الغرفة؛ ارجع وحاول مجددًا.", "Unable to open the room. Go back and try again."), 18)
+  push_error("NAVIGATION_FAILED: Multiplayer scene error %d" % result)
 

@@ -4,7 +4,17 @@ import base64
 import unittest
 from unittest.mock import patch
 
-from server import Room, rooms, connections, process
+from server import Room, rooms, connections, process as process_message
+
+async def process(*args):
+    await process_message(*args)
+    socket, message = args
+    if message.get('type') in ('voice_offer', 'voice_answer', 'voice_ice'):
+        room = rooms.get(connections.get(socket))
+        if room is not None:
+            relay = room.voice_signal_relays[room.players.index(socket)]
+            if relay is not None and relay.task is not None:
+                await asyncio.wait_for(asyncio.shield(relay.task), 1)
 
 
 class FakeSocket:

@@ -54,7 +54,8 @@ jobs:
           set -euo pipefail
           PROJECT="$RUNNER_TEMP/voice-project"
           godot --headless --path "$PROJECT" --editor --import --quit
-          godot --headless --path "$PROJECT" --install-android-build-template
+          # Godot editor must explicitly exit after installing the template.
+          timeout 120s godot --headless --editor --path "$PROJECT" --install-android-build-template --quit
           test -f "$PROJECT/android/build/build.gradle"
       - name: Export diagnostic APK
         shell: bash
@@ -65,15 +66,9 @@ jobs:
           godot --headless --path "$PROJECT" --export-debug "Android" "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
           test -s "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
           sha256sum "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
-          python3 - "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk" <<'PY'
-          import sys, zipfile
-          with zipfile.ZipFile(sys.argv[1]) as z:
-              names=z.namelist()
-              assert 'assets/data/voice_staging.json' in names
-              assert any('classes' in n and n.endswith('.dex') for n in names)
-              assert z.testzip() is None
-          print("VOICE_DIAGNOSTIC_APK_READY")
-          PY
+          # Validate the signed APK, packaged staging profile, DEX plugin and source fingerprint.
+          python3 tools/verify_staging_apk.py "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk" --sdk "$ANDROID_HOME" --output "$RUNNER_TEMP/voice-validation"
+          echo "VOICE_DIAGNOSTIC_APK_READY"
       - uses: actions/upload-artifact@v4
         with:
           name: GamingHub-Voice-Diagnostics-11.7-APK

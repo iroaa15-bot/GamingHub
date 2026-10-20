@@ -1,0 +1,19 @@
+{
+  "status": "STAGING_APK_VERIFIED",
+  "application_id": "com.iroaa15.gaminghub.voicestaging",
+  "label": "Gaming Hub Voice Test",
+  "staging_url": "wss://gaminghub-voice-staging.onrender.com",
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "native_voice_protocol": 2,
+  "native_source_sha256": "b597cf4a7f570440097c0022d0444a1f5b6dc19c61bdd1f0efbd34c503b20fb3",
+  "apk_size_bytes": 101407491,
+  "apk_sha256": "cbb30bace2843fc29a477a0f9702014e0005a112a627a085481cff20d77b5035",
+  "signature_verified": true,
+  "compressed_native_libraries": true,
+  "real_device_audio_tested": false
+}

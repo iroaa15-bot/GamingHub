@@ -26,6 +26,8 @@ class StagingPreparationTests(unittest.TestCase):
             '\n'.join([
                 '[preset.0]', 'package/unique_name="com.iroaa15.gaminghub"',
                 'package/name="Gaming Hub"', 'export_path="build/GamingHub-debug.apk"',
+                'architectures/arm64-v8a=true', 'architectures/armeabi-v7a=false',
+                'gradle_build/use_gradle_build=true',
                 '[preset.1]', 'package/unique_name="com.iroaa15.gaminghub"',
                 'package/name="Gaming Hub"', 'export_path="build/GamingHub-release.aab"',
             ]), encoding="utf-8"
@@ -45,6 +47,11 @@ class StagingPreparationTests(unittest.TestCase):
         self.assertEqual(presets.count('package/unique_name="com.iroaa15.gaminghub.voicestaging"'), 2)
         self.assertNotIn('package/unique_name="com.iroaa15.gaminghub"', presets)
         self.assertIn("Gaming Hub Voice Test", presets)
+        self.assertIn("architectures/arm64-v8a=true", presets)
+        self.assertIn("architectures/armeabi-v7a=true", presets)
+        self.assertIn("gradle_build/compress_native_libraries=true", presets)
+        self.assertNotIn("compress_native_libraries", (self.source / "export_presets.cfg").read_text())
+        self.assertIn("architectures/armeabi-v7a=false", (self.source / "export_presets.cfg").read_text())
         self.assertFalse((self.source / "data/voice_staging.json").exists())
 
     def test_refuses_overwrite(self):

@@ -1,0 +1,14 @@
+test_refuses_destination_inside_source (test_prepare_voice_staging.StagingPreparationTests.test_refuses_destination_inside_source) ... ok
+test_refuses_overwrite (test_prepare_voice_staging.StagingPreparationTests.test_refuses_overwrite) ... ok
+test_refuses_staging_as_production (test_prepare_voice_staging.StagingPreparationTests.test_refuses_staging_as_production) ... ok
+test_refuses_unexpected_export_preset (test_prepare_voice_staging.StagingPreparationTests.test_refuses_unexpected_export_preset) ... ok
+test_staging_export_isolated (test_prepare_voice_staging.StagingPreparationTests.test_staging_export_isolated) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.003s
+
+OK
+STAGING_PREPARED: /tmp/tmpqvxqwf9i/isolated
+Production endpoint preserved: wss://gaminghub-multiplayer.onrender.com
+Staging endpoint: wss://gaminghub-voice-staging.onrender.com
+Staging Android package: com.iroaa15.gaminghub.voicestaging

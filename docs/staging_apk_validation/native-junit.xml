@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.gaminghub.voice.VoiceBuffersTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-20T03:38:21" hostname="8c7bf50443ac" time="0.025">
+  <properties/>
+  <testcase name="shortBurstStartsAfterSixtyMs" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.002"/>
+  <testcase name="captureResetAndInvalidFrames" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.003"/>
+  <testcase name="silenceAndNoiseAreNotAmplified" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.007"/>
+  <testcase name="peakLimiterPreventsClippingAndSignWrapping" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.002"/>
+  <testcase name="burstBufferHasHardLimit" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="jitterPrimesThreeFrames" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="resetDropsSpeechAndAllowsNewSequence" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="incomingBufferIsCopied" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.007"/>
+  <testcase name="captureDropsOldFramesAfterRenderStall" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="captureQueueKeepsNewestThreeFrames" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.001"/>
+  <testcase name="staleSpeechIsNeverReplayed" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="duplicateAndOutOfOrderFramesAreRejected" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <testcase name="quietSpeechGetsBoundedGain" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.001"/>
+  <testcase name="littleEndianSignedSamplesStayCorrect" classname="com.gaminghub.voice.VoiceBuffersTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

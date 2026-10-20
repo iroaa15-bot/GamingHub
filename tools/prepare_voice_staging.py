@@ -45,6 +45,11 @@ def prepare(source: Path, destination: Path) -> Path:
         raise ValueError("Unexpected Android export presets; refusing unsafe staging export")
     presets = presets.replace(original_id, 'package/unique_name="com.iroaa15.gaminghub.voicestaging"')
     presets = presets.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Voice Test"')
+    # Keep 32-bit Android phones eligible for this isolated device test.
+    presets = presets.replace('architectures/armeabi-v7a=false', 'architectures/armeabi-v7a=true')
+    # Compress native libraries for an easier download and legacy Android loading.
+    presets = presets.replace('gradle_build/use_gradle_build=true',
+                              'gradle_build/use_gradle_build=true\ngradle_build/compress_native_libraries=true')
     presets = presets.replace('build/GamingHub-debug.apk', 'build/GamingHub-voice-staging-debug.apk')
     presets = presets.replace('build/GamingHub-release.aab', 'build/GamingHub-voice-staging-release.aab')
     presets_path.write_text(presets, encoding="utf-8")

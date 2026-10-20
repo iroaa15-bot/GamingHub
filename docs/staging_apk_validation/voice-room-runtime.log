@@ -1,0 +1,8 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+VOICE_CAPABILITIES {"simulated":true}
+VOICE_CAPABILITIES {"simulated":true}
+VOICE_CAPABILITIES {"simulated":true}
+VOICE_CAPABILITIES {"simulated":true}
+VOICE_ROOM_RUNTIME_PASS: two Godot clients, real WebSocket PCM, UI consent, room identity, disconnect/resume, new consent, leave
+

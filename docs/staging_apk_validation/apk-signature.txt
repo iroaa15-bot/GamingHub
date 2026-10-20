@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Gaming Hub Staging Debug, O=Gaming Hub, C=EG
+Signer #1 certificate SHA-256 digest: d580163ad1eee49865030ec54022fde6fb3114a2b0a3a800a1055a47bb263c3c
+Signer #1 certificate SHA-1 digest: 6093451b2f21b202b02c6bc9fee36c87d889c04f
+Signer #1 certificate MD5 digest: 79ef513aabe0abe71b17588358c5ba48
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: f10a0b73a1a4abc95ff9daf50b492d354e6a486ca331b11568d4e621b60c42b7
+Signer #1 public key SHA-1 digest: da78166e3d629249bad32410058d5294ba6ef2a7
+Signer #1 public key MD5 digest: 4821abbd7192698fe98ccb5c1cdc084a

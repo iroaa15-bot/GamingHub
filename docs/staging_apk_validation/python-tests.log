@@ -1,0 +1,32 @@
+
+$ python tests/project_preflight.py
+Preflight: 10 scripts, 7 JSON files
+PASS: static source checks (Godot runtime still untested)
+
+$ python -m unittest discover -s tests -p test_*.py
+..........................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 218 tests in 2.725s
+
+OK
+PASS: static state-machine safety checks (not a device/SDK test)
+STAGING_PREPARED: /tmp/tmpom88866t/isolated
+Production endpoint preserved: wss://gaminghub-multiplayer.onrender.com
+Staging endpoint: wss://gaminghub-voice-staging.onrender.com
+Staging Android package: com.iroaa15.gaminghub.voicestaging
+
+$ python -m unittest discover -s server -p test_*.py
+...........................................................................
+----------------------------------------------------------------------
+Ran 75 tests in 4.044s
+
+OK
+
+$ python -m unittest discover -s ai_daily -p test_*.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.229s
+
+OK
+
+RESULT: PASS

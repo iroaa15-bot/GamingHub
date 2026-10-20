@@ -383,7 +383,7 @@ func _voice_diagnostics_text() -> String:
    permission = str(plugin.call("hasMicrophonePermission"))
  var bridge_ready := android_voice_bridge != null and android_voice_bridge.is_available()
  var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
- return "\n".join([
+ return "\n".join(PackedStringArray([
   "Gaming Hub Voice Diagnostics v1",
   "os=" + OS.get_name(),
   "os_version=" + OS.get_version(),
@@ -396,7 +396,7 @@ func _voice_diagnostics_text() -> String:
   "ws_state=" + str(socket.get_ready_state()),
   "game_connected=" + str(connected),
   "voice_active=" + str(android_voice_bridge.active if android_voice_bridge != null else false)
- ])
+ ]))
 
 func _show_voice_diagnostics() -> void:
  var report := _voice_diagnostics_text()

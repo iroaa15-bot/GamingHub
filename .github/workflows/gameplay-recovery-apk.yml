@@ -1,0 +1,108 @@
+name: Gaming Hub Gameplay Recovery APK
+on:
+  push:
+    branches: [recovery/android-gameplay-voice-20261020]
+    paths:
+      - .github/workflows/gameplay-recovery-apk.yml
+      - scripts/main.gd
+      - scripts/multiplayer.gd
+      - tests/godot_smoke.gd
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gaminghub-gameplay-recovery
+  cancel-in-progress: true
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: recovery/android-gameplay-voice-20261020
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Import and test gameplay navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 180s godot --headless --path . --editor --import --quit
+          set +e
+          timeout 120s godot --headless --path . --script res://tests/godot_smoke.gd 2>&1 | tee "$RUNNER_TEMP/gameplay-smoke.log"
+          result=${PIPESTATUS[0]}
+          set -e
+          test "$result" -eq 0
+          grep -q "NAV_OFFLINE_VISIBLE" "$RUNNER_TEMP/gameplay-smoke.log"
+          grep -q "NAV_FRIEND_VISIBLE" "$RUNNER_TEMP/gameplay-smoke.log"
+          grep -q "GODOT_SMOKE_PASS" "$RUNNER_TEMP/gameplay-smoke.log"
+      - name: Prepare isolated Android recovery package
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RECOVERY_DIR="$RUNNER_TEMP/gaminghub-recovery"
+          mkdir -p "$RECOVERY_DIR"
+          rsync -a --exclude=.git --exclude=.godot --exclude=build --exclude=__pycache__ ./ "$RECOVERY_DIR/"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p = Path(os.environ['RECOVERY_DIR']) / 'export_presets.cfg'
+          s = p.read_text()
+          original = 'package/unique_name="com.iroaa15.gaminghub"'
+          assert s.count(original) == 2, "Original package ID unexpectedly changed"
+          s = s.replace(original, 'package/unique_name="com.iroaa15.gaminghub.gameplayrecovery"')
+          s = s.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Recovery"')
+          s = s.replace('architectures/armeabi-v7a=false', 'architectures/armeabi-v7a=true')
+          p.write_text(s)
+          print('RECOVERY_ISOLATED: ' + str(p))
+          PY
+      - name: Android SDK and debug signing setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?Missing Android SDK}"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+      - name: Export isolated gameplay APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT="$RUNNER_TEMP/gaminghub-recovery"
+          mkdir -p "$RUNNER_TEMP/recovery-apk"
+          timeout 180s godot --headless --path "$PROJECT" --editor --import --quit
+          timeout 900s godot --headless --path "$PROJECT" --install-android-build-template --export-debug "Android" "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk"
+          test -s "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk"
+          unzip -t "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk" | tail -2
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk" | tee "$RUNNER_TEMP/apk-badging.txt"
+          grep -q 'com.iroaa15.gaminghub.gameplayrecovery' "$RUNNER_TEMP/apk-badging.txt"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk"
+          sha256sum "$RUNNER_TEMP/recovery-apk/GamingHub-Gameplay-Recovery.apk"
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Recovery-Test-Logs
+          path: |
+            ${{ runner.temp }}/gameplay-smoke.log
+            ${{ runner.temp }}/apk-badging.txt
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload isolated gameplay APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Gameplay-Recovery-APK
+          path: ${{ runner.temp }}/recovery-apk/GamingHub-Gameplay-Recovery.apk
+          if-no-files-found: error
+          retention-days: 7

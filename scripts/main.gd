@@ -1017,11 +1017,9 @@ func clear_ui() -> void:
  margins.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margins)
  margins.add_child(root)
- if reduced_motion:
-  root.modulate.a = 1.0
- else:
-  root.modulate.a = 0.0
-  root.create_tween().tween_property(root, "modulate:a", 1.0, 0.18)
+ # Show rebuilt menus immediately on Android. Navigation must not rely on
+ # a Tween to reveal its controls, including when frames are suspended.
+ root.modulate.a = 1.0
 
 func label(text_value: String, font_size: int = 23) -> Label:
  var l := Label.new()

@@ -1,0 +1,82 @@
+name: Gaming Hub Android Voice Diagnostic APK
+on:
+  push:
+    branches: [fix/android-voice-root-cause]
+    paths: [.github/workflows/voice-diagnostic-apk.yml]
+permissions:
+  contents: read
+concurrency:
+  group: gaminghub-voice-diagnostic-apk
+  cancel-in-progress: true
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/android-voice-root-cause
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Validate isolated staging setup
+        run: python3 -m unittest discover -s tests -p test_prepare_voice_staging.py -v
+      - name: Validate voice AAR binaries
+        run: python3 tools/verify_voice_aar.py
+      - name: Prepare independent staging project
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/prepare_voice_staging.py --output "$RUNNER_TEMP/voice-project"
+          grep -q 'com.iroaa15.gaminghub.voicestaging' "$RUNNER_TEMP/voice-project/export_presets.cfg"
+          grep -q 'gaminghub-voice-staging.onrender.com' "$RUNNER_TEMP/voice-project/data/voice_staging.json"
+      - name: Android SDK and signing setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?Android SDK missing}"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+      - name: Import Godot and install Android Gradle template
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT="$RUNNER_TEMP/voice-project"
+          godot --headless --path "$PROJECT" --editor --import --quit
+          godot --headless --path "$PROJECT" --install-android-build-template
+          test -f "$PROJECT/android/build/build.gradle"
+      - name: Export diagnostic APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT="$RUNNER_TEMP/voice-project"
+          mkdir -p "$RUNNER_TEMP/apk"
+          godot --headless --path "$PROJECT" --export-debug "Android" "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
+          test -s "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
+          sha256sum "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
+          python3 - "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk" <<'PY'
+          import sys, zipfile
+          with zipfile.ZipFile(sys.argv[1]) as z:
+              names=z.namelist()
+              assert 'assets/data/voice_staging.json' in names
+              assert any('classes' in n and n.endswith('.dex') for n in names)
+              assert z.testzip() is None
+          print("VOICE_DIAGNOSTIC_APK_READY")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Voice-Diagnostics-11.7-APK
+          path: ${{ runner.temp }}/apk/GamingHub-Voice-Diagnostics-11.7.apk
+          if-no-files-found: error
+          retention-days: 7

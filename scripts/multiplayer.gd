@@ -179,7 +179,8 @@ func _apply_voice_state(msg: Dictionary) -> void:
  if epoch < voice_epoch:
   return
  if epoch != voice_epoch:
-  android_voice_bridge.stop_voice()
+  if android_voice_bridge != null:
+   android_voice_bridge.stop_voice()
   voice_epoch = epoch
   voice_sequence = 0
   voice_ice_ready = false
@@ -249,9 +250,9 @@ func _on_voice_status(state: String, details: String) -> void:
 func _update_voice_ui() -> void:
  if not is_instance_valid(voice_button):
   return
- voice_button.disabled = not _voice_room_ready() or not android_voice_bridge.is_available()
+ voice_button.disabled = not _voice_room_ready() or OS.get_name() != "Android" or (android_voice_bridge != null and not android_voice_bridge.is_available())
  voice_button.text = _t("إيقاف المحادثة الصوتية", "Turn voice off") if voice_requested else _t("تفعيل المحادثة الصوتية", "Enable voice chat")
- if not android_voice_bridge.is_available():
+ if android_voice_bridge != null and not android_voice_bridge.is_available():
   voice_label.text = _t("الصوت غير متاح في هذه النسخة؛ استخدم نسخة Android المحدثة.", "Voice is unavailable in this version; use the updated Android app.")
  elif not voice_requested:
   voice_label.text = _t("الصوت اختياري؛ كل لاعب يفعله بنفسه.", "Voice is optional; each player enables it.")
@@ -334,7 +335,8 @@ func _ready() -> void:
  status = _label(_t("جاهز للاتصال", "Ready to connect"), 18)
  health_label = _label(_t("الشبكة: غير متصل", "Network: offline"), 14)
  health_label.add_theme_color_override("font_color", Color("a7b6d7"))
- _setup_native_voice()
+ # Native audio is optional: never initialize WebRTC while merely opening the lobby.
+ # This keeps room navigation independent of voice plugin/device failures.
  voice_button = Button.new()
  voice_button.custom_minimum_size.y = 52
  voice_button.pressed.connect(func(): set_voice_opt_in(not voice_requested))

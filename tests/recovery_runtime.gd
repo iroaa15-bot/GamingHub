@@ -72,7 +72,10 @@ func run() -> void:
  check(int(current_scene.profile.get("xp", 0)) == 4567, "Return from room reset progress")
  # Exercise the second home button as well; it must open the same room lobby
  # without starting native voice or resetting the parent game.
+ # Returning from the lobby reloads saved language preferences; match both labels.
  var random_match: Button = find_button(current_scene, "FIND AN ONLINE OPPONENT")
+ if random_match == null:
+  random_match = find_button(current_scene, "ابحث عن منافس أونلاين")
  check(random_match != null, "Find opponent button missing")
  if random_match != null:
   random_match.pressed.emit(); await scene_changed; await frames()

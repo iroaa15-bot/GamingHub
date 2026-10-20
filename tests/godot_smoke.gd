@@ -105,8 +105,8 @@ func _check_home_navigation() -> void:
  await process_frame
  if hub.game != 0 or not is_instance_valid(hub.root):
   failures.append("Navigation: offline entry did not create a mode screen")
- elif hub.root.get_child_count() < 2 or not hub.root.is_visible_in_tree():
-  failures.append("Navigation: offline mode is blank/hidden")
+ elif hub.root.get_child_count() < 2 or not hub.root.is_visible_in_tree() or hub.root.modulate.a < 0.95:
+  failures.append("Navigation: offline mode is blank/hidden/transparent")
  hub.queue_free()
  await process_frame
  # Exercise friend navigation to the real Multiplayer scene and verify UI content.
@@ -120,8 +120,8 @@ func _check_home_navigation() -> void:
  await process_frame
  if not is_instance_valid(client) or not is_instance_valid(client.output):
   failures.append("Navigation: Multiplayer did not build its UI")
- elif client.output.get_child_count() < 5 or not client.output.is_visible_in_tree():
-  failures.append("Navigation: Multiplayer screen is blank/hidden")
+ elif client.output.get_child_count() < 5 or not client.output.is_visible_in_tree() or client.output.modulate.a < 0.95:
+  failures.append("Navigation: Multiplayer screen is blank/hidden/transparent")
  client.queue_free()
  await process_frame
 

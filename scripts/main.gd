@@ -1017,11 +1017,10 @@ func clear_ui() -> void:
  margins.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margins)
  margins.add_child(root)
- if reduced_motion:
-  root.modulate.a = 1.0
- else:
-  root.modulate.a = 0.0
-  root.create_tween().tween_property(root, "modulate:a", 1.0, 0.18)
+ # Always render the newly-built game screen immediately. A delayed fade can
+ # leave a fully transparent screen on some Android GPU/lifecycle paths.
+ # Keep transitions optional for later; never make navigation depend on a tween.
+ root.modulate.a = 1.0
 
 func label(text_value: String, font_size: int = 23) -> Label:
  var l := Label.new()

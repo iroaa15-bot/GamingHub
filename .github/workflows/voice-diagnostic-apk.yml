@@ -54,6 +54,9 @@ jobs:
           set -euo pipefail
           PROJECT="$RUNNER_TEMP/voice-project"
           timeout 180s godot --headless --path "$PROJECT" --editor --import --quit
+          # Test navigation of the actual friend/offline entry screens before spending Gradle build time.
+          timeout 90s godot --headless --path "$PROJECT" --script res://tests/godot_smoke.gd 2>&1 | tee "$RUNNER_TEMP/godot-navigation.log"
+          grep -q 'GODOT_SMOKE_PASS' "$RUNNER_TEMP/godot-navigation.log"
       - name: Install Android Gradle template and export diagnostic APK
         shell: bash
         run: |
@@ -68,6 +71,14 @@ jobs:
           # Validate the signed APK, packaged staging profile, DEX plugin and source fingerprint.
           python3 tools/verify_staging_apk.py "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk" --sdk "$ANDROID_HOME" --output "$RUNNER_TEMP/voice-validation"
           echo "VOICE_DIAGNOSTIC_APK_READY"
+      - name: Upload Godot navigation diagnostics when build fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-Godot-Navigation-Diagnostics
+          path: ${{ runner.temp }}/godot-navigation.log
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@v4
         with:
           name: GamingHub-Voice-Diagnostics-11.7-APK

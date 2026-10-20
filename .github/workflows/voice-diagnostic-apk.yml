@@ -48,22 +48,21 @@ jobs:
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
             keytool -genkeypair -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           fi
-      - name: Import Godot and install Android Gradle template
+      - name: Import Godot resources
         shell: bash
         run: |
           set -euo pipefail
           PROJECT="$RUNNER_TEMP/voice-project"
-          godot --headless --path "$PROJECT" --editor --import --quit
-          # Godot editor must explicitly exit after installing the template.
-          timeout 120s godot --headless --editor --path "$PROJECT" --install-android-build-template --quit
-          test -f "$PROJECT/android/build/build.gradle"
-      - name: Export diagnostic APK
+          timeout 180s godot --headless --path "$PROJECT" --editor --import --quit
+      - name: Install Android Gradle template and export diagnostic APK
         shell: bash
         run: |
           set -euo pipefail
           PROJECT="$RUNNER_TEMP/voice-project"
           mkdir -p "$RUNNER_TEMP/apk"
-          godot --headless --path "$PROJECT" --export-debug "Android" "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
+          # Godot 4.5 requires template installation AND export in the same command.
+          timeout 900s godot --headless --path "$PROJECT" --install-android-build-template --export-debug "Android" "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
+          test -f "$PROJECT/android/build/build.gradle"
           test -s "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
           sha256sum "$RUNNER_TEMP/apk/GamingHub-Voice-Diagnostics-11.7.apk"
           # Validate the signed APK, packaged staging profile, DEX plugin and source fingerprint.

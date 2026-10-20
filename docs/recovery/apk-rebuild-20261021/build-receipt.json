@@ -1,0 +1,13 @@
+{
+  "source_commit": "ee9c25354055207be38a78f4f4a640f4ba38585f",
+  "backend_commit": "e10537da4205673ea2cecb3c1c3957b485f63766",
+  "backend_deploy": "dep-dbbtffgm7kps73d6n4o0",
+  "apk_file": "GamingHub-Recovery-Staging-11.7-Test-21.apk",
+  "export_process_exit": 1,
+  "export_failure_stage": "post-build Gradle copyAndRename export task; immutable workspace cache metadata",
+  "artifact_retrieval": "byte-identical copy of assembled signed APK from Gradle output; no APK patch/repack",
+  "signature_packaging_gate": "PASS",
+  "compiled_resources_runtime_gate": "PASS",
+  "physical_android_device_tested": false,
+  "new_debug_signing_key": true
+}

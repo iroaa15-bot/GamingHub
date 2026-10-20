@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Gaming Hub Recovery Debug
+Signer #1 certificate SHA-256 digest: 6a335d63b7c7dde3555702691e07204f824d2b1ee19a953fe22f0851274dff42
+Signer #1 certificate SHA-1 digest: 9b9e13260da84b336625338d688513450dc1d76f
+Signer #1 certificate MD5 digest: c005b529c4b93d1d966b75fecf138b30
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 497ca8ba9c551bfbf966fe91587423901f3d4ebe1e288c1b3aee3cc0f12f6747
+Signer #1 public key SHA-1 digest: 183038a3a61121768a9f6fd3b3093a5c0c841036
+Signer #1 public key MD5 digest: d9de17591c25a0e5de31e0275180e2f3

@@ -1,0 +1,20 @@
+{
+  "status": "STAGING_APK_VERIFIED",
+  "application_id": "com.iroaa15.gaminghub.recoverystaging",
+  "label": "Gaming Hub Recovery Test",
+  "staging_url": "wss://gaminghub-voice-staging.onrender.com",
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "native_voice_protocol": 2,
+  "voice_engine": "libwebrtc-144.7559.15",
+  "native_source_sha256": "f9d8098a1d4bd19d449b7075530e02943944a9fe3b7faa8cc3e2dea7d81dc6e8",
+  "apk_size_bytes": 112023637,
+  "apk_sha256": "00c10e3364766fa202585145cbd3bfeaa1da632bac6846d8ca42228ec7ea0ae9",
+  "signature_verified": true,
+  "compressed_native_libraries": true,
+  "real_device_audio_tested": false
+}

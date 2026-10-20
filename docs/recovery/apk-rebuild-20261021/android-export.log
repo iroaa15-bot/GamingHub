@@ -1,0 +1,62 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+Exporting Poing AdMob '.cfg' file
+[   0% ] [90m[1mexport[22m | Started Exporting for Android (105 steps)[39m[0m
+0 param: --xr_mode_regular
+1 param: --xr-mode
+2 param: off
+3 param: --fullscreen
+4 param: --background_color
+5 param: #000000
+ERROR: Export: Unable to copy and rename export file:
+
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+The contents of the immutable workspace '/workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/37e5be14a28f8f11419da974b0852381' have been modified. This behavior has been deprecated. This will fail with an error in Gradle 9.0. These workspace directories are not supposed to be modified once they are created. The modification might have been caused by an external process, or could be the result of disk corruption. The inconsistent workspace will be moved to '/workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/37e5be14a28f8f11419da974b0852381-e73412f6-070c-45eb-9fe9-d7df27b4d2f6', and will be recreated.
+outputDirectory:
+ - transformed (Directory, 9a2dd67ac2a25633177f21d32ff6594e)
+   - .gradle-agent-instrumented.marker (RegularFile, f571933bb948577b1f9f3076fb8fc7c6)
+   - .gradle-instrumented-classpath.marker (RegularFile, f571933bb948577b1f9f3076fb8fc7c6)
+   - instrumented (Directory, 991e6927d258e54d34417af39a937319)
+     - .instrumented-kotlin-gradle-plugin-2.1.20-gradle85.jar.eTpjNK (RegularFile, 054c866e4affc72bc746ceecaee74103)
+     - instrumented-kotlin-gradle-plugin-2.1.20-gradle85.jar (RegularFile, 3ab0e2756be630fa458414dbd61d79e7)
+
+resultsFile:
+ - results.bin (RegularFile, dceeb88e81740e228b525d9f91b6a991)
+
+[Incubating] Problems report is available at: file:///workspace/scratch/4b73d9626291/staging/android/build/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring root project 'build'.
+> A build operation failed.
+      Could not read workspace metadata from /workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/37e5be14a28f8f11419da974b0852381/metadata.bin
+   > Could not read workspace metadata from /workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/37e5be14a28f8f11419da974b0852381/metadata.bin
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 13s
+
+   at: add_message (./editor/export/editor_export_platform.h:255)
+[92m[ DONE ][39m [1mexport[22m
+[0m
+ERROR: Project export for preset "Android" failed.
+   at: _fs_changed (editor/editor_node.cpp:1275)
+cannot connect to daemon at tcp:5037: Connection refused

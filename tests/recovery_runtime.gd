@@ -70,6 +70,18 @@ func run() -> void:
  check("bridge_available=" in online._voice_diagnostics_text(), "Voice diagnostics failed")
  online._exit_to_games(); await scene_changed; await frames()
  check(int(current_scene.profile.get("xp", 0)) == 4567, "Return from room reset progress")
+ # Exercise the second home button as well; it must open the same room lobby
+ # without starting native voice or resetting the parent game.
+ var random_match: Button = find_button(current_scene, "FIND AN ONLINE OPPONENT")
+ check(random_match != null, "Find opponent button missing")
+ if random_match != null:
+  random_match.pressed.emit(); await scene_changed; await frames()
+  var matchmaking_lobby = current_scene
+  check(matchmaking_lobby.has_method("_request_action"), "Matchmaking controller missing")
+  if matchmaking_lobby.has_method("_request_action"):
+   visible_screen(matchmaking_lobby.output, "Random opponent lobby")
+   check(matchmaking_lobby.android_voice_bridge == null, "Matchmaking entry unexpectedly initialized native audio")
+   check(is_instance_valid(matchmaking_lobby.match_button), "Random matchmaking button missing")
  current_scene.queue_free(); await frames()
  if failures.is_empty():
   print("RECOVERY_RUNTIME_PASS: actual computer/friend buttons, opacity, textures, computer turn, 10 games x3 levels, quiz scoring, 8 styles, save reload and return")

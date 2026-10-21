@@ -8,6 +8,8 @@ on:
       - scripts/multiplayer.gd
       - tests/godot_smoke.gd
       - tests/recovery_runtime.gd
+      - native/android-voice/**
+      - scripts/android_voice_bridge.gd
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,6 +34,17 @@ jobs:
           version: 4.5.1
           use-dotnet: false
           include-templates: true
+      - name: Build the current native WebRTC voice plugin
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${ANDROID_HOME:?Missing Android SDK}"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-36' 'build-tools;36.0.0' 'platform-tools'
+          cd native/android-voice
+          chmod +x gradlew
+          timeout 600s ./gradlew --no-daemon --max-workers=2 testDebugUnitTest installPlugin
+          cd ../..
+          python3 tools/verify_voice_aar.py
       - name: Import and test gameplay navigation
         shell: bash
         run: |
@@ -67,6 +80,8 @@ jobs:
           s = s.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Recovery"')
           s = s.replace('architectures/armeabi-v7a=false', 'architectures/armeabi-v7a=true')
           p.write_text(s)
+          staging = p.parent / 'data' / 'voice_staging.json'
+          staging.write_text('{"enabled": true, "server_url": "wss://gaminghub-voice-staging.onrender.com"}\\n')
           print('RECOVERY_ISOLATED: ' + str(p))
           PY
       - name: Android SDK and debug signing setup

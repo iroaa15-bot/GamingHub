@@ -59,16 +59,21 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
                     if (!destroyed) emitSignal("voice_status", "error", requestId, reason)
                 } })
             rtcEngine = instance
-            try { instance.start(iceJson) }
-            catch (_: Exception) {
+            try {
+                android.util.Log.i("GamingHubVoice", "WebRTC start requested; ticket=$ticket")
+                instance.start(iceJson)
+            } catch (error: Throwable) {
+                // A missing/incompatible native WebRTC symbol can throw LinkageError
+                // (not Exception). Never let the dedicated control thread die silently.
+                val reason = if (error is LinkageError) "webrtc_library_unavailable"
+                             else "webrtc_start_failed"
+                android.util.Log.e("GamingHubVoice", "WebRTC start failed ($reason)", error)
                 if (generation.compareAndSet(ticket, ticket + 1)) {
-                    instance.stop(); if (rtcEngine === instance) rtcEngine = null
-                    emitSignal("voice_status", "error", requestId, "webrtc_start_failed")
-                }
-            } catch (_: LinkageError) {
-                if (generation.compareAndSet(ticket, ticket + 1)) {
-                    instance.stop(); if (rtcEngine === instance) rtcEngine = null
-                    emitSignal("voice_status", "error", requestId, "webrtc_library_unavailable")
+                    try { instance.stop() } catch (cleanup: Throwable) {
+                        android.util.Log.e("GamingHubVoice", "WebRTC cleanup failed", cleanup)
+                    }
+                    if (rtcEngine === instance) rtcEngine = null
+                    emitSignal("voice_status", "error", requestId, reason)
                 }
             }
         }

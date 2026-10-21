@@ -1,0 +1,15 @@
+{
+  "name": "gaminghub-colyseus-room-poc",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "colyseus": "^0.16.0",
+    "@colyseus/schema": "^3.0.0",
+    "@colyseus/sdk": "^0.16.0"
+  }
+}

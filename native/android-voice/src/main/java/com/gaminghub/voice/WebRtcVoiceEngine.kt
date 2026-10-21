@@ -41,6 +41,7 @@ class WebRtcVoiceEngine(private val context: Context, private val control: Sched
     private var previousDevice: AudioDeviceInfo? = null
     private var ownsRoute = false
     private var ownsFocus = false
+    private var deviceCallbackRegistered = false
     private var focus: AudioFocusRequest? = null
     private var retry: ScheduledFuture<*>? = null
     private var attempts = 0
@@ -77,6 +78,7 @@ class WebRtcVoiceEngine(private val context: Context, private val control: Sched
         check(ownsFocus) { "audio_focus_denied" }
         route()
         manager.registerAudioDeviceCallback(devices, handler)
+        deviceCallbackRegistered = true
         adm = JavaAudioDeviceModule.builder(context)
             .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION).setAudioAttributes(attributes)
             // WebRTC owns capture AND the render reference, resampling and delay estimation.
@@ -212,7 +214,10 @@ class WebRtcVoiceEngine(private val context: Context, private val control: Sched
         local?.dispose(); local = null; source?.dispose(); source = null
         factory?.dispose(); factory = null; adm?.release(); adm = null; candidates.clear()
         if (ownsRoute) {
-            manager.unregisterAudioDeviceCallback(devices)
+            if (deviceCallbackRegistered) {
+                manager.unregisterAudioDeviceCallback(devices)
+                deviceCallbackRegistered = false
+            }
             if (Build.VERSION.SDK_INT >= 31) {
                 val previous = previousDevice
                 if (previous == null || !manager.setCommunicationDevice(previous)) manager.clearCommunicationDevice()

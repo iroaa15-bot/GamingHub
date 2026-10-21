@@ -34,7 +34,7 @@ test("invalid invitation denied in room hook", () => {
   assert.equal(room.onAuth(client("a"), { inviteCode: "incorrect-secret" }), false);
   assert.equal(room.members.size, 0);
 });
-test("six players accepted, seventh denied, leave frees slot", () => {
+test("six players accepted, seventh denied, explicit leave frees slot", async () => {
   const room = makeRoom();
   for (let i = 0; i < 6; i++) {
     const c = client(`p${i}`);
@@ -43,7 +43,7 @@ test("six players accepted, seventh denied, leave frees slot", () => {
   }
   assert.equal(room.members.size, 6);
   assert.equal(room.onAuth(client("p6"), { inviteCode: "local-secret-1234" }), false);
-  room.onLeave(client("p0"));
+  await room.onLeave(client("p0"), true);
   assert.equal(room.onAuth(client("p6"), { inviteCode: "local-secret-1234" }), true);
 });
 test("ping message triggers pong", () => {
@@ -51,4 +51,25 @@ test("ping message triggers pong", () => {
   const c = client("a");
   room.handlers.get("ping")(c, { nonce: "x" });
   assert.deepEqual(c.sent, [["pong", { nonce: "x" }]]);
+});
+
+test("unexpected disconnect reserves seat until Colyseus rejects reconnect", async () => {
+  const room = makeRoom();
+  const c = client("p0");
+  room.onJoin(c);
+  let resolveReconnect;
+  room.allowReconnection = () => new Promise(resolve => { resolveReconnect = resolve; });
+  const leaving = room.onLeave(c, false);
+  assert.equal(room.members.has("p0"), true);
+  resolveReconnect();
+  await leaving;
+  assert.equal(room.members.has("p0"), true);
+});
+test("expired reconnect releases seat", async () => {
+  const room = makeRoom();
+  const c = client("p0");
+  room.onJoin(c);
+  room.allowReconnection = async () => { throw new Error("expired"); };
+  await room.onLeave(c, false);
+  assert.equal(room.members.has("p0"), false);
 });

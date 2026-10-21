@@ -18,8 +18,8 @@ test("allow replacement after player leaves", () => {
   assert.equal(registerMember(members,"p6",true),true);
   assert.equal(members.size,6);
 });
-test("idempotent re-entry for existing session", () => {
+test("duplicate active session cannot join again", () => {
   const members=new Set(Array.from({length:6},(_,i)=>`p${i}`));
-  assert.equal(registerMember(members,"p1",true),true);
+  assert.equal(registerMember(members,"p1",true),false);
   assert.equal(members.size,6);
 });

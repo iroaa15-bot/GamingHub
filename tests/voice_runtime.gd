@@ -65,6 +65,7 @@ func run() -> void:
  root.add_child(game)
  await process_frame
  var game_native := FakeNative.new(); game_native.granted = true; root.add_child(game_native)
+ game._setup_native_voice()
  game.android_voice_bridge.attach_native(game_native)
  game.connected = true; game.finished = false; game.room_code = "TEST01"; game.player_index = 0
  game.voice_requested = true

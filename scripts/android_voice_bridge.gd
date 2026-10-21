@@ -14,23 +14,34 @@ var starting := false
 var request_id := 0
 var caller := false
 var ice_config: Dictionary = {}
+var native_attach_in_progress := false
+var native_webrtc_supported := false
 
 func _ready() -> void:
  _try_attach_native()
 
 # A late native registration must not permanently disable voice after scene ready.
 func _try_attach_native() -> void:
- if native_voice_bridge != null or OS.get_name() != "Android":
+ if native_voice_bridge != null or native_attach_in_progress or OS.get_name() != "Android":
   return
  if not Engine.has_singleton("GamingHubVoice"):
   return
+ native_attach_in_progress = true
  attach_native(Engine.get_singleton("GamingHubVoice"))
+ native_attach_in_progress = false
 
 # Also used by executable Godot tests with a fake native boundary.
 func attach_native(plugin: Object) -> void:
- if not plugin.has_method("getVoiceApiVersion") or int(plugin.getVoiceApiVersion()) != 2:
+ # Godot 4.5.1 JNISingleton dispatches calls via callp(), but does not expose
+ # registered Java methods through Object.has_method(). Negotiate directly.
+ var jni_plugin := plugin != null and plugin.get_class() == "JNISingleton"
+ if plugin == null or (not jni_plugin and not plugin.has_method("getVoiceApiVersion")):
   voice_unavailable.emit("Android voice plugin needs an update")
   return
+ if int(plugin.getVoiceApiVersion()) != 2:
+  voice_unavailable.emit("Android voice plugin needs an update")
+  return
+ native_webrtc_supported = (jni_plugin or plugin.has_method("supportsWebRtcVoice")) and bool(plugin.supportsWebRtcVoice())
  native_voice_bridge = plugin
  if plugin.has_signal("voice_signal") and not plugin.is_connected("voice_signal", _on_native_signal):
   plugin.connect("voice_signal", _on_native_signal)
@@ -40,7 +51,7 @@ func attach_native(plugin: Object) -> void:
   native_voice_bridge.connect("voice_status", _on_native_status)
 
 func uses_webrtc() -> bool:
- return native_voice_bridge != null and native_voice_bridge.has_method("supportsWebRtcVoice") and bool(native_voice_bridge.supportsWebRtcVoice())
+ return native_voice_bridge != null and native_webrtc_supported
 
 func configure_webrtc(initiator: bool, config: Dictionary) -> void:
  caller = initiator
@@ -58,7 +69,7 @@ func receive_signal(kind: String, payload: Dictionary) -> void:
   native_voice_bridge.receiveWebRtcSignal(kind, JSON.stringify(payload), request_id)
 
 func is_available() -> bool:
- _try_attach_native()
+ # UI reads must never initialize JNI or reenter a failure callback.
  return native_voice_bridge != null
 
 func request_permission() -> void:
@@ -75,12 +86,12 @@ func _on_permission(granted: bool) -> void:
  permission_ready.emit(granted)
 
 func set_consent(local_enabled: bool, peer_enabled: bool) -> void:
- _try_attach_native()
  local_opt_in = local_enabled
  peer_opt_in = peer_enabled
  if not (local_opt_in and peer_opt_in):
   stop_voice()
   return
+ _try_attach_native()
  if active or starting:
   return
  if native_voice_bridge == null or not native_voice_bridge.hasMicrophonePermission():

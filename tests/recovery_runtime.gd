@@ -69,7 +69,8 @@ func run() -> void:
  check(online.android_voice_bridge == null, "Online entry unexpectedly initialized native audio")
  check(online.output.size.x > 0 and online.output.size.y > 0, "Friend layout collapsed")
  check(is_instance_valid(online.create_button) and is_instance_valid(online.join_button) and is_instance_valid(online.match_button), "Room controls missing")
- check("bridge_available=" in online._voice_diagnostics_text(), "Voice diagnostics failed")
+ check("native_singleton_registered=" in online._voice_diagnostics_text(), "Voice diagnostics failed")
+ check(online.android_voice_bridge == null, "Diagnostics unexpectedly initialized native audio")
  online._exit_to_games(); await scene_changed; await frames()
  check(int(current_scene.profile.get("xp", 0)) == 4567, "Return from room reset progress")
  # Exercise the second home button as well; it must open the same room lobby

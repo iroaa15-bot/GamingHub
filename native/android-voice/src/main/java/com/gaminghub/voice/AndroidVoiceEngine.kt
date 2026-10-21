@@ -38,6 +38,7 @@ class AndroidVoiceEngine(private val context: Context) {
     private var previousSpeaker = false
     private var ownsRoute = false
     private var ownsFocus = false
+    private var deviceCallbackRegistered = false
     private var focusRequest: AudioFocusRequest? = null
     @Volatile var onCapture: ((ByteArray) -> Unit)? = null
     @Volatile var onFailure: ((String) -> Unit)? = null
@@ -96,6 +97,7 @@ class AndroidVoiceEngine(private val context: Context) {
             speaker.play()
             running.set(true)
             manager.registerAudioDeviceCallback(devices, Handler(Looper.getMainLooper()))
+            deviceCallbackRegistered = true
             capture = Thread({ audioWorker {
                 val normalizer = Pcm16Normalizer()
                 val frame = ByteArray(FRAME_BYTES)
@@ -184,7 +186,10 @@ class AndroidVoiceEngine(private val context: Context) {
     @Suppress("DEPRECATION")
     fun stop() {
         running.set(false)
-        if (ownsRoute) manager.unregisterAudioDeviceCallback(devices)
+        if (deviceCallbackRegistered) {
+            manager.unregisterAudioDeviceCallback(devices)
+            deviceCallbackRegistered = false
+        }
         // Unblock both native I/O calls before joining/releasing their objects.
         try { record?.stop() } catch (_: RuntimeException) {}
         try { track?.pause(); track?.flush() } catch (_: RuntimeException) {}

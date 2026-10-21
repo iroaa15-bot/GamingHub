@@ -17,7 +17,8 @@ const rewritten = source
   .replace('import { createServer } from "node:http";', "const createServer = () => ({});")
   .replace('import { fileURLToPath } from "node:url";', 'const fileURLToPath = () => "not-entry";')
   .replaceAll('from "./invite-code.mjs"', `from "${new URL("../invite-code.mjs", import.meta.url).href}"`)
-  .replaceAll('from "./room-policy.mjs"', `from "${new URL("../room-policy.mjs", import.meta.url).href}"`);
+  .replaceAll('from "./room-policy.mjs"', `from "${new URL("../room-policy.mjs", import.meta.url).href}"`)
+  .replace('export { validInviteCode } from "./invite-code.mjs";', "");
 const { PartyRoom } = await import(`data:text/javascript,${encodeURIComponent(rewritten)}`);
 const makeRoom = () => {
   const room = new PartyRoom();

@@ -1,14 +1,8 @@
 import { Server, Room } from "colyseus";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
-import { timingSafeEqual } from "node:crypto";
+import { validInviteCode } from "./invite-code.mjs";
 
-export function validInviteCode(expected, supplied) {
-  if (typeof expected !== "string" || typeof supplied !== "string") return false;
-  const a = Buffer.from(expected);
-  const b = Buffer.from(supplied);
-  return a.length >= 12 && a.length === b.length && timingSafeEqual(a, b);
-}
 export class PartyRoom extends Room {
   maxClients = 6;
   onCreate(options) {

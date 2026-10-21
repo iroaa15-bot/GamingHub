@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "test:offline": "node --test test/invite-code.test.mjs",
+    "check:syntax": "node --check server.mjs && node --check invite-code.mjs && node --check test/invite-code.test.mjs && node --check test/rooms.test.mjs"
   },
   "dependencies": {
     "colyseus": "^0.16.0",

@@ -37,7 +37,17 @@ export class PartyRoom extends Room {
     this.broadcast("member_joined", { sessionId: client.sessionId });
   }
 
-  onLeave(client) {
+  async onLeave(client, consented) {
+    // Colyseus owns the reconnection token. Do not accept a client-supplied
+    // sessionId as proof of ownership. Only unexpected disconnects get a grace period.
+    if (!consented) {
+      try {
+        await this.allowReconnection(client, 90);
+        return; // Keep the member seat while Colyseus restores the connection.
+      } catch {
+        // Token expired or reconnection failed: release the seat below.
+      }
+    }
     unregisterMember(this.members, client.sessionId);
     this.broadcast("member_left", { sessionId: client.sessionId });
   }

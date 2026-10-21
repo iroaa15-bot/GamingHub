@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test test/*.test.mjs",
-    "test:offline": "node --test test/invite-code.test.mjs test/room-policy.test.mjs",
-    "check:syntax": "node --check server.mjs && node --check invite-code.mjs && node --check room-policy.mjs && node --check test/invite-code.test.mjs && node --check test/room-policy.test.mjs && node --check test/rooms.test.mjs"
+    "test:offline": "node --test test/invite-code.test.mjs test/room-policy.test.mjs test/reconnect-policy.test.mjs",
+    "check:syntax": "node --check server.mjs && node --check invite-code.mjs && node --check room-policy.mjs && node --check reconnect-policy.mjs && node --check test/invite-code.test.mjs && node --check test/room-policy.test.mjs && node --check test/reconnect-policy.test.mjs && node --check test/rooms.test.mjs"
   },
   "dependencies": {
     "colyseus": "^0.16.0",

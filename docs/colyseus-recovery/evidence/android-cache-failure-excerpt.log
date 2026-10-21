@@ -1,0 +1,28 @@
+> Task :checkStandardDebugAarMetadata FAILED
+[Incubating] Problems report is available at: file:///workspace/scratch/4b73d9626291/colyseus-android-final/android/build/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':checkStandardDebugAarMetadata'.
+> A build operation failed.
+      Could not read workspace metadata from /workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/ce499857357f779744ce9d4afb452ed6/metadata.bin
+   > Could not read workspace metadata from /workspace/scratch/4b73d9626291/toolchain/gradle-home/caches/8.11.1/transforms/ce499857357f779744ce9d4afb452ed6/metadata.bin
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s
+4 actionable tasks: 2 executed, 2 up-to-date
+
+   at: add_message (./editor/export/editor_export_platform.h:255)
+[92m[ DONE ][39m [1mexport[22m
+[0m
+ERROR: Project export for preset "Android" failed.
+   at: _fs_changed (editor/editor_node.cpp:1275)
+WARNING: Scan thread aborted...
+     at: _notification (editor/file_system/editor_file_system.cpp:1729)
+cannot connect to daemon at tcp:5037: Connection refused

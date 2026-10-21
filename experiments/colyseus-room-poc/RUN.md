@@ -1,35 +1,44 @@
-# Gaming Hub — isolated Colyseus experiment
+# تشغيل التجربة المعزولة
 
-**Experimental only.** This directory is not wired to the Android app, production server, or `main`. Do not deploy publicly. Node.js 20+ is required.
+لا يتطلب التشغيل GitHub Actions أو خدمة مدفوعة أو تعديل Render.
 
-## Run dependency-free checks
-
-```sh
-cd experiments/colyseus-room-poc
-npm run test:offline
-node --check server.mjs
-```
-
-These tests use a mock Room for lifecycle hooks. They do **not** prove that Colyseus, WebSocket, reconnection, or voice works.
-
-## Run actual network integration (requires network access)
+من جذر المستودع على حاسوبك:
 
 ```sh
+python -m pip install -r server/requirements.txt
 cd experiments/colyseus-room-poc
-npm install --ignore-scripts
+npm ci --ignore-scripts
 npm run preflight
 npm test
+npm run start:android:lan
 ```
 
-If `npm install` fails with `EAI_AGAIN`, dependency download is blocked by DNS/network connectivity. Stop there; do not claim a successful network test. Do not trigger GitHub Actions as a workaround.
+الأمر الأخير يشغّل Python على `127.0.0.1:8765` وColyseus على منفذ loopback
+داخلي، وبوابة الهاتف على `0.0.0.0:2568/gaminghub`. استخدمه فقط على Wi-Fi خاص
+موثوق، واسمح بالمنفذ 2568 في جدار الحماية للشبكة الخاصة. لا تستخدم port forwarding.
+التشغيل دون `--lan`، باستخدام `npm run start:android`، يبقى على loopback.
 
-`npm test` includes tests that start a **loopback-only** server at `127.0.0.1`, exercise joining, invite rejection, capacity, ping/pong, and a reconnection attempt. They have not been validated against an installed Colyseus runtime yet. Fix any real integration failures before Android integration.
+على الهاتفين: افتح نسخة `Gaming Hub Colyseus Test`، ثم «العب مع صديق»، ثم
+«إعدادات الاتصال (متقدمة)». اكتب على الاثنين `ws://عنوان-الحاسوب:2568/gaminghub`
+واضغط الاتصال اليدوي. يجب أن يكون الحاسوب والهاتفان على الشبكة نفسها.
+أنشئ غرفة على الأول وانضم بكودها على الثاني؛ واختبر «منافس عشوائي» بصورة منفصلة.
 
-## Safety / scope
+الاتصال الافتراضي في APK يستخدم خدمة `gaminghub-voice-staging` الحالية، وهي
+خادم Python السابق؛ اختبار Colyseus يتطلب تغيير العنوان إلى البوابة المحلية.
+المحتوى اليومي في APK التجريبي موجّه إلى staging أيضًا. النسخة الأصلية وبياناتها منفصلتان.
 
-- Keep `main`, the existing Gaming Hub APK, production services, daily content generator, and other projects unchanged.
-- No paid services or CI builds.
-- Do not expose the example static invite code or the loopback server to the internet.
-- Reconnection must be authorized using Colyseus' own reconnection token, not an arbitrary session ID.
-- Voice/echo/low-volume on two physical Android phones remains a **separate, unverified** acceptance test.
-- Build an isolated test APK only after the network integration suite passes.
+لإعادة الاختبارات الإضافية من جذر المستودع بعد تثبيت Godot 4.5.1 وaiortc:
+
+```sh
+python -m pip install aiortc numpy
+python tests/run_colyseus_runtime.py --godot /path/to/godot --output /tmp/colyseus-results
+python tools/run_godot_gate.py --godot /path/to/godot --project . --script tests/recovery_runtime.gd --marker RECOVERY_RUNTIME_PASS --log /tmp/recovery.log
+python tests/run_checks.py
+```
+
+`test:offline` يستخدم Room مقلّدًا؛ لا يعتبر إثبات WebSocket. اختبارات `npm test`
+و`run_colyseus_runtime.py` تشغّل اتصالات حقيقية. اختبار Godot يقلّد JNI فقط؛ اختبار
+aiortc ينقل صوتًا مولّدًا فعليًا عبر UDP، ولا يقيس ميكروفون الهاتف أو مستوى سماعته.
+
+إذا عاد `EAI_AGAIN`، تحقق من DNS ومن إعدادات proxy الخاصة ببيئتك ثم أعد
+`npm ci --ignore-scripts`. لا تغيّر TLS ولا تستخدم Actions لتجاوز المشكلة.

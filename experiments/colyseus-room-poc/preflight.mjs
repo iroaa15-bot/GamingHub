@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 const require = createRequire(import.meta.url);
-const packages = ["colyseus", "@colyseus/sdk", "@colyseus/schema"];
+const packages = ["@colyseus/core", "colyseus.js", "@colyseus/schema"];
 let missing = 0;
 
 for (const name of packages) {

@@ -1,0 +1,11 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+VOICE_CAPABILITIES {"simulated":true,"engine":"webrtc"}
+WEBRTC_ROOM_RUNTIME_PASS: actual Godot clients/server signaling; JNI simulated; denial, voice error isolation, room recovery, background/foreground, opt-out and leave

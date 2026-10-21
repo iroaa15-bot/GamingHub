@@ -24,7 +24,8 @@ class FeedbackAccessibilityV82(unittest.TestCase):
  def test_reduced_motion_opt_out_persisted(self):
   self.assertIn('reduced_motion = bool(profile.get("reduced_motion", false))',MAIN)
   self.assertIn('profile["reduced_motion"] = reduced_motion',MAIN)
-  self.assertIn('if reduced_motion:\n  root.modulate.a = 1.0',MAIN)
+  self.assertIn('root.modulate.a = 1.0',MAIN)
+  self.assertNotIn('root.modulate.a = 0.0',MAIN)
   self.assertIn('if reduced_motion:\n  target.scale = Vector2.ONE',MAIN)
  def test_english_arabic_only_in_language_selector(self):
   section=MAIN.split('func show_languages() -> void:',1)[1].split('\nfunc ',1)[0]

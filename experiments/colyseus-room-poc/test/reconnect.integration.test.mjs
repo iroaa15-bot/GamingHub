@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Client } from "@colyseus/sdk";
+import { Client } from "colyseus.js";
 import { startServer } from "../server.mjs";
 
 // Real network test. Requires installed Colyseus packages.
@@ -18,8 +18,18 @@ test("unexpected socket loss restores the same session within 90 seconds", { tim
     assert.ok(typeof token === "string" && token.length > 0, "SDK must expose a reconnect token");
 
     // Abrupt transport loss, not room.leave() (which means intentional exit).
+    const dropped = new Promise(resolve => room.onLeave(resolve));
     room.connection.close();
-    recovered = await client.reconnect(token);
+    await dropped;
+    // The local close callback can race the server registering its reservation.
+    // Retry only the reconnection token, never a game move or arbitrary session ID.
+    for (let attempt = 0; attempt < 10; attempt++) {
+      try { recovered = await client.reconnect(token); break; }
+      catch (error) {
+        if (error.code !== 4214 || attempt === 9) throw error;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
     assert.equal(recovered.roomId, roomId);
     assert.equal(recovered.sessionId, sessionId);
 
@@ -30,7 +40,7 @@ test("unexpected socket loss restores the same session within 90 seconds", { tim
     recovered.send("ping", { nonce: "after-reconnect" });
     assert.equal((await pong).nonce, "after-reconnect");
   } finally {
-    await Promise.allSettled([recovered?.leave(), room?.leave()]);
-    await gameServer.gracefullyShutdown();
+    await Promise.allSettled([recovered?.leave()]);
+    await gameServer.gracefullyShutdown(false);
   }
 });

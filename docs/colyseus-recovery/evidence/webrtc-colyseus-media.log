@@ -1,0 +1,1 @@
+{"result": "WEBRTC_MEDIA_PASS", "media": "Opus/SRTP loopback UDP", "received_frames": [1500, 1500], "non_silent": true, "turn_configured": false, "turn_transport_tested": false, "android_hardware_tested": false, "signaling": "localhost"}

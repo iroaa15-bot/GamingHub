@@ -18,3 +18,9 @@ build/
 outputs/
 signing-private/
 addons/admob/downloads/
+
+node_modules/
+.gradle/
+.kotlin/
+/native/android-voice/local.properties
+*.import

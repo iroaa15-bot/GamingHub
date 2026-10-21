@@ -1,0 +1,7 @@
+{
+  "result": "APK_RUNTIME_PASS",
+  "apk_sha256": "df7a8652b8070bcc7e13cc5ed28192399ddc51e03c83953072667208569961d2",
+  "execution": "Godot 4.5.1 headless on extracted APK resources",
+  "android_jni_executed": false,
+  "physical_device_tested": false
+}

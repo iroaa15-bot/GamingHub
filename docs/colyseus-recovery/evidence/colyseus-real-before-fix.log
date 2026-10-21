@@ -1,0 +1,186 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> gaminghub-colyseus-room-poc@0.1.0 test
+> node --test test/*.test.mjs
+
+✔ correct invite accepted (1.096942ms)
+✔ incorrect invite rejected (0.26535ms)
+✔ short invite rejected (0.204017ms)
+✔ missing invite rejected (0.15244ms)
+✔ unicode invite supported (0.174323ms)
+✔ reconnect within 90 seconds reclaims reserved slot (1.139466ms)
+✔ reservation blocks a seventh player (0.286361ms)
+✔ reservation expires after 90 seconds (0.214043ms)
+✔ explicit leave releases slot immediately (0.246211ms)
+✔ invalid and duplicate sessions do not consume slots (0.201594ms)
+DEPRECATION WARNING: 'pingInterval', 'pingMaxRetries', 'server', and 'verifyClient' Server options will be permanently moved to WebSocketTransport on v0.15
+new Server({
+  transport: new WebSocketTransport({
+    pingInterval: ...,
+    pingMaxRetries: ...,
+    server: ...,
+    verifyClient: ...
+  })
+})
+👉 Documentation: https://docs.colyseus.io/server/transport/
+
+       ___      _
+      / __\___ | |_   _ ___  ___ _   _ ___
+     / /  / _ \| | | | / __|/ _ \ | | / __|
+    / /__| (_) | | |_| \__ \  __/ |_| \__ \
+    \____/\___/|_|\__, |___/\___|\__,_|___/
+                  |___/
+
+     · Multiplayer Framework for Node.js ·
+
+💖 Consider becoming a Sponsor on GitHub → https://github.com/sponsors/endel
+🌟 Give us a star on GitHub → https://github.com/colyseus/colyseus
+☁️  Deploy and scale your project on Colyseus Cloud → https://cloud.colyseus.io
+
+
+❌ reconnection token invalid or expired. Did you miss .allowReconnection()?
+👉 https://docs.colyseus.io/server/room/#allowreconnection-client-seconds
+✖ unexpected socket loss restores the same session within 90 seconds (136.65787ms)
+✔ invalid invitation denied in room hook (1.386758ms)
+✔ six players accepted, seventh denied, explicit leave frees slot (0.595737ms)
+✔ ping message triggers pong (1.313959ms)
+✔ unexpected disconnect reserves seat until Colyseus rejects reconnect (0.284178ms)
+✔ expired reconnect releases seat (0.403899ms)
+✔ reject unauthorized and malformed sessions (0.791311ms)
+✔ allow six players, reject seventh (0.156055ms)
+✔ allow replacement after player leaves (1.484355ms)
+✔ duplicate active session cannot join again (0.359271ms)
+DEPRECATION WARNING: 'pingInterval', 'pingMaxRetries', 'server', and 'verifyClient' Server options will be permanently moved to WebSocketTransport on v0.15
+new Server({
+  transport: new WebSocketTransport({
+    pingInterval: ...,
+    pingMaxRetries: ...,
+    server: ...,
+    verifyClient: ...
+  })
+})
+👉 Documentation: https://docs.colyseus.io/server/transport/
+
+       ___      _
+      / __\___ | |_   _ ___  ___ _   _ ___
+     / /  / _ \| | | | / __|/ _ \ | | / __|
+    / /__| (_) | | |_| \__ \  __/ |_| \__ \
+    \____/\___/|_|\__, |___/\___|\__,_|___/
+                  |___/
+
+     · Multiplayer Framework for Node.js ·
+
+💖 Consider becoming a Sponsor on GitHub → https://github.com/sponsors/endel
+🌟 Give us a star on GitHub → https://github.com/colyseus/colyseus
+☁️  Deploy and scale your project on Colyseus Cloud → https://cloud.colyseus.io
+
+
+✔ invite code validator rejects incorrect and short codes (1.083361ms)
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js - onError => (4215) onAuth failed
+Room connection was closed unexpectedly (4002): 
+colyseus.js - onError => (4002) 
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+DEPRECATION WARNING: 'pingInterval', 'pingMaxRetries', 'server', and 'verifyClient' Server options will be permanently moved to WebSocketTransport on v0.15
+new Server({
+  transport: new WebSocketTransport({
+    pingInterval: ...,
+    pingMaxRetries: ...,
+    server: ...,
+    verifyClient: ...
+  })
+})
+👉 Documentation: https://docs.colyseus.io/server/transport/
+
+       ___      _
+      / __\___ | |_   _ ___  ___ _   _ ___
+     / /  / _ \| | | | / __|/ _ \ | | / __|
+    / /__| (_) | | |_| \__ \  __/ |_| \__ \
+    \____/\___/|_|\__, |___/\___|\__,_|___/
+                  |___/
+
+     · Multiplayer Framework for Node.js ·
+
+💖 Consider becoming a Sponsor on GitHub → https://github.com/sponsors/endel
+🌟 Give us a star on GitHub → https://github.com/colyseus/colyseus
+☁️  Deploy and scale your project on Colyseus Cloud → https://cloud.colyseus.io
+
+
+✔ two players join; wrong invite code is rejected; ping works (112.848022ms)
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+✔ real server rejects seventh player and admits replacement after leave (40.30301ms)
+✔ invite code rejects prefix and trailing whitespace (1.18222ms)
+✔ invalid member collections fail closed (0.169014ms)
+✔ denied join does not mutate members (0.846845ms)
+✔ reconnect at exact deadline is expired (0.284809ms)
+✔ unknown disconnect cannot reserve a slot (0.227272ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 27
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1361.618992
+
+✖ failing tests:
+
+test at test/reconnect.integration.test.mjs:8:1
+✖ unexpected socket loss restores the same session within 90 seconds (136.65787ms)
+  Error [MatchMakeError]: reconnection token invalid or expired.
+      at Client.createMatchMakeRequest (file:///workspace/scratch/4b73d9626291/GamingHub/experiments/colyseus-room-poc/node_modules/colyseus.js/build/esm/Client.mjs:157:19)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Client.reconnect (file:///workspace/scratch/4b73d9626291/GamingHub/experiments/colyseus-room-poc/node_modules/colyseus.js/build/esm/Client.mjs:102:16)
+      at async TestContext.<anonymous> (file:///workspace/scratch/4b73d9626291/GamingHub/experiments/colyseus-room-poc/test/reconnect.integration.test.mjs:22:17)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    code: 4214
+  }

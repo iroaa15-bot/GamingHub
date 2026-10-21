@@ -1,0 +1,21 @@
+✖ real Godot JSON protocol crosses Colyseus: game, capacity, reconnect, voice isolation (243.916226ms)
+✔ real Colyseus random matchmaking pairs two players and separates the third (145.996636ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1528.562331
+
+✖ failing tests:
+
+test at test/game-gateway.integration.test.mjs:55:1
+✖ real Godot JSON protocol crosses Colyseus: game, capacity, reconnect, voice isolation (243.916226ms)
+  Error: {"type":"error","message":"Invalid question"}
+      at Object.next (file:///workspace/scratch/4b73d9626291/GamingHub/experiments/colyseus-room-poc/test/game-gateway.integration.test.mjs:40:46)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///workspace/scratch/4b73d9626291/GamingHub/experiments/colyseus-room-poc/test/game-gateway.integration.test.mjs:67:40)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)

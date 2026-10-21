@@ -1,0 +1,121 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+Downloading https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+
+Welcome to Gradle 8.11.1!
+
+Here are the highlights of this release:
+ - Parallel load and store for Configuration Cache
+ - Java compilation errors at the end of the build output
+ - Consolidated report for warnings and deprecations
+
+For more details see https://docs.gradle.org/8.11.1/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :generateVoiceBuildInfo
+> Task :preBuild
+> Task :preDebugBuild
+> Task :generateDebugResValues
+> Task :generateDebugResources
+> Task :packageDebugResources
+> Task :javaPreCompileDebug
+> Task :preDebugUnitTestBuild
+> Task :javaPreCompileDebugUnitTest
+> Task :mergeDebugJniLibFolders
+> Task :mergeDebugNativeLibs NO-SOURCE
+> Task :stripDebugDebugSymbols NO-SOURCE
+> Task :copyDebugJniLibsProjectAndLocalJars
+> Task :extractDeepLinksForAarDebug
+> Task :parseDebugLocalResources
+> Task :mergeDebugShaders
+> Task :compileDebugShaders NO-SOURCE
+> Task :generateDebugAssets UP-TO-DATE
+> Task :mergeDebugAssets
+> Task :generateDebugRFile
+> Task :compileDebugKotlin
+> Task :compileDebugJavaWithJavac NO-SOURCE
+> Task :generateDebugUnitTestStubRFile
+> Task :bundleLibRuntimeToJarDebug
+> Task :bundleLibCompileToJarDebug
+> Task :processDebugJavaRes
+> Task :compileDebugUnitTestKotlin
+> Task :extractDebugAnnotations
+> Task :compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :processDebugUnitTestJavaRes
+
+> Task :testDebugUnitTest
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts
+
+> Task :mergeDebugGeneratedProguardFiles
+> Task :mergeDebugConsumerProguardFiles
+> Task :prepareDebugArtProfile
+> Task :prepareLintJarForPublish
+> Task :processDebugManifest
+> Task :writeDebugAarMetadata
+> Task :createFullJarDebug
+> Task :preDebugAndroidTestBuild
+> Task :generateDebugAndroidTestResValues
+> Task :writeDebugLintModelMetadata
+> Task :mergeDebugJavaResource
+> Task :extractProguardFiles
+> Task :syncDebugLibJars
+> Task :bundleDebugLocalLintAar
+> Task :generateDebugAndroidTestLintModel
+> Task :generateDebugLintReportModel
+> Task :generateDebugUnitTestLintModel
+> Task :lintAnalyzeDebugAndroidTest
+> Task :lintAnalyzeDebugUnitTest
+> Task :preReleaseBuild
+> Task :generateReleaseResValues
+> Task :generateReleaseResources
+> Task :packageReleaseResources
+> Task :parseReleaseLocalResources
+> Task :generateReleaseRFile
+> Task :compileReleaseKotlin
+> Task :javaPreCompileRelease
+> Task :compileReleaseJavaWithJavac NO-SOURCE
+> Task :processReleaseManifest
+> Task :generateReleaseLintReportModel
+> Task :mergeReleaseJniLibFolders
+> Task :mergeReleaseNativeLibs NO-SOURCE
+> Task :stripReleaseDebugSymbols NO-SOURCE
+> Task :copyReleaseJniLibsProjectAndLocalJars
+> Task :extractDeepLinksForAarRelease
+> Task :extractReleaseAnnotations
+> Task :mergeReleaseShaders
+> Task :compileReleaseShaders NO-SOURCE
+> Task :generateReleaseAssets UP-TO-DATE
+> Task :mergeReleaseAssets
+> Task :mergeReleaseGeneratedProguardFiles
+> Task :mergeReleaseConsumerProguardFiles
+> Task :prepareReleaseArtProfile
+> Task :processReleaseJavaRes
+> Task :mergeReleaseJavaResource
+> Task :syncReleaseLibJars
+> Task :writeReleaseAarMetadata
+> Task :bundleReleaseLocalLintAar
+> Task :bundleLibRuntimeToJarRelease
+> Task :createFullJarRelease
+> Task :preReleaseUnitTestBuild
+> Task :writeReleaseLintModelMetadata
+> Task :generateReleaseUnitTestLintModel
+> Task :lintAnalyzeDebug
+> Task :lintReportDebug
+> Task :lintDebug
+> Task :lintAnalyzeReleaseUnitTest
+> Task :bundleDebugAar
+> Task :assembleDebug
+> Task :bundleReleaseAar
+> Task :mapReleaseSourceSetPaths
+> Task :mergeReleaseResources
+> Task :verifyReleaseResources
+> Task :assembleRelease
+> Task :installPlugin
+> Task :lintAnalyzeRelease
+> Task :lintReportRelease
+> Task :lintRelease
+
+BUILD SUCCESSFUL in 3m 39s
+80 actionable tasks: 80 executed

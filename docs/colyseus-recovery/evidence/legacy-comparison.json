@@ -1,0 +1,50 @@
+[
+  {
+    "project": "baseline-main-3916225",
+    "test": "smoke",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-baseline-smoke.log"
+  },
+  {
+    "project": "baseline-main-3916225",
+    "test": "journeys",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-baseline-journeys.log"
+  },
+  {
+    "project": "baseline-main-3916225",
+    "test": "languages",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-baseline-languages.log"
+  },
+  {
+    "project": "experiment",
+    "test": "smoke",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-experiment-smoke.log"
+  },
+  {
+    "project": "experiment",
+    "test": "journeys",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-experiment-journeys.log"
+  },
+  {
+    "project": "experiment",
+    "test": "languages",
+    "exit": 124,
+    "assertion_failed": true,
+    "passed": false,
+    "log": "legacy-experiment-languages.log"
+  }
+]

@@ -5,6 +5,7 @@ from liveops_content import daily_rotation
 from daily_content import json_bytes, daily_pack, validate_pack
 from daily_images import public_json as daily_image_json, image_for_filename as daily_image_bytes, pack as daily_image_pack
 from dataclasses import dataclass, field
+from collections import deque
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
 from websockets.datastructures import Headers
@@ -59,6 +60,10 @@ class Room:
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
     voice_packet_at: list = field(default_factory=lambda: [[], []])
+    voice_epoch: int = 0
+    voice_sequence: list = field(default_factory=lambda: [-1, -1])
+    voice_relays: list = field(default_factory=lambda: [None, None])
+    voice_signal_relays: list = field(default_factory=lambda: [None, None])
 
 rooms = {}
 connections = {}
@@ -83,6 +88,81 @@ async def broadcast(room, payload):
 def public_card(card):
     return {'name':card['name']}
 
+class VoiceRelay:
+    """Bounded live-media outbox, independent of the player's gameplay receive loop."""
+    def __init__(self, room, sender, signaling=False):
+        self.room, self.sender, self.signaling = room, sender, signaling
+        self.pending = deque(maxlen=32 if signaling else 6)
+        self.task = None
+
+    def offer(self, payload):
+        self.pending.append((time.monotonic(), payload))
+        if self.task is None:
+            self.task = asyncio.create_task(self.run())
+
+    async def run(self):
+        try:
+            while self.pending:
+                queued_at, packet = self.pending.popleft()
+                room = self.room
+                target = room.players[1-self.sender]
+                if (time.monotonic() - queued_at > (3 if self.signaling else .16) or rooms.get(room.code) is not room
+                        or target is None or room.over or not all(room.voice_enabled)
+                        or packet.get('epoch', packet.get('payload', {}).get('epoch', room.voice_epoch)) != room.voice_epoch):
+                    continue
+                try:
+                    await asyncio.wait_for(send(target, packet), timeout=.25)
+                except Exception:
+                    # A slow/dead receiver must not disconnect the healthy sender.
+                    # Closing this socket invokes the existing authenticated room resume path.
+                    if self.signaling:
+                        try:
+                            await asyncio.wait_for(send(room.players[self.sender],
+                                {'type':'error','scope':'voice','message':'Voice signaling stalled'}), timeout=.25)
+                        except Exception:
+                            pass
+                    else:
+                        try:
+                            await asyncio.wait_for(target.close(code=1013, reason='Voice transport stalled'), timeout=1)
+                        except Exception:
+                            pass
+                    self.pending.clear()
+                    return
+        finally:
+            self.task = None
+
+    def cancel(self):
+        self.pending.clear()
+        if self.task is not None:
+            self.task.cancel()
+
+
+def reset_voice_media(room):
+    room.voice_epoch += 1
+    room.voice_sequence = [-1, -1]
+    room.voice_packet_at = [[], []]
+    for relay in room.voice_relays + room.voice_signal_relays:
+        if relay is not None:
+            relay.cancel()
+    room.voice_relays = [None, None]
+    room.voice_signal_relays = [None, None]
+
+
+async def voice_state_snapshot(room, index, kind='voice_state', request_id=None, reset=False):
+    target = room.players[index]
+    if target is None:
+        return
+    payload = {'type': kind, 'player': 1-index, 'enabled': room.voice_enabled[index] if kind == 'voice_state_ack' else room.voice_enabled[1-index],
+               'local_enabled': room.voice_enabled[index], 'peer_enabled': room.voice_enabled[1-index],
+               'protocol': 2, 'epoch': room.voice_epoch, 'reset': reset}
+    if request_id is not None:
+        payload['request_id'] = request_id
+    try:
+        await send(target, payload)
+    except Exception:
+        pass # Its handler owns detach/resume cleanup.
+
+
 async def start_room(room):
     room.cards = random.sample(CARDS, 2)
     room.turn, room.moves, room.over = 0, 0, False
@@ -92,7 +172,7 @@ async def start_room(room):
     room.history = []
     room.winner = -1
     room.voice_enabled = [False, False]
-    room.voice_packet_at = [[], []]
+    reset_voice_media(room)
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -109,6 +189,7 @@ def snapshot(room, index, kind='synced', include_token=False):
              'finished': room.over,
              'questions': [q['text'] for q in QUESTIONS],
              'questions_ar': [q['ar'] for q in QUESTIONS],
+             'questions_tr': [q['tr'] for q in QUESTIONS],
              'history': room.history.copy(),
              'paused': any(p is None for p in room.players)}
     if include_token:
@@ -120,6 +201,8 @@ async def cleanup_room(code, reason='Match expired', exclude=None):
     room = rooms.pop(code, None)
     if room is None:
         return
+    room.voice_enabled = [False, False]
+    reset_voice_media(room)
     for peer in room.players:
         if peer is not None:
             connections.pop(peer, None)
@@ -172,27 +255,28 @@ async def process(ws, msg):
         code = msg.get('code')
         token = msg.get('token')
         if ws in connections or ws in waiting:
-            return await send(ws, {'type':'error','message':'Already in a room'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Already in a room'})
         if not isinstance(code, str) or not isinstance(token, str) or len(token) != 64:
-            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Invalid resume credentials'})
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards:
-            return await send(ws, {'type':'error','message':'Match unavailable'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Match unavailable'})
         idx = next((i for i, expected in enumerate(room.resume_tokens)
                     if expected and secrets.compare_digest(expected, token)), -1)
         if idx < 0:
-            return await send(ws, {'type':'error','message':'Invalid resume credentials'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Invalid resume credentials'})
         disconnected_at = room.detached_at[idx]
         if disconnected_at is None:
-            return await send(ws, {'type':'error','message':'Original player still connected'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Original player still connected'})
         if time.monotonic() - disconnected_at >= RECONNECT_GRACE:
             await cleanup_room(code, 'Reconnection window expired')
-            return await send(ws, {'type':'error','message':'Reconnection expired'})
+            return await send(ws, {'type':'error','scope':'resume','message':'Reconnection expired'})
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
         had_voice_consent = any(room.voice_enabled)
         room.voice_enabled = [False, False]
+        reset_voice_media(room)
         room.detached_at[idx] = None
         connections[ws] = code
         room.last_activity = time.monotonic()
@@ -200,28 +284,34 @@ async def process(ws, msg):
         if all(p is not None for p in room.players):
             await broadcast(room, {'type':'peer_resumed', 'player':idx, 'turn':room.turn})
             if had_voice_consent:
-                await broadcast(room, {'type':'voice_state','player':idx,'enabled':False})
+                for i in range(2):
+                    await voice_state_snapshot(room, i, reset=True)
         return
-    # Optional voice signaling only. Audio media must use a native WebRTC client.
+    # Optional voice signaling only. Native PCM media is relayed by the bounded v2 path below.
     # No SDP/ICE is stored in room history or server-side databases.
     if action in ('voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_audio', 'voice_ice_config'):
         code = connections.get(ws)
         room = rooms.get(code)
         if room is None or len(room.players) != 2 or not room.cards or room.over or ws not in room.players:
-            return await send(ws, {'type':'error','message':'No active voice room'})
+            return await send(ws, {'type':'error','scope':'voice','message':'No active voice room'})
         if any(peer is None for peer in room.players):
-            return await send(ws, {'type':'error','message':'Voice peer unavailable'})
+            return await send(ws, {'type':'error','scope':'voice','message':'Voice peer unavailable'})
         index = room.players.index(ws)
         if action == 'voice_state':
             enabled = msg.get('enabled')
             if type(enabled) is not bool:
-                return await send(ws, {'type':'error','message':'Invalid voice state'})
-            room.voice_enabled[index] = enabled
-            await send(room.players[1-index], {'type':'voice_state','player':index,'enabled':enabled})
-            await send(ws, {'type':'voice_state_ack','enabled':enabled,'peer_enabled':room.voice_enabled[1-index]})
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid voice state'})
+            request_id = msg.get('request_id')
+            if request_id is not None and (type(request_id) is not int or not 0 <= request_id < 2**31):
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid voice request'})
+            if room.voice_enabled[index] != enabled:
+                room.voice_enabled[index] = enabled
+                reset_voice_media(room)
+            await voice_state_snapshot(room, 1-index)
+            await voice_state_snapshot(room, index, 'voice_state_ack', request_id=request_id)
             return
         if not all(room.voice_enabled):
-            return await send(ws, {'type':'error','message':'Both players must enable voice'})
+            return await send(ws, {'type':'error','scope':'voice','message':'Both players must enable voice'})
         if action == 'voice_ice_config':
             config = ephemeral_turn_credentials(code, index)
             # No credentials unless both players explicitly enabled voice.
@@ -231,13 +321,21 @@ async def process(ws, msg):
             # No persistence. Per-sender pacing protects rooms from audio floods.
             encoded = msg.get('pcm')
             if not isinstance(encoded, str) or len(encoded) != 856:
-                return await send(ws, {'type':'error','message':'Invalid audio packet'})
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid audio packet'})
             try:
                 pcm = base64.b64decode(encoded, validate=True)
             except (ValueError, binascii.Error):
-                return await send(ws, {'type':'error','message':'Invalid audio encoding'})
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid audio encoding'})
             if len(pcm) != 640:
-                return await send(ws, {'type':'error','message':'Invalid audio size'})
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid audio size'})
+            v2 = 'seq' in msg or 'epoch' in msg
+            if v2:
+                seq, epoch = msg.get('seq'), msg.get('epoch')
+                if type(seq) is not int or not 0 <= seq < 2**31 or type(epoch) is not int:
+                    return await send(ws, {'type':'error','scope':'voice','message':'Invalid audio sequence'})
+                if epoch != room.voice_epoch or seq <= room.voice_sequence[index]:
+                    return # Old consent sessions and duplicate/reordered frames never play.
+                room.voice_sequence[index] = seq
             # Legitimate 20 ms frames can arrive in bursts when the mobile UI
             # catches up. A 12 ms inter-arrival gate dropped those frames and
             # caused audible missing syllables. Limit the rolling rate instead.
@@ -247,17 +345,30 @@ async def process(ws, msg):
             if len(recent) >= 80:
                 return  # Reject sustained >80 packets/s; expected rate is 50.
             recent.append(now)
-            await send(room.players[1-index], {'type':'voice_audio','pcm':encoded})
+            packet = {'type':'voice_audio','pcm':encoded}
+            if v2:
+                packet.update(epoch=room.voice_epoch, seq=seq, player=index)
+                if room.voice_relays[index] is None:
+                    room.voice_relays[index] = VoiceRelay(room, index)
+                room.voice_relays[index].offer(packet)
+            else:
+                # Keep old clients compatible. New clients require protocol=2 and an epoch.
+                try:
+                    await asyncio.wait_for(send(room.players[1-index], packet), timeout=.25)
+                except Exception:
+                    pass
             return
         payload = msg.get('payload')
         if not isinstance(payload, dict) or len(json.dumps(payload)) > (18000 if action in ('voice_offer', 'voice_answer') else 6000):
-            return await send(ws, {'type':'error','message':'Invalid voice payload'})
+            return await send(ws, {'type':'error','scope':'voice','message':'Invalid voice payload'})
         if action in ('voice_offer', 'voice_answer'):
             if not isinstance(payload.get('sdp'), str) or not 0 < len(payload['sdp']) <= 16000:
-                return await send(ws, {'type':'error','message':'Invalid voice SDP'})
+                return await send(ws, {'type':'error','scope':'voice','message':'Invalid voice SDP'})
         if action == 'voice_ice' and (not isinstance(payload.get('candidate'), str) or not 0 < len(payload['candidate']) <= 4096):
-            return await send(ws, {'type':'error','message':'Invalid ICE candidate'})
-        await send(room.players[1-index], {'type':action,'player':index,'payload':payload})
+            return await send(ws, {'type':'error','scope':'voice','message':'Invalid ICE candidate'})
+        if room.voice_signal_relays[index] is None:
+            room.voice_signal_relays[index] = VoiceRelay(room, index, signaling=True)
+        room.voice_signal_relays[index].offer({'type':action,'player':index,'payload':payload})
         return
     if action == 'leave':
         if ws in waiting:
@@ -343,6 +454,8 @@ async def process(ws, msg):
         await broadcast(room, event)
         if correct:
             room.over = True
+            room.voice_enabled = [False, False]
+            reset_voice_media(room)
             room.winner = index
             result = {'type':'finished','winner':index,'cards':[c['name'] for c in room.cards]}
             room.history.append(result)
@@ -352,6 +465,8 @@ async def process(ws, msg):
     room.moves += 1
     if room.moves >= 20:
         room.over = True
+        room.voice_enabled = [False, False]
+        reset_voice_media(room)
         room.winner = -1
         result = {'type':'finished','winner':-1,'cards':[c['name'] for c in room.cards]}
         room.history.append(result)
@@ -362,19 +477,34 @@ async def process(ws, msg):
 async def handler(ws):
     # Simple per-connection burst limiter; production still needs authentication and proxy limits.
     timestamps = []
+    all_packets = deque()
     try:
         async for raw in ws:
-            now = time.monotonic()
-            timestamps = [t for t in timestamps if now - t < 10]
-            timestamps.append(now)
-            if len(timestamps) > 35:
-                await send(ws, {'type':'error','message':'Too many requests'})
-                await ws.close(code=1008, reason='Rate limit')
-                break
             try:
-                if len(raw) > 8192: raise ValueError('Oversized message')
+                # Parse before rate classification. Voice PCM is separately paced
+                # at 80 packets/second per room in process().
+                if len(raw) > 20000:
+                    raise ValueError('Oversized message')
                 msg = json.loads(raw)
-                if not isinstance(msg, dict): raise ValueError('Expected object')
+                if not isinstance(msg, dict):
+                    raise ValueError('Expected object')
+                action = msg.get('type')
+                voice_packet = isinstance(action, str) and action in ('voice_audio', 'voice_state', 'voice_offer', 'voice_answer', 'voice_ice', 'voice_ice_config')
+                if voice_packet:
+                    now = time.monotonic()
+                    while all_packets and now - all_packets[0] > 1:
+                        all_packets.popleft()
+                    if len(all_packets) >= 150:
+                        continue # Voice congestion never consumes the gameplay budget.
+                    all_packets.append(now)
+                else:
+                    now = time.monotonic()
+                    timestamps = [t for t in timestamps if now - t < 10]
+                    timestamps.append(now)
+                    if len(timestamps) > 35:
+                        await send(ws, {'type':'error','message':'Too many requests'})
+                        await ws.close(code=1008, reason='Rate limit')
+                        break
                 await process(ws, msg)
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})
@@ -389,13 +519,14 @@ async def handler(ws):
                 room.players[idx] = None
                 had_voice_consent = any(room.voice_enabled)
                 room.voice_enabled = [False, False]
+                reset_voice_media(room)
                 room.detached_at[idx] = time.monotonic()
                 for peer in room.players:
                     if peer is not None:
                         try:
                             await send(peer, {'type':'paused','player':idx,'seconds':RECONNECT_GRACE})
                             if had_voice_consent:
-                                await send(peer, {'type':'voice_state','player':idx,'enabled':False})
+                                await voice_state_snapshot(room, room.players.index(peer), reset=True)
                         except Exception: pass
             else:
                 await cleanup_room(code, 'Opponent disconnected')
@@ -486,7 +617,7 @@ async def http_health(connection, request):
 async def main():
     host = os.getenv('HOST','0.0.0.0')
     port = int(os.getenv('PORT','8765'))
-    async with serve(handler, host, port, max_size=32768, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
+    async with serve(handler, host, port, max_size=32768, ping_interval=20, ping_timeout=20, max_queue=8, write_limit=8192, compression=None, process_request=http_health):
         print(f'Gaming Hub server on {host}:{port}')
         task = asyncio.create_task(expiry_loop())
         try:

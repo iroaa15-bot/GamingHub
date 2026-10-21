@@ -1,29 +1,37 @@
-# Colyseus room experiment — isolated POC
+# Gaming Hub — isolated Colyseus Android experiment
 
-Status: experimental; NOT deployed or integrated into Gaming Hub.
+Branch: `experiment/colyseus-room-poc`. No production deployment or CI is required.
 
-## Scope and guardrails
-- Branch: `experiment/colyseus-room-poc`; never modify `main` or production services.
-- No paid hosting, GitHub Actions workflow, automatic deploy, or changes to current room/voice services.
-- Keep current game, user progress, daily generation and all existing game modes unchanged.
-- Reference: https://github.com/colyseus/realtime-tanks-demo (MIT license; preserve notices if copying code).
-- Colyseus is for room membership, matchmaking and state synchronization, **not** a voice solution.
+The original `party_poc` six-seat room is exercised using real Colyseus clients.
+`game-gateway.mjs` connects the existing Godot JSON/WebSocket protocol to Colyseus
+private/public two-seat rooms using the official `colyseus.js` 0.16 SDK. Python
+continues to own game rules, cards, turn validation, history and voice consent.
+This is an opt-in transport experiment, not a replacement for the existing backend.
 
-## Evaluation steps
-1. Clone the upstream demo separately and pin an audited commit, inspect dependencies and MIT notices.
-2. Run the upstream server locally in a sandbox; do not expose it publicly.
-3. Test two simulated clients: create private room, join by code, leave, reconnect, room capacity and unauthorized joins.
-4. Compare results to Gaming Hub's current server, especially recovery after a dropped connection and timeout behavior.
-5. Run soak tests and record CPU/memory, latency and disconnect rates.
-6. Only after passing tests, propose an opt-in client adapter on this branch, with feature flag default OFF.
-7. Validate two physical Android phones separately for gameplay and voice. Never infer voice success from Colyseus tests.
+## Verified locally
 
-## Acceptance criteria
-- Existing Gaming Hub production server remains untouched.
-- Room code and matchmaking function in local test with two clients.
-- Reconnection behavior documented with failure cases.
-- No GitHub Actions minutes or paid infrastructure used for this experiment.
-- No merge or deploy until explicit approval.
+- Actual SDK/WebSocket joins, invitations, six-seat capacity and replacement.
+- Authenticated Colyseus reconnection; Python snapshot/token rotation and moves survive.
+- Private room codes, public two-player matchmaking, full-room rejection, cancellation and a new game.
+- Actual `multiplayer.gd` clients through the gateway; JNI is simulated in this test.
+- Real aiortc Opus/SRTP loopback UDP: 1500 non-silent frames each direction.
+- A 501-ICE burst does not block heartbeat or a real game move.
 
-## Current state
-Planning scaffold only; no running Colyseus server, client integration, APK, or test pass is claimed.
+The detailed results and Android limitations are in
+[the Arabic recovery report](../../docs/colyseus-recovery/REPORT_AR.md).
+
+## Cost and isolation
+
+Use Node.js 20+ and Python 3.10+. Install the pinned lockfile with `npm ci --ignore-scripts`.
+`@colyseus/sdk@0.16` does not exist; 0.16 clients use `colyseus.js`.
+Only core, schema, WebSocket transport, SDK and ws are installed; Redis/auth/native
+transports and paid hosting are not needed. The gateway refuses non-loopback Python backends.
+
+`npm audit --omit=dev` still reports the legacy core's transitive `nanoid` advisory.
+Do not expose this POC publicly. The direct `ws` dependency is updated to 8.22.0.
+A migration to a maintained Colyseus generation requires its own compatibility gate;
+do not silence audit or force an incompatible nanoid major override.
+
+Colyseus manages membership/signaling transport; Android voice uses native libwebrtc.
+No physical Android microphone/speaker, echo, loudness, packet loss, mobile NAT/TURN
+or OPPO A31 success is claimed. Rooms/tokens are in memory and do not survive server restart.

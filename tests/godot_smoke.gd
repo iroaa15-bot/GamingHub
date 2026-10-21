@@ -68,6 +68,7 @@ func _check_arcade_modes() -> void:
   failures.append("Blitz did not create 5+ rounds and an active clock")
  else:
   hub.finish_round(true, hub.correct_answer_text(hub.round_bank[0]))
+  await create_timer(0.33).timeout
   if hub.blitz_total_bonus <= 0:
    failures.append("Blitz win did not earn a time-based score bonus")
  hub.match_style = "treasure"
@@ -77,21 +78,60 @@ func _check_arcade_modes() -> void:
  else:
   for index in range(4):
    hub.finish_round(true, hub.correct_answer_text(hub.round_bank[hub.question_index]))
+   await create_timer(0.33).timeout
    hub.next_round()
   if hub.treasure_keys != 4 or hub.question_index != 4:
    failures.append("Treasure chest was not reached with four earned keys")
   else:
    hub.claim_treasure("double")
+   await create_timer(0.33).timeout
    if hub.treasure_keys != 2 or hub.treasure_doubles != 1 or hub.treasure_claims != 1:
     failures.append("Treasure claim incorrectly charged keys or applied reward")
    else:
     hub.finish_round(true, hub.correct_answer_text(hub.round_bank[hub.question_index]))
+    await create_timer(0.33).timeout
     if not hub.treasure_doubled_this_round or hub.treasure_doubles != 0:
      failures.append("Treasure double-points boost was not consumed on correct answer")
  hub.queue_free()
  await process_frame
 
+func _check_gameplay_navigation() -> void:
+ var scene := load("res://scenes/Main.tscn") as PackedScene
+ if scene == null:
+  failures.append("Gameplay navigation: main scene missing")
+  return
+ var hub = scene.instantiate()
+ root.add_child(hub)
+ await process_frame
+ hub.start_guess_offline()
+ await process_frame
+ if hub.game != 0 or not is_instance_valid(hub.root):
+  failures.append("Gameplay navigation: Play vs Computer failed")
+ elif not hub.root.is_visible_in_tree() or hub.root.modulate.a < 0.95 or hub.root.get_child_count() < 3:
+  failures.append("Gameplay navigation: computer screen blank or transparent")
+ else:
+  print("NAV_OFFLINE_VISIBLE")
+ hub.queue_free()
+ await process_frame
+ var online := load("res://scenes/Multiplayer.tscn") as PackedScene
+ if online == null:
+  failures.append("Gameplay navigation: friend scene missing")
+  return
+ var client = online.instantiate()
+ root.add_child(client)
+ await process_frame
+ await process_frame
+ if not is_instance_valid(client) or not is_instance_valid(client.output):
+  failures.append("Gameplay navigation: Play with Friend failed to initialize")
+ elif not client.output.is_visible_in_tree() or client.output.modulate.a < 0.95 or client.output.get_child_count() < 3:
+  failures.append("Gameplay navigation: friend screen blank or transparent")
+ else:
+  print("NAV_FRIEND_VISIBLE")
+ client.queue_free()
+ await process_frame
+
 func _run() -> void:
+ await _check_gameplay_navigation()
  await _check_scene("res://scenes/Main.tscn")
  await _check_scene("res://scenes/Multiplayer.tscn")
  await _check_offline_picture_round()

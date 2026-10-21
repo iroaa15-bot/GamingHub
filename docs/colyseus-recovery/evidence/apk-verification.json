@@ -1,0 +1,20 @@
+{
+  "status": "STAGING_APK_VERIFIED",
+  "application_id": "com.iroaa15.gaminghub.colyseustest",
+  "label": "Gaming Hub Colyseus Test",
+  "staging_url": "wss://gaminghub-voice-staging.onrender.com",
+  "min_sdk": 24,
+  "target_sdk": 36,
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a"
+  ],
+  "native_voice_protocol": 2,
+  "voice_engine": "libwebrtc-144.7559.15",
+  "native_source_sha256": "7e5fb73787e7752ddb24fd15ab01a4cd2ea47606e1774ec8ca27429ead40ebf4",
+  "apk_size_bytes": 111971408,
+  "apk_sha256": "df7a8652b8070bcc7e13cc5ed28192399ddc51e03c83953072667208569961d2",
+  "signature_verified": true,
+  "compressed_native_libraries": true,
+  "real_device_audio_tested": false
+}

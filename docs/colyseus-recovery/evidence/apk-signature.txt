@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=GamingHub Colyseus Debug
+Signer #1 certificate SHA-256 digest: b81cc4969eb8d59541426675abe693e39915cd139d3a09a91bb3ec1172b160fe
+Signer #1 certificate SHA-1 digest: 831d952e3db6a6794a45800a4e55611bb3d03f85
+Signer #1 certificate MD5 digest: 30abf99cbf4dc19cbe4a4f919a5cea6c
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: a93d930e67ada16bf4d9c4e062953df73ddbd9df1a53be8acbe73a1d43cc66b7
+Signer #1 public key SHA-1 digest: daa92f4699f4676b1af9a993507f713996d9dc69
+Signer #1 public key MD5 digest: d8e4859c5bf5ef3284f2d344a5db27f8

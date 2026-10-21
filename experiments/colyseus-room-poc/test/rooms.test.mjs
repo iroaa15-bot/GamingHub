@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { Client } from "@colyseus/sdk";
+import { Client } from "colyseus.js";
 import { startServer, validInviteCode } from "../server.mjs";
 
 test("invite code validator rejects incorrect and short codes", () => {
@@ -28,7 +28,7 @@ test("two players join; wrong invite code is rejected; ping works", async () => 
     assert.equal((await pong).nonce, "test");
   } finally {
     await Promise.allSettled([room1?.leave(), room2?.leave()]);
-    await gameServer.gracefullyShutdown();
+    await gameServer.gracefullyShutdown(false);
   }
 });
 
@@ -55,6 +55,6 @@ test("real server rejects seventh player and admits replacement after leave", as
     assert.equal(replacement.roomId, first.roomId);
   } finally {
     await Promise.allSettled(joined.map(room => room.leave()));
-    await gameServer.gracefullyShutdown();
+    await gameServer.gracefullyShutdown(false);
   }
 });

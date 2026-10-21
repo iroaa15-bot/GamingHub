@@ -1,0 +1,1 @@
+STAGING_SMOKE_PASS: ping, room, join, consent, bidirectional PCM, duplicate rejection and revocation protocol=2

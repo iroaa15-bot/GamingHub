@@ -13,7 +13,8 @@ const fakeRoom = `class Room {
   }
 }`;
 const rewritten = source
-  .replace('import { Server, Room } from "colyseus";', fakeRoom + "\nconst Server = class {};")
+  .replace('import { Server, Room } from "@colyseus/core";', fakeRoom + "\nconst Server = class {};")
+  .replace('import { WebSocketTransport } from "@colyseus/ws-transport";', "")
   .replace('import { createServer } from "node:http";', "const createServer = () => ({});")
   .replace('import { fileURLToPath } from "node:url";', 'const fileURLToPath = () => "not-entry";')
   .replaceAll('from "./invite-code.mjs"', `from "${new URL("../invite-code.mjs", import.meta.url).href}"`)

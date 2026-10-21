@@ -1,0 +1,97 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> gaminghub-colyseus-room-poc@0.1.0 test
+> node --test test/*.test.mjs
+
+✔ correct invite accepted (0.823582ms)
+✔ incorrect invite rejected (0.150297ms)
+✔ short invite rejected (0.126611ms)
+✔ missing invite rejected (0.191739ms)
+✔ unicode invite supported (0.223777ms)
+✔ reconnect within 90 seconds reclaims reserved slot (1.196854ms)
+✔ reservation blocks a seventh player (0.332421ms)
+✔ reservation expires after 90 seconds (0.364709ms)
+✔ explicit leave releases slot immediately (0.211579ms)
+✔ invalid and duplicate sessions do not consume slots (0.201864ms)
+❌ reconnection token invalid or expired. Did you miss .allowReconnection()?
+👉 https://docs.colyseus.io/server/room/#allowreconnection-client-seconds
+✔ unexpected socket loss restores the same session within 90 seconds (139.495037ms)
+✔ invalid invitation denied in room hook (1.762797ms)
+✔ six players accepted, seventh denied, explicit leave frees slot (0.456098ms)
+✔ ping message triggers pong (0.908038ms)
+✔ unexpected disconnect reserves seat until Colyseus rejects reconnect (0.307063ms)
+✔ expired reconnect releases seat (0.321394ms)
+✔ reject unauthorized and malformed sessions (0.805193ms)
+✔ allow six players, reject seventh (0.15947ms)
+✔ allow replacement after player leaves (0.138899ms)
+✔ duplicate active session cannot join again (0.241925ms)
+✔ invite code validator rejects incorrect and short codes (1.014729ms)
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js - onError => (4215) onAuth failed
+Room connection was closed unexpectedly (4002): 
+colyseus.js - onError => (4002) 
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+✔ two players join; wrong invite code is rejected; ping works (94.865127ms)
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_joined'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+colyseus.js: onMessage() not registered for type 'member_left'.
+✔ real server rejects seventh player and admits replacement after leave (36.104963ms)
+✔ invite code rejects prefix and trailing whitespace (0.718332ms)
+✔ invalid member collections fail closed (0.230757ms)
+✔ denied join does not mutate members (0.138929ms)
+✔ reconnect at exact deadline is expired (0.226752ms)
+✔ unknown disconnect cannot reserve a slot (0.306402ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1311.297785

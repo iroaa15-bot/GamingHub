@@ -1,4 +1,5 @@
-import { Server, Room } from "colyseus";
+import { Server, Room } from "@colyseus/core";
+import { WebSocketTransport } from "@colyseus/ws-transport";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { validInviteCode } from "./invite-code.mjs";
@@ -55,10 +56,10 @@ export class PartyRoom extends Room {
 
 export async function startServer(port = 2567) {
   const httpServer = createServer();
-  const gameServer = new Server({ server: httpServer });
+  const gameServer = new Server({ transport: new WebSocketTransport({ server: httpServer }), greet: false, gracefullyShutdown: false });
   gameServer.define("party_poc", PartyRoom);
   await gameServer.listen(port, "127.0.0.1");
-  return { gameServer, httpServer, port };
+  return { gameServer, httpServer, port: httpServer.address().port };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {

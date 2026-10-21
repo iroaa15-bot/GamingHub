@@ -1,0 +1,74 @@
+
+$ python tests/project_preflight.py
+Preflight: 9 scripts, 6 JSON files
+PASS: static source checks (Godot runtime still untested)
+
+$ python -m unittest discover -s tests -p test_*.py
+...............F.........................................................................................................................................E.....F..................................
+======================================================================
+ERROR: setUpClass (test_source_archive_v92.SourceArchiveV92)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/4b73d9626291/GamingHub/tests/test_source_archive_v92.py", line 23, in setUpClass
+    cls.count, cls.size = build(cls.first, ROOT)
+                          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/release/source_archive.py", line 27, in build
+    entries = _entries(root)
+              ^^^^^^^^^^^^^^
+  File "/workspace/scratch/4b73d9626291/GamingHub/release/source_archive.py", line 20, in _entries
+    raise ValueError('Invalid source manifest: ' + '; '.join(errors[:5]))
+ValueError: Invalid source manifest: Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log
+
+======================================================================
+FAIL: test_full_project_inventory_passes (test_android_ci_v90.ReleaseGateV90.test_full_project_inventory_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/4b73d9626291/GamingHub/tests/test_android_ci_v90.py", line 17, in test_full_project_inventory_passes
+    self.assertEqual([],upload.verify(ROOT))
+AssertionError: Lists differ: [] != ['Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log'
+
+- []
++ ['Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log']
+
+======================================================================
+FAIL: test_project_manifest_matches (test_source_sync_v91.SourceSyncV91.test_project_manifest_matches)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/4b73d9626291/GamingHub/tests/test_source_sync_v91.py", line 15, in test_project_manifest_matches
+    self.assertEqual([],manifest.verify(ROOT))
+AssertionError: Lists differ: [] != ['Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log'
+
+- []
++ ['Untracked source file: docs/colyseus-recovery/evidence/baseline-python.log']
+
+----------------------------------------------------------------------
+Ran 193 tests in 0.731s
+
+FAILED (failures=2, errors=1)
+PASS: static state-machine safety checks (not a device/SDK test)
+
+$ python -m unittest discover -s server -p test_*.py
+......................................................................
+----------------------------------------------------------------------
+Ran 70 tests in 1.610s
+
+OK
+
+$ python -m unittest discover -s ai_daily -p test_*.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.332s
+
+OK
+
+RESULT: FAIL
+Failed:
+python -m unittest discover -s tests -p test_*.py

@@ -1,0 +1,507 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+Unable to open Android 'build-tools' directory.
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (137 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   1% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   2% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   3% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   4% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   5% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   6% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   7% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   8% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[   9% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  10% ] [90m[1mupdate_scripts_classes[22m | AdapterResponseInfo[39m[0m
+[  11% ] [90m[1mupdate_scripts_classes[22m | AdapterStatus[39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | AdChoicesPlacement[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | AdError[39m[0m
+[  13% ] [90m[1mupdate_scripts_classes[22m | AdPosition[39m[0m
+[  14% ] [90m[1mupdate_scripts_classes[22m | AdRequest[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | AdSize[39m[0m
+[  15% ] [90m[1mupdate_scripts_classes[22m | AdValue[39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | AdVideoController[39m[0m
+[  17% ] [90m[1mupdate_scripts_classes[22m | LoadAdError[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | MediaContent[39m[0m
+[  18% ] [90m[1mupdate_scripts_classes[22m | NativeAdOptions[39m[0m
+[  19% ] [90m[1mupdate_scripts_classes[22m | NativeMediaAspectRatio[39m[0m
+[  20% ] [90m[1mupdate_scripts_classes[22m | NativeTemplateFontStyle[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | NativeTemplateStyle[39m[0m
+[  21% ] [90m[1mupdate_scripts_classes[22m | NativeTemplateTextStyle[39m[0m
+[  22% ] [90m[1mupdate_scripts_classes[22m | RequestConfiguration[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | ResponseInfo[39m[0m
+[  23% ] [90m[1mupdate_scripts_classes[22m | RewardedItem[39m[0m
+[  24% ] [90m[1mupdate_scripts_classes[22m | ServerSideVerificationOptions[39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | AdVideoOptions[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | AdInspectorClosedListener[39m[0m
+[  26% ] [90m[1mupdate_scripts_classes[22m | AdListener[39m[0m
+[  27% ] [90m[1mupdate_scripts_classes[22m | AppOpenAdLoadCallback[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | FullScreenContentCallback[39m[0m
+[  28% ] [90m[1mupdate_scripts_classes[22m | InterstitialAdLoadCallback[39m[0m
+[  29% ] [90m[1mupdate_scripts_classes[22m | OnInitializationCompleteListener[39m[0m
+[  30% ] [90m[1mupdate_scripts_classes[22m | OnUserEarnedRewardListener[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | RewardedAdLoadCallback[39m[0m
+[  31% ] [90m[1mupdate_scripts_classes[22m | RewardedInterstitialAdLoadCallback[39m[0m
+[  32% ] [90m[1mupdate_scripts_classes[22m | VideoLifecycleCallbacks[39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | AdView[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | AppOpenAd[39m[0m
+[  34% ] [90m[1mupdate_scripts_classes[22m | AppOpenAdLoader[39m[0m
+[  35% ] [90m[1mupdate_scripts_classes[22m | InitializationStatus[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | InterstitialAd[39m[0m
+[  36% ] [90m[1mupdate_scripts_classes[22m | InterstitialAdLoader[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | MobileAds[39m[0m
+[  38% ] [90m[1mupdate_scripts_classes[22m | NativeOverlayAd[39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | RewardedAd[39m[0m
+[  39% ] [90m[1mupdate_scripts_classes[22m | RewardedAdLoader[39m[0m
+[  40% ] [90m[1mupdate_scripts_classes[22m | RewardedInterstitialAd[39m[0m
+[  41% ] [90m[1mupdate_scripts_classes[22m | RewardedInterstitialAdLoader[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | MobileSingletonPlugin[39m[0m
+[  42% ] [90m[1mupdate_scripts_classes[22m | AppLovin[39m[0m
+[  43% ] [90m[1mupdate_scripts_classes[22m | BidMachine[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | Chartboost[39m[0m
+[  44% ] [90m[1mupdate_scripts_classes[22m | DTExchange[39m[0m
+[  45% ] [90m[1mupdate_scripts_classes[22m | IMobile[39m[0m
+[  46% ] [90m[1mupdate_scripts_classes[22m | InMobi[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | IronSource[39m[0m
+[  47% ] [90m[1mupdate_scripts_classes[22m | LineAds[39m[0m
+[  48% ] [90m[1mupdate_scripts_classes[22m | LineMediationExtras[39m[0m
+[  49% ] [90m[1mupdate_scripts_classes[22m | FBAdSettings[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | UnityAds[39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | Vungle[39m[0m
+[  51% ] [90m[1mupdate_scripts_classes[22m | VungleInterstitialMediationExtras[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | VungleMediationExtras[39m[0m
+[  52% ] [90m[1mupdate_scripts_classes[22m | VungleRewardedMediationExtras[39m[0m
+[  53% ] [90m[1mupdate_scripts_classes[22m | MediationExtras[39m[0m
+[  54% ] [90m[1mupdate_scripts_classes[22m | ConsentForm[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | ConsentInformation[39m[0m
+[  55% ] [90m[1mupdate_scripts_classes[22m | UserMessagingPlatform[39m[0m
+[  56% ] [90m[1mupdate_scripts_classes[22m | ConsentDebugSettings[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | ConsentRequestParameters[39m[0m
+[  57% ] [90m[1mupdate_scripts_classes[22m | DebugGeography[39m[0m
+[  58% ] [90m[1mupdate_scripts_classes[22m | FormError[39m[0m
+[  59% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  60% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  61% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  63% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  64% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  65% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  67% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  68% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  69% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  70% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  71% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  72% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  73% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  74% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  76% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  77% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  78% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  79% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  80% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  81% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  82% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  83% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  84% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  85% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  86% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  87% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  88% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  89% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  90% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  91% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  92% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  93% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  94% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  95% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  96% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  97% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  98% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (113 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Ko-fi_Logo_RGB_ColorBg.png[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Patreon_logo_with_wordmark.svg[39m[0m
+[   1% ] [90m[1m_update_scan_actions[22m | PayPal.svg[39m[0m
+[   2% ] [90m[1m_update_scan_actions[22m | NotoSansSC-Regular.otf[39m[0m
+[   3% ] [90m[1m_update_scan_actions[22m | android.png[39m[0m
+[   4% ] [90m[1m_update_scan_actions[22m | arrow_left.svg[39m[0m
+[   5% ] [90m[1m_update_scan_actions[22m | arrow_right.svg[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | flood_it_icon.svg[39m[0m
+[   7% ] [90m[1m_update_scan_actions[22m | format-app-open.svg[39m[0m
+[   7% ] [90m[1m_update_scan_actions[22m | format-banner.svg[39m[0m
+[   8% ] [90m[1m_update_scan_actions[22m | format-interstitial.svg[39m[0m
+[   9% ] [90m[1m_update_scan_actions[22m | format-native.svg[39m[0m
+[  10% ] [90m[1m_update_scan_actions[22m | format-rewarded-interstitial.svg[39m[0m
+[  11% ] [90m[1m_update_scan_actions[22m | google_play_icon.svg[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | icon-15.png[39m[0m
+[  13% ] [90m[1m_update_scan_actions[22m | icon-76.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | icon-120.png[39m[0m
+[  14% ] [90m[1m_update_scan_actions[22m | icon-500.png[39m[0m
+[  15% ] [90m[1m_update_scan_actions[22m | icon-1024.png[39m[0m
+[  16% ] [90m[1m_update_scan_actions[22m | ios.png[39m[0m
+[  17% ] [90m[1m_update_scan_actions[22m | music.ogg[39m[0m
+[  18% ] [90m[1m_update_scan_actions[22m | poing.jpeg[39m[0m
+[  19% ] [90m[1m_update_scan_actions[22m | pos_bottom.svg[39m[0m
+[  20% ] [90m[1m_update_scan_actions[22m | pos_bottom_left.svg[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | pos_bottom_right.svg[39m[0m
+[  21% ] [90m[1m_update_scan_actions[22m | pos_center.svg[39m[0m
+[  22% ] [90m[1m_update_scan_actions[22m | pos_left.svg[39m[0m
+[  23% ] [90m[1m_update_scan_actions[22m | pos_right.svg[39m[0m
+[  24% ] [90m[1m_update_scan_actions[22m | pos_top.svg[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | pos_top_left.svg[39m[0m
+[  26% ] [90m[1m_update_scan_actions[22m | pos_top_right.svg[39m[0m
+[  27% ] [90m[1m_update_scan_actions[22m | admob_sample.csv[39m[0m
+[  28% ] [90m[1m_update_scan_actions[22m | bell.wav[39m[0m
+[  28% ] [90m[1m_update_scan_actions[22m | clock.wav[39m[0m
+[  29% ] [90m[1m_update_scan_actions[22m | drum.wav[39m[0m
+[  30% ] [90m[1m_update_scan_actions[22m | feedback_celebrate.wav[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | feedback_retry.wav[39m[0m
+[  32% ] [90m[1m_update_scan_actions[22m | feedback_success.wav[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | heartbeat.wav[39m[0m
+[  34% ] [90m[1m_update_scan_actions[22m | pitch_0.wav[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | pitch_1.wav[39m[0m
+[  35% ] [90m[1m_update_scan_actions[22m | pitch_2.wav[39m[0m
+[  36% ] [90m[1m_update_scan_actions[22m | pitch_3.wav[39m[0m
+[  37% ] [90m[1m_update_scan_actions[22m | pulses_2.wav[39m[0m
+[  38% ] [90m[1m_update_scan_actions[22m | pulses_3.wav[39m[0m
+[  39% ] [90m[1m_update_scan_actions[22m | pulses_4.wav[39m[0m
+[  40% ] [90m[1m_update_scan_actions[22m | pulses_5.wav[39m[0m
+[  41% ] [90m[1m_update_scan_actions[22m | rain.wav[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | siren.wav[39m[0m
+[  42% ] [90m[1m_update_scan_actions[22m | telephone.wav[39m[0m
+[  43% ] [90m[1m_update_scan_actions[22m | tempo_0.wav[39m[0m
+[  44% ] [90m[1m_update_scan_actions[22m | tempo_1.wav[39m[0m
+[  45% ] [90m[1m_update_scan_actions[22m | tempo_2.wav[39m[0m
+[  46% ] [90m[1m_update_scan_actions[22m | tempo_3.wav[39m[0m
+[  47% ] [90m[1m_update_scan_actions[22m | ui_tap.wav[39m[0m
+[  48% ] [90m[1m_update_scan_actions[22m | wind.wav[39m[0m
+[  49% ] [90m[1m_update_scan_actions[22m | island_beach.webp[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | island_garden.webp[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | island_lighthouse.webp[39m[0m
+[  51% ] [90m[1m_update_scan_actions[22m | island_tower.webp[39m[0m
+[  52% ] [90m[1m_update_scan_actions[22m | island_workshop.webp[39m[0m
+[  53% ] [90m[1m_update_scan_actions[22m | apple.png[39m[0m
+[  54% ] [90m[1m_update_scan_actions[22m | burger.png[39m[0m
+[  55% ] [90m[1m_update_scan_actions[22m | elephant.png[39m[0m
+[  56% ] [90m[1m_update_scan_actions[22m | football.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | guitar.png[39m[0m
+[  57% ] [90m[1m_update_scan_actions[22m | lion.png[39m[0m
+[  58% ] [90m[1m_update_scan_actions[22m | panda.png[39m[0m
+[  59% ] [90m[1m_update_scan_actions[22m | pizza.png[39m[0m
+[  60% ] [90m[1m_update_scan_actions[22m | apple.webp[39m[0m
+[  61% ] [90m[1m_update_scan_actions[22m | banana.webp[39m[0m
+[  62% ] [90m[1m_update_scan_actions[22m | bicycle.webp[39m[0m
+[  63% ] [90m[1m_update_scan_actions[22m | burger.webp[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | cake.webp[39m[0m
+[  64% ] [90m[1m_update_scan_actions[22m | camera.webp[39m[0m
+[  65% ] [90m[1m_update_scan_actions[22m | dolphin.webp[39m[0m
+[  66% ] [90m[1m_update_scan_actions[22m | eiffel.webp[39m[0m
+[  67% ] [90m[1m_update_scan_actions[22m | elephant.webp[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | football.webp[39m[0m
+[  69% ] [90m[1m_update_scan_actions[22m | giraffe.webp[39m[0m
+[  70% ] [90m[1m_update_scan_actions[22m | guitar.webp[39m[0m
+[  71% ] [90m[1m_update_scan_actions[22m | laptop.webp[39m[0m
+[  71% ] [90m[1m_update_scan_actions[22m | lighthouse.webp[39m[0m
+[  72% ] [90m[1m_update_scan_actions[22m | lion.webp[39m[0m
+[  73% ] [90m[1m_update_scan_actions[22m | panda.webp[39m[0m
+[  74% ] [90m[1m_update_scan_actions[22m | penguin.webp[39m[0m
+[  75% ] [90m[1m_update_scan_actions[22m | pizza.webp[39m[0m
+[  76% ] [90m[1m_update_scan_actions[22m | pyramids.webp[39m[0m
+[  77% ] [90m[1m_update_scan_actions[22m | saturn_art.webp[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | strawberry.webp[39m[0m
+[  78% ] [90m[1m_update_scan_actions[22m | sushi.webp[39m[0m
+[  79% ] [90m[1m_update_scan_actions[22m | taj_mahal.webp[39m[0m
+[  80% ] [90m[1m_update_scan_actions[22m | tiger.webp[39m[0m
+[  81% ] [90m[1m_update_scan_actions[22m | violin.webp[39m[0m
+[  82% ] [90m[1m_update_scan_actions[22m | game_0.svg[39m[0m
+[  83% ] [90m[1m_update_scan_actions[22m | game_1.svg[39m[0m
+[  84% ] [90m[1m_update_scan_actions[22m | game_2.svg[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | game_3.svg[39m[0m
+[  85% ] [90m[1m_update_scan_actions[22m | game_4.svg[39m[0m
+[  86% ] [90m[1m_update_scan_actions[22m | game_5.svg[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | game_6.svg[39m[0m
+[  88% ] [90m[1m_update_scan_actions[22m | game_7.svg[39m[0m
+[  89% ] [90m[1m_update_scan_actions[22m | game_8.svg[39m[0m
+[  90% ] [90m[1m_update_scan_actions[22m | game_9.svg[39m[0m
+[  91% ] [90m[1m_update_scan_actions[22m | gaming_hub_brand.png[39m[0m
+[  92% ] [90m[1m_update_scan_actions[22m | gaming_hub_icon.png[39m[0m
+[  92% ] [90m[1m_update_scan_actions[22m | world_0.webp[39m[0m
+[  93% ] [90m[1m_update_scan_actions[22m | world_1.webp[39m[0m
+[  94% ] [90m[1m_update_scan_actions[22m | world_2.webp[39m[0m
+[  95% ] [90m[1m_update_scan_actions[22m | world_3.webp[39m[0m
+[  96% ] [90m[1m_update_scan_actions[22m | world_4.webp[39m[0m
+[  97% ] [90m[1m_update_scan_actions[22m | io-black.png[39m[0m
+[  98% ] [90m[1m_update_scan_actions[22m | io-white.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (113 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   1% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   2% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   3% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   4% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   5% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   6% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   7% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   7% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   8% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   9% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  10% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  11% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  12% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  13% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  14% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  15% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  16% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  17% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  18% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  19% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  20% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  21% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  22% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  23% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  24% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  25% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  26% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  27% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  28% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  28% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  29% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  30% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  31% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  32% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  33% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  34% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  35% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  36% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  37% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  38% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  39% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  40% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  41% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  42% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  43% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  44% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  45% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  46% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  47% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  48% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  49% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  50% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  51% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  52% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  53% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  54% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  55% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  56% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  57% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  58% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  59% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  60% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  61% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  62% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  63% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  64% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  65% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  66% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  67% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  68% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  69% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  70% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  71% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  71% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  72% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  73% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  74% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  75% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  76% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  77% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  78% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  79% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  80% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  81% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  82% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  83% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  84% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  85% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  86% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  87% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  88% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  89% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  90% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  91% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  92% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  92% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  93% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  94% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  95% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  96% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  97% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  98% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | admob_sample.csv[39m[0m
+[   0% ] [90m[1mreimport[22m | NotoSansSC-Regular.otf[39m[0m
+[   1% ] [90m[1mreimport[22m | music.ogg[39m[0m
+[   2% ] [90m[1mreimport[22m | admob_sample.csv[39m[0m
+[   3% ] [90m[1mreimport[22m | NotoSansSC-Regular.otf[39m[0m
+[   4% ] [90m[1mreimport[22m | music.ogg[39m[0m
+[   5% ] [90m[1mreimport[22m | panda.webp[39m[0m
+[   6% ] [90m[1mreimport[22m | lion.webp[39m[0m
+[   7% ] [90m[1mreimport[22m | lighthouse.webp[39m[0m
+[   7% ] [90m[1mreimport[22m | laptop.webp[39m[0m
+[   8% ] [90m[1mreimport[22m | guitar.webp[39m[0m
+[   9% ] [90m[1mreimport[22m | giraffe.webp[39m[0m
+[  10% ] [90m[1mreimport[22m | football.webp[39m[0m
+[  11% ] [90m[1mreimport[22m | elephant.webp[39m[0m
+[  12% ] [90m[1mreimport[22m | eiffel.webp[39m[0m
+[  13% ] [90m[1mreimport[22m | dolphin.webp[39m[0m
+[  14% ] [90m[1mreimport[22m | camera.webp[39m[0m
+[  14% ] [90m[1mreimport[22m | cake.webp[39m[0m
+[  15% ] [90m[1mreimport[22m | burger.webp[39m[0m
+[  16% ] [90m[1mreimport[22m | bicycle.webp[39m[0m
+[  17% ] [90m[1mreimport[22m | banana.webp[39m[0m
+[  18% ] [90m[1mreimport[22m | apple.webp[39m[0m
+[  19% ] [90m[1mreimport[22m | pizza.png[39m[0m
+[  20% ] [90m[1mreimport[22m | panda.png[39m[0m
+[  21% ] [90m[1mreimport[22m | lion.png[39m[0m
+[  21% ] [90m[1mreimport[22m | guitar.png[39m[0m
+[  22% ] [90m[1mreimport[22m | football.png[39m[0m
+[  23% ] [90m[1mreimport[22m | elephant.png[39m[0m
+[  24% ] [90m[1mreimport[22m | burger.png[39m[0m
+[  25% ] [90m[1mreimport[22m | apple.png[39m[0m
+[  26% ] [90m[1mreimport[22m | island_workshop.webp[39m[0m
+[  27% ] [90m[1mreimport[22m | island_tower.webp[39m[0m
+[  28% ] [90m[1mreimport[22m | island_lighthouse.webp[39m[0m
+[  28% ] [90m[1mreimport[22m | io-white.png[39m[0m
+[  29% ] [90m[1mreimport[22m | io-black.png[39m[0m
+[  30% ] [90m[1mreimport[22m | world_4.webp[39m[0m
+[  31% ] [90m[1mreimport[22m | world_3.webp[39m[0m
+[  32% ] [90m[1mreimport[22m | world_2.webp[39m[0m
+[  33% ] [90m[1mreimport[22m | world_1.webp[39m[0m
+[  34% ] [90m[1mreimport[22m | world_0.webp[39m[0m
+[  35% ] [90m[1mreimport[22m | gaming_hub_icon.png[39m[0m
+[  35% ] [90m[1mreimport[22m | gaming_hub_brand.png[39m[0m
+[  36% ] [90m[1mreimport[22m | game_9.svg[39m[0m
+[  37% ] [90m[1mreimport[22m | game_8.svg[39m[0m
+[  38% ] [90m[1mreimport[22m | game_7.svg[39m[0m
+[  39% ] [90m[1mreimport[22m | game_6.svg[39m[0m
+[  40% ] [90m[1mreimport[22m | game_5.svg[39m[0m
+[  41% ] [90m[1mreimport[22m | game_4.svg[39m[0m
+[  42% ] [90m[1mreimport[22m | game_3.svg[39m[0m
+[  42% ] [90m[1mreimport[22m | game_2.svg[39m[0m
+[  43% ] [90m[1mreimport[22m | game_1.svg[39m[0m
+[  44% ] [90m[1mreimport[22m | game_0.svg[39m[0m
+[  45% ] [90m[1mreimport[22m | violin.webp[39m[0m
+[  46% ] [90m[1mreimport[22m | tiger.webp[39m[0m
+[  47% ] [90m[1mreimport[22m | taj_mahal.webp[39m[0m
+[  48% ] [90m[1mreimport[22m | sushi.webp[39m[0m
+[  49% ] [90m[1mreimport[22m | strawberry.webp[39m[0m
+[  50% ] [90m[1mreimport[22m | saturn_art.webp[39m[0m
+[  50% ] [90m[1mreimport[22m | pyramids.webp[39m[0m
+[  51% ] [90m[1mreimport[22m | pizza.webp[39m[0m
+[  52% ] [90m[1mreimport[22m | penguin.webp[39m[0m
+[  53% ] [90m[1mreimport[22m | pos_top.svg[39m[0m
+[  54% ] [90m[1mreimport[22m | pos_right.svg[39m[0m
+[  55% ] [90m[1mreimport[22m | pos_left.svg[39m[0m
+[  56% ] [90m[1mreimport[22m | pos_center.svg[39m[0m
+[  57% ] [90m[1mreimport[22m | pos_bottom_right.svg[39m[0m
+[  57% ] [90m[1mreimport[22m | pos_bottom_left.svg[39m[0m
+[  58% ] [90m[1mreimport[22m | pos_bottom.svg[39m[0m
+[  59% ] [90m[1mreimport[22m | poing.jpeg[39m[0m
+[  60% ] [90m[1mreimport[22m | ios.png[39m[0m
+[  61% ] [90m[1mreimport[22m | icon-1024.png[39m[0m
+[  62% ] [90m[1mreimport[22m | icon-500.png[39m[0m
+[  63% ] [90m[1mreimport[22m | icon-120.png[39m[0m
+[  64% ] [90m[1mreimport[22m | icon-76.png[39m[0m
+[  64% ] [90m[1mreimport[22m | icon-15.png[39m[0m
+[  65% ] [90m[1mreimport[22m | google_play_icon.svg[39m[0m
+[  66% ] [90m[1mreimport[22m | format-rewarded-interstitial.svg[39m[0m
+[  67% ] [90m[1mreimport[22m | format-native.svg[39m[0m
+[  68% ] [90m[1mreimport[22m | format-interstitial.svg[39m[0m
+[  69% ] [90m[1mreimport[22m | format-banner.svg[39m[0m
+[  70% ] [90m[1mreimport[22m | format-app-open.svg[39m[0m
+[  71% ] [90m[1mreimport[22m | flood_it_icon.svg[39m[0m
+[  71% ] [90m[1mreimport[22m | arrow_right.svg[39m[0m
+[  72% ] [90m[1mreimport[22m | arrow_left.svg[39m[0m
+[  73% ] [90m[1mreimport[22m | android.png[39m[0m
+[  74% ] [90m[1mreimport[22m | PayPal.svg[39m[0m
+[  75% ] [90m[1mreimport[22m | Patreon_logo_with_wordmark.svg[39m[0m
+[  76% ] [90m[1mreimport[22m | Ko-fi_Logo_RGB_ColorBg.png[39m[0m
+[  77% ] [90m[1mreimport[22m | island_garden.webp[39m[0m
+[  78% ] [90m[1mreimport[22m | admob_sample.csv[39m[0m
+[  78% ] [90m[1mreimport[22m | NotoSansSC-Regular.otf[39m[0m
+[  79% ] [90m[1mreimport[22m | music.ogg[39m[0m
+[  80% ] [90m[1mreimport[22m | panda.webp[39m[0m
+[  81% ] [90m[1mreimport[22m | lion.webp[39m[0m
+[  82% ] [90m[1mreimport[22m | lighthouse.webp[39m[0m
+[  83% ] [90m[1mreimport[22m | laptop.webp[39m[0m
+[  84% ] [90m[1mreimport[22m | guitar.webp[39m[0m
+[  85% ] [90m[1mreimport[22m | giraffe.webp[39m[0m
+[  85% ] [90m[1mreimport[22m | football.webp[39m[0m
+[  86% ] [90m[1mreimport[22m | elephant.webp[39m[0m
+[  87% ] [90m[1mreimport[22m | eiffel.webp[39m[0m
+[  88% ] [90m[1mreimport[22m | dolphin.webp[39m[0m
+[  89% ] [90m[1mreimport[22m | camera.webp[39m[0m
+[  90% ] [90m[1mreimport[22m | cake.webp[39m[0m
+[  91% ] [90m[1mreimport[22m | burger.webp[39m[0m
+[  92% ] [90m[1mreimport[22m | bicycle.webp[39m[0m
+[  92% ] [90m[1mreimport[22m | banana.webp[39m[0m
+[  93% ] [90m[1mreimport[22m | apple.webp[39m[0m
+[  94% ] [90m[1mreimport[22m | pizza.png[39m[0m
+[  95% ] [90m[1mreimport[22m | panda.png[39m[0m
+[  96% ] [90m[1mreimport[22m | lion.png[39m[0m
+[  97% ] [90m[1mreimport[22m | guitar.png[39m[0m
+[  98% ] [90m[1mreimport[22m | football.png[39m[0m
+[  99% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (113 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m

@@ -5,6 +5,22 @@ const VisualSkin = preload("res://scripts/visual_skin.gd")
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
 var socket := WebSocketPeer.new()
+var android_voice_bridge: Node = null
+var voice_local_enabled := false
+var voice_peer_enabled := false
+var voice_requested := false
+var voice_permission_pending := false
+var voice_request_id := 0
+var voice_epoch := -1
+var voice_sequence := 0
+var voice_desired := false
+var voice_foreground := true
+var voice_retry_after := 0
+var voice_ice_pending := false
+var voice_ice_ready := false
+var voice_signals: Array[Dictionary] = []
+var voice_button: Button
+var voice_label: Label
 var connected := false
 var room_code := ""
 var opponent_card := ""
@@ -86,6 +102,173 @@ const CANDIDATES_PER_PAGE: int = 6
 func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
 
+func _setup_native_voice() -> void:
+ if android_voice_bridge != null:
+  return
+ android_voice_bridge = load("res://scripts/android_voice_bridge.gd").new()
+ android_voice_bridge.outgoing_pcm.connect(_send_native_voice_pcm)
+ android_voice_bridge.outgoing_signal.connect(_send_native_voice_signal)
+ android_voice_bridge.permission_ready.connect(_on_voice_permission)
+ android_voice_bridge.voice_unavailable.connect(_on_voice_unavailable)
+ android_voice_bridge.status_changed.connect(_on_voice_status)
+ add_child(android_voice_bridge)
+
+func _voice_room_ready() -> bool:
+ return connected and not reconnecting and not opponent_paused and not finished and not leaving and player_index >= 0 and not room_code.is_empty()
+
+func _send_native_voice_signal(kind: String, payload: Dictionary) -> void:
+ if not (_voice_room_ready() and voice_local_enabled and voice_peer_enabled and voice_requested and voice_epoch >= 0):
+  return
+ var packet := payload.duplicate(true)
+ packet["epoch"] = voice_epoch
+ _send({"type":kind, "payload":packet})
+
+func _send_native_voice_pcm(pcm: String) -> void:
+ if not (_voice_room_ready() and voice_local_enabled and voice_peer_enabled and voice_requested and voice_epoch >= 0):
+  return
+ voice_sequence += 1
+ # Drop live audio under transport congestion; never enqueue seconds of old speech.
+ if socket.get_ready_state() == WebSocketPeer.STATE_OPEN and socket.get_current_outbound_buffered_amount() < 4096:
+  var err := socket.send_text(JSON.stringify({"type":"voice_audio", "pcm":pcm, "seq":voice_sequence, "epoch":voice_epoch}))
+  if err != OK:
+   _on_voice_unavailable("Voice transport interrupted")
+
+func set_voice_opt_in(enabled: bool) -> void:
+ _setup_native_voice()
+ voice_desired = enabled and android_voice_bridge.uses_webrtc()
+ var was_requested := voice_requested or voice_local_enabled
+ if enabled and not _voice_room_ready():
+  return
+ voice_requested = enabled
+ if not enabled:
+  voice_permission_pending = false
+  voice_local_enabled = false
+  android_voice_bridge.set_consent(false, voice_peer_enabled)
+  if was_requested and _voice_room_ready():
+   voice_request_id += 1
+   _send({"type":"voice_state", "enabled":false, "request_id":voice_request_id})
+  _update_voice_ui()
+  return
+ voice_permission_pending = true
+ _update_voice_ui()
+ android_voice_bridge.request_permission()
+
+func _on_voice_permission(granted: bool) -> void:
+ if not voice_permission_pending:
+  return
+ voice_permission_pending = false
+ if not voice_requested or not _voice_room_ready():
+  voice_requested = false
+ elif not granted:
+  _on_voice_unavailable("Microphone permission denied")
+  return
+ else:
+  voice_request_id += 1
+  _send({"type":"voice_state", "enabled":true, "request_id":voice_request_id})
+ _update_voice_ui()
+
+func _apply_voice_state(msg: Dictionary) -> void:
+ if not _voice_room_ready():
+  return
+ if int(msg.get("protocol", 0)) != 2:
+  _on_voice_unavailable("Voice server needs an update")
+  return
+ if str(msg.get("type", "")) == "voice_state_ack" and int(msg.get("request_id", voice_request_id)) != voice_request_id:
+  return
+ var epoch := int(msg.get("epoch", -1))
+ if epoch < voice_epoch:
+  return
+ if epoch != voice_epoch:
+  if android_voice_bridge != null:
+   android_voice_bridge.stop_voice()
+  voice_epoch = epoch
+  voice_sequence = 0
+  voice_ice_ready = false
+  voice_ice_pending = false
+  voice_signals.clear()
+ if bool(msg.get("reset", false)):
+  voice_requested = false
+ voice_local_enabled = voice_requested and bool(msg.get("local_enabled", msg.get("enabled", false)))
+ voice_peer_enabled = bool(msg.get("peer_enabled", false))
+ _refresh_native_voice()
+
+func _refresh_native_voice() -> void:
+ if android_voice_bridge != null:
+  var mutual: bool = voice_requested and voice_local_enabled and voice_peer_enabled and _voice_room_ready()
+  if mutual and android_voice_bridge.uses_webrtc() and not voice_ice_ready:
+   if not voice_ice_pending:
+    voice_ice_pending = true
+    _send({"type":"voice_ice_config"})
+   _update_voice_ui()
+   return
+  android_voice_bridge.set_consent(mutual, voice_peer_enabled)
+  if mutual and voice_ice_ready:
+   for pending in voice_signals:
+    android_voice_bridge.receive_signal(str(pending["type"]), pending["payload"])
+   voice_signals.clear()
+ _update_voice_ui()
+
+func _reset_voice_on_connection_loss(preserve_intent: bool = false) -> void:
+ if not preserve_intent:
+  voice_desired = false
+ voice_requested = false
+ voice_permission_pending = false
+ voice_peer_enabled = false
+ voice_local_enabled = false
+ voice_epoch = -1
+ voice_sequence = 0
+ voice_ice_ready = false
+ voice_ice_pending = false
+ voice_signals.clear()
+ _refresh_native_voice()
+
+func _on_voice_unavailable(reason: String) -> void:
+ var retry_voice: bool = voice_desired and reason in ["audio_focus_lost", "Audio interrupted; enable voice again"]
+ set_voice_opt_in(false)
+ voice_desired = retry_voice
+ voice_retry_after = Time.get_ticks_msec() + 3000
+ if is_instance_valid(voice_label):
+  voice_label.text = _t("الصوت متوقف: ", "Voice unavailable: ") + _voice_failure_text(reason)
+
+func _voice_failure_text(reason: String) -> String:
+ match reason:
+  "Microphone permission denied", "microphone_muted":
+   return _t("اسمح باستخدام الميكروفون وتأكد أنه غير مكتوم.", "Allow microphone access and check that it is not muted.")
+  "audio_focus_lost", "Audio interrupted; enable voice again", "audio_focus_denied":
+   return _t("توقف الصوت بسبب مقاطعة؛ يمكنك تفعيله مجددًا.", "Audio was interrupted; enable voice again.")
+  "Voice server needs an update":
+   return _t("خدمة الصوت تحتاج تحديثًا.", "The voice service needs an update.")
+  _:
+   return _t("تعذر تشغيل الصوت؛ جرّب تفعيله مجددًا.", "Could not start voice; try enabling it again.")
+
+func _on_voice_status(state: String, details: String) -> void:
+ _update_voice_ui()
+ if state == "active" and OS.is_debug_build():
+  # Capability data only; no PCM, tokens, or conversation contents are logged.
+  print("VOICE_CAPABILITIES ", details)
+
+func _update_voice_ui() -> void:
+ if not is_instance_valid(voice_button):
+  return
+ voice_button.disabled = not _voice_room_ready() or OS.get_name() != "Android" or (android_voice_bridge != null and not android_voice_bridge.is_available())
+ voice_button.text = _t("إيقاف المحادثة الصوتية", "Turn voice off") if voice_requested else _t("تفعيل المحادثة الصوتية", "Enable voice chat")
+ if android_voice_bridge != null and not android_voice_bridge.is_available():
+  voice_label.text = _t("الصوت غير متاح في هذه النسخة؛ استخدم نسخة Android المحدثة.", "Voice is unavailable in this version; use the updated Android app.")
+ elif not voice_requested:
+  voice_label.text = _t("الصوت اختياري؛ كل لاعب يفعله بنفسه.", "Voice is optional; each player enables it.")
+ elif voice_permission_pending:
+  voice_label.text = _t("اسمح باستخدام الميكروفون للمتابعة.", "Allow microphone access to continue.")
+ elif android_voice_bridge.active:
+  voice_label.text = _t("المحادثة الصوتية تعمل", "Voice chat active")
+ elif not voice_local_enabled:
+  voice_label.text = _t("جاري تأكيد الصوت مع السيرفر…", "Confirming voice with the server…")
+ else:
+  voice_label.text = _t("في انتظار تفعيل الطرف الآخر للصوت…", "Waiting for the other player to enable voice…")
+
+func _exit_tree() -> void:
+ _reset_voice_on_connection_loss()
+ socket.close()
+
 func _ready() -> void:
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
@@ -139,11 +322,32 @@ func _ready() -> void:
  var network_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/network_config.json"))
  if network_settings is Dictionary:
   server_url = str(network_settings.get("server_url", "")).strip_edges()
+ # Only an explicitly enabled local staging profile can override production.
+ # Exported release builds have no staging profile by default.
+ if FileAccess.file_exists("res://data/voice_staging.json"):
+  var staging_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/voice_staging.json"))
+  if staging_settings is Dictionary and staging_settings.get("enabled", false) == true:
+   var staging_url := str(staging_settings.get("server_url", "")).strip_edges()
+   if staging_url == "wss://gaminghub-voice-staging.onrender.com":
+    server_url = staging_url
  _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
  # The active match is placed ABOVE lobby actions for portrait phones.
  status = _label(_t("جاهز للاتصال", "Ready to connect"), 18)
  health_label = _label(_t("الشبكة: غير متصل", "Network: offline"), 14)
  health_label.add_theme_color_override("font_color", Color("a7b6d7"))
+ # Native audio is optional: never initialize WebRTC while merely opening the lobby.
+ # This keeps room navigation independent of voice plugin/device failures.
+ voice_button = Button.new()
+ voice_button.custom_minimum_size.y = 52
+ voice_button.pressed.connect(func(): set_voice_opt_in(not voice_requested))
+ _style_button(voice_button)
+ output.add_child(voice_button)
+ voice_label = _label("", 14)
+ _update_voice_ui()
+ # Local-only diagnostics for staging; never collect audio, room codes or resume tokens.
+ if OS.get_name() == "Android" and FileAccess.file_exists("res://data/voice_staging.json"):
+  _button(_t("تشخيص الصوت (نسخ التقرير)", "Voice diagnostics (copy report)"), _show_voice_diagnostics)
+
  match_view = VBoxContainer.new()
  match_view.add_theme_constant_override("separation", 10)
  output.add_child(match_view)
@@ -205,6 +409,47 @@ func _ready() -> void:
  _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
  _update_lobby()
 
+func _voice_diagnostics_text() -> String:
+ _setup_native_voice()
+ var plugin_found := Engine.has_singleton("GamingHubVoice")
+ var api_version := -1
+ var permission := "unknown"
+ if plugin_found:
+  var plugin := Engine.get_singleton("GamingHubVoice")
+  if plugin != null and plugin.has_method("getVoiceApiVersion"):
+   api_version = int(plugin.call("getVoiceApiVersion"))
+  if plugin != null and plugin.has_method("hasMicrophonePermission"):
+   permission = str(plugin.call("hasMicrophonePermission"))
+ var bridge_ready: bool = android_voice_bridge != null and bool(android_voice_bridge.is_available())
+ var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
+ return "\n".join(PackedStringArray([
+  "Gaming Hub Voice Diagnostics v1",
+  "os=" + OS.get_name(),
+  "os_version=" + OS.get_version(),
+  "app_debug=" + str(OS.is_debug_build()),
+  "native_singleton=" + str(plugin_found),
+  "native_api_version=" + str(api_version),
+  "bridge_available=" + str(bridge_ready),
+  "mic_permission=" + permission,
+  "endpoint=" + endpoint_kind,
+  "ws_state=" + str(socket.get_ready_state()),
+  "game_connected=" + str(connected),
+  "voice_active=" + str(android_voice_bridge.active if android_voice_bridge != null else false)
+ ]))
+
+func _show_voice_diagnostics() -> void:
+ var report := _voice_diagnostics_text()
+ var dialog := AcceptDialog.new()
+ dialog.title = _t("تشخيص المحادثة الصوتية", "Voice diagnostics")
+ dialog.dialog_text = report
+ dialog.ok_button_text = _t("إغلاق", "Close")
+ add_child(dialog)
+ dialog.popup_centered_ratio(0.92)
+ DisplayServer.clipboard_set(report)
+ # This report is copied locally; the app never sends diagnostics to a server.
+ dialog.confirmed.connect(dialog.queue_free)
+ dialog.canceled.connect(dialog.queue_free)
+
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
   if event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK:
@@ -229,6 +474,7 @@ func _request_exit_to_games() -> void:
  )
 
 func _exit_to_games() -> void:
+ _reset_voice_on_connection_loss()
  if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send({"type": "cancel_queue"})
   _send({"type": "leave"})
@@ -294,6 +540,7 @@ func _clear_match_view() -> void:
  deduction_status = null
 
 func _update_lobby() -> void:
+ _update_voice_ui()
  if not is_instance_valid(lobby_controls):
   return
  var active := not room_code.is_empty() or matchmaking_pending or not pending_action.is_empty() or lobby_request_pending or leaving
@@ -304,6 +551,7 @@ func _update_lobby() -> void:
  share_button.disabled = room_code.is_empty() or leaving
 
 func _reset_match_state() -> void:
+ _reset_voice_on_connection_loss()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -348,6 +596,7 @@ func _join_room() -> void:
  _request_action({"type":"join", "code":code})
 
 func _leave_match() -> void:
+ _reset_voice_on_connection_loss()
  if leaving:
   return
  if reconnecting:
@@ -435,13 +684,15 @@ func _connect_server() -> void:
  _update_lobby()
  connect_started_ms = Time.get_ticks_msec()
  socket = WebSocketPeer.new()
- var err := socket.connect_to_url(url)
+ server_url = url
+ var err := socket.connect_to_url(server_url)
  if err != OK:
   pending_action.clear()
   _update_lobby()
  status.text = _t("جاري الاتصال...", "Connecting...") if err == OK else _t("فشل بدء الاتصال: ", "Connection error: ") + str(err)
 
 func _start_reconnect() -> void:
+ _reset_voice_on_connection_loss(true)
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -463,7 +714,18 @@ func _start_reconnect() -> void:
  _refresh_actions()
  status.text = _t("انقطع الاتصال؛ جاري استكمال نفس المباراة...", "Connection lost; restoring your match...")
 
+func _notification(what: int) -> void:
+ if what == NOTIFICATION_APPLICATION_PAUSED:
+  voice_foreground = false
+  var restore: bool = voice_desired
+  set_voice_opt_in(false)
+  voice_desired = restore
+ elif what == NOTIFICATION_APPLICATION_RESUMED:
+  voice_foreground = true
+
 func _process(_delta: float) -> void:
+ if voice_desired and voice_foreground and not voice_requested and _voice_room_ready() and Time.get_ticks_msec() >= voice_retry_after:
+  set_voice_opt_in(true)
  socket.poll()
  var state := socket.get_ready_state()
  if reconnecting:
@@ -492,7 +754,7 @@ func _process(_delta: float) -> void:
    return
   if state == WebSocketPeer.STATE_CLOSED and reconnect_now >= reconnect_next_ms:
    socket = WebSocketPeer.new()
-   var err := socket.connect_to_url(address_input.text.strip_edges())
+   var err := socket.connect_to_url(server_url)
    connect_started_ms = reconnect_now if err == OK else 0
    reconnect_next_ms = reconnect_now + 2500
    return
@@ -620,15 +882,42 @@ func _send(message: Dictionary) -> void:
 
 func _handle(msg: Dictionary) -> void:
  var kind := str(msg.get("type", ""))
+ if kind == "voice_ice_config":
+  if voice_ice_pending and _voice_room_ready() and voice_requested:
+   voice_ice_pending = false
+   voice_ice_ready = true
+   android_voice_bridge.configure_webrtc(player_index == 0, msg.get("payload", {}))
+   _refresh_native_voice()
+  return
+ if kind in ["voice_offer", "voice_answer", "voice_ice"]:
+  var payload: Variant = msg.get("payload", {})
+  if payload is Dictionary and _voice_room_ready() and voice_requested and voice_local_enabled and voice_peer_enabled and int(payload.get("epoch", -1)) == voice_epoch:
+   if voice_ice_ready:
+    android_voice_bridge.receive_signal(kind, payload)
+   elif voice_signals.size() < 128:
+    voice_signals.append({"type":kind, "payload":payload})
+  return
+ if kind in ["voice_state_ack", "voice_state"]:
+  _apply_voice_state(msg)
+  return
+ if kind == "voice_audio":
+  if _voice_room_ready() and android_voice_bridge != null and voice_local_enabled and voice_peer_enabled and int(msg.get("epoch", -2)) == voice_epoch and int(msg.get("player", player_index)) != player_index:
+   android_voice_bridge.receive_pcm(str(msg.get("pcm", "")), int(msg.get("seq", -1)))
+  return
+ if kind == "error" and str(msg.get("scope", "")) == "voice":
+  _on_voice_unavailable(str(msg.get("message", "")))
+  return
  if leaving and kind not in ["left", "disconnected"]:
   # A create/matchmake request can race with leave; never resurrect its UI.
   return
- if kind in ["turn", "finished", "error", "left", "disconnected"]:
+ # A generic error can be unrelated to an in-flight move (e.g. voice).
+ # Do not discard a move awaiting authoritative sync because of that error.
+ if kind in ["turn", "finished", "left", "disconnected"]:
   action_in_flight = false
   move_started_ms = 0
   sync_pending = false
   sync_started_ms = 0
- if kind in ["room", "queue", "started", "error", "left", "disconnected"]:
+ if kind in ["room", "queue", "started", "left", "disconnected"]:
   lobby_request_pending = false
   lobby_request_started_ms = 0
  match kind:
@@ -639,15 +928,19 @@ func _handle(msg: Dictionary) -> void:
     if is_instance_valid(health_label):
      health_label.text = (_t("الشبكة: بطيئة • %d مللي ثانية", "Network: slow • %d ms") if latency_ms > 600 else _t("الشبكة: مستقرة • %d مللي ثانية", "Network: stable • %d ms")) % latency_ms
   "paused":
+   _reset_voice_on_connection_loss(true)
    opponent_paused = true
    status.text = _t("المنافس فقد الاتصال؛ المباراة متوقفة مؤقتًا في انتظار عودته.", "Opponent disconnected; match paused until they return.")
    _refresh_actions()
   "peer_resumed":
+   _reset_voice_on_connection_loss(true)
    opponent_paused = false
    my_turn = int(msg.get("turn", -1)) == player_index
    status.text = _t("المنافس رجع؛ المباراة مستمرة.", "Opponent reconnected; match resumed.")
    _refresh_actions()
   "resumed", "synced":
+   if kind == "resumed":
+    _reset_voice_on_connection_loss(true)
    # The authoritative snapshot replaces local state; do NOT replay a timed-out move.
    var replay: Array = msg.get("history", [])
    var started_message: Dictionary = msg.duplicate()
@@ -691,6 +984,11 @@ func _handle(msg: Dictionary) -> void:
    _update_lobby()
    status.text = _local("ROOM CODE: ") + room_code + " • " + _local(str(msg.get("status", "")))
   "started":
+   # Joiners and random matches receive the room in started, without a prior room message.
+   var assigned_room := str(msg.get("room", room_code))
+   if assigned_room != room_code:
+    _reset_voice_on_connection_loss()
+   room_code = assigned_room
    pending_action.clear()
    matchmaking_pending = false
    _clear_match_view()
@@ -759,6 +1057,7 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("تخمين: ", "Guess: ") + str(msg.get("guess", "")) + (" ✓" if msg.get("correct", false) else " ✗"), 16)
    _update_deduction_status()
   "finished":
+   _reset_voice_on_connection_loss()
    finished = true
    my_turn = false
    var names: Array[String] = []
@@ -775,7 +1074,8 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
    _refresh_actions()
   "error":
-   if reconnect_pending:
+   # Do not cancel unrelated gameplay operations on an uncorrelated error.
+   if reconnect_pending and str(msg.get("scope", "")) == "resume":
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.
      socket.close()
@@ -787,10 +1087,16 @@ func _handle(msg: Dictionary) -> void:
      return
     _abort_stalled_session(_t("السيرفر رفض استكمال المباراة. يمكنك بدء مباراة جديدة.", "Server rejected resume. Start a new match."))
     return
-   action_in_flight = false
-   _refresh_actions()
-   matchmaking_pending = false
-   _update_lobby()
+   # Generic server errors have no request ID. An error may belong to
+   # signaling while a gameplay move is still awaiting acknowledgement.
+   # Keep that move pending until authoritative sync resolves its outcome.
+   if lobby_request_pending:
+    lobby_request_pending = false
+    lobby_request_started_ms = 0
+    matchmaking_pending = false
+    _update_lobby()
+   if not action_in_flight:
+    _refresh_actions()
    status.text = _local(str(msg.get("message", "Server error")))
 
 var deduction_status: Label
@@ -967,6 +1273,7 @@ func _recommended_question_index() -> int:
  return best_index
 
 func _refresh_actions() -> void:
+ _update_voice_ui()
  for child in action_area.get_children():
   child.queue_free()
  if finished or not my_turn or action_in_flight or reconnecting or opponent_paused:

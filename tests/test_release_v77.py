@@ -32,7 +32,7 @@ class ReleaseV77(unittest.TestCase):
   source=(ROOT/'scripts/multiplayer.gd').read_text(encoding='utf-8')
   self.assertIn('action_in_flight',source)
   self.assertIn('action_type in ["ask", "guess"] and action_in_flight',source)
-  self.assertIn('kind in ["turn", "finished", "error", "left", "disconnected"]',source)
+  self.assertIn('kind in ["turn", "finished", "left", "disconnected"]',source)
 
  def test_ads_cannot_claim_rewards_without_native_sdk(self):
   config=json.loads((ROOT/'monetization/ad_config.json').read_text())

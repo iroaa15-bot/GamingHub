@@ -1,0 +1,5 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> gaminghub-colyseus-room-poc@0.1.0 check:syntax
+> node --check server.mjs && node --check invite-code.mjs && node --check room-policy.mjs && node --check reconnect-policy.mjs && node --check test/invite-code.test.mjs && node --check test/room-policy.test.mjs && node --check test/reconnect-policy.test.mjs && node --check test/rooms.test.mjs && node --check game-gateway.mjs && node --check android-lan-server.mjs && node --check test/game-gateway.integration.test.mjs && node --check test/reconnect.integration.test.mjs
+

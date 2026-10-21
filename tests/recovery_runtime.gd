@@ -24,7 +24,9 @@ func run() -> void:
  root.add_child(hub); current_scene = hub
  await frames()
  if not hub.has_method("show_home"): push_error("Main controller missing"); quit(1); return
- hub.age_group = "18plus"; hub.selected_language = "en"; hub.show_home()
+ # Reproduce a real adult user's persisted selection across scene reloads.
+ # Assigning age_group in memory alone makes the next Main scene show age setup.
+ hub._set_age_group("18plus"); hub.selected_language = "en"; hub.show_home()
  var offline: Button = find_button(hub, "PLAY VS COMPUTER")
  check(offline != null, "Computer button missing")
  if offline != null: offline.pressed.emit()

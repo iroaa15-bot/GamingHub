@@ -2,23 +2,47 @@ import { Server, Room } from "colyseus";
 import { createServer } from "node:http";
 import { fileURLToPath } from "node:url";
 import { validInviteCode } from "./invite-code.mjs";
+import { MAX_PLAYERS, canJoinRoom, registerMember, unregisterMember } from "./room-policy.mjs";
+
+export { validInviteCode } from "./invite-code.mjs";
 
 export class PartyRoom extends Room {
-  maxClients = 6;
+  maxClients = MAX_PLAYERS;
+  members = new Set();
+
   onCreate(options) {
-    if (typeof options.inviteCode !== "string" || options.inviteCode.length < 12) {
-      throw new Error("inviteCode must have at least 12 characters");
+    if (typeof options?.inviteCode !== "string" ||
+        Buffer.byteLength(options.inviteCode, "utf8") < 12) {
+      throw new Error("inviteCode must contain at least 12 UTF-8 bytes");
     }
     this.inviteCode = options.inviteCode;
     this.autoDispose = true;
-    this.onMessage("ping", (client, data) => client.send("pong", { nonce: data?.nonce ?? null }));
+    this.onMessage("ping", (client, data) =>
+      client.send("pong", { nonce: data?.nonce ?? null }));
   }
+
   onAuth(client, options) {
-    return validInviteCode(this.inviteCode, options?.inviteCode);
+    const inviteValid = validInviteCode(this.inviteCode, options?.inviteCode);
+    return canJoinRoom({
+      members: this.members,
+      sessionId: client.sessionId,
+      inviteValid,
+    });
   }
-  onJoin(client) { this.broadcast("member_joined", { sessionId: client.sessionId }); }
-  onLeave(client) { this.broadcast("member_left", { sessionId: client.sessionId }); }
+
+  onJoin(client) {
+    if (!registerMember(this.members, client.sessionId, true)) {
+      throw new Error("room capacity exceeded");
+    }
+    this.broadcast("member_joined", { sessionId: client.sessionId });
+  }
+
+  onLeave(client) {
+    unregisterMember(this.members, client.sessionId);
+    this.broadcast("member_left", { sessionId: client.sessionId });
+  }
 }
+
 export async function startServer(port = 2567) {
   const httpServer = createServer();
   const gameServer = new Server({ server: httpServer });
@@ -26,7 +50,8 @@ export async function startServer(port = 2567) {
   await gameServer.listen(port, "127.0.0.1");
   return { gameServer, httpServer, port };
 }
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  startServer(Number(process.env.PORT || 2567)).then(({port}) =>
+  startServer(Number(process.env.PORT || 2567)).then(({ port }) =>
     console.log(`POC server on 127.0.0.1:${port} (local only)`));
 }

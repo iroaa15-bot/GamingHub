@@ -31,3 +31,30 @@ test("two players join; wrong invite code is rejected; ping works", async () => 
     await gameServer.gracefullyShutdown();
   }
 });
+
+test("real server rejects seventh player and admits replacement after leave", async () => {
+  const port = 28000 + Math.floor(Math.random() * 1000);
+  const { gameServer } = await startServer(port);
+  const clients = Array.from({ length: 7 }, () => new Client(`ws://127.0.0.1:${port}`));
+  const joined = [];
+  try {
+    const first = await clients[0].create("party_poc", { inviteCode: "local-secret-1234" });
+    joined.push(first);
+    for (let i = 1; i < 6; i++) {
+      joined.push(await clients[i].joinById(first.roomId, { inviteCode: "local-secret-1234" }));
+    }
+    assert.equal(joined.length, 6);
+    await assert.rejects(
+      clients[6].joinById(first.roomId, { inviteCode: "local-secret-1234" }),
+      "a seventh player must not join a full room"
+    );
+    await joined[5].leave();
+    joined.pop();
+    const replacement = await clients[6].joinById(first.roomId, { inviteCode: "local-secret-1234" });
+    joined.push(replacement);
+    assert.equal(replacement.roomId, first.roomId);
+  } finally {
+    await Promise.allSettled(joined.map(room => room.leave()));
+    await gameServer.gracefullyShutdown();
+  }
+});

@@ -19,6 +19,7 @@ test("two players join; wrong invite code is rejected; ping works", async () => 
     room2 = await client.joinById(room1.roomId, { inviteCode: "local-secret-1234" });
     assert.equal(room1.roomId, room2.roomId);
     assert.notEqual(room1.sessionId, room2.sessionId);
+    assert.equal(room1.name, "party_poc");
     const pong = new Promise((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error("pong timeout")), 3000);
       room2.onMessage("pong", message => { clearTimeout(timeout); resolve(message); });

@@ -24,7 +24,7 @@ if [[ ! -f native/android-voice/gradlew ]]; then
   echo "Missing pinned Gradle wrapper." >&2
   exit 3
 fi
-OUT_DIR="${1:-$ROOT/voice-fix-output}"
+OUT_DIR="${1:-${TMPDIR:-/tmp}/gaminghub-voice-fix-output}"
 mkdir -p "$OUT_DIR"
 OUT_DIR="$(cd "$OUT_DIR" && pwd)"
 if [[ "$OUT_DIR" == "$ROOT" || "$OUT_DIR" == "$ROOT/"* ]]; then
@@ -52,12 +52,14 @@ fi
 "$GODOT_BIN" --headless --path "$STAGING/source" --export-debug "Android" "$APK"
 test -s "$APK" || { echo "APK not produced" >&2; exit 5; }
 echo "[6/6] Verify Android package identity and fingerprint"
-if command -v aapt >/dev/null; then
-  aapt dump badging "$APK" | grep -F "package: name='com.iroaa15.gaminghub.colyseustest'" >/dev/null ||
-    { echo "REFUSING: wrong Android package identity" >&2; exit 6; }
-else
-  echo "WARNING: aapt unavailable; APK package identity requires independent verification" >&2
+SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
+AAPT_BIN="$(find "$SDK_ROOT/build-tools" -maxdepth 2 -type f -name aapt 2>/dev/null | sort -V | tail -1)"
+if [[ -z "$AAPT_BIN" ]]; then
+  echo "REFUSING: Android build-tools aapt is required to verify package identity." >&2
+  exit 6
 fi
+"$AAPT_BIN" dump badging "$APK" | grep -F "package: name='com.iroaa15.gaminghub.colyseustest'" >/dev/null ||
+  { echo "REFUSING: wrong Android package identity" >&2; exit 6; }
 sha256sum "$APK" | tee "$OUT_DIR/GamingHub-Colyseus-Voice-Fix-Test.sha256"
 echo "BUILT: $APK"
 echo "Not device-tested. Reproduce both voice-button scenarios on actual Android hardware."

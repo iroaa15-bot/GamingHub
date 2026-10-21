@@ -410,31 +410,25 @@ func _ready() -> void:
  _update_lobby()
 
 func _voice_diagnostics_text() -> String:
- _setup_native_voice()
- var plugin_found := Engine.has_singleton("GamingHubVoice")
- var api_version := -1
- var permission := "unknown"
- if plugin_found:
-  var plugin := Engine.get_singleton("GamingHubVoice")
-  if plugin != null and plugin.has_method("getVoiceApiVersion"):
-   api_version = int(plugin.call("getVoiceApiVersion"))
-  if plugin != null and plugin.has_method("hasMicrophonePermission"):
-   permission = str(plugin.call("hasMicrophonePermission"))
- var bridge_ready: bool = android_voice_bridge != null and bool(android_voice_bridge.is_available())
+ # Crash-safe diagnostics: do not initialize or call Android/JNI/WebRTC.
+ # In particular, _setup_native_voice(), Engine.get_singleton() and
+ # is_available() may trigger the same native boundary being diagnosed.
+ var plugin_registered := Engine.has_singleton("GamingHubVoice")
+ var bridge_attached := android_voice_bridge != null
  var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
  return "\n".join(PackedStringArray([
-  "Gaming Hub Voice Diagnostics v1",
+  "Gaming Hub Voice Diagnostics v2 (safe mode)",
   "os=" + OS.get_name(),
   "os_version=" + OS.get_version(),
   "app_debug=" + str(OS.is_debug_build()),
-  "native_singleton=" + str(plugin_found),
-  "native_api_version=" + str(api_version),
-  "bridge_available=" + str(bridge_ready),
-  "mic_permission=" + permission,
+  "native_singleton_registered=" + str(plugin_registered),
+  "bridge_attached=" + str(bridge_attached),
+  "native_api_version=not_queried_safely",
+  "mic_permission=not_queried_safely",
   "endpoint=" + endpoint_kind,
   "ws_state=" + str(socket.get_ready_state()),
   "game_connected=" + str(connected),
-  "voice_active=" + str(android_voice_bridge.active if android_voice_bridge != null else false)
+  "voice_active_cached=" + str(android_voice_bridge.active if bridge_attached else false)
  ]))
 
 func _show_voice_diagnostics() -> void:

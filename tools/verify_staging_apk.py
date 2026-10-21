@@ -12,7 +12,7 @@ from zipfile import ZipFile
 from verify_voice_aar import native_fingerprint
 
 STAGING_URL = 'wss://gaminghub-voice-staging.onrender.com'
-APPLICATION_ID = 'com.iroaa15.gaminghub.colyseustest'
+APPLICATION_ID = 'com.iroaa15.gaminghub.colyseustest.voicefix118'
 
 
 def dex_classes(data):
@@ -39,8 +39,10 @@ def verify(apk, sdk):
     manifest = command('aapt', 'dump', 'xmltree', apk, 'AndroidManifest.xml')
     if f"package: name='{APPLICATION_ID}'" not in badging:
         raise ValueError('APK has an unexpected application ID')
-    if "application-label:'Gaming Hub Colyseus Test'" not in badging:
+    if "application-label:'Gaming Hub Voice Test 11.8'" not in badging:
         raise ValueError('Staging application label missing')
+    if "versionCode='118'" not in badging or "versionName='11.8-test'" not in badging:
+        raise ValueError('Expected newly versioned 11.8 test APK')
     if "sdkVersion:'24'" not in badging or "targetSdkVersion:'36'" not in badging:
         raise ValueError('Unexpected Android SDK compatibility')
     for permission in ('RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'INTERNET'):
@@ -57,7 +59,7 @@ def verify(apk, sdk):
                 raise ValueError(f'Native voice class not defined in APK DEX: {name}')
         for name in ('Lorg/webrtc/PeerConnection;', 'Lorg/webrtc/audio/JavaAudioDeviceModule;'):
             if name not in classes: raise ValueError(f'WebRTC definition missing: {name}')
-        for abi in ('arm64-v8a', 'armeabi-v7a'):
+        for abi in ('arm64-v8a', 'armeabi-v7a', 'x86_64'):
             if f'lib/{abi}/libjingle_peerconnection_so.so' not in archive.namelist():
                 raise ValueError(f'WebRTC native library missing for {abi}')
         config_paths = [n for n in archive.namelist() if n.endswith('/data/voice_staging.json')]
@@ -69,12 +71,12 @@ def verify(apk, sdk):
         if info != {'protocol': 2, 'source_sha256': native_fingerprint()}:
             raise ValueError('Packaged native voice implementation is stale')
         abis = sorted({n.split('/')[1] for n in archive.namelist() if n.startswith('lib/') and n.endswith('/libgodot_android.so')})
-        if abis != ['arm64-v8a', 'armeabi-v7a']:
-            raise ValueError(f'Expected universal ARM staging APK; got {abis}')
+        if abis != ['arm64-v8a', 'armeabi-v7a', 'x86_64']:
+            raise ValueError(f'Expected ARM and emulator staging APK; got {abis}')
         compressed_native = all(i.compress_type == 8 for i in archive.infolist() if i.filename.startswith('lib/') and i.filename.endswith('.so'))
         if not compressed_native: raise ValueError('Native libraries are not compressed for this staging build')
         if archive.testzip() is not None: raise ValueError('Corrupt APK archive')
-    return {'status': 'STAGING_APK_VERIFIED', 'application_id': APPLICATION_ID, 'label': 'Gaming Hub Colyseus Test',
+    return {'status': 'STAGING_APK_VERIFIED', 'application_id': APPLICATION_ID, 'label': 'Gaming Hub Voice Test 11.8',
             'staging_url': STAGING_URL, 'min_sdk': 24, 'target_sdk': 36, 'abis': abis,
             'native_voice_protocol': 2, 'voice_engine': 'libwebrtc-144.7559.15', 'native_source_sha256': info['source_sha256'],
             'apk_size_bytes': apk.stat().st_size, 'apk_sha256': hashlib.sha256(apk.read_bytes()).hexdigest(),

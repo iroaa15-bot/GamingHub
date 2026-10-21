@@ -44,12 +44,12 @@ python3 tools/prepare_colyseus_staging.py --output "$STAGING/source"
 echo "[4/6] Import Godot resources"
 "$GODOT_BIN" --headless --path "$STAGING/source" --editor --import --quit
 echo "[5/6] Export the test APK (no production install/publish)"
-APK="$OUT_DIR/GamingHub-Colyseus-Voice-Fix-Test.apk"
+APK="$OUT_DIR/GamingHub-Colyseus-Voice-Fixed-11.8-Test.apk"
 if [[ -e "$APK" ]]; then
   echo "REFUSING to overwrite existing $APK" >&2
   exit 2
 fi
-"$GODOT_BIN" --headless --path "$STAGING/source" --export-debug "Android" "$APK"
+"$GODOT_BIN" --headless --path "$STAGING/source" --install-android-build-template --export-debug "Android" "$APK"
 test -s "$APK" || { echo "APK not produced" >&2; exit 5; }
 echo "[6/6] Verify Android package identity and fingerprint"
 SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT}}"
@@ -58,8 +58,9 @@ if [[ -z "$AAPT_BIN" ]]; then
   echo "REFUSING: Android build-tools aapt is required to verify package identity." >&2
   exit 6
 fi
-"$AAPT_BIN" dump badging "$APK" | grep -F "package: name='com.iroaa15.gaminghub.colyseustest'" >/dev/null ||
+"$AAPT_BIN" dump badging "$APK" | grep -F "package: name='com.iroaa15.gaminghub.colyseustest.voicefix118'" >/dev/null ||
   { echo "REFUSING: wrong Android package identity" >&2; exit 6; }
-sha256sum "$APK" | tee "$OUT_DIR/GamingHub-Colyseus-Voice-Fix-Test.sha256"
+python3 tools/verify_staging_apk.py "$APK" --sdk "$SDK_ROOT" --output "$OUT_DIR/verification"
+sha256sum "$APK" | tee "$OUT_DIR/GamingHub-Colyseus-Voice-Fixed-11.8-Test.sha256"
 echo "BUILT: $APK"
 echo "Not device-tested. Reproduce both voice-button scenarios on actual Android hardware."

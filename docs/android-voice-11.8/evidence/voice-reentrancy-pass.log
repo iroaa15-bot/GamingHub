@@ -1,0 +1,4 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+VOICE_REENTRANCY_ATTEMPTS=1
+VOICE_REENTRANCY_PASS: rejected plugin leaves game responsive; UI and opt-out do not initialize JNI

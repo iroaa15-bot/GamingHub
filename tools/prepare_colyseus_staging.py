@@ -37,16 +37,24 @@ def prepare(source: Path, destination: Path) -> Path:
             if n in SKIP_FILES or (n in SKIP_DIRS and (Path(_dir) / n).is_dir())
         ],
     )
-    # Separate Android application ID prevents replacing the installed production app.
+    # Explicit QA runner; it never replaces Main or executes on normal startup.
+    diagnostics = destination / "diagnostics"
+    diagnostics.mkdir(exist_ok=True)
+    shutil.copyfile(source / "tests/android_voice_runtime.gd", diagnostics / "android_voice_runtime.gd")
+    shutil.copyfile(source / "tests/recovery_runtime.gd", diagnostics / "recovery_runtime.gd")
+    # Version-specific ID preserves both production and the old test app/data: its debug signing key is unavailable.
     presets_path = destination / "export_presets.cfg"
     presets = presets_path.read_text(encoding="utf-8")
     original_id = 'package/unique_name="com.iroaa15.gaminghub"'
     if presets.count(original_id) != 2:
         raise ValueError("Unexpected Android export presets; refusing unsafe staging export")
-    presets = presets.replace(original_id, 'package/unique_name="com.iroaa15.gaminghub.colyseustest"')
-    presets = presets.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Colyseus Test"')
+    presets = presets.replace(original_id, 'package/unique_name="com.iroaa15.gaminghub.colyseustest.voicefix118"')
+    presets = presets.replace('package/name="Gaming Hub"', 'package/name="Gaming Hub Voice Test 11.8"')
     # Keep 32-bit Android phones eligible for this isolated device test.
     presets = presets.replace('architectures/armeabi-v7a=false', 'architectures/armeabi-v7a=true')
+    presets = presets.replace('architectures/x86_64=false', 'architectures/x86_64=true')
+    presets = presets.replace('version/code=117', 'version/code=118')
+    presets = presets.replace('version/name="11.7"', 'version/name="11.8-test"')
     # Compress native libraries for an easier download and legacy Android loading.
     presets = presets.replace('gradle_build/use_gradle_build=true',
                               'gradle_build/use_gradle_build=true\ngradle_build/compress_native_libraries=true')
@@ -75,7 +83,7 @@ def prepare(source: Path, destination: Path) -> Path:
     print(f"STAGING_PREPARED: {destination}")
     print(f"Production endpoint preserved: {production_url}")
     print(f"Staging endpoint: {STAGING_URL}")
-    print("Staging Android package: com.iroaa15.gaminghub.colyseustest")
+    print("Staging Android package: com.iroaa15.gaminghub.colyseustest.voicefix118")
     return destination
 
 

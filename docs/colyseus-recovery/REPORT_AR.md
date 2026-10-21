@@ -84,3 +84,7 @@ Wi-Fi/بيانات الهاتف. لا يوجد TURN مضبوط في البيئة
 
 الرجوع آمن: احذف تطبيق `Gaming Hub Colyseus Test` فقط وأوقف خادم LAN بـCtrl+C.
 تظل النسخة الأصلية و`main` وخدمات الإنتاج كما كانت.
+
+Commit الكود المختبر: [489d9ef316513df8c23028880d5668cce3e60be8](https://github.com/iroaa15-bot/GamingHub/commit/489d9ef316513df8c23028880d5668cce3e60be8).
+قائمة الملفات الدقيقة: [CHANGED_FILES.txt](CHANGED_FILES.txt).
+نص الاستكمال القابل للنسخ: [HANDOFF_AR.md](HANDOFF_AR.md).

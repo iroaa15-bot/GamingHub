@@ -1,0 +1,19 @@
+{
+  "source_commit": "489d9ef316513df8c23028880d5668cce3e60be8",
+  "github_workflow_runs": 0,
+  "production": {
+    "name": "gaminghub-multiplayer",
+    "branch": "main",
+    "updated_at": "2026-10-19T08:00:39.127287Z"
+  },
+  "staging": {
+    "name": "gaminghub-voice-staging",
+    "branch": "fix/android-voice-root-cause",
+    "auto_deploy": "no",
+    "updated_at": "2026-10-20T21:06:35.391035Z"
+  },
+  "render_mutations_performed": false,
+  "new_services_created": false,
+  "main_head": "39162256ccbea20151b6bb66a129baad1fd0bd42",
+  "main_unchanged": true
+}

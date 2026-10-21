@@ -7,11 +7,13 @@ addons/gaminghub_voice/plugin.cfg
 addons/gaminghub_voice/plugin.gd
 addons/gaminghub_voice/plugin.gd.uid
 docs/colyseus-recovery/CHANGED_FILES.txt
+docs/colyseus-recovery/HANDOFF_AR.md
 docs/colyseus-recovery/PHONE_TEST_AR.md
 docs/colyseus-recovery/REPORT_AR.md
 docs/colyseus-recovery/build-receipt.json
 docs/colyseus-recovery/evidence/activities.log
 docs/colyseus-recovery/evidence/adb-devices.log
+docs/colyseus-recovery/evidence/android-cache-failure-excerpt.log
 docs/colyseus-recovery/evidence/android-export-final.log
 docs/colyseus-recovery/evidence/apk-badging.txt
 docs/colyseus-recovery/evidence/apk-gameplay-runtime.log
@@ -55,6 +57,7 @@ docs/colyseus-recovery/evidence/release-runtime.log
 docs/colyseus-recovery/evidence/staging-smoke.log
 docs/colyseus-recovery/evidence/webrtc-bridge.log
 docs/colyseus-recovery/evidence/webrtc-colyseus-media.log
+docs/colyseus-recovery/isolation-verification.json
 docs/colyseus-recovery/preservation.json
 experiments/colyseus-room-poc/.gdignore
 experiments/colyseus-room-poc/README.md

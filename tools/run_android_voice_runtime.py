@@ -90,9 +90,13 @@ def main(adb, apk, output, scenario='both', skip_install=False):
         text = call('logcat', '-d', '-v', 'threadtime')
         (output/(choice+'-logcat.txt')).write_text(text)
         expected = 'ANDROID_PERMISSION_CALLBACK=' + ('false' if choice == 'deny' else 'true')
-        passed = ('ANDROID_VOICE_RUNTIME_PASS' in text and expected in text and tapped
+        # Denial must not be judged by the native-restart success marker.
+        # Both outcomes still require a real permission-dialog interaction.
+        marker = 'ANDROID_VOICE_PERMISSION_DENIED_PASS' if choice == 'deny' else 'ANDROID_VOICE_RUNTIME_PASS'
+        passed = (marker in text and expected in text and tapped
                   and 'Fatal signal' not in text and 'FATAL EXCEPTION' not in text and 'SCRIPT ERROR:' not in text)
-        if choice == 'allow': passed = passed and 'ANDROID_NATIVE_RESTART_COMPLETED' in text
+        if choice == 'allow':
+            passed = passed and 'ANDROID_NATIVE_RESTART_COMPLETED' in text
         results.append({'scenario': choice, 'passed': passed, 'actual_android_jni': True})
         (output/'result.json').write_text(json.dumps({'results': results, 'physical_device_tested': False}, indent=2))
         if not passed:

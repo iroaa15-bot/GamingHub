@@ -1,0 +1,75 @@
+name: Gaming Hub Touch Fix - Isolated Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-touch-fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse production branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "fix/android-touch-tween-lifecycle-20261022"
+          grep -q 'package/unique_name="com.iroaa15.gaminghub.touchfix"' export_presets.cfg
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: true
+      - name: Create disposable debug key
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.android"
+          keytool -genkeypair -noprompt -keystore "$HOME/.android/debug.keystore" -storepass android -keypass android -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname 'CN=Android Debug,O=Android,C=US'
+      - name: Configure Godot Android SDK
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.5.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+      - name: Import and validate scripts
+        run: godot --headless --path . --editor --import --quit
+      - name: Export isolated APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-touchfix-debug.apk
+      - name: Verify identity and signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=build/GamingHub-touchfix-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | tee build/touchfix-package-info.txt
+          grep -q "package: name='com.iroaa15.gaminghub.touchfix'" build/touchfix-package-info.txt
+          sha256sum "$APK" | tee build/touchfix-sha256.txt
+      - name: Upload APK and SHA-256
+        uses: actions/upload-artifact@v4
+        with:
+          name: GamingHub-TouchFix-Android-APK
+          path: |
+            build/GamingHub-touchfix-debug.apk
+            build/touchfix-sha256.txt
+          retention-days: 7
+          if-no-files-found: error

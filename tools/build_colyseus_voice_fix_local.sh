@@ -38,7 +38,17 @@ echo "[2/6] Reject stale/missing Android plugin binaries"
 python3 tools/verify_voice_aar.py
 echo "[3/6] Create isolated staging source with different package/URLs"
 STAGING="$(mktemp -d "${TMPDIR:-/tmp}/gaminghub-voice-fix.XXXXXXXX")"
-trap 'rm -rf "$STAGING"' EXIT
+cleanup() {
+  local result=$?
+  if [[ "$result" -eq 0 ]]; then
+    rm -rf "$STAGING"
+  else
+    # Keep the freshly assembled APK/logs if Gradle's copy task fails. Never
+    # fall back to an older APK or discard the evidence needed for recovery.
+    echo "BUILD FAILED; isolated staging retained for inspection: $STAGING" >&2
+  fi
+}
+trap cleanup EXIT
 # prepare_colyseus_staging refuses existing destinations; place source in new child
 python3 tools/prepare_colyseus_staging.py --output "$STAGING/source"
 echo "[4/6] Import Godot resources"

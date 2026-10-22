@@ -22,6 +22,10 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     @Volatile private var destroyed = false
     @Volatile private var active = false
     private var permissionPending = false
+    // Permission dialogs pause the Activity. Their result can reach Godot's
+    // render thread before onMainResume restores the audio startup gate.
+    // Accessed only by Android lifecycle/permission callbacks on the UI thread.
+    private var permissionResultAwaitingResume: Boolean? = null
     private var previousVolumeStream: Int? = null
     override fun getPluginName() = "GamingHubVoice"
     override fun getPluginSignals(): Set<SignalInfo> = setOf(
@@ -33,7 +37,10 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     @UsedByGodot fun supportsWebRtcVoice(): Boolean = true
     @UsedByGodot fun startWebRtcVoice(requestId: Int, caller: Boolean, iceJson: String): Boolean {
         val host = activity ?: return false
-        if (destroyed || !foreground || !hasMicrophonePermission() || iceJson.length > 8192) return false
+        if (destroyed || !foreground || !hasMicrophonePermission() || iceJson.length > 8192) {
+            android.util.Log.w("GamingHubVoice", "WebRTC startup gate: foreground=$foreground destroyed=$destroyed microphone=${hasMicrophonePermission()}")
+            return false
+        }
         val ticket = generation.incrementAndGet()
         active = false; captured.clear()
         control.execute {
@@ -92,7 +99,7 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     @UsedByGodot fun requestMicrophonePermission() {
         val host = activity ?: return
         host.runOnUiThread {
-            if (hasMicrophonePermission()) emitSignal("microphone_permission", true)
+            if (hasMicrophonePermission()) deliverMicrophonePermission(true)
             else if (!permissionPending && !destroyed) {
                 permissionPending = true
                 host.requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 7821)
@@ -102,8 +109,13 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
     override fun onMainRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == 7821) {
             permissionPending = false
-            emitSignal("microphone_permission", hasMicrophonePermission())
+            deliverMicrophonePermission(hasMicrophonePermission())
         }
+    }
+    private fun deliverMicrophonePermission(granted: Boolean) {
+        if (destroyed) return
+        if (foreground) emitSignal("microphone_permission", granted)
+        else permissionResultAwaitingResume = granted
     }
     @UsedByGodot fun startVoice(requestId: Int): Boolean {
         val host = activity ?: return false
@@ -176,10 +188,17 @@ class GamingHubVoicePlugin(godot: Godot) : GodotPlugin(godot) {
         }
     }
     override fun onMainPause() { foreground = false; stopSession(true) }
-    override fun onMainResume() { foreground = true }
+    override fun onMainResume() {
+        foreground = true
+        permissionResultAwaitingResume?.let { granted ->
+            permissionResultAwaitingResume = null
+            deliverMicrophonePermission(granted)
+        }
+    }
     override fun onMainDestroy() {
         generation.incrementAndGet()
         active = false; destroyed = true; captured.clear()
+        permissionResultAwaitingResume = null
         restoreVolumeKeys()
         control.execute { engine?.stop(); engine = null; rtcEngine?.stop(); rtcEngine = null; captured.clear() }
         control.shutdown()

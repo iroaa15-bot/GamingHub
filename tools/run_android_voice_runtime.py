@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 PACKAGE = 'com.iroaa15.gaminghub.colyseustest.voicefix118'
 
-def main(adb, apk, output):
+def main(adb, apk, output, scenario='both', skip_install=False):
     output.mkdir(parents=True, exist_ok=True)
     commands = []
     def call(*args, timeout=120, check=True):
@@ -22,13 +22,29 @@ def main(adb, apk, output):
                          'stdout': result.stdout.decode(errors='replace'),
                          'stderr': result.stderr.decode(errors='replace')})
         (output/'adb-commands.json').write_text(json.dumps(commands, indent=2))
+        # logd can transiently refuse clearing on a slow software emulator.
+        # Retain every failed attempt rather than hiding the command failure.
+        if result.returncode and tuple(args) == ('logcat', '-c'):
+            for attempt in range(3):
+                time.sleep(1)
+                retry = subprocess.run([str(adb), *args], capture_output=True, timeout=timeout)
+                commands.append({'args': list(args), 'retry': attempt + 1,
+                                 'returncode': retry.returncode,
+                                 'stdout': retry.stdout.decode(errors='replace'),
+                                 'stderr': retry.stderr.decode(errors='replace')})
+                (output/'adb-commands.json').write_text(json.dumps(commands, indent=2))
+                result = retry
+                if not result.returncode:
+                    break
         if check and result.returncode:
             raise RuntimeError('adb failed: ' + ' '.join(args))
         return result.stdout.decode(errors='replace')
-    call('install', '-r', '--no-streaming', str(apk), timeout=480)
-    call('shell', 'pm', 'revoke', PACKAGE, 'android.permission.RECORD_AUDIO', check=False)
+    if not skip_install:
+        call('install', '-r', '--no-streaming', str(apk), timeout=480)
+    if scenario != 'allow':
+        call('shell', 'pm', 'revoke', PACKAGE, 'android.permission.RECORD_AUDIO', check=False)
     results = []
-    for choice in ('deny', 'allow'):
+    for choice in (('deny', 'allow') if scenario == 'both' else (scenario,)):
         call('logcat', '-c')
         call('shell', 'am', 'start', '-S', '-n', PACKAGE+'/com.godot.game.GodotApp',
              '--esa', 'command_line_params',
@@ -81,5 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('--adb', type=Path, required=True)
     parser.add_argument('--apk', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--scenario', choices=('both', 'deny', 'allow'), default='both')
+    parser.add_argument('--skip-install', action='store_true')
     args = parser.parse_args()
-    main(args.adb.resolve(), args.apk.resolve(), args.output.resolve())
+    main(args.adb.resolve(), args.apk.resolve(), args.output.resolve(), args.scenario, args.skip_install)

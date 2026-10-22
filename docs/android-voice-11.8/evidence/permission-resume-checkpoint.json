@@ -1,0 +1,14 @@
+{
+  "status": "PARTIAL",
+  "evidence_origin": "Previously recorded session output; full uncommitted logs and build environment were removed by workspace maintenance.",
+  "android_10_emulator_before_permission_fix": {
+    "permission_denied": "PASS: ANDROID_PERMISSION_DENIAL_PASS and ANDROID_VOICE_RUNTIME_PASS",
+    "permission_granted": "FAIL: callback=true, Native startup refused, Native offer missing; second startup produced voice_offer and completed restart"
+  },
+  "permission_onMainResume_fix": "Source preserved; post-fix Android test NOT RUN",
+  "compiled_aar_status": "Existing committed AARs precede this Kotlin change. Both AARs must be rebuilt; do not bypass the source fingerprint check.",
+  "apk_delivery": "No surviving newly verified APK",
+  "pending_test": "tools/run_android_voice_runtime.py --scenario allow --skip-install (after rebuilding and installing the fixed isolated APK)",
+  "physical_android_tested": false,
+  "resource_policy": "No dependency reinstall or repeat of passed tests; no GitHub Actions or production changes."
+}

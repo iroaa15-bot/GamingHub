@@ -14,6 +14,12 @@ import xml.etree.ElementTree as ET
 PACKAGE = 'com.iroaa15.gaminghub.colyseustest.voicefix118'
 
 def main(adb, apk, output, scenario='both', skip_install=False):
+    project_root = Path(__file__).resolve().parents[1]
+    diagnostic = project_root / 'diagnostics' / 'android_voice_runtime.gd'
+    if not diagnostic.is_file():
+        raise FileNotFoundError(f'Android voice diagnostic missing: {diagnostic}')
+    if not skip_install and not apk.is_file():
+        raise FileNotFoundError(f'Android voice APK missing: {apk}')
     output.mkdir(parents=True, exist_ok=True)
     commands = []
     def call(*args, timeout=120, check=True):

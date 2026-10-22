@@ -28,6 +28,14 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         rooms.clear()
         connections.clear()
 
+    async def wait_for_voice(self, socket, kind):
+        async with asyncio.timeout(0.5):
+            while True:
+                matches = [m for m in socket.messages if m.get("type") == kind]
+                if matches:
+                    return matches[-1]
+                await asyncio.sleep(0.005)
+
     async def test_mutual_opt_in_required_and_turn_independent(self):
         offer = {"type": "voice_offer", "payload": {"sdp": "v=0"}}
         await process(self.a, offer)
@@ -38,8 +46,8 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.b, {"type": "voice_state", "enabled": True})
         self.room.turn = 0
         await process(self.b, offer)
-        self.assertEqual(self.a.messages[-1]["type"], "voice_offer")
-        self.assertEqual(self.a.messages[-1]["payload"]["sdp"], "v=0")
+        delivered = await self.wait_for_voice(self.a, "voice_offer")
+        self.assertEqual(delivered["payload"]["sdp"], "v=0")
 
     async def test_large_sdp_relay_and_reject_oversize(self):
         await process(self.a, {"type": "voice_state", "enabled": True})
@@ -49,8 +57,8 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
             receiver = self.b if kind == "voice_offer" else self.a
             sender = self.a if kind == "voice_offer" else self.b
             await process(sender, {"type": kind, "payload": {"sdp": sdp}})
-            self.assertEqual(receiver.messages[-1]["type"], kind)
-            self.assertEqual(receiver.messages[-1]["payload"]["sdp"], sdp)
+            delivered = await self.wait_for_voice(receiver, kind)
+            self.assertEqual(delivered["payload"]["sdp"], sdp)
             count = len(receiver.messages)
             await process(sender, {"type": kind, "payload": {"sdp": "x" * 16001}})
             self.assertEqual(sender.messages[-1]["type"], "error")
@@ -76,7 +84,7 @@ class VoiceSignalingTests(unittest.IsolatedAsyncioTestCase):
         await process(self.b, {"type": "voice_state", "enabled": True})
         before = len(self.outsider.messages)
         await process(self.a, {"type": "voice_offer", "payload": {"sdp": "v=0"}})
-        self.assertEqual(self.b.messages[-1]["type"], "voice_offer")
+        await self.wait_for_voice(self.b, "voice_offer")
         self.assertEqual(len(self.outsider.messages), before)
 
     async def test_finished_match_rejects_voice(self):

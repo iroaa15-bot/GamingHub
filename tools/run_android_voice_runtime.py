@@ -41,10 +41,12 @@ def main(adb, apk, output, scenario='both', skip_install=False):
         return result.stdout.decode(errors='replace')
     if not skip_install:
         call('install', '-r', '--no-streaming', str(apk), timeout=480)
-    if scenario != 'allow':
-        call('shell', 'pm', 'revoke', PACKAGE, 'android.permission.RECORD_AUDIO', check=False)
     results = []
     for choice in (('deny', 'allow') if scenario == 'both' else (scenario,)):
+        # Each case must start with permission denied so the actual Android
+        # permission callback is exercised. In particular, --scenario allow
+        # must not silently reuse a previous grant and skip the dialog.
+        call('shell', 'pm', 'revoke', PACKAGE, 'android.permission.RECORD_AUDIO')
         call('logcat', '-c')
         call('shell', 'am', 'start', '-S', '-n', PACKAGE+'/com.godot.game.GodotApp',
              '--esa', 'command_line_params',

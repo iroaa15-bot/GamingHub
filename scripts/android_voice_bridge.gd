@@ -7,6 +7,7 @@ signal permission_ready(granted: bool)
 signal status_changed(state: String, details: String)
 
 var native_voice_bridge: Object = null
+var attaching_native := false
 var local_opt_in := false
 var peer_opt_in := false
 var active := false
@@ -20,11 +21,14 @@ func _ready() -> void:
 
 # A late native registration must not permanently disable voice after scene ready.
 func _try_attach_native() -> void:
- if native_voice_bridge != null or OS.get_name() != "Android":
+ if attaching_native or native_voice_bridge != null or OS.get_name() != "Android":
   return
  if not Engine.has_singleton("GamingHubVoice"):
   return
+ # Error handlers may synchronously call set_consent() or is_available().
+ attaching_native = true
  attach_native(Engine.get_singleton("GamingHubVoice"))
+ attaching_native = false
 
 # Also used by executable Godot tests with a fake native boundary.
 func attach_native(plugin: Object) -> void:

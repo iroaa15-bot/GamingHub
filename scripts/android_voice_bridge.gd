@@ -24,7 +24,9 @@ func _ready() -> void:
 func _try_attach_native() -> void:
  if native_voice_bridge != null or native_attach_in_progress or OS.get_name() != "Android":
   return
- if not Engine.has_singleton("GamingHubVoice"):
+ var found := Engine.has_singleton("GamingHubVoice")
+ print("[GH_VOICE_DIAG] discovery singleton_found=", found)
+ if not found:
   return
  native_attach_in_progress = true
  attach_native(Engine.get_singleton("GamingHubVoice"))
@@ -35,13 +37,19 @@ func attach_native(plugin: Object) -> void:
  # Godot 4.5.1 JNISingleton dispatches calls via callp(), but does not expose
  # registered Java methods through Object.has_method(). Negotiate directly.
  var jni_plugin := plugin != null and plugin.get_class() == "JNISingleton"
+ print("[GH_VOICE_DIAG] attach plugin_null=", plugin == null, " plugin_class=", plugin.get_class() if plugin != null else "null", " jni=", jni_plugin)
  if plugin == null or (not jni_plugin and not plugin.has_method("getVoiceApiVersion")):
+  print("[GH_VOICE_DIAG] rejected reason=version_method_unavailable")
   voice_unavailable.emit("Android voice plugin needs an update")
   return
- if int(plugin.getVoiceApiVersion()) != 2:
+ var api_version := int(plugin.getVoiceApiVersion())
+ print("[GH_VOICE_DIAG] api_version=", api_version, " expected=2")
+ if api_version != 2:
+  print("[GH_VOICE_DIAG] rejected reason=version_mismatch")
   voice_unavailable.emit("Android voice plugin needs an update")
   return
  native_webrtc_supported = (jni_plugin or plugin.has_method("supportsWebRtcVoice")) and bool(plugin.supportsWebRtcVoice())
+ print("[GH_VOICE_DIAG] attach_success webrtc_supported=", native_webrtc_supported)
  native_voice_bridge = plugin
  if plugin.has_signal("voice_signal") and not plugin.is_connected("voice_signal", _on_native_signal):
   plugin.connect("voice_signal", _on_native_signal)
@@ -73,6 +81,7 @@ func is_available() -> bool:
  return native_voice_bridge != null
 
 func request_permission() -> void:
+ print("[GH_VOICE_DIAG] request_permission entry attached=", native_voice_bridge != null)
  _try_attach_native()
  if native_voice_bridge == null:
   permission_ready.emit(false)
@@ -86,6 +95,7 @@ func _on_permission(granted: bool) -> void:
  permission_ready.emit(granted)
 
 func set_consent(local_enabled: bool, peer_enabled: bool) -> void:
+ print("[GH_VOICE_DIAG] set_consent local=", local_enabled, " peer=", peer_enabled, " attached=", native_voice_bridge != null)
  local_opt_in = local_enabled
  peer_opt_in = peer_enabled
  if not (local_opt_in and peer_opt_in):

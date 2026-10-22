@@ -1,4 +1,1 @@
-{
-  "server_url": "wss://gaminghub-multiplayer.onrender.com",
-  "note": "Render service: https://dashboard.render.com/web/srv-db6r5eou01pc73b91f90. If connection fails, check service status and logs."
-}
+﻿{"server_url":"wss://gaminghub-voice-staging.onrender.com","note":"Voice integration testing only - staging server"}

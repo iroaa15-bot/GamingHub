@@ -1084,13 +1084,15 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
 # Kill a previous animation before starting another: rapid taps cannot queue
 # overlapping tweens that keep changing button scale after the touch ends.
 func animate_touch_button(target: Button, desired_scale: Vector2, seconds: float) -> void:
- if not is_instance_valid(target):
+ if not is_instance_valid(target) or not target.is_inside_tree():
   return
- var old: Variant = target.get_meta("touch_tween", null)
- if old is Tween:
-  var previous: Tween = old as Tween
-  if previous.is_valid():
-   previous.kill()
+ if target.has_meta("touch_tween"):
+  var old: Variant = target.get_meta("touch_tween")
+  if old is Tween:
+   var previous: Tween = old as Tween
+   if previous.is_valid():
+    previous.kill()
+  target.remove_meta("touch_tween")
  if reduced_motion:
   target.scale = Vector2.ONE
   return

@@ -281,3 +281,11 @@ python release/verify_project_upload.py
 - `tests/test_final_image_catalog.py`
 
 بعده: أُضيف ملف التسليم، وحراسة نوع معرف السؤال واختبارها، وتحدّثت سجلات وmanifest المصدر.
+
+## آخر حالة الحفظ والرفع
+
+آخر commit كود/توثيق قبل سجل التعطل: `7c05ec1fe529d3d47d3b73a4f4e3a81dbe5f1a1a`؛ يتبعه commit توثيق هذا التعطل فقط وملف UID آلي للمشهد. المرجع الدقيق النهائي محفوظ في حزمة git bundle ويمكن استخراجه بـgit bundle list-heads.
+
+PUSH BLOCKED: Git credential helper تعطل بـNtCreateDirectoryObject/msys access denied، ومحاولة credential-manager الأصلية غير التفاعلية تعذرت كذلك. لم يُرفع أي commit جديد إلى GitHub. رأس الفرع البعيد ما زال 4b2f8a6bd063fb8373850f5ed897088745769512، وmain ظل 39162256ccbea20151b6bb66a129baad1fd0bd42 حسب ls-remote بعد المحاولة. يلزم إصلاح مصادقة GitHub في بيئة غير مقيدة ثم git push origin HEAD:refs/heads/integration/gaminghub-final-20261024، مع [skip ci] كما في الرسائل الحالية ودون إنشاء PR أو dispatch.
+
+حُفظ تقدم الكود والأصول والتوثيق كاملًا في commit محلي، وتُسلّم أيضًا حزمة مصدر ZIP وgit bundle مستقلة في outputs. هذه ليست APK أو AAB. لا تفترض وجود handoff على GitHub حتى ينجح الرفع فعليًا. قراءة الاستخدام الأخيرة62% قصير و57% أسبوعي (البداية34%/52%)؛ أي28 و5 نقاط مئوية، أقل من نصف المتاح عند البداية. لا توجد قراءة لعملة Work منفصلة.

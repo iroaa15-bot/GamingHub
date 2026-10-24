@@ -834,7 +834,7 @@
     "release/PRIVACY_POLICY_PUBLISH_DRAFT_AR_EN.md": "111db4a215effd0289bbb4502716b92b07936a38a474de4726d75cbabb687585",
     "release/PRIVACY_POLICY_REVIEW_DRAFT.md": "c76bddd7fdc004a5baa937d7d67b9a5b9f787168d86f3aaebde8d1130df2759e",
     "release/RC_11_7_GATE.md": "d80cdf4ae803d6373763f28e64f75bcd0f6be283ec9d30876ed52738b03954a1",
-    "release/WORK_HANDOFF_FINAL.md": "398f45a5fb5a331ebcdfee692ee172956aafbf87dac2eaddb5b34297c5cd6327",
+    "release/WORK_HANDOFF_FINAL.md": "dcad4cff2e581303ccb7f74d668bf7034d832b51830572e5fbcf67345fb45998",
     "release/build_android.ps1": "d75cbe737f1202f0015f39ab92e6d48b5b610775bf866e37bedaed8adb398d13",
     "release/build_android.sh": "70ff1f8774032ab7853eaddd0c2560012f6eafcfbd5c919d1f1fc608fce44122",
     "release/build_unsigned_bundle.py": "9679be9bdc8798f8c6d226990911a1be7872e29d98ed6822b7e792f4a7933ca8",

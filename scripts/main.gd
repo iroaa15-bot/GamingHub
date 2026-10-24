@@ -1810,9 +1810,6 @@ func show_home() -> void:
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
  label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
- # Internal-only photo library preview; absent from production/release builds.
- if OS.has_feature("editor") and FileAccess.file_exists("res://data/guess_picture_302/catalog.json") and ResourceLoader.exists("res://scenes/guess_picture_302_preview.tscn"):
-  button(tr_ui("🖼️ معاينة مكتبة الصور (اختبار داخلي)", "🖼️ PHOTO LIBRARY PREVIEW (INTERNAL)"), func(): get_tree().change_scene_to_file("res://scenes/guess_picture_302_preview.tscn"), ACCENT)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
   button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
@@ -1872,6 +1869,10 @@ func show_more_games() -> void:
  var favorites: Array = profile.get("favorites", [])
  for i in range(GAMES.size()):
   grid.add_child(make_game_tile(i, previews[i], i in favorites))
+ # Keep the photo library in the game list, isolated from matchmaking and release builds.
+ # The review-only 102 photos remain opt-in within the preview scene.
+ if OS.has_feature("editor") and FileAccess.file_exists("res://data/guess_picture_302/catalog.json") and ResourceLoader.exists("res://scenes/guess_picture_302_preview.tscn"):
+  button(tr_ui("🖼️ خمن صورتك — مكتبة الصور (اختبار داخلي)", "🖼️ GUESS YOUR PICTURE — PHOTO LIBRARY (INTERNAL)"), func(): get_tree().change_scene_to_file("res://scenes/guess_picture_302_preview.tscn"), ACCENT)
  button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
  button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
  button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)

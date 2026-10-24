@@ -152,6 +152,7 @@ class StagingHub:
             return
         if action == "photo_voice_start":
             event = room.handle(player, {"type": "photo_text", "text": "[voice]"})
+            room.match.question_mode = "voice"
             event = {**event, "mode": "voice", "text": ""}
             for peer in record["peers"].values():
                 await self.send(peer, event)

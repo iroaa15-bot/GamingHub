@@ -19,7 +19,14 @@ func _ready() -> void:
 		AudioServer.set_bus_name(bus, "PhotoDuelMic")
 	# Keep bus unmuted for capture; attenuate output to prevent feedback.
 	AudioServer.set_bus_mute(bus, false)
-	AudioServer.set_bus_volume_db(bus, -80.0)
+	AudioServer.set_bus_volume_db(bus, 0.0)
+	AudioServer.set_bus_send(bus, "PhotoDuelSilent")
+	var silent := AudioServer.get_bus_index("PhotoDuelSilent")
+	if silent == -1:
+		AudioServer.add_bus()
+		silent = AudioServer.bus_count - 1
+		AudioServer.set_bus_name(silent, "PhotoDuelSilent")
+	AudioServer.set_bus_mute(silent, true)
 	capture = AudioEffectCapture.new()
 	AudioServer.add_bus_effect(bus, capture)
 	player = AudioStreamPlayer.new()

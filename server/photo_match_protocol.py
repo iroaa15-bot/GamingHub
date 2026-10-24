@@ -24,6 +24,7 @@ class PhotoMatch:
     finished: bool = False
     awaiting_confirmation: bool = False
     guess_text: str = ""
+    pending_question: bool = False
     turn_started: float = field(default_factory=time.monotonic)
     events: list[dict] = field(default_factory=list)
 
@@ -58,6 +59,7 @@ class PhotoMatch:
         if self.awaiting_confirmation:
             raise MatchError("Guess awaiting opponent confirmation")
         self.current = 1 - self.current
+        self.pending_question = False
         self.turn_started = time.monotonic()
         return self._event("turn", player=self.current)
 
@@ -65,18 +67,26 @@ class PhotoMatch:
         self._active(player)
         if self.awaiting_confirmation or not isinstance(text, str) or not 0 < len(text.strip()) <= MAX_TEXT:
             raise MatchError("Invalid text question")
+        if self.pending_question:
+            raise MatchError("Previous question awaiting answer")
+        self.pending_question = True
         return self._event("question", player=self.current, mode="text", text=text.strip())
 
     def ask_tap(self, player: str, question_id: str, facts: dict) -> dict:
         self._active(player)
         if self.awaiting_confirmation or question_id not in facts or type(facts[question_id]) is not bool:
             raise MatchError("No verified answer for this question")
+        if self.pending_question:
+            raise MatchError("Previous question awaiting answer")
         return self._event("question", player=self.current, mode="tap", question_id=question_id, answer=facts[question_id])
 
     def reply(self, player: str, yes: bool) -> dict:
         index = self._player(player)
         if self.finished or self.awaiting_confirmation or index == self.current or type(yes) is not bool:
             raise MatchError("Only opponent can answer yes/no")
+        if not self.pending_question:
+            raise MatchError("No text question awaiting answer")
+        self.pending_question = False
         return self._event("reply", player=index, answer=yes)
 
     def propose_guess(self, player: str, guess: str = "") -> dict:
@@ -84,6 +94,7 @@ class PhotoMatch:
         if self.awaiting_confirmation or not isinstance(guess, str) or len(guess) > MAX_TEXT:
             raise MatchError("Invalid guess")
         self.awaiting_confirmation = True
+        self.pending_question = False
         self.guess_text = guess.strip()
         return self._event("guess_pending", player=self.current, guess=self.guess_text)
 

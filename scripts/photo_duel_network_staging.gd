@@ -19,7 +19,7 @@ var address_field: LineEdit
 var code_field: LineEdit
 var text_field: LineEdit
 var guess_field: LineEdit
-var requested_action := ""
+var requested_action: Dictionary = {}
 var server_url := "ws://127.0.0.1:8769"
 var previous_state := WebSocketPeer.STATE_CLOSED
 

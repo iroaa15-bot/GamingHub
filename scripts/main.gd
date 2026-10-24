@@ -3018,8 +3018,12 @@ func picture_panel(id: String, height: int) -> void:
  label(artwork_note(id), 13)
 
 func select_answer(index: int) -> void:
+ if round_finished or question_index < 0 or question_index >= round_bank.size():
+  return
  var item: Dictionary = round_bank[question_index]
  var choices: Array = item["choices_" + selected_language]
+ if index < 0 or index >= choices.size():
+  return
  var feedback: Array = item.get("feedback_" + selected_language, [])
  answer_feedback = tr_ui("اختيارك: ", "Your choice: ") + str(choices[index])
  if index < feedback.size():

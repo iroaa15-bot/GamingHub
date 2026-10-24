@@ -24,6 +24,8 @@ class PhotoMatch:
     finished: bool = False
     awaiting_confirmation: bool = False
     guess_text: str = ""
+    confirmation_started: float = 0.0
+    server_facts: dict = field(default_factory=dict, repr=False)
     pending_question: bool = False
     turn_started: float = field(default_factory=time.monotonic)
     events: list[dict] = field(default_factory=list)
@@ -31,6 +33,8 @@ class PhotoMatch:
     def __post_init__(self):
         if len(self.players) != 2 or not all(self.players) or self.players[0] == self.players[1]:
             raise MatchError("Exactly two distinct players required")
+        if any(type(v) is not int for v in (self.target,self.timer,self.reward)):
+            raise MatchError("Settings must be integers")
         if self.target not in ALLOWED_TARGETS or self.timer not in ALLOWED_TIMERS or self.reward not in ALLOWED_REWARDS:
             raise MatchError("Invalid match settings")
 
@@ -52,6 +56,7 @@ class PhotoMatch:
     def _event(self, kind: str, **payload) -> dict:
         event = {"type": "photo_" + kind, "round": self.round, **payload}
         self.events.append(event)
+        del self.events[:-256]
         return event
 
     def pass_turn(self, player: str) -> dict:
@@ -72,8 +77,9 @@ class PhotoMatch:
         self.pending_question = True
         return self._event("question", player=self.current, mode="text", text=text.strip())
 
-    def ask_tap(self, player: str, question_id: str, facts: dict) -> dict:
+    def ask_tap(self, player: str, question_id: str) -> dict:
         self._active(player)
+        facts = self.server_facts
         if self.awaiting_confirmation or question_id not in facts or type(facts[question_id]) is not bool:
             raise MatchError("No verified answer for this question")
         if self.pending_question:
@@ -82,6 +88,8 @@ class PhotoMatch:
 
     def reply(self, player: str, yes: bool) -> dict:
         index = self._player(player)
+        if self.timer and time.monotonic() - self.turn_started >= self.timer:
+            raise MatchError("Turn expired")
         if self.finished or self.awaiting_confirmation or index == self.current or type(yes) is not bool:
             raise MatchError("Only opponent can answer yes/no")
         if not self.pending_question:
@@ -94,6 +102,7 @@ class PhotoMatch:
         if self.awaiting_confirmation or not isinstance(guess, str) or len(guess) > MAX_TEXT:
             raise MatchError("Invalid guess")
         self.awaiting_confirmation = True
+        self.confirmation_started = time.monotonic()
         self.pending_question = False
         self.guess_text = guess.strip()
         return self._event("guess_pending", player=self.current, guess=self.guess_text)
@@ -102,6 +111,8 @@ class PhotoMatch:
         index = self._player(player)
         if self.finished or index == self.current or not self.awaiting_confirmation or type(correct) is not bool:
             raise MatchError("Only opponent can confirm pending guess")
+        if time.monotonic() - self.confirmation_started >= 30:
+            raise MatchError("Confirmation expired")
         self.awaiting_confirmation = False
         result = [self._event("guess_result", player=self.current, correct=correct)]
         if correct:
@@ -117,10 +128,18 @@ class PhotoMatch:
         return result
 
     def expire_turn(self) -> dict | None:
-        if self.finished or self.awaiting_confirmation or not self.timer:
+        if self.finished:
             return None
-        if time.monotonic() - self.turn_started < self.timer:
+        if self.awaiting_confirmation:
+            if time.monotonic() - self.confirmation_started < 30:
+                return None
+            self.awaiting_confirmation = False
+            self.guess_text = ""
+        elif not self.timer:
             return None
+        elif time.monotonic() - self.turn_started < self.timer:
+            return None
+        self.pending_question = False
         self.current = 1 - self.current
         self.turn_started = time.monotonic()
         return self._event("turn", player=self.current, reason="timeout")

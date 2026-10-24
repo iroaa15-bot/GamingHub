@@ -1,0 +1,16 @@
+test_confirmation_only_opponent (test_photo_match_protocol.PhotoMatchTests.test_confirmation_only_opponent) ... ok
+test_expired_reply_and_confirmation (test_photo_match_protocol.PhotoMatchTests.test_expired_reply_and_confirmation) ... ok
+test_settings (test_photo_match_protocol.PhotoMatchTests.test_settings) ... ok
+test_text_tap_and_reply (test_photo_match_protocol.PhotoMatchTests.test_text_tap_and_reply) ... ok
+test_unlimited_timer (test_photo_match_protocol.PhotoMatchTests.test_unlimited_timer) ... ok
+test_wrong_guess_passes (test_photo_match_protocol.PhotoMatchTests.test_wrong_guess_passes) ... ok
+test_exact_core_assets (test_photo_room_service.PhotoRoomTests.test_exact_core_assets) ... ok
+test_forged_facts_ignored_and_self_confirmation_rejected (test_photo_room_service.PhotoRoomTests.test_forged_facts_ignored_and_self_confirmation_rejected) ... ok
+test_repeated_sessions (test_photo_room_service.PhotoRoomTests.test_repeated_sessions) ... ok
+test_resume_token_rotation_and_leave (test_photo_room_service.PhotoRoomTests.test_resume_token_rotation_and_leave) ... ok
+test_secret_not_in_own_snapshot (test_photo_room_service.PhotoRoomTests.test_secret_not_in_own_snapshot) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.127s
+
+OK

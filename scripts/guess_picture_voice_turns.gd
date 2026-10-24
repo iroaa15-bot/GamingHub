@@ -25,6 +25,10 @@ var finished := false
 var timer: Timer
 var ui: VBoxContainer
 var info: Label
+var clock_label: Label
+var clock_bar: ProgressBar
+var history_label: Label
+var event_history: Array[String] = []
 var COLORS := {"bg": Color("#0b1734"), "panel": Color("#1b3158"), "purple": Color("#6753bb"), "green": Color("#208977"), "gold": Color("#f0c568")}
 
 func _ready() -> void:
@@ -68,6 +72,7 @@ func _layout() -> void:
  add_child(scroll)
  var margin := MarginContainer.new()
  margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ margin.size_flags_vertical = Control.SIZE_EXPAND_FILL
  for side in ["left", "right", "top", "bottom"]:
   margin.add_theme_constant_override("margin_" + side, 16)
  scroll.add_child(margin)
@@ -90,6 +95,7 @@ func _button(t: String, action: Callable, color: Color) -> Button:
  b.text = t
  b.custom_minimum_size.y = 57
  b.add_theme_font_size_override("font_size", 18)
+ b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var s := StyleBoxFlat.new()
  s.bg_color = color
  s.set_corner_radius_all(16)
@@ -101,11 +107,55 @@ func _button(t: String, action: Callable, color: Color) -> Button:
  ui.add_child(b)
  return b
 
+func _panel(text_value: String, background_color: Color, size: int = 19) -> void:
+ var frame := PanelContainer.new()
+ var style := StyleBoxFlat.new()
+ style.bg_color = background_color
+ style.set_corner_radius_all(18)
+ style.set_content_margin_all(16)
+ frame.add_theme_stylebox_override("panel", style)
+ ui.add_child(frame)
+ var title := Label.new()
+ title.text = text_value
+ title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+ title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+ title.add_theme_color_override("font_color", Color.WHITE)
+ title.add_theme_font_size_override("font_size", size)
+ frame.add_child(title)
+
+func _log_event(value: String) -> void:
+ event_history.append(value)
+ if event_history.size() > 6:
+  event_history.pop_front()
+ if is_instance_valid(history_label):
+  history_label.text = "\n".join(event_history)
+
+func _scoreboard() -> void:
+ var leader := "تعادل" if score[0] == score[1] else ("لاعب 1 متقدم" if score[0] > score[1] else "لاعب 2 متقدم")
+ _panel("🏆  " + str(score[0]) + "  ━  " + str(score[1]) + "  |  الهدف " + str(target_score) + "\n" + leader, COLORS["panel"], 23)
+ _panel("الجولة " + str(round_number) + "  •  الدور: اللاعب " + str(asker + 1), COLORS["purple"], 18)
+
+func _clock() -> void:
+ if turn_limit == 0:
+  _panel("⏱ وقت مفتوح", COLORS["panel"], 17)
+  return
+ clock_label = _label("⏱ " + str(turn_left) + " ثانية", 19)
+ clock_bar = ProgressBar.new()
+ clock_bar.custom_minimum_size.y = 12
+ clock_bar.show_percentage = false
+ clock_bar.max_value = turn_limit
+ clock_bar.value = turn_left
+ ui.add_child(clock_bar)
+
+func _history() -> void:
+ _label("آخر أحداث المباراة", 17)
+ history_label = _label("لا توجد أسئلة بعد" if event_history.is_empty() else "\n".join(event_history), 14)
+
 func _setup() -> void:
  timer.stop()
  _layout()
- _label("🎮 خمن صورتك — 3 طرق للسؤال", 24)
- _label("الإعداد المعتمد: أصدقاء • 3 طرق للسؤال • 30 ثانية • 10 نقاط", 14)
+ _panel("🖼️ خمن صورتك\nPHOTO DUEL", COLORS["purple"], 28)
+ _label("أصدقاء • أسئلة شفوية ونصية وجاهزة", 16)
  _label("اختبار على جهاز واحد فقط؛ الصوت والشات الشبكي لم يتم ربطهما بعد", 14)
  _label("طريقة اللعب: أصدقاء (لاعبان في النموذج المحلي)", 18)
  _label("طريقة السؤال (يمكن الجمع بين الثلاثة):", 19)
@@ -129,6 +179,7 @@ func _start() -> void:
  asker = 0
  round_number = 1
  finished = false
+ event_history.clear()
  _next_photo()
  _turn()
 
@@ -139,7 +190,12 @@ func _turn() -> void:
  pending_guess = false
  turn_left = turn_limit
  _layout()
- _label("الجولة " + str(round_number), 25)
+ clock_label = null
+ clock_bar = null
+ history_label = null
+ _panel("PHOTO DUEL  •  خمن صورتك", COLORS["purple"], 25)
+ _scoreboard()
+ _clock()
  if not active_photo.is_empty():
   var image_path := str(active_photo.get("image", ""))
   if ResourceLoader.exists(image_path):
@@ -149,10 +205,10 @@ func _turn() -> void:
    picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
    picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
    ui.add_child(picture)
- _label("لاعب 1: " + str(score[0]) + "    |    لاعب 2: " + str(score[1]), 18)
+ _panel("🖼️ صورة الجولة — العرض المحلي فقط", COLORS["panel"], 16)
  info = _label("دور اللاعب " + str(asker + 1) + " في طرح السؤال", 20)
  if question_mode in ["voice", "all"]:
-  _label("🎙 شفهي: اسأل بصوتك خارج هذا النموذج؛ الصوت الشبكي لم يُربط بعد", 15)
+  _panel("🎙️ السؤال الشفهي متاح وجهًا لوجه فقط\nالصوت الشبكي غير متصل بهذا النموذج", COLORS["panel"], 15)
  if question_mode in ["text", "all"]:
   question_input = LineEdit.new()
   question_input.placeholder_text = "اكتب سؤالك هنا (عرض محلي فقط)"
@@ -171,6 +227,7 @@ func _turn() -> void:
  _button("❌ لا", func(): _record_response("لا"), COLORS["purple"])
  _button("🎯 أريد تأكيد تخمين", _request_guess, COLORS["gold"])
  _button("🔄 تسليم الدور للمنافس", _pass_turn, COLORS["panel"])
+ _history()
  _button("إنهاء المباراة", _finish, COLORS["panel"])
  if turn_limit > 0:
   timer.start()
@@ -183,6 +240,7 @@ func _submit_text_question() -> void:
   return
  last_question = value
  info.text = "السؤال النصي المحلي: " + value
+ _log_event("💬 لاعب " + str(asker + 1) + ": " + value)
  question_input.clear()
 
 func _select_fact_question(key: String) -> void:
@@ -193,11 +251,13 @@ func _select_fact_question(key: String) -> void:
   return
  last_question = FACT_QUESTIONS[key]
  info.text = last_question + " — " + ("نعم ✅" if facts[key] else "لا ❌")
+ _log_event("👆 " + last_question + " → " + ("نعم" if facts[key] else "لا"))
 
 func _record_response(answer: String) -> void:
  if pending_guess or finished:
   return
  info.text = "رد المنافس: " + answer + " • يقدر اللاعب يكمل الأسئلة أو يسلم الدور"
+ _log_event("🗣️ المنافس: " + answer)
 
 func _request_guess() -> void:
  if pending_guess or finished:
@@ -211,7 +271,7 @@ func _request_guess() -> void:
  guess_input.placeholder_text = "التخمين النصي اختياري (محلي فقط)"
  ui.add_child(guess_input)
  _label("الطرف الآخر يؤكد صحة التخمين يدويًا — لا يوجد تعرف آلي على الكلام", 15)
- _label("التأكيد يمنح نقطة واحدة؛ التخمين الخاطئ ينقل الدور", 14)
+ _label("التخمين الصحيح يمنح " + str(score_per_win) + " نقطة؛ والخاطئ ينقل الدور", 14)
  _button("✅ التخمين صحيح — منح نقطة", _confirm_correct, COLORS["green"])
  _button("❌ التخمين خطأ — انتقال الدور", _confirm_wrong, COLORS["purple"])
  _button("إلغاء التأكيد والعودة للدور", _turn, COLORS["panel"])
@@ -221,6 +281,7 @@ func _confirm_correct() -> void:
   return
  pending_guess = false
  score[asker] += score_per_win
+ _log_event("🎯 تخمين صحيح للاعب " + str(asker + 1) + "  +" + str(score_per_win))
  if score[asker] >= target_score:
   _finish()
  else:
@@ -233,6 +294,7 @@ func _confirm_wrong() -> void:
  if not pending_guess or finished:
   return
  pending_guess = false
+ _log_event("❌ تخمين غير صحيح — انتقال الدور")
  _pass_turn()
 
 func _pass_turn() -> void:
@@ -250,13 +312,18 @@ func _tick() -> void:
  if turn_left <= 0:
   _pass_turn()
  else:
-  info.text = "دور اللاعب " + str(asker + 1) + " • متبقي " + str(turn_left) + " ثانية"
+  if is_instance_valid(clock_label):
+   clock_label.text = "⏱ " + str(turn_left) + " ثانية"
+  if is_instance_valid(clock_bar):
+   clock_bar.value = turn_left
+  if is_instance_valid(info):
+   info.text = "دور اللاعب " + str(asker + 1) + " • متبقي " + str(turn_left) + " ثانية"
 
 func _finish() -> void:
  finished = true
  timer.stop()
  _layout()
- _label("🏆 نهاية المباراة", 27)
+ _panel("🏆 نهاية المباراة", COLORS["purple"], 27)
  _label("الهدف: " + str(target_score) + " نقاط", 16)
  _label("لاعب 1: " + str(score[0]) + "    |    لاعب 2: " + str(score[1]))
  if score[0] == score[1]:

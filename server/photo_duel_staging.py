@@ -132,7 +132,7 @@ class StagingHub:
             match = room.match
             if room.closed or room.disconnected or match.finished or match.awaiting_confirmation:
                 raise MatchError("Voice unavailable")
-            if player != match.players[match.current] or not match.pending_question:
+            if player != match.players[match.current] or not match.pending_question or match.question_mode != "voice":
                 raise MatchError("Only active questioner may send voice")
             if match.timer and time.monotonic() - match.turn_started >= match.timer:
                 raise MatchError("Turn expired")

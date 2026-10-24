@@ -167,7 +167,6 @@ func _draw_lobby() -> void:
  _button("العودة للقائمة الرئيسية", _home)
 
 func _draw_match() -> void:
- _stop_mic_probe()
  _clear()
  _label("كود الغرفة: " + session_code)
  if state.is_empty():
@@ -220,7 +219,7 @@ func _draw_match() -> void:
     if FACT_LABELS.has(key):
      _button(str(FACT_LABELS[key]), func(): _send({"type":"photo_tap","question_id":key}))
   else:
-   _label("🎙 السؤال جارٍ — بانتظار إجابة المنافس...")
+   _label("🎙 السؤال جارٍ — بانتظار إجابة المنافس..." if str(state.get("question_mode", "")) == "voice" else "بانتظار إجابة المنافس...")
   guess_field = _field("تخمين الصورة")
   _button("طلب تأكيد التخمين", func(): _send({"type":"photo_guess","guess":guess_field.text}))
   _label("الدور ينتقل تلقائيًا عند انتهاء المؤقت", 15)
@@ -258,14 +257,14 @@ func _sync_voice() -> void:
   return
  var mine := int(state.get("player", -1)) == int(state.get("current", -2))
  var should_send := mine and str(state.get("question_mode", "")) == "voice" and bool(state.get("pending_question", false)) and not bool(state.get("awaiting_confirmation", false)) and not bool(state.get("finished", false))
- if should_send:
+ if should_send and not voice_question_active:
   voice_question_active = true
   mic_probe.start_voice()
- else:
+ elif not should_send and voice_question_active:
   voice_question_active = false
   mic_probe.stop_voice()
-  if is_instance_valid(voice_receiver):
-   voice_receiver.clear_audio()
+ if is_instance_valid(voice_receiver) and mine and should_send:
+  voice_receiver.clear_audio()
 
 func _on_voice_frame(pcm: String) -> void:
  if voice_question_active and connected and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:

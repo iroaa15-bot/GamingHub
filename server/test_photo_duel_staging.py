@@ -5,6 +5,7 @@ Run from repository root:
 No production server, GitHub Actions, network port, or Android required.
 """
 import asyncio
+import base64
 import json
 import unittest
 
@@ -64,6 +65,16 @@ class StagingHubTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.b.last("photo_state")["awaiting_confirmation"])
         await self.hub.handle(self.b, {"type": "photo_confirm", "correct": True})
         self.assertEqual(self.a.last("photo_state")["scores"], [1, 0])
+
+    async def test_voice_turn(self):
+        await self.join()
+        await self.hub.handle(self.a, {"type": "photo_voice_start"})
+        self.assertEqual(self.b.last("photo_state")["question_mode"], "voice")
+        pcm = base64.b64encode(bytes(1920)).decode("ascii")
+        await self.hub.handle(self.a, {"type": "photo_voice", "pcm": pcm})
+        self.assertEqual(self.b.last("photo_voice")["pcm"], pcm)
+        await self.hub.handle(self.b, {"type": "photo_reply", "answer": True})
+        self.assertEqual(self.a.last("photo_state")["current"], 1)
 
     async def test_disconnect_resume_rotates_token(self):
         await self.join()

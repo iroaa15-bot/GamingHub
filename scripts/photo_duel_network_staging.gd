@@ -203,7 +203,7 @@ func _draw_match() -> void:
    _label("بانتظار إجابة المنافس...")
   guess_field = _field("تخمين الصورة")
   _button("طلب تأكيد التخمين", func(): _send({"type":"photo_guess","guess":guess_field.text}))
-  _button("تسليم الدور", func(): _send({"type":"photo_pass"}))
+  _label("الدور ينتقل تلقائيًا عند انتهاء المؤقت", 15)
  else:
   _label("دور المنافس")
   if bool(state.get("pending_question", false)):

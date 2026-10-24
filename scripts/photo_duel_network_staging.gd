@@ -22,9 +22,15 @@ var guess_field: LineEdit
 var requested_action: Dictionary = {}
 var server_url := "ws://127.0.0.1:8769"
 var previous_state := WebSocketPeer.STATE_CLOSED
+var mic_probe: Node
+var mic_level_label: Label
+var mic_probe_active := false
 
 func _ready() -> void:
  _draw_lobby()
+ mic_probe = load("res://scripts/photo_duel_mic_probe_staging.gd").new()
+ add_child(mic_probe)
+ mic_probe.microphone_level.connect(_on_mic_level)
  set_process(true)
 
 func _process(_delta: float) -> void:
@@ -92,6 +98,8 @@ func _received(message: Dictionary) -> void:
 
 func _clear() -> void:
  for child in get_children():
+  if child == mic_probe:
+   continue
   remove_child(child)
   child.queue_free()
  var scroll := ScrollContainer.new()
@@ -140,6 +148,7 @@ func _status(value: String) -> void:
  print("[PHOTO_STAGING] ", value)
 
 func _draw_lobby() -> void:
+ _stop_mic_probe()
  _clear()
  address_field = _field("WebSocket staging URL", server_url)
  code_field = _field("كود الغرفة للانضمام", session_code)
@@ -149,6 +158,7 @@ func _draw_lobby() -> void:
  _button("العودة للقائمة الرئيسية", _home)
 
 func _draw_match() -> void:
+ _stop_mic_probe()
  _clear()
  _label("كود الغرفة: " + session_code)
  if state.is_empty():
@@ -209,9 +219,29 @@ func _draw_match() -> void:
   if bool(state.get("pending_question", false)):
    _button("الإجابة: نعم", func(): _send({"type":"photo_reply","answer":true}))
    _button("الإجابة: لا", func(): _send({"type":"photo_reply","answer":false}))
+ _label("اختبار الميكروفون المحلي (لا ينقل الصوت للمنافس)", 15)
+ mic_level_label = _label("مستوى الصوت: --", 15)
+ _button("تشغيل اختبار الميكروفون", _start_mic_probe)
+ _button("إيقاف اختبار الميكروفون", _stop_mic_probe)
  _button("تحديث الحالة", func(): _send({"type":"photo_sync"}))
  _button("مغادرة الغرفة", func(): _send({"type":"photo_leave"}); state = {}; session_code = ""; resume_token = ""; _draw_lobby())
 
 func _home() -> void:
  socket.close()
  get_tree().change_scene_to_file(HOME)
+
+func _start_mic_probe() -> void:
+ if mic_probe == null:
+  return
+ mic_probe_active = true
+ mic_probe.start_probe()
+ _status("اختبار الميكروفون المحلي يعمل")
+
+func _stop_mic_probe() -> void:
+ mic_probe_active = false
+ if is_instance_valid(mic_probe):
+  mic_probe.stop_probe()
+
+func _on_mic_level(level: float) -> void:
+ if mic_probe_active and is_instance_valid(mic_level_label):
+  mic_level_label.text = "مستوى الصوت: %d%%" % int(clampf(level * 100.0, 0.0, 100.0))

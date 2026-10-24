@@ -5,7 +5,7 @@ var playback: AudioStreamGeneratorPlayback
 var sample_rate := 48000.0
 
 func _ready() -> void:
-	sample_rate = AudioServer.get_mix_rate()
+	sample_rate = 48000.0
 	var generator := AudioStreamGenerator.new()
 	generator.mix_rate = sample_rate
 	generator.buffer_length = 0.35

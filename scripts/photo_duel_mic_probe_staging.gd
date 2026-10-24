@@ -4,6 +4,8 @@ extends Node
 signal microphone_level(value: float)
 signal audio_frame(pcm: String)
 var voice_enabled := false
+const VOICE_RATE := 48000.0
+var resample_phase := 0.0
 var voice_buffer := PackedVector2Array()
 var capture: AudioEffectCapture
 var player: AudioStreamPlayer
@@ -39,6 +41,7 @@ func start_probe() -> void:
 
 func stop_probe() -> void:
 	enabled = false
+	resample_phase = 0.0
 	voice_buffer.clear()
 	player.stop()
 	if capture:
@@ -56,8 +59,12 @@ func _process(_delta: float) -> void:
 		peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
 	microphone_level.emit(peak)
 	if voice_enabled:
+		var ratio := VOICE_RATE / maxf(float(AudioServer.get_mix_rate()), 1.0)
 		for frame in frames:
-			voice_buffer.append(frame)
+			resample_phase += ratio
+			while resample_phase >= 1.0:
+				voice_buffer.append(frame)
+				resample_phase -= 1.0
 		while voice_buffer.size() >= 960:
 			var pcm := PackedByteArray()
 			for i in range(960):

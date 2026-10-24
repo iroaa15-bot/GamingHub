@@ -39,5 +39,5 @@ func _process(_delta: float) -> void:
 	var frames := capture.get_buffer(mini(available, 1024))
 	var peak := 0.0
 	for frame in frames:
-		peak = maxf(peak, absf(frame.x), absf(frame.y))
+		peak = maxf(peak, maxf(absf(frame.x), absf(frame.y)))
 	microphone_level.emit(peak)

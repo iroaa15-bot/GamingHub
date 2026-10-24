@@ -60,6 +60,7 @@ class PhotoRoom:
                 'finished':self.match.finished,'closed':self.closed,
                 'awaiting_confirmation':self.match.awaiting_confirmation,
                 'pending_question':self.match.pending_question,
+                'question_mode':self.match.question_mode,
                 'visible_opponent_image':{'id':item['id'],'image':item['image']},
                 'available_questions':list(self.catalog[self.secret_ids[index]]['facts'])}
 

@@ -137,13 +137,13 @@ class StagingHub:
             if match.timer and time.monotonic() - match.turn_started >= match.timer:
                 raise MatchError("Turn expired")
             encoded = message.get("pcm")
-            if not isinstance(encoded, str) or len(encoded) > 2200:
+            if not isinstance(encoded, str) or len(encoded) > 2800:
                 raise MatchError("Invalid voice packet")
             try:
                 raw = base64.b64decode(encoded, validate=True)
             except (binascii.Error, ValueError):
                 raise MatchError("Invalid voice encoding")
-            if not raw or len(raw) > 1600 or len(raw) % 2:
+            if not raw or len(raw) > 2048 or len(raw) % 2:
                 raise MatchError("Invalid voice frame")
             other = match.players[1 - match.current]
             peer = record["peers"].get(other)

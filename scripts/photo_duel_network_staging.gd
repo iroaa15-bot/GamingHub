@@ -257,7 +257,7 @@ func _sync_voice() -> void:
  if not is_instance_valid(mic_probe):
   return
  var mine := int(state.get("player", -1)) == int(state.get("current", -2))
- var should_send := mine and bool(state.get("pending_question", false)) and not bool(state.get("awaiting_confirmation", false)) and not bool(state.get("finished", false))
+ var should_send := mine and str(state.get("question_mode", "")) == "voice" and bool(state.get("pending_question", false)) and not bool(state.get("awaiting_confirmation", false)) and not bool(state.get("finished", false))
  if should_send:
   voice_question_active = true
   mic_probe.start_voice()

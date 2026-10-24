@@ -1,7 +1,12 @@
 extends Control
-## Isolated, editor-only voice-guided turn protocol prototype.
+## Isolated, editor-only three-mode question flow prototype.
 ## Does NOT start audio, connect servers, alter game cards or persist scores.
 const MAIN := "res://scenes/Main.tscn"
+var question_mode := "all" # voice, text, tap, or all
+var question_input: LineEdit
+var guess_input: LineEdit
+var last_question := ""
+const READY_QUESTIONS := ["هل هو كائن حي؟", "هل هو حيوان؟", "هل هو شخص مشهور؟", "هل يُستخدم في المنزل؟", "هل يمكن أكله؟", "هل يوجد في الطبيعة؟", "هل هو مكان؟", "هل حجمه كبير؟"]
 var target_score := 5
 var turn_limit := 0
 var score := [0, 0]
@@ -76,8 +81,12 @@ func _button(t: String, action: Callable, color: Color) -> Button:
 func _setup() -> void:
  timer.stop()
  _layout()
- _label("🎙 خمن صورتك — نظام الأدوار الصوتية", 24)
- _label("محاكاة محلية للأزرار فقط • لا يوجد اتصال صوتي في هذه النسخة", 14)
+ _label("🎮 خمن صورتك — 3 طرق للسؤال", 24)
+ _label("نموذج محلي: لا يشغّل الصوت أو يرسل رسائل للشبكة", 14)
+ _label("طريقة السؤال (يمكن الجمع بين الثلاثة):", 19)
+ for key in ["voice", "text", "tap", "all"]:
+  var names := {"voice": "🎙 شفهي", "text": "💬 نصي", "tap": "👆 أسئلة جاهزة", "all": "✨ الثلاثة معًا"}
+  _button(names[key] + (" ✓" if question_mode == key else ""), func(): question_mode = key; _setup(), COLORS["green"] if question_mode == key else COLORS["panel"])
  _label("نقاط الفوز: " + str(target_score))
  for n in [3, 5, 10, 20]:
   _button(str(n) + " نقاط", func(): target_score = n; _setup(), COLORS["green"] if target_score == n else COLORS["panel"])
@@ -103,8 +112,19 @@ func _turn() -> void:
  _layout()
  _label("الجولة " + str(round_number), 25)
  _label("لاعب 1: " + str(score[0]) + "    |    لاعب 2: " + str(score[1]), 18)
- info = _label("دور اللاعب " + str(asker + 1) + " في طرح الأسئلة شفهيًا", 20)
- _label("الطرف الآخر يجيب شفهيًا ويضغط نعم أو لا لتسجيل الرد", 15)
+ info = _label("دور اللاعب " + str(asker + 1) + " في طرح السؤال", 20)
+ if question_mode in ["voice", "all"]:
+  _label("🎙 شفهي: اسأل بصوتك خارج هذا النموذج؛ الصوت الشبكي لم يُربط بعد", 15)
+ if question_mode in ["text", "all"]:
+  question_input = LineEdit.new()
+  question_input.placeholder_text = "اكتب سؤالك هنا (عرض محلي فقط)"
+  ui.add_child(question_input)
+  _button("💬 إرسال السؤال داخل شاشة الاختبار", _submit_text_question, COLORS["panel"])
+ if question_mode in ["tap", "all"]:
+  _label("👆 اختر سؤالًا جاهزًا", 16)
+  for q in READY_QUESTIONS:
+   _button(q, _select_question.bind(q), COLORS["panel"])
+ _label("الطرف الآخر يرد بنعم أو لا، أو يسلّم الدور", 15)
  _button("✅ نعم", func(): _record_response("نعم"), COLORS["green"])
  _button("❌ لا", func(): _record_response("لا"), COLORS["purple"])
  _button("🎯 أريد تأكيد تخمين", _request_guess, COLORS["gold"])
@@ -112,6 +132,22 @@ func _turn() -> void:
  _button("إنهاء المباراة", _finish, COLORS["panel"])
  if turn_limit > 0:
   timer.start()
+
+func _submit_text_question() -> void:
+ if question_input == null or pending_guess or finished:
+  return
+ var value := question_input.text.strip_edges()
+ if value.is_empty():
+  return
+ last_question = value
+ info.text = "السؤال النصي المحلي: " + value
+ question_input.clear()
+
+func _select_question(value: String) -> void:
+ if pending_guess or finished:
+  return
+ last_question = value
+ info.text = "السؤال المختار: " + value
 
 func _record_response(answer: String) -> void:
  if pending_guess or finished:
@@ -125,8 +161,11 @@ func _request_guess() -> void:
  timer.stop()
  _layout()
  _label("🎯 تأكيد التخمين", 25)
- _label("اللاعب " + str(asker + 1) + " يقول التخمين بصوته أولًا")
- _label("الطرف الآخر هو الذي يؤكد صحة التخمين — لا يوجد تعرف آلي على الكلام", 15)
+ _label("اللاعب " + str(asker + 1) + " يعلن التخمين شفهيًا أو كتابيًا", 17)
+ guess_input = LineEdit.new()
+ guess_input.placeholder_text = "التخمين النصي اختياري (محلي فقط)"
+ ui.add_child(guess_input)
+ _label("الطرف الآخر يؤكد صحة التخمين يدويًا — لا يوجد تعرف آلي على الكلام", 15)
  _button("✅ التخمين صحيح — منح نقطة", _confirm_correct, COLORS["green"])
  _button("❌ التخمين خطأ — انتقال الدور", _confirm_wrong, COLORS["purple"])
  _button("إلغاء التأكيد والعودة للدور", _turn, COLORS["panel"])

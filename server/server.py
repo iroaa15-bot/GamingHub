@@ -10,6 +10,11 @@ from websockets.http11 import Response
 from websockets.datastructures import Headers
 
 from pathlib import Path
+# Staging-only photo room protocol. Disabled by default, never enabled in production.
+from photo_match_protocol import PhotoMatch, MatchError
+PHOTO_MATCH_STAGING = os.getenv("GAMINGHUB_PHOTO_MATCH_STAGING", "0") == "1"
+photo_matches = {}
+photo_ready = {}
 catalog_path = Path(__file__).resolve().parent.parent / 'data' / 'cards.json'
 AI_DAILY_DIR = Path(__file__).resolve().parent / 'ai_daily_publish'
 if not catalog_path.exists():
@@ -118,6 +123,8 @@ def snapshot(room, index, kind='synced', include_token=False):
 
 async def cleanup_room(code, reason='Match expired', exclude=None):
     room = rooms.pop(code, None)
+    photo_matches.pop(code, None)
+    photo_ready.pop(code, None)
     if room is None:
         return
     for peer in room.players:
@@ -168,6 +175,65 @@ async def process(ws, msg):
             return await send(ws, {'type':'error','message':'No active match'})
         index = room.players.index(ws)
         return await send(ws, snapshot(room, index))
+    # Photo game opt-in uses the EXISTING authenticated room sockets.
+    # All legacy messages and the existing voice transport remain unchanged.
+    if action.startswith('photo_'):
+        if not PHOTO_MATCH_STAGING:
+            return await send(ws, {'type':'error','message':'Photo staging is disabled'})
+        code = connections.get(ws)
+        room = rooms.get(code)
+        if room is None or len(room.players) != 2 or ws not in room.players or any(p is None for p in room.players):
+            return await send(ws, {'type':'error','message':'No active two-player room'})
+        index = room.players.index(ws)
+        match = photo_matches.get(code)
+        if action == 'photo_ready':
+            if match is not None:
+                return await send(ws, {'type':'photo_snapshot','turn':match.current,'scores':match.scores,'round':match.round,'finished':match.finished,'timer':match.timer,'target':match.target})
+            if type(msg.get('target',10)) is not int or type(msg.get('timer',30)) is not int or type(msg.get('reward',1)) is not int:
+                return await send(ws, {'type':'error','message':'Invalid photo settings'})
+            settings = (msg.get('target',10), msg.get('timer',30), msg.get('reward',1))
+            try:
+                PhotoMatch(("0","1"), target=settings[0], timer=settings[1], reward=settings[2])
+            except MatchError as exc:
+                return await send(ws, {'type':'error','message':str(exc)})
+            ready = photo_ready.setdefault(code, {})
+            ready[index] = settings
+            await send(ws, {'type':'photo_waiting','ready':True})
+            if len(ready) == 2:
+                if ready[0] != ready[1]:
+                    photo_ready.pop(code,None)
+                    return await broadcast(room, {'type':'photo_error','message':'Photo settings mismatch'})
+                match = PhotoMatch(("0","1"), target=settings[0], timer=settings[1], reward=settings[2])
+                photo_matches[code] = match
+                photo_ready.pop(code,None)
+                await broadcast(room, {'type':'photo_started','turn':0,'scores':match.scores,'round':1,'timer':match.timer,'target':match.target,'reward':match.reward})
+            return
+        if match is None:
+            return await send(ws, {'type':'error','message':'Photo match not started'})
+        try:
+            player = str(index)
+            if action == 'photo_text':
+                events = [match.ask_text(player, msg.get('text'))]
+            elif action == 'photo_tap':
+                # Facts must come from server-verified photo data, NEVER from a client payload.
+                return await send(ws, {'type':'error','message':'Verified photo facts not configured'})
+            elif action == 'photo_reply':
+                events = [match.reply(player, msg.get('answer'))]
+            elif action == 'photo_pass':
+                events = [match.pass_turn(player)]
+            elif action == 'photo_guess':
+                events = [match.propose_guess(player, msg.get('guess',''))]
+            elif action == 'photo_confirm':
+                events = match.confirm_guess(player, msg.get('correct'))
+            elif action == 'photo_sync':
+                return await send(ws, {'type':'photo_snapshot','turn':match.current,'scores':match.scores,'round':match.round,'finished':match.finished,'timer':match.timer,'target':match.target,'events':match.events[-40:]})
+            else:
+                return await send(ws, {'type':'error','message':'Unknown photo action'})
+        except MatchError as exc:
+            return await send(ws, {'type':'error','message':str(exc)})
+        for event in events:
+            await broadcast(room, event)
+        return
     if action == 'resume':
         code = msg.get('code')
         token = msg.get('token')

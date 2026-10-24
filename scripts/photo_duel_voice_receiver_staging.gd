@@ -21,7 +21,7 @@ func receive_pcm(encoded: String) -> void:
 	var data := Marshalls.base64_to_raw(encoded)
 	if data.size() == 0 or data.size() % 2 != 0:
 		return
-	var frames := data.size() / 2
+	var frames := int(data.size() / 2)
 	if playback.get_frames_available() < frames:
 		return # Drop late audio rather than increasing latency.
 	for i in range(frames):

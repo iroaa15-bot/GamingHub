@@ -1869,13 +1869,10 @@ func show_more_games() -> void:
  var favorites: Array = profile.get("favorites", [])
  for i in range(GAMES.size()):
   grid.add_child(make_game_tile(i, previews[i], i in favorites))
- # Keep the photo library in the game list, isolated from matchmaking and release builds.
- # The review-only 102 photos remain opt-in within the preview scene.
- if OS.has_feature("editor") and FileAccess.file_exists("res://data/guess_picture_302/catalog.json") and ResourceLoader.exists("res://scenes/guess_picture_302_preview.tscn"):
-  button(tr_ui("🖼️ خمن صورتك — مكتبة الصور (اختبار داخلي)", "🖼️ GUESS YOUR PICTURE — PHOTO LIBRARY (INTERNAL)"), func(): get_tree().change_scene_to_file("res://scenes/guess_picture_302_preview.tscn"), ACCENT)
- # Isolated editor-only photo match; no production or networking changes.
- if OS.has_feature("editor") and FileAccess.file_exists("res://data/guess_picture_302/catalog.json") and ResourceLoader.exists("res://scenes/guess_picture_match.tscn"):
-  button(tr_ui("🎮 خمن صورتك — مباراة ونقاط وأدوار (تجريبي)", "🎮 GUESS YOUR PICTURE — MATCH SETUP (INTERNAL)"), func(): get_tree().change_scene_to_file("res://scenes/guess_picture_match.tscn"), GREEN)
+ # Single editor-only entry for the updated photo game; legacy production games remain untouched.
+ # This does not activate networking or the 102 rights-review images.
+ if OS.has_feature("editor") and FileAccess.file_exists("res://data/guess_picture_302/catalog.json") and ResourceLoader.exists("res://scenes/guess_picture_voice_turns.tscn"):
+  button(tr_ui("🖼️ خمن صورتك — أصدقاء • شفهي/نصي/نقر (تجريبي)", "🖼️ GUESS YOUR PICTURE — FRIENDS • VOICE/TEXT/TAP (PREVIEW)"), func(): get_tree().change_scene_to_file("res://scenes/guess_picture_voice_turns.tscn"), GREEN)
  button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
  button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
  button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)

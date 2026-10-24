@@ -27,6 +27,7 @@ class PhotoMatch:
     confirmation_started: float = 0.0
     server_facts: dict = field(default_factory=dict, repr=False)
     pending_question: bool = False
+    question_mode: str = ""
     turn_started: float = field(default_factory=time.monotonic)
     events: list[dict] = field(default_factory=list)
 
@@ -75,6 +76,7 @@ class PhotoMatch:
         if self.pending_question:
             raise MatchError("Previous question awaiting answer")
         self.pending_question = True
+        self.question_mode = "text"
         return self._event("question", player=self.current, mode="text", text=text.strip())
 
     def ask_tap(self, player: str, question_id: str) -> dict:
@@ -99,6 +101,7 @@ class PhotoMatch:
         if not self.pending_question:
             raise MatchError("No text question awaiting answer")
         self.pending_question = False
+        self.question_mode = ""
         reply_event = self._event("reply", player=index, answer=yes)
         self.current = index
         self.turn_started = time.monotonic()
@@ -148,6 +151,7 @@ class PhotoMatch:
         elif time.monotonic() - self.turn_started < self.timer:
             return None
         self.pending_question = False
+        self.question_mode = ""
         self.current = 1 - self.current
         self.turn_started = time.monotonic()
         return self._event("turn", player=self.current, reason="timeout")

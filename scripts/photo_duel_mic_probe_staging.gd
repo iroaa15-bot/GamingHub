@@ -20,13 +20,13 @@ func _ready() -> void:
 	# Keep bus unmuted for capture; attenuate output to prevent feedback.
 	AudioServer.set_bus_mute(bus, false)
 	AudioServer.set_bus_volume_db(bus, 0.0)
-	AudioServer.set_bus_send(bus, "PhotoDuelSilent")
 	var silent := AudioServer.get_bus_index("PhotoDuelSilent")
 	if silent == -1:
 		AudioServer.add_bus()
 		silent = AudioServer.bus_count - 1
 		AudioServer.set_bus_name(silent, "PhotoDuelSilent")
 	AudioServer.set_bus_mute(silent, true)
+	AudioServer.set_bus_send(bus, "PhotoDuelSilent")
 	capture = AudioEffectCapture.new()
 	AudioServer.add_bus_effect(bus, capture)
 	player = AudioStreamPlayer.new()
@@ -51,8 +51,8 @@ func stop_probe() -> void:
 	resample_phase = 0.0
 	voice_buffer.clear()
 	player.stop()
-	if capture:
-		capture.clear_buffer()
+	# AudioEffectCapture.clear_buffer() fails while the audio effect is active.
+	# Captured frames are drained when recording resumes.
 
 func _process(_delta: float) -> void:
 	if not enabled or capture == null:

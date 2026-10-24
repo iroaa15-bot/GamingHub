@@ -2,13 +2,14 @@ extends Control
 ## Isolated, editor-only three-mode question flow prototype.
 ## Does NOT start audio, connect servers, alter game cards or persist scores.
 const MAIN := "res://scenes/Main.tscn"
-var question_mode := "all" # voice, text, tap, or all
+var question_mode := "all" # approved default: voice + text + prepared tap questions
+var play_mode := "friends" # local two-friend protocol prototype; online room not connected
 var question_input: LineEdit
 var guess_input: LineEdit
 var last_question := ""
 const READY_QUESTIONS := ["هل هو كائن حي؟", "هل هو حيوان؟", "هل هو شخص مشهور؟", "هل يُستخدم في المنزل؟", "هل يمكن أكله؟", "هل يوجد في الطبيعة؟", "هل هو مكان؟", "هل حجمه كبير؟"]
-var target_score := 5
-var turn_limit := 0
+var target_score := 10
+var turn_limit := 30
 var score := [0, 0]
 var asker := 0
 var round_number := 1
@@ -82,7 +83,9 @@ func _setup() -> void:
  timer.stop()
  _layout()
  _label("🎮 خمن صورتك — 3 طرق للسؤال", 24)
- _label("نموذج محلي: لا يشغّل الصوت أو يرسل رسائل للشبكة", 14)
+ _label("الإعداد المعتمد: أصدقاء • 3 طرق للسؤال • 30 ثانية • 10 نقاط", 14)
+ _label("اختبار على جهاز واحد فقط؛ الصوت والشات الشبكي لم يتم ربطهما بعد", 14)
+ _label("طريقة اللعب: أصدقاء (لاعبان في النموذج المحلي)", 18)
  _label("طريقة السؤال (يمكن الجمع بين الثلاثة):", 19)
  for key in ["voice", "text", "tap", "all"]:
   var names := {"voice": "🎙 شفهي", "text": "💬 نصي", "tap": "👆 أسئلة جاهزة", "all": "✨ الثلاثة معًا"}
@@ -124,7 +127,7 @@ func _turn() -> void:
   _label("👆 اختر سؤالًا جاهزًا", 16)
   for q in READY_QUESTIONS:
    _button(q, _select_question.bind(q), COLORS["panel"])
- _label("الطرف الآخر يرد بنعم أو لا، أو يسلّم الدور", 15)
+ _label("الطرف الآخر يرد بنعم أو لا؛ السؤال والإجابة لا يمنحان نقاطًا", 15)
  _button("✅ نعم", func(): _record_response("نعم"), COLORS["green"])
  _button("❌ لا", func(): _record_response("لا"), COLORS["purple"])
  _button("🎯 أريد تأكيد تخمين", _request_guess, COLORS["gold"])
@@ -166,6 +169,7 @@ func _request_guess() -> void:
  guess_input.placeholder_text = "التخمين النصي اختياري (محلي فقط)"
  ui.add_child(guess_input)
  _label("الطرف الآخر يؤكد صحة التخمين يدويًا — لا يوجد تعرف آلي على الكلام", 15)
+ _label("التأكيد يمنح نقطة واحدة؛ التخمين الخاطئ ينقل الدور", 14)
  _button("✅ التخمين صحيح — منح نقطة", _confirm_correct, COLORS["green"])
  _button("❌ التخمين خطأ — انتقال الدور", _confirm_wrong, COLORS["purple"])
  _button("إلغاء التأكيد والعودة للدور", _turn, COLORS["panel"])
@@ -210,6 +214,7 @@ func _finish() -> void:
  timer.stop()
  _layout()
  _label("🏆 نهاية المباراة", 27)
+ _label("الهدف: " + str(target_score) + " نقاط", 16)
  _label("لاعب 1: " + str(score[0]) + "    |    لاعب 2: " + str(score[1]))
  if score[0] == score[1]:
   _label("تعادل")

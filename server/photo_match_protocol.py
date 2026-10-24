@@ -84,7 +84,11 @@ class PhotoMatch:
             raise MatchError("No verified answer for this question")
         if self.pending_question:
             raise MatchError("Previous question awaiting answer")
-        return self._event("question", player=self.current, mode="tap", question_id=question_id, answer=facts[question_id])
+        question = self._event("question", player=self.current, mode="tap", question_id=question_id, answer=facts[question_id])
+        self.current = 1 - self.current
+        self.turn_started = time.monotonic()
+        self._event("turn", player=self.current, reason="answered")
+        return question
 
     def reply(self, player: str, yes: bool) -> dict:
         index = self._player(player)
@@ -95,7 +99,11 @@ class PhotoMatch:
         if not self.pending_question:
             raise MatchError("No text question awaiting answer")
         self.pending_question = False
-        return self._event("reply", player=index, answer=yes)
+        reply_event = self._event("reply", player=index, answer=yes)
+        self.current = index
+        self.turn_started = time.monotonic()
+        self._event("turn", player=self.current, reason="answered")
+        return reply_event
 
     def propose_guess(self, player: str, guess: str = "") -> dict:
         self._active(player)

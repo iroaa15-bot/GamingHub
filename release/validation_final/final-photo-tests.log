@@ -11,6 +11,6 @@ test_resume_token_rotation_and_leave (test_photo_room_service.PhotoRoomTests.tes
 test_secret_not_in_own_snapshot (test_photo_room_service.PhotoRoomTests.test_secret_not_in_own_snapshot) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.127s
+Ran 11 tests in 0.131s
 
 OK

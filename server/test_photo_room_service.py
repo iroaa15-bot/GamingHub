@@ -16,6 +16,7 @@ class PhotoRoomTests(unittest.TestCase):
         correct=r.catalog[r.secret_ids[0]]['facts']['living']
         result=r.handle('a',{'type':'photo_tap','question_id':'living','facts':{'living':not correct},'player':'b'})
         self.assertEqual(result['answer'],correct)
+        with self.assertRaises(MatchError):r.handle('a',{'type':'photo_tap','question_id':[]})
         r.handle('a',{'type':'photo_guess','guess':'test'})
         with self.assertRaises(MatchError):r.handle('a',{'type':'photo_confirm','correct':True})
         r.handle('b',{'type':'photo_confirm','correct':True})

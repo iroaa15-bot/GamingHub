@@ -80,7 +80,7 @@ class PhotoMatch:
     def ask_tap(self, player: str, question_id: str) -> dict:
         self._active(player)
         facts = self.server_facts
-        if self.awaiting_confirmation or question_id not in facts or type(facts[question_id]) is not bool:
+        if self.awaiting_confirmation or not isinstance(question_id,str) or question_id not in facts or type(facts[question_id]) is not bool:
             raise MatchError("No verified answer for this question")
         if self.pending_question:
             raise MatchError("Previous question awaiting answer")

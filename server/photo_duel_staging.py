@@ -3,6 +3,8 @@ Run separately: python -m server.photo_duel_staging (from repository root).
 Requires websockets >= 12; binds loopback by default.
 """
 import asyncio
+import base64
+import binascii
 import json
 import os
 import secrets
@@ -20,7 +22,7 @@ MAX_BYTES = 4096
 MAX_ROOMS = 100
 ROOM_IDLE_SECONDS = 1200
 PHOTO_ACTIONS = frozenset({
-    "photo_text", "photo_tap", "photo_reply", "photo_guess", "photo_confirm", "photo_pass"
+    "photo_text", "photo_tap", "photo_reply", "photo_guess", "photo_confirm", "photo_pass", "photo_voice_start"
 })
 
 
@@ -125,6 +127,35 @@ class StagingHub:
             return
         if action == "photo_sync":
             await self.send(ws, room.view(player))
+            return
+        if action == "photo_voice":
+            match = room.match
+            if room.closed or room.disconnected or match.finished or match.awaiting_confirmation:
+                raise MatchError("Voice unavailable")
+            if player != match.players[match.current] or not match.pending_question:
+                raise MatchError("Only active questioner may send voice")
+            if match.timer and time.monotonic() - match.turn_started >= match.timer:
+                raise MatchError("Turn expired")
+            encoded = message.get("pcm")
+            if not isinstance(encoded, str) or len(encoded) > 2200:
+                raise MatchError("Invalid voice packet")
+            try:
+                raw = base64.b64decode(encoded, validate=True)
+            except (binascii.Error, ValueError):
+                raise MatchError("Invalid voice encoding")
+            if not raw or len(raw) > 1600 or len(raw) % 2:
+                raise MatchError("Invalid voice frame")
+            other = match.players[1 - match.current]
+            peer = record["peers"].get(other)
+            if peer is not None:
+                await self.send(peer, {"type": "photo_voice", "pcm": encoded})
+            return
+        if action == "photo_voice_start":
+            event = room.handle(player, {"type": "photo_text", "text": "[voice]"})
+            event = {**event, "mode": "voice", "text": ""}
+            for peer in record["peers"].values():
+                await self.send(peer, event)
+            await self.notify(code)
             return
         if action not in PHOTO_ACTIONS:
             raise MatchError("Unsupported action")

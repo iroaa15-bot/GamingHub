@@ -25,12 +25,17 @@ var previous_state := WebSocketPeer.STATE_CLOSED
 var mic_probe: Node
 var mic_level_label: Label
 var mic_probe_active := false
+var voice_receiver: Node
+var voice_question_active := false
 
 func _ready() -> void:
  _draw_lobby()
  mic_probe = load("res://scripts/photo_duel_mic_probe_staging.gd").new()
  add_child(mic_probe)
  mic_probe.microphone_level.connect(_on_mic_level)
+ mic_probe.audio_frame.connect(_on_voice_frame)
+ voice_receiver = load("res://scripts/photo_duel_voice_receiver_staging.gd").new()
+ add_child(voice_receiver)
  set_process(true)
 
 func _process(_delta: float) -> void:
@@ -89,6 +94,10 @@ func _received(message: Dictionary) -> void:
   "photo_state":
    state = message
    _draw_match()
+   _sync_voice()
+  "photo_voice":
+   if is_instance_valid(voice_receiver):
+    voice_receiver.receive_pcm(str(message.get("pcm", "")))
   "photo_error":
    _status("خطأ: " + str(message.get("message", "غير معروف")))
   "photo_question", "photo_reply", "photo_turn", "photo_guess_pending", "photo_guess_result", "photo_finished":
@@ -98,7 +107,7 @@ func _received(message: Dictionary) -> void:
 
 func _clear() -> void:
  for child in get_children():
-  if child == mic_probe:
+  if child == mic_probe or child == voice_receiver:
    continue
   remove_child(child)
   child.queue_free()
@@ -202,6 +211,7 @@ func _draw_match() -> void:
  elif me == current:
   _label("دورك في السؤال • المتبقي: " + str(state.get("remaining", "?")) + " ثانية")
   if not bool(state.get("pending_question", false)):
+   _button("🎙 ابدأ السؤال الصوتي", func(): _send({"type":"photo_voice_start"}))
    text_field = _field("اكتب سؤالًا للمنافس")
    _button("إرسال السؤال", func(): _send({"type":"photo_text","text":text_field.text}))
    var facts: Array = state.get("available_questions", [])
@@ -210,7 +220,7 @@ func _draw_match() -> void:
     if FACT_LABELS.has(key):
      _button(str(FACT_LABELS[key]), func(): _send({"type":"photo_tap","question_id":key}))
   else:
-   _label("بانتظار إجابة المنافس...")
+   _label("🎙 السؤال جارٍ — بانتظار إجابة المنافس...")
   guess_field = _field("تخمين الصورة")
   _button("طلب تأكيد التخمين", func(): _send({"type":"photo_guess","guess":guess_field.text}))
   _label("الدور ينتقل تلقائيًا عند انتهاء المؤقت", 15)
@@ -239,8 +249,27 @@ func _start_mic_probe() -> void:
 
 func _stop_mic_probe() -> void:
  mic_probe_active = false
+ voice_question_active = false
  if is_instance_valid(mic_probe):
   mic_probe.stop_probe()
+
+func _sync_voice() -> void:
+ if not is_instance_valid(mic_probe):
+  return
+ var mine := int(state.get("player", -1)) == int(state.get("current", -2))
+ var should_send := mine and bool(state.get("pending_question", false)) and not bool(state.get("awaiting_confirmation", false)) and not bool(state.get("finished", false))
+ if should_send:
+  voice_question_active = true
+  mic_probe.start_voice()
+ else:
+  voice_question_active = false
+  mic_probe.stop_voice()
+  if is_instance_valid(voice_receiver):
+   voice_receiver.clear_audio()
+
+func _on_voice_frame(pcm: String) -> void:
+ if voice_question_active and connected and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+  _send({"type":"photo_voice", "pcm":pcm})
 
 func _on_mic_level(level: float) -> void:
  if mic_probe_active and is_instance_valid(mic_level_label):

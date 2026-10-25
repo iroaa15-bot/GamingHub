@@ -1,0 +1,37 @@
+connection handler failed
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\server.py", line 762, in protocol_handler
+    await handler(connection)
+  File "C:\Users\Omar\Documents\Codex\2026-10-24\referenced-chatgpt-conversation-this-is-an-3\work\GamingHub-services\server\party_room_staging.py", line 32, in handler
+    async for raw in ws:
+    ...<84 lines>...
+            await send(ws, {"type": "party.error", "error": str(exc)[:100]})
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\connection.py", line 237, in __aiter__
+    yield await self.recv()
+          ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\connection.py", line 317, in recv
+    raise self.protocol.close_exc from self.recv_exc
+websockets.exceptions.ConnectionClosedError: no close frame received or sent
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+
+
+[PARTY_STAGING] جار الاتصال بالسيرفر التجريبي...
+
+[PARTY_STAGING] تم الاتصال بالغرفة 0FCA4F
+
+[PARTY_STAGING] جار الاتصال بالسيرفر التجريبي...
+
+[PARTY_STAGING] تم الاتصال بالغرفة 0FCA4F
+
+[PARTY_STAGING] انقطع الاتصال. استعد الجلسة من شاشة الاتصال
+
+[PARTY_STAGING] جار الاتصال بالسيرفر التجريبي...
+
+[PARTY_STAGING] تم الاتصال بالغرفة 0FCA4F
+
+PARTY_MAIN_APP_RUNTIME failures=0 main-menu navigation, create/join, game turn, scoreboard, chat, reconnect
+
+[PARTY_STAGING] انقطع الاتصال. استعد الجلسة من شاشة الاتصال
+
+

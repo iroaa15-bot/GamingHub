@@ -1,3 +1,7 @@
+# Latest: Build120 native voice integration
+
+See WORK_HANDOFF_VOICE120_AR.md. Native plugin packaged and verified; live staging, two Godot clients and Main-to-Party Room navigation passed. Hardware and original upload signing key remain blocked. Historical checkpoints below.
+
 # Latest checkpoint — 25 October 2026
 
 See WORK_HANDOFF_SERVICES_20261025.md. Built verified debug APK119 and unsigned AAB119. Six real local WebSocket clients completed15 Party Room rounds;11 rule tests and focused Godot UI/drawing/scrolling passed. Not publication-ready: upload signing key, physical Android voice/ads QA and staging service availability remain blocked. No main/production changes or Actions. The following is historical evidence.

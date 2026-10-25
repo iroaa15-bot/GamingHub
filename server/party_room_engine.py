@@ -59,7 +59,7 @@ class PartyRoom:
             "code": self.code, "host_id": self.host_id, "phase": self.phase,
             "revision": self.revision, "round_index": self.round_index,
             "total_rounds": len(ROUND_SEQUENCE),
-            "game": ROUND_SEQUENCE[self.round_index] if self.round_index >= 0 else None,
+            "game": ROUND_SEQUENCE[self.round_index] if 0 <= self.round_index < len(ROUND_SEQUENCE) else None,
             "members": [{"id": m.player_id, "name": m.display_name,
                          "ready": m.ready, "connected": m.connected}
                         for m in self.members.values()],

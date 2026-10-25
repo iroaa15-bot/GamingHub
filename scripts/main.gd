@@ -1005,8 +1005,10 @@ func clear_ui() -> void:
  scroll.offset_right = -16
  scroll.offset_bottom = -36
  # Allow a finger swipe to scroll without accidentally pressing a quiz answer.
- scroll.scroll_deadzone = 22
+ scroll.scroll_deadzone = 12
  scroll.follow_focus = true
+ scroll.mouse_filter = Control.MOUSE_FILTER_PASS
+ scroll.scroll_horizontal_enabled = false
  add_child(scroll)
  root = VBoxContainer.new()
  root.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -172,6 +172,15 @@ func _room() -> void:
   if player_id == str(room_state.get("host_id", "")):
    _button("بدء المباراة", func(): _send({"type":"party.start"}))
  elif phase == "active":
+  var kind := str(rule.get("answer_kind", "text"))
+  if kind == "player_vote":
+   _label("اكتب معرّف اللاعب من قائمة أعضاء الغرفة", 15)
+  elif kind == "choice":
+   _label("اختر A أو B أو C أو D", 15)
+  elif kind == "truth_dare":
+   _label("اكتب truth أو dare", 15)
+  elif kind == "completion":
+   _label("اكتب done أو skip", 15)
   answer = _field("إجابتك لهذه الجولة")
   _button("إرسال الإجابة", func(): _send({"type":"party.submit", "answer":answer.text, "request_id":str(Time.get_ticks_usec())}))
   if player_id == str(room_state.get("host_id", "")):

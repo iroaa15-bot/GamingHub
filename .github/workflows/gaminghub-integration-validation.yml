@@ -1,0 +1,42 @@
+name: Gaming Hub integration verification
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  party-protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Party Room Python modules
+        run: |
+          python3 -m compileall -q server/party_room_engine.py server/party_game_rules.py server/party_room_staging.py server/test_party_room_engine.py
+          python3 -m unittest -v server.test_party_room_engine
+      - name: Verify staging and production stay separate
+        run: |
+          test -f scenes/PartyRoomStaging.tscn
+          test -f scripts/party_room_staging.gd
+          test -f scenes/Main.tscn
+          test -f scripts/main.gd
+          test -f scripts/multiplayer.gd
+          test -f scripts/daily_ai.gd
+          test -f scripts/daily_rounds.gd
+          test -f scripts/ad_manager.gd
+          test -f server/server.py
+  godot-parse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5 headless
+        run: |
+          curl -fsSL --retry 2 -o godot.zip https://github.com/godotengine/godot/releases/download/4.5.1-stable/Godot_v4.5.1-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          chmod +x Godot_v4.5.1-stable_linux.x86_64
+      - name: Parse project and staging scene without launching Android
+        run: |
+          ./Godot_v4.5.1-stable_linux.x86_64 --headless --path . --editor --import --quit
+          ./Godot_v4.5.1-stable_linux.x86_64 --headless --path . --quit-after 10

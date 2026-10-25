@@ -16,6 +16,8 @@ var player_name: LineEdit
 var join_code: LineEdit
 var answer: LineEdit
 var last_state := WebSocketPeer.STATE_CLOSED
+var page_scroll: ScrollContainer
+var saved_scroll_y := 0
 
 func _ready() -> void:
  _lobby()
@@ -75,13 +77,22 @@ func _receive(message: Dictionary) -> void:
   "party.error":
    _status("خطأ: " + str(message.get("error", "")))
 
-func _clear() -> void:
+func _clear(keep_position: bool = false) -> void:
+ var previous_y := page_scroll.scroll_vertical if keep_position and is_instance_valid(page_scroll) else 0
  for child in get_children():
   remove_child(child)
   child.queue_free()
  var scroll := ScrollContainer.new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ scroll.scroll_horizontal_enabled = false
+ scroll.scroll_deadzone = 12
+ scroll.follow_focus = true
+ scroll.mouse_filter = Control.MOUSE_FILTER_PASS
  add_child(scroll)
+ page_scroll = scroll
+ if keep_position:
+  saved_scroll_y = previous_y
+  _restore_scroll.call_deferred()
  var margin := MarginContainer.new()
  margin.add_theme_constant_override("margin_left", 16)
  margin.add_theme_constant_override("margin_right", 16)
@@ -94,6 +105,10 @@ func _clear() -> void:
  _label("🎉 Party Room — اختبار معزول", 26)
  _label("السيرفر تجريبي؛ الصوت غير مفعّل هنا", 15)
  status = _label("جاهز", 16)
+
+func _restore_scroll() -> void:
+ if is_instance_valid(page_scroll):
+  page_scroll.scroll_vertical = saved_scroll_y
 
 func _label(value: String, size: int = 19) -> Label:
  var item := Label.new()
@@ -134,7 +149,7 @@ func _lobby() -> void:
  _button("العودة للرئيسية", func(): get_tree().change_scene_to_file(HOME))
 
 func _room() -> void:
- _clear()
+ _clear(true)
  var phase := str(room_state.get("phase", "lobby"))
  _label("كود الغرفة: " + code, 25)
  _label("الحالة: " + phase + " | الجولة: " + str(int(room_state.get("round_index", -1)) + 1) + " / 15")

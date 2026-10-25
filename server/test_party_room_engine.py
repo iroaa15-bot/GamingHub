@@ -66,6 +66,18 @@ class PartyRoomEngineTests(unittest.TestCase):
         self.assertEqual(revealed["reveal"]["awarded"], {})
         self.assertEqual(revealed["scores"]["guest"], 0)
 
+    def test_completed_match_snapshot_has_no_game(self):
+        self.room.ready("host", True)
+        self.room.ready("guest", True)
+        self.room.start("host")
+        for _ in range(15):
+            self.room.reveal("host")
+            self.room.next_round("host")
+        result = self.room.snapshot()
+        self.assertEqual(result["phase"], "results")
+        self.assertIsNone(result["game"])
+        self.assertIsNone(result["round_rule"])
+
     def test_only_host_can_advance(self):
         self.room.ready("host", True)
         self.room.ready("guest", True)

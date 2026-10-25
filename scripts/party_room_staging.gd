@@ -46,6 +46,9 @@ func _send(payload: Dictionary) -> void:
 
 func _connect(payload: Dictionary) -> void:
  if connected:
+  if str(payload.get("type", "")) in ["party.create", "party.join", "party.reconnect"]:
+   _status("اتصال موجود بالفعل؛ افتح جلسة جديدة بعد قطع الاتصال")
+   return
   _send(payload)
   return
  if socket.get_ready_state() == WebSocketPeer.STATE_CONNECTING:

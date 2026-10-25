@@ -139,6 +139,15 @@ func _room() -> void:
  _label("كود الغرفة: " + code, 25)
  _label("الحالة: " + phase + " | الجولة: " + str(int(room_state.get("round_index", -1)) + 1) + " / 15")
  _label("اللعبة: " + str(room_state.get("game", "لم تبدأ")))
+ var rule: Dictionary = room_state.get("round_rule", {}) if room_state.get("round_rule", {}) is Dictionary else {}
+ if not rule.is_empty():
+  _label(str(rule.get("title_ar", "")) + " — " + str(rule.get("instruction_ar", "")), 17)
+ var reveal_data: Dictionary = room_state.get("reveal", {}) if room_state.get("reveal", {}) is Dictionary else {}
+ if phase == "reveal" and not reveal_data.is_empty():
+  _label("الإجابات: " + str(reveal_data.get("answers", {})), 16)
+  _label("النقاط المضافة: " + str(reveal_data.get("awarded", {})), 16)
+ if phase == "results":
+  _label("النتيجة النهائية: " + str(room_state.get("scores", {})), 20)
  var members: Array = room_state.get("members", [])
  for member in members:
   if member is Dictionary:

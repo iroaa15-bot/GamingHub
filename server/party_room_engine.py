@@ -6,6 +6,7 @@ Python 3.10+; stdlib only.
 from dataclasses import dataclass, field
 import secrets
 import time
+from .party_game_rules import public_rule, validate_submission
 
 MAX_PLAYERS = 6
 ROUND_SEQUENCE = (
@@ -63,6 +64,7 @@ class PartyRoom:
                         for m in self.members.values()],
             "scores": dict(self.scores), "submitted_count": len(self.submissions),
             "deadline": self.deadline,
+            "round_rule": public_rule(ROUND_SEQUENCE[self.round_index]) if self.phase != "results" and self.round_index >= 0 else None,
         }
 
     def join(self, player_id: str, name: str) -> str:
@@ -117,6 +119,10 @@ class PartyRoom:
             raise PartyError("invalid_answer")
         if self.deadline is not None and time.monotonic() > self.deadline:
             raise PartyError("round_expired")
+        try:
+            answer = validate_submission(ROUND_SEQUENCE[self.round_index], answer, set(self.members))
+        except ValueError as exc:
+            raise PartyError(str(exc)) from exc
         self.submissions[player_id] = answer
         self.revision += 1
         response = self.snapshot()

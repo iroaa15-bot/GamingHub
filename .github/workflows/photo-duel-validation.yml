@@ -1,0 +1,22 @@
+name: Photo Duel isolated validation
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Python protocol and tests
+        run: |
+          python3 -m py_compile server/photo_match_protocol.py server/test_photo_match_protocol.py
+          cd server
+          python3 -m unittest -v test_photo_match_protocol
+      - name: Check Godot scene references
+        run: |
+          test -f scenes/guess_picture_voice_turns.tscn
+          test -f scripts/guess_picture_voice_turns.gd

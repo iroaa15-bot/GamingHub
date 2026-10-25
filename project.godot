@@ -12,6 +12,10 @@ config_version=5
 
 general/ios/enabled=false
 
+[audio]
+
+driver/enable_input=true
+
 [application]
 
 config/name="Gaming Hub"

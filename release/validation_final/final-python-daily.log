@@ -1,0 +1,8 @@
+test_categories_and_choices (test_pipeline.PipelineTests.test_categories_and_choices) ... ok
+test_demo_cannot_approve (test_pipeline.PipelineTests.test_demo_cannot_approve) ... ok
+test_reviewed_categories_require_force_publish (test_pipeline.PipelineTests.test_reviewed_categories_require_force_publish) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.563s
+
+OK

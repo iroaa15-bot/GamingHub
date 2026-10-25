@@ -27,6 +27,19 @@ class PartyRoomEngineTests(unittest.TestCase):
         self.assertEqual(self.room.phase, "results")
         self.assertEqual(self.room.round_index, 15)
 
+    def test_game_specific_validation(self):
+        self.room.ready("host", True)
+        self.room.ready("guest", True)
+        self.room.start("host")
+        with self.assertRaisesRegex(PartyError, "one_word_only"):
+            self.room.submit("guest", "two words", "bad")
+        self.room.submit("guest", "banana", "good")
+        self.room.reveal("host")
+        self.room.next_round("host")
+        with self.assertRaisesRegex(PartyError, "vote_for_room_member_only"):
+            self.room.submit("guest", "outsider", "bad2")
+        self.room.submit("guest", "host", "good2")
+
     def test_only_host_can_advance(self):
         self.room.ready("host", True)
         self.room.ready("guest", True)

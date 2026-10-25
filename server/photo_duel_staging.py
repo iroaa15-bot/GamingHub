@@ -219,8 +219,15 @@ class StagingHub:
 
 async def main():
     host = os.getenv("GAMINGHUB_PHOTO_STAGING_HOST", "127.0.0.1")
-    if host not in ("127.0.0.1", "localhost", "::1"):
-        raise RuntimeError("Staging must bind loopback only")
+    import ipaddress
+    try:
+        address = ipaddress.ip_address(host)
+    except ValueError:
+        if host != "localhost":
+            raise RuntimeError("Staging host must be localhost or a private IP")
+    else:
+        if not (address.is_loopback or (address.version == 4 and address.is_private)):
+            raise RuntimeError("Staging host must be loopback or private IPv4")
     port = int(os.getenv("GAMINGHUB_PHOTO_STAGING_PORT", "8769"))
     hub = StagingHub()
     async with serve(hub.connected, host, port, max_size=MAX_BYTES, max_queue=16):

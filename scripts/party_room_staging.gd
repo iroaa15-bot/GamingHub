@@ -37,7 +37,8 @@ func _process(_delta: float) -> void:
     _receive(data)
  elif current == WebSocketPeer.STATE_CLOSED and last_state != WebSocketPeer.STATE_CLOSED:
   connected = false
-  _status("انقطع الاتصال. استعد الجلسة من الشاشة الرئيسية")
+  if is_instance_valid(status):
+   _status("انقطع الاتصال. استعد الجلسة من شاشة الاتصال")
  last_state = current
 
 func _send(payload: Dictionary) -> void:

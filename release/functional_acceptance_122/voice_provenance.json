@@ -1,0 +1,40 @@
+{
+  "source_commit": "ef357d9442952d090a753d2bc3ea84f2b1f7d30a",
+  "source_ref": "origin/fix/android-voice-root-cause",
+  "method": "reuse existing module files; no branch merge",
+  "native_files": [
+    {
+      "path": "addons/gaminghub_voice/bin/gaminghub-voice-debug.aar",
+      "sha256": "60a563a8c8785b0dfac45d2691193fd17ad882617e40f50174ed0cbccce74fba"
+    },
+    {
+      "path": "addons/gaminghub_voice/bin/gaminghub-voice-release.aar",
+      "sha256": "02a088d22cd7a5367a21cc2cfb11692900a67db850a42a0901d5c245ad7806c4"
+    },
+    {
+      "path": "addons/gaminghub_voice/export_plugin.gd",
+      "sha256": "024c0876390fad0793c78e4d89d8521e7748eb5c46bb3f4957cc95e10de1e3e3"
+    },
+    {
+      "path": "addons/gaminghub_voice/export_plugin.gd.uid",
+      "sha256": "b71cdf56136a23dbda12c58776140203662a25d752f25f480aba06474fed8162"
+    },
+    {
+      "path": "addons/gaminghub_voice/plugin.cfg",
+      "sha256": "3a318e9d6760a0f6afb4cee05a5814600f75cd100a9d8c6422b7208c4a12494b"
+    },
+    {
+      "path": "addons/gaminghub_voice/plugin.gd",
+      "sha256": "f02cae161daeed946099a8a588925d2b198a8f370875fe69e7f462829182336c"
+    },
+    {
+      "path": "addons/gaminghub_voice/plugin.gd.uid",
+      "sha256": "122fc487ebeca70122ed5f86f95f48f8718062c63f1102be9f4e4b892f8d7fb7"
+    }
+  ],
+  "bridge": "scripts/android_voice_bridge.gd",
+  "client_local_fixes": [
+    "explicit bool type for bridge_ready",
+    "deferred guarded room action callbacks"
+  ]
+}

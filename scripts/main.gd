@@ -1810,13 +1810,14 @@ func show_home() -> void:
  game = -1
  clear_ui()
  VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
+ button(tr_ui("🎮 الألعاب", "🎮 GAMES"), show_more_games, GOLD)
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
  label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
   button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
- button(tr_ui("🖼️ تحدي الصور • غرفة لصديقين", "🖼️ PHOTO DUEL • TWO PLAYER ROOM"), open_photo_duel, GOLD)
+ button(tr_ui("🖼️ خمن صورتك • الصور والغرف", "🖼️ GUESS YOUR PICTURE • IMAGES & ROOMS"), func(): show_modes(0), GOLD)
  button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
  button(tr_ui("⚡ جولات جديدة: سباق السرعة ورحلة الكنز", "⚡ NEW ARCADE: BLITZ & TREASURE"), func(): show_modes(5), GOLD)
  button(tr_ui("🎲 مفاجأة الجولة • لعبة مختلفة كل مرة", "🎲 SURPRISE ME • A DIFFERENT GAME EACH TIME"), start_surprise_arcade, ACCENT)
@@ -1865,7 +1866,8 @@ func start_surprise_arcade() -> void:
 
 func show_more_games() -> void:
  clear_ui()
- label(tr_ui("ألعاب إضافية", "MORE GAMES"), 30)
+ label(tr_ui("الألعاب", "GAMES"), 30)
+ button(tr_ui("🖼️ خمن صورتك • ابدأ هنا", "🖼️ GUESS YOUR PICTURE • START HERE"), func(): show_modes(0), GOLD)
  var grid := GridContainer.new()
  grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 650 else 2
  root.add_child(grid)
@@ -1887,6 +1889,14 @@ func show_modes(index: int) -> void:
  campaign_active = false
  clear_ui()
  VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
+ if game == 0:
+  if age_group not in ["under13", "unknown"]:
+   button(tr_ui("👥 إنشاء / انضمام لغرفة بكود", "👥 CREATE / JOIN ROOM BY CODE"), open_guess_multiplayer, GOLD)
+  else:
+   label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
+  button(tr_ui("🖼️ مكتبة الصور الأصلية • 200 صورة", "🖼️ ORIGINAL PICTURE LIBRARY • 200 IMAGES"), func(): picture_library_page = 0; show_picture_library(), ACCENT)
+  button(tr_ui("🤖 العب خمن صورتك • بدون إنترنت", "🤖 PLAY GUESS YOUR PICTURE • OFFLINE"), start_picture_game, GREEN)
+  label(tr_ui("الخادم الحالي يدعم لاعبين وأسئلة جاهزة. غرف 3–6 والدردشة الحرة ومؤقت الدور وتأكيد المنافس تحتاج بروتوكول خادم متوافق؛ غير متاحة حاليًا.", "The current server supports two players and preset questions. Rooms for 3–6, free chat, turn timer and opponent confirmation require a compatible server protocol and are unavailable."), 16)
  if game not in [0, 4]:
   button(tr_ui("طول الجولة: %d • تعديل", "ROUND LENGTH: %d • CHANGE") % session_length, show_accessibility)
  button(tr_ui("★ أضف أو أزل من المفضلة", "★ TOGGLE FAVORITE"), toggle_favorite)
@@ -1930,8 +1940,8 @@ func show_modes(index: int) -> void:
    var chosen: int = level
    button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
  label(tr_ui("أفضل نتيجة: %d", "Personal best: %d") % int(profile.get("best_" + str(game), 0)), 17)
- if game == 0 and audience != "children":
-  button(tr_ui("غرفة الأصدقاء • تجريبي", "FRIENDS ROOM • experimental"), func(): get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn"), ACCENT)
+ if game == 0 and age_group not in ["under13", "unknown"]:
+  button(tr_ui("غرفة الأصدقاء • كود دعوة", "FRIENDS ROOM • INVITE CODE"), open_guess_multiplayer, ACCENT)
  else:
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
@@ -3014,6 +3024,7 @@ func matches_card_guess(value: String, card: Dictionary) -> bool:
 
 func picture_panel(id: String, height: int) -> void:
  var art := TextureRect.new()
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.texture = card_texture(id)
  art.custom_minimum_size.y = height
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -3469,10 +3480,27 @@ func open_guess_multiplayer() -> void:
 func open_photo_duel() -> void:
  if age_group == "under13" or age_group == "unknown":
   return
- get_tree().change_scene_to_file("res://scenes/PhotoDuelStaging.tscn")
+ open_guess_multiplayer()
 
 func _run_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
  var control: Variant = ref.get_ref()
  if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
   if control.is_inside_tree() and not control.is_queued_for_deletion():
    action.call()
+
+var picture_library_page := 0
+func show_picture_library() -> void:
+ clear_ui()
+ game = 0
+ label(tr_ui("مكتبة الصور الأصلية • %d", "ORIGINAL PICTURE LIBRARY • %d") % CARDS.size(), 26)
+ button(tr_ui("العب بكل الصور • بدون إنترنت", "PLAY WITH ALL IMAGES • OFFLINE"), func(): deck = "all"; start_picture_game(), GOLD)
+ var first := picture_library_page * 8
+ for index in range(first, mini(first + 8, CARDS.size())):
+  var card: Dictionary = CARDS[index]
+  picture_panel(str(card["name"]), 170)
+  label(str(card.get("ar" if selected_language == "ar" else "en", card["name"])), 21)
+ if picture_library_page > 0:
+  button(tr_ui("الصفحة السابقة", "PREVIOUS PAGE"), func(): picture_library_page -= 1; show_picture_library())
+ if first + 8 < CARDS.size():
+  button(tr_ui("الصفحة التالية", "NEXT PAGE"), func(): picture_library_page += 1; show_picture_library())
+ button(tr_ui("خمن صورتك • الغرف واللعب", "GUESS YOUR PICTURE • ROOMS & PLAY"), func(): show_modes(0), GOLD)

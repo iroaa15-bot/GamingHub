@@ -1,0 +1,13 @@
+{
+  "zip_integrity": true,
+  "original_main_scene": true,
+  "native_voice_plugin_dex": true,
+  "gameplay_catalog_matches_source": true,
+  "gameplay_catalog_count": 200,
+  "bytecode_main": true,
+  "bytecode_multiplayer": true,
+  "bytecode_android_voice_bridge": true,
+  "original_texture_resources_resolve": 200,
+  "sha256": "c27fcdfda70ae5efec712ef7ff8477db684a9c3f52a91505a2fb969c4d77f296",
+  "size": 186732495
+}

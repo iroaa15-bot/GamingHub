@@ -72,6 +72,7 @@ async def handler(ws):
                     if old is not None and old is not ws:
                         await old.close()
                     clients[identity] = ws
+                    await send(ws, {"type": "party.auth", "code": code, "player_id": player, "resume_token": room.members[player].token})
                 else:
                     if identity is None:
                         raise PartyError("authentication_required")

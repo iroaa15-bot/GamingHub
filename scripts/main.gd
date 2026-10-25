@@ -1826,7 +1826,12 @@ func show_home_v2() -> void:
  if age_group != "under13":
   button(tr_ui("👥 إنشاء غرفة أو الانضمام بكود", "👥 CREATE OR JOIN ROOM"), open_guess_multiplayer, ACCENT)
  label(tr_ui("المحادثة والصوت متاحان داخل الغرف المدعومة فقط", "Chat and voice are available in supported rooms only"), 16)
+ if not DailyRounds.current_pack.is_empty():
+  label(tr_ui("🌟 تحديات اليوم جديدة • محفوظ لديك %d سؤال إضافي", "🌟 TODAY'S CHALLENGES FIRST • %d STORED EXTRA QUESTIONS") % [DailyRounds.total_questions()], 17)
+ else:
+  label(tr_ui("🌐 تحديث الجولات اليومية قيد الانتظار • الألعاب الأساسية متاحة", "🌐 Daily refresh pending • built-in games available"), 16)
  button(tr_ui("🔄 جلب تحديات جديدة", "🔄 FETCH NEW CHALLENGES"), func(): DailyRounds.refresh(true), PANEL)
+ button(tr_ui("📚 إضافة أسئلة أقدم للأرشيف", "📚 LOAD OLDER QUESTION PACKS"), func(): DailyRounds.load_older(), PANEL)
  button("العربية / English", show_languages, PANEL)
  button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
  button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)

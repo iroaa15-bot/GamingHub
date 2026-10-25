@@ -40,6 +40,32 @@ class PartyRoomEngineTests(unittest.TestCase):
             self.room.submit("guest", "outsider", "bad2")
         self.room.submit("guest", "host", "good2")
 
+    def test_vote_reveal_awards_points_once(self):
+        self.room.ready("host", True)
+        self.room.ready("guest", True)
+        self.room.start("host")
+        self.room.reveal("host")
+        self.room.next_round("host")
+        self.room.submit("host", "guest", "vote-host")
+        self.room.submit("guest", "guest", "vote-guest")
+        revealed = self.room.reveal("host")
+        self.assertEqual(revealed["reveal"]["awarded"], {"guest": 1})
+        self.assertEqual(revealed["scores"]["guest"], 1)
+        with self.assertRaisesRegex(PartyError, "round_not_active"):
+            self.room.reveal("host")
+        self.room.next_round("host")
+        self.assertEqual(self.room.scores["guest"], 1)
+
+    def test_unverified_game_has_no_fabricated_points(self):
+        self.room.ready("host", True)
+        self.room.ready("guest", True)
+        self.room.start("host")
+        self.room.submit("guest", "banana", "word")
+        revealed = self.room.reveal("host")
+        self.assertTrue(revealed["reveal"]["scoring_pending"])
+        self.assertEqual(revealed["reveal"]["awarded"], {})
+        self.assertEqual(revealed["scores"]["guest"], 0)
+
     def test_only_host_can_advance(self):
         self.room.ready("host", True)
         self.room.ready("guest", True)

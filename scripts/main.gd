@@ -980,7 +980,10 @@ func _process(_delta: float) -> void:
  if is_instance_valid(blitz_counter):
   blitz_counter.text = tr_ui("⏱ متبقي %d ثانية", "⏱ %d SECONDS LEFT") % ceili(remaining)
 
+var ui_action_generation := 0
+
 func clear_ui() -> void:
+ ui_action_generation += 1
  active_play_screen = false
  if is_instance_valid(blitz_timer):
   blitz_timer.stop()
@@ -1079,7 +1082,7 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
   if sound_enabled:
    play_tap()
  )
- b.pressed.connect(action)
+ b.pressed.connect(_run_ui_action.bind(weakref(b), ui_action_generation, action), CONNECT_DEFERRED)
  root.add_child(b)
  return b
 
@@ -1088,7 +1091,7 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
 func animate_touch_button(target: Button, desired_scale: Vector2, seconds: float) -> void:
  if not is_instance_valid(target):
   return
- var old: Variant = target.get_meta("touch_tween", null)
+ var old: Variant = target.get_meta("touch_tween") if target.has_meta("touch_tween") else null
  if old is Tween:
   var previous: Tween = old as Tween
   if previous.is_valid():
@@ -1813,6 +1816,7 @@ func show_home() -> void:
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
   button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
+ button(tr_ui("🖼️ تحدي الصور • غرفة لصديقين", "🖼️ PHOTO DUEL • TWO PLAYER ROOM"), open_photo_duel, GOLD)
  button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
  button(tr_ui("⚡ جولات جديدة: سباق السرعة ورحلة الكنز", "⚡ NEW ARCADE: BLITZ & TREASURE"), func(): show_modes(5), GOLD)
  button(tr_ui("🎲 مفاجأة الجولة • لعبة مختلفة كل مرة", "🎲 SURPRISE ME • A DIFFERENT GAME EACH TIME"), start_surprise_arcade, ACCENT)
@@ -3461,3 +3465,14 @@ func open_guess_multiplayer() -> void:
   return
  get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn")
 
+
+func open_photo_duel() -> void:
+ if age_group == "under13" or age_group == "unknown":
+  return
+ get_tree().change_scene_to_file("res://scenes/PhotoDuelStaging.tscn")
+
+func _run_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
+ var control: Variant = ref.get_ref()
+ if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
+  if control.is_inside_tree() and not control.is_queued_for_deletion():
+   action.call()

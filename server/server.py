@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
 from websockets.datastructures import Headers
+from websockets.exceptions import ConnectionClosed
 
 from pathlib import Path
 catalog_path = Path(__file__).resolve().parent.parent / 'data' / 'cards.json'
@@ -59,6 +60,11 @@ class Room:
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
     voice_packet_at: list = field(default_factory=lambda: [[], []])
+
+from photo_duel_staging import StagingHub
+from photo_match_protocol import MatchError
+PHOTO_DUEL_ENABLED = os.environ.get("GAMINGHUB_ENABLE_PHOTO_DUEL") == "1"
+photo_hub = StagingHub()
 
 rooms = {}
 connections = {}
@@ -148,6 +154,18 @@ async def process(ws, msg):
     action = msg.get('type')
     if not isinstance(action, str):
         return await send(ws, {'type':'error','message':'Missing action'})
+    if action.startswith('photo_'):
+        if not PHOTO_DUEL_ENABLED:
+            return await send(ws, {'type':'photo_error','message':'Photo Duel is not enabled on this server'})
+        if ws in connections or ws in waiting:
+            return await send(ws, {'type':'photo_error','message':'Leave the existing room first'})
+        try:
+            async with photo_hub.lock:
+                return await photo_hub.handle(ws, msg)
+        except (ValueError, TypeError, KeyError, MatchError) as exc:
+            return await photo_hub.error(ws, str(exc)[:160])
+    if ws in photo_hub.sockets and action != 'ping':
+        return await send(ws, {'type':'error','message':'Leave Photo Duel first'})
     code_for_activity = connections.get(ws)
     if action not in ('ping', 'sync') and code_for_activity in rooms:
         rooms[code_for_activity].last_activity = time.monotonic()
@@ -362,11 +380,24 @@ async def process(ws, msg):
 async def handler(ws):
     # Simple per-connection burst limiter; production still needs authentication and proxy limits.
     timestamps = []
+    voice_timestamps = []
     try:
         async for raw in ws:
             now = time.monotonic()
             timestamps = [t for t in timestamps if now - t < 10]
-            timestamps.append(now)
+            try:
+                candidate = json.loads(raw) if isinstance(raw, str) and len(raw) <= 8192 else None
+            except (ValueError, TypeError):
+                candidate = None
+            is_photo_voice = PHOTO_DUEL_ENABLED and ws in photo_hub.sockets and isinstance(candidate, dict) and candidate.get('type') == 'photo_voice'
+            if is_photo_voice:
+                voice_timestamps = [t for t in voice_timestamps if now - t < 1]
+                voice_timestamps.append(now)
+                if len(voice_timestamps) > 100:
+                    await ws.close(code=1008, reason='Voice rate limit')
+                    break
+            else:
+                timestamps.append(now)
             if len(timestamps) > 35:
                 await send(ws, {'type':'error','message':'Too many requests'})
                 await ws.close(code=1008, reason='Rate limit')
@@ -378,7 +409,18 @@ async def handler(ws):
                 await process(ws, msg)
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})
+    except ConnectionClosed:
+        pass # A closed transport still runs room detach/resume cleanup.
     finally:
+        async with photo_hub.lock:
+            binding = photo_hub.sockets.pop(ws, None)
+            if binding:
+                code, player = binding
+                record = photo_hub.rooms.get(code)
+                if record:
+                    record['peers'].pop(player, None)
+                    record['room'].disconnect(player)
+                    await photo_hub.notify(code)
         if ws in waiting:
             waiting.remove(ws)
         code = connections.pop(ws, None)
@@ -488,12 +530,15 @@ async def main():
     port = int(os.getenv('PORT','8765'))
     async with serve(handler, host, port, max_size=32768, ping_interval=20, ping_timeout=20, max_queue=16, process_request=http_health):
         print(f'Gaming Hub server on {host}:{port}')
+        photo_task = asyncio.create_task(photo_hub.sweep()) if PHOTO_DUEL_ENABLED else None
         task = asyncio.create_task(expiry_loop())
         try:
             await asyncio.Future()
         finally:
             task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
+            if photo_task:
+                photo_task.cancel()
+            await asyncio.gather(task, *([photo_task] if photo_task else []), return_exceptions=True)
 
 if __name__ == '__main__':
     asyncio.run(main())

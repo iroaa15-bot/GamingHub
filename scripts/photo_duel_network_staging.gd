@@ -1,5 +1,5 @@
 extends Control
-## Staging-only Photo Duel client. Open res://scenes/PhotoDuelStaging.tscn in Godot.
+## Photo Duel screen embedded in the original Gaming Hub application.
 ## Does not touch existing game rooms, audio, AdMob, or production services.
 const HOME := "res://scenes/Main.tscn"
 const FACT_LABELS := {
@@ -20,7 +20,11 @@ var code_field: LineEdit
 var text_field: LineEdit
 var guess_field: LineEdit
 var requested_action: Dictionary = {}
-var server_url := "ws://127.0.0.1:8769"
+var server_url := ""
+var language := "ar"
+var ui_generation := 0
+var last_feedback := ""
+const VisualSkin = preload("res://scripts/visual_skin.gd")
 var previous_state := WebSocketPeer.STATE_CLOSED
 var mic_probe: Node
 var mic_level_label: Label
@@ -29,6 +33,12 @@ var voice_receiver: Node
 var voice_question_active := false
 
 func _ready() -> void:
+ var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://progress_v10_all.json")) if FileAccess.file_exists("user://progress_v10_all.json") else null
+ if saved is Dictionary:
+  language = str(saved.get("language", "ar"))
+ var config: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/network_config.json"))
+ if config is Dictionary:
+  server_url = str(config.get("server_url", ""))
  _draw_lobby()
  mic_probe = load("res://scripts/photo_duel_mic_probe_staging.gd").new()
  add_child(mic_probe)
@@ -52,6 +62,7 @@ func _process(_delta: float) -> void:
     _received(payload)
  elif current == WebSocketPeer.STATE_CLOSED and previous_state != WebSocketPeer.STATE_CLOSED:
   connected = false
+  _draw_lobby()
   _status("انقطع الاتصال؛ استخدم استعادة الجلسة")
  previous_state = current
 
@@ -76,7 +87,7 @@ func _connect_and_send(payload: Dictionary) -> void:
  socket = WebSocketPeer.new()
  var err := socket.connect_to_url(server_url)
  if err != OK:
-  _status("تعذر بدء الاتصال: " + str(err))
+  _status(("Connection failed: " if language == "en" else "تعذر بدء الاتصال: ") + str(err))
  else:
   _status("جارٍ الاتصال...")
  previous_state = WebSocketPeer.STATE_CONNECTING
@@ -87,10 +98,10 @@ func _received(message: Dictionary) -> void:
   "photo_created", "photo_joined", "photo_resumed":
    session_code = str(message.get("code", session_code))
    resume_token = str(message.get("token", ""))
-   _status("غرفة " + session_code + " • الجلسة متصلة")
+   _status(("Room " if language == "en" else "غرفة ") + session_code + (" • connected" if language == "en" else " • الجلسة متصلة"))
    _draw_match()
   "photo_waiting":
-   _status("في انتظار اللاعب الثاني • كود الغرفة: " + session_code)
+   _status(("Waiting for opponent • room code: " if language == "en" else "في انتظار اللاعب الثاني • كود الغرفة: ") + session_code)
   "photo_state":
    state = message
    _draw_match()
@@ -99,20 +110,37 @@ func _received(message: Dictionary) -> void:
    if is_instance_valid(voice_receiver):
     voice_receiver.receive_pcm(str(message.get("pcm", "")))
   "photo_error":
-   _status("خطأ: " + str(message.get("message", "غير معروف")))
-  "photo_question", "photo_reply", "photo_turn", "photo_guess_pending", "photo_guess_result", "photo_finished":
-   _status("حدث: " + kind)
+   _status(("Error: " if language == "en" else "خطأ: ") + str(message.get("message", "غير معروف")))
+  "photo_question":
+   last_feedback = str(message.get("text", ""))
+   if str(message.get("mode", "")) == "tap":
+    last_feedback = _localized(str(FACT_LABELS.get(str(message.get("question_id", "")), ""))) + " " + _yes_no(bool(message.get("answer", false)))
+   elif str(message.get("mode", "")) == "voice":
+    last_feedback = "Voice question" if language == "en" else "سؤال صوتي"
+   _draw_match()
+  "photo_reply":
+   last_feedback = ("Opponent reply: " if language == "en" else "إجابة المنافس: ") + _yes_no(bool(message.get("answer", false)))
+   _draw_match()
+  "photo_turn", "photo_guess_pending", "photo_guess_result", "photo_finished":
+   _status(("Event: " if language == "en" else "حدث: ") + kind)
   _:
    pass
 
 func _clear() -> void:
+ ui_generation += 1
  for child in get_children():
   if child == mic_probe or child == voice_receiver:
    continue
   remove_child(child)
   child.queue_free()
+ var background := VisualSkin.new()
+ background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+ add_child(background)
  var scroll := ScrollContainer.new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+ scroll.scroll_deadzone = 22
  add_child(scroll)
  var margin := MarginContainer.new()
  margin.add_theme_constant_override("margin_left", 16)
@@ -125,12 +153,12 @@ func _clear() -> void:
  panel.add_theme_constant_override("separation", 12)
  margin.add_child(panel)
  _label("🖼️ خمن صورتك — PHOTO DUEL", 27)
- _label("اختبار شبكي معزول • ليس سيرفر الإنتاج", 15)
+ _label("يتطلب خادم الغرف تفعيل تحدي الصور", 15)
  status_label = _label("جاهز", 16)
 
 func _label(value: String, size: int = 19) -> Label:
  var label_node := Label.new()
- label_node.text = value
+ label_node.text = _localized(value)
  label_node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  label_node.add_theme_font_size_override("font_size", size)
  panel.add_child(label_node)
@@ -138,7 +166,7 @@ func _label(value: String, size: int = 19) -> Label:
 
 func _field(placeholder: String, value: String = "") -> LineEdit:
  var field := LineEdit.new()
- field.placeholder_text = placeholder
+ field.placeholder_text = _localized(placeholder)
  field.text = value
  field.custom_minimum_size.y = 55
  panel.add_child(field)
@@ -146,20 +174,21 @@ func _field(placeholder: String, value: String = "") -> LineEdit:
 
 func _button(value: String, callback: Callable) -> void:
  var b := Button.new()
- b.text = value
+ b.text = _localized(value)
  b.custom_minimum_size.y = 54
- b.pressed.connect(callback)
+ VisualSkin.decorate_button(b, "gold")
+ b.pressed.connect(_invoke_action.bind(weakref(b), ui_generation, callback), CONNECT_DEFERRED)
  panel.add_child(b)
 
 func _status(value: String) -> void:
  if is_instance_valid(status_label):
-  status_label.text = value
+  status_label.text = _localized(value)
  print("[PHOTO_STAGING] ", value)
 
 func _draw_lobby() -> void:
  _stop_mic_probe()
  _clear()
- address_field = _field("WebSocket staging URL", server_url)
+ address_field = _field("عنوان خادم الغرف", server_url)
  code_field = _field("كود الغرفة للانضمام", session_code)
  _button("إنشاء غرفة", func(): _connect_and_send({"type":"photo_create","target":10,"timer":30,"reward":1}))
  _button("الانضمام للغرفة", func(): _connect_and_send({"type":"photo_join","code":code_field.text.strip_edges().to_upper()}))
@@ -168,7 +197,9 @@ func _draw_lobby() -> void:
 
 func _draw_match() -> void:
  _clear()
- _label("كود الغرفة: " + session_code)
+ _label(("Room code: " if language == "en" else "كود الغرفة: ") + session_code)
+ if not last_feedback.is_empty():
+  _label(last_feedback)
  if state.is_empty():
   _label("في انتظار دخول اللاعب الثاني...")
   _button("تحديث الحالة", func(): _send({"type":"photo_sync"}))
@@ -177,7 +208,7 @@ func _draw_match() -> void:
  var me := int(state.get("player", -1))
  var current := int(state.get("current", -1))
  var scores: Array = state.get("scores", [0, 0])
- _label("اللاعب %d | الجولة %d | النقاط %s" % [me + 1, int(state.get("round", 1)), str(scores)])
+ _label(("Player %d | round %d | score %s" if language == "en" else "اللاعب %d | الجولة %d | النقاط %s") % [me + 1, int(state.get("round", 1)), str(scores)])
  if bool(state.get("closed", false)):
   _label("تم إغلاق الغرفة")
   _button("العودة", _draw_lobby)
@@ -186,6 +217,10 @@ func _draw_match() -> void:
   _label("انتهت المباراة")
   _button("العودة", _draw_lobby)
   return
+ if bool(state.get("pending_question", false)) and str(state.get("question_mode", "")) == "text":
+  _label(str(state.get("question_text", "")))
+ if bool(state.get("awaiting_confirmation", false)):
+  _label(str(state.get("guess_text", "")))
  var visible: Dictionary = state.get("visible_opponent_image", {})
  var image_path := str(visible.get("image", ""))
  _label("صورة المنافس (لا تظهر له على جهازه):", 16)
@@ -199,7 +234,7 @@ func _draw_match() -> void:
    picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
    panel.add_child(picture)
  else:
-  _label("تعذر عرض الصورة: " + str(visible.get("id", "")), 14)
+  _label(("Picture unavailable: " if language == "en" else "تعذر عرض الصورة: ") + str(visible.get("id", "")), 14)
  if bool(state.get("awaiting_confirmation", false)):
   if me != current:
    _label("المنافس ينتظر تأكيد تخمينه")
@@ -208,7 +243,7 @@ func _draw_match() -> void:
   else:
    _label("بانتظار تأكيد المنافس")
  elif me == current:
-  _label("دورك في السؤال • المتبقي: " + str(state.get("remaining", "?")) + " ثانية")
+  _label(("Your question • remaining: " if language == "en" else "دورك في السؤال • المتبقي: ") + str(state.get("remaining", "?")) + (" seconds" if language == "en" else " ثانية"))
   if not bool(state.get("pending_question", false)):
    _button("🎙 ابدأ السؤال الصوتي", func(): _send({"type":"photo_voice_start"}))
    text_field = _field("اكتب سؤالًا للمنافس")
@@ -236,6 +271,9 @@ func _draw_match() -> void:
  _button("مغادرة الغرفة", func(): _send({"type":"photo_leave"}); state = {}; session_code = ""; resume_token = ""; _draw_lobby())
 
 func _home() -> void:
+ if connected:
+  _send({"type":"photo_leave"})
+ _stop_mic_probe()
  socket.close()
  get_tree().change_scene_to_file(HOME)
 
@@ -272,4 +310,84 @@ func _on_voice_frame(pcm: String) -> void:
 
 func _on_mic_level(level: float) -> void:
  if mic_probe_active and is_instance_valid(mic_level_label):
-  mic_level_label.text = "مستوى الصوت: %d%%" % int(clampf(level * 100.0, 0.0, 100.0))
+  mic_level_label.text = ("Microphone level: %d%%" if language == "en" else "مستوى الصوت: %d%%") % int(clampf(level * 100.0, 0.0, 100.0))
+
+func _invoke_action(ref: WeakRef, generation: int, action: Callable) -> void:
+ var control: Variant = ref.get_ref()
+ if is_inside_tree() and generation == ui_generation and is_instance_valid(control):
+  if control.is_inside_tree() and not control.is_queued_for_deletion():
+   action.call()
+
+func _notification(what: int) -> void:
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+  _home.call_deferred()
+
+func _exit_tree() -> void:
+ _stop_mic_probe()
+ socket.close()
+
+func _unhandled_key_input(event: InputEvent) -> void:
+ if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE, KEY_BACK]:
+  get_viewport().set_input_as_handled()
+  _home.call_deferred()
+
+const ENGLISH = {
+ "هل هو كائن حي؟": "Is it alive?",
+ "هل هو حيوان؟": "Is it an animal?",
+ "هل هو شخص مشهور؟": "Is it a celebrity?",
+ "هل يمكن أكله؟": "Is it edible?",
+ "هل يُستخدم في المنزل؟": "Is it used at home?",
+ "هل يوجد في الطبيعة؟": "Is it found in nature?",
+ "هل هو مكان؟": "Is it a place?",
+ "هل حجمه كبير؟": "Is it large?",
+ "🖼️ خمن صورتك — PHOTO DUEL": "🖼️ GUESS YOUR PICTURE — PHOTO DUEL",
+ "يتطلب خادم الغرف تفعيل تحدي الصور": "Photo Duel must be enabled on the room server",
+ "جاهز": "Ready",
+ "عنوان خادم الغرف": "Room server URL",
+ "كود الغرفة للانضمام": "Room code to join",
+ "إنشاء غرفة": "Create room",
+ "الانضمام للغرفة": "Join room",
+ "استعادة الجلسة": "Resume session",
+ "العودة للقائمة الرئيسية": "Back to main menu",
+ "تحديث الحالة": "Refresh state",
+ "العودة": "Back",
+ "في انتظار دخول اللاعب الثاني...": "Waiting for the second player...",
+ "تم إغلاق الغرفة": "Room closed",
+ "انتهت المباراة": "Match finished",
+ "صورة المنافس (لا تظهر له على جهازه):": "Opponent picture (hidden on their device):",
+ "المنافس ينتظر تأكيد تخمينه": "Opponent is waiting for guess confirmation",
+ "التخمين صحيح": "Correct guess",
+ "التخمين خطأ": "Incorrect guess",
+ "بانتظار تأكيد المنافس": "Waiting for opponent confirmation",
+ "🎙 ابدأ السؤال الصوتي": "🎙 Start voice question",
+ "اكتب سؤالًا للمنافس": "Write a question",
+ "إرسال السؤال": "Send question",
+ "🎙 السؤال جارٍ — بانتظار إجابة المنافس...": "🎙 Voice question — waiting for reply...",
+ "بانتظار إجابة المنافس...": "Waiting for reply...",
+ "تخمين الصورة": "Guess the picture",
+ "طلب تأكيد التخمين": "Request guess confirmation",
+ "الدور ينتقل تلقائيًا عند انتهاء المؤقت": "The turn changes when the timer expires",
+ "دور المنافس": "Opponent turn",
+ "الإجابة: نعم": "Answer: Yes",
+ "الإجابة: لا": "Answer: No",
+ "اختبار الميكروفون المحلي (لا ينقل الصوت للمنافس)": "Local microphone test (not sent to opponent)",
+ "مستوى الصوت: --": "Microphone level: --",
+ "تشغيل اختبار الميكروفون": "Start microphone test",
+ "إيقاف اختبار الميكروفون": "Stop microphone test",
+ "مغادرة الغرفة": "Leave room",
+ "متصل بالسيرفر التجريبي": "Connected to room server",
+ "لا يوجد اتصال بالسيرفر": "Not connected",
+ "الاتصال جارٍ": "Connecting",
+ "عنوان السيرفر يجب أن يبدأ بـ ws:// أو wss://": "Server URL must start with ws:// or wss://",
+ "جارٍ الاتصال...": "Connecting...",
+ "انقطع الاتصال؛ استخدم استعادة الجلسة": "Disconnected; use Resume session",
+ "اختبار الميكروفون المحلي يعمل": "Local microphone test active"
+}
+
+func _localized(value: String) -> String:
+ return str(ENGLISH.get(value, value)) if language == "en" else value
+
+func _yes_no(value: bool) -> String:
+ if language == "en":
+  return "Yes" if value else "No"
+ return "نعم" if value else "لا"

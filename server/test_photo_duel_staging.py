@@ -61,10 +61,10 @@ class StagingHubTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(self.b.last("photo_state")["pending_question"])
         await self.hub.handle(self.b, {"type": "photo_reply", "answer": True})
         self.assertFalse(self.a.last("photo_state")["pending_question"])
-        await self.hub.handle(self.a, {"type": "photo_guess", "guess": "test"})
-        self.assertTrue(self.b.last("photo_state")["awaiting_confirmation"])
-        await self.hub.handle(self.b, {"type": "photo_confirm", "correct": True})
-        self.assertEqual(self.a.last("photo_state")["scores"], [1, 0])
+        await self.hub.handle(self.b, {"type": "photo_guess", "guess": "test"})
+        self.assertTrue(self.a.last("photo_state")["awaiting_confirmation"])
+        await self.hub.handle(self.a, {"type": "photo_confirm", "correct": True})
+        self.assertEqual(self.a.last("photo_state")["scores"], [0, 1])
 
     async def test_voice_turn(self):
         await self.join()

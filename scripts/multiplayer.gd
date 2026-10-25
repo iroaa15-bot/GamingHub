@@ -202,6 +202,7 @@ func _ready() -> void:
  address_input.custom_minimum_size.y = 52
  advanced_panel.add_child(address_input)
  _button(_t("اتصال يدوي", "Connect manually"), _connect_server, advanced_panel)
+ _button(_t("تحدي الصور • غرفة لصديقين", "Photo Duel • two player room"), func(): _open_photo_duel.call_deferred())
  _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
  _update_lobby()
 
@@ -1082,3 +1083,9 @@ func _prev_questions() -> void:
 func _next_questions() -> void:
  question_page += 1
  _refresh_actions()
+
+func _open_photo_duel() -> void:
+ if connected or not room_code.is_empty():
+  return # Leave the existing room before switching game modes.
+ socket.close()
+ get_tree().change_scene_to_file("res://scenes/PhotoDuelStaging.tscn")

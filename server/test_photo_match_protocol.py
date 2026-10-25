@@ -8,12 +8,12 @@ class PhotoMatchTests(unittest.TestCase):
     def test_text_tap_and_reply(self):
         m = PhotoMatch(("a","b"),server_facts={"animal":True})
         self.assertTrue(m.ask_tap("a","animal")["answer"])
-        self.assertEqual(m.ask_text("a","هل هو حيوان؟")["mode"], "text")
+        self.assertEqual(m.ask_text("b","هل هو حيوان؟")["mode"], "text")
         with self.assertRaises(MatchError):
             m.ask_tap("a","animal")
         with self.assertRaises(MatchError):
             m.ask_tap("a","unknown")
-        self.assertTrue(m.reply("b",True)["answer"])
+        self.assertTrue(m.reply("a",True)["answer"])
         with self.assertRaises(MatchError):
             m.reply("a",True)
     def test_confirmation_only_opponent(self):

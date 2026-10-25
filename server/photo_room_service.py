@@ -13,7 +13,7 @@ class PhotoRoom:
     def __init__(self, players, *, catalog=CATALOG, **settings):
         items=json.loads(Path(catalog).read_text(encoding='utf-8'))['items']
         self.catalog={x['id']: x for x in items if x['group']=='original_200' and x['rights_status']=='CORE_200_EXISTING_LIBRARY'}
-        if len(self.catalog)<2: raise MatchError('At least two approved core images required')
+        if len(self.catalog)!=200: raise MatchError('Exactly 200 original core images required')
         self.match=PhotoMatch(tuple(players),**settings)
         self.tokens={p:secrets.token_urlsafe(32) for p in players}
         self.disconnected={}
@@ -61,6 +61,8 @@ class PhotoRoom:
                 'awaiting_confirmation':self.match.awaiting_confirmation,
                 'pending_question':self.match.pending_question,
                 'question_mode':self.match.question_mode,
+                'question_text':next((e.get('text','') for e in reversed(self.match.events) if e['type']=='photo_question'), '') if self.match.pending_question else '',
+                'guess_text':self.match.guess_text if self.match.awaiting_confirmation else '',
                 'visible_opponent_image':{'id':item['id'],'image':item['image']},
                 'available_questions':list(self.catalog[self.secret_ids[index]]['facts'])}
 

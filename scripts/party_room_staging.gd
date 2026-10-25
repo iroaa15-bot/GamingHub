@@ -178,15 +178,24 @@ func _room() -> void:
  elif phase == "active":
   var kind := str(rule.get("answer_kind", "text"))
   if kind == "player_vote":
-   _label("اكتب معرّف اللاعب من قائمة أعضاء الغرفة", 15)
-  elif kind == "choice":
-   _label("اختر A أو B أو C أو D", 15)
-  elif kind == "truth_dare":
-   _label("اكتب truth أو dare", 15)
-  elif kind == "completion":
-   _label("اكتب done أو skip", 15)
-  answer = _field("إجابتك لهذه الجولة")
-  _button("إرسال الإجابة", func(): _send({"type":"party.submit", "answer":answer.text, "request_id":str(Time.get_ticks_usec())}))
+   _label("صوّت للاعب من الموجودين في الغرفة", 15)
+   var selector := OptionButton.new()
+   for member in members:
+    if member is Dictionary:
+     selector.add_item(str(member.get("name", "Player")))
+     selector.set_item_metadata(selector.item_count - 1, str(member.get("id", "")))
+   panel.add_child(selector)
+   _button("إرسال التصويت", func(): _send({"type":"party.submit", "answer":str(selector.get_selected_metadata()), "request_id":str(Time.get_ticks_usec())}))
+  elif kind in ["choice", "truth_dare", "completion"]:
+   var choices := ["A", "B", "C", "D"] if kind == "choice" else (["truth", "dare"] if kind == "truth_dare" else ["done", "skip"])
+   var selector := OptionButton.new()
+   for choice in choices:
+    selector.add_item(choice)
+   panel.add_child(selector)
+   _button("إرسال الاختيار", func(): _send({"type":"party.submit", "answer":selector.get_item_text(selector.selected), "request_id":str(Time.get_ticks_usec())}))
+  else:
+   answer = _field("إجابتك لهذه الجولة")
+   _button("إرسال الإجابة", func(): _send({"type":"party.submit", "answer":answer.text, "request_id":str(Time.get_ticks_usec())}))
   if player_id == str(room_state.get("host_id", "")):
    _button("كشف الإجابات", func(): _send({"type":"party.reveal"}))
  elif phase == "reveal" and player_id == str(room_state.get("host_id", "")):

@@ -19,7 +19,7 @@ RULES = {
     "whos_most_likely": Rule("مين فينا؟", "اختار لاعبًا واحدًا من الغرفة", "player_vote", scoring="majority_vote"),
     "odd_one_out": Rule("مين المختلف؟", "اختار العنصر المختلف من الاختيارات", "choice", scoring="correct_choice"),
     "truth_or_dare": Rule("حقيقة ولا تحدي", "اختار حقيقة أو تحدي", "truth_dare", scoring="participation"),
-    "draw_disaster": Rule("ارسم الكارثة", "ارسم ثم أرسل وصفًا مختصرًا؛ الرسم الفعلي يتطلب قناة رسم", "drawing_description", max_length=500, scoring="peer_vote"),
+    "draw_disaster": Rule("ارسم الكارثة", "ارسم التحدي ثم صوّت لرسم منافس", "drawing", max_length=12000, scoring="peer_vote"),
     "crazy_emoji": Rule("إيموجي مجنون", "خمن المعنى من الرموز التعبيرية", "text", scoring="correct_answer"),
     "fake_it": Rule("كدبة مقنعة", "اكتب إجابة مقنعة دون إفشاء الإجابة الصحيحة", "text", scoring="peer_vote"),
     "secret_mission": Rule("المهمة السرية", "اكتب تأكيد إتمام المهمة دون كشف نصها", "completion", scoring="host_review"),

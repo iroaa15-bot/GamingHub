@@ -34,17 +34,32 @@ func _ready() -> void:
 	player.bus = "PhotoDuelMic"
 	add_child(player)
 
-func start_voice() -> void:
-	voice_enabled = true
-	start_probe()
+func start_voice() -> bool:
+	voice_enabled = start_probe()
+	return voice_enabled
 
 func stop_voice() -> void:
 	voice_enabled = false
 	stop_probe()
 
-func start_probe() -> void:
+func start_probe() -> bool:
+	if OS.get_name() == "Android" and not "android.permission.RECORD_AUDIO" in OS.get_granted_permissions():
+		OS.request_permission("android.permission.RECORD_AUDIO")
+		return false
 	enabled = true
 	player.play()
+	return true
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		stop_voice()
+
+func _exit_tree() -> void:
+	stop_voice()
+	for bus_name in ["PhotoDuelMic", "PhotoDuelSilent"]:
+		var bus := AudioServer.get_bus_index(bus_name)
+		if bus >= 0:
+			AudioServer.remove_bus(bus)
 
 func stop_probe() -> void:
 	enabled = false

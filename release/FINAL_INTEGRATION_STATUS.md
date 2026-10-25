@@ -1,3 +1,7 @@
+# Latest checkpoint — 25 October 2026
+
+See WORK_HANDOFF_SERVICES_20261025.md. Built verified debug APK119 and unsigned AAB119. Six real local WebSocket clients completed15 Party Room rounds;11 rule tests and focused Godot UI/drawing/scrolling passed. Not publication-ready: upload signing key, physical Android voice/ads QA and staging service availability remain blocked. No main/production changes or Actions. The following is historical evidence.
+
 # Final integration checkpoint — 24 October 2026
 
 NOT RELEASE READY. No main merge, deployment, Play upload or workflow dispatch.

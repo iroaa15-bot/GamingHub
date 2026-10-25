@@ -1,0 +1,8 @@
+{
+  "aab_bytes": 130671716,
+  "aab_sha256": "c81feef410d4ac46a88833c1d30052270de373d0cddb1415ee2bbedbd503dccd",
+  "required_structure": "PASS",
+  "jar_signing_metadata_present": false,
+  "publication_ready": false,
+  "blocker": "Requires the existing Play upload key, bundletool validation and device QA."
+}

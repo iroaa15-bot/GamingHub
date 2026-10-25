@@ -1,0 +1,8 @@
+test_six_clients_fifteen_rounds_and_reconnection (server.test_party_socket.PartySocketTests.test_six_clients_fifteen_rounds_and_reconnection) ... Executing <Task pending name='Task-6' coro=<serve.<locals>.protocol_handler() running at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\server.py:762> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py:459> created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\server.py:226> took 0.101 seconds
+Executing <Task pending name='Task-22' coro=<serve.<locals>.protocol_handler() running at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\server.py:762> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py:459> created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\site-packages\websockets\asyncio\server.py:226> took 0.101 seconds
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 36.646s
+
+OK

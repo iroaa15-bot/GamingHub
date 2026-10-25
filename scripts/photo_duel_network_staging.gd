@@ -111,7 +111,7 @@ func _clear() -> void:
    continue
   remove_child(child)
   child.queue_free()
- var scroll := ScrollContainer.new()
+ var scroll := preload("res://scripts/touch_scroll.gd").new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(scroll)
  var margin := MarginContainer.new()
@@ -242,9 +242,8 @@ func _home() -> void:
 func _start_mic_probe() -> void:
  if mic_probe == null:
   return
- mic_probe_active = true
- mic_probe.start_probe()
- _status("اختبار الميكروفون المحلي يعمل")
+ mic_probe_active = mic_probe.start_probe()
+ _status("اختبار الميكروفون المحلي يعمل" if mic_probe_active else "اسمح باستخدام الميكروفون ثم اضغط تشغيل مرة أخرى")
 
 func _stop_mic_probe() -> void:
  mic_probe_active = false
@@ -258,8 +257,9 @@ func _sync_voice() -> void:
  var mine := int(state.get("player", -1)) == int(state.get("current", -2))
  var should_send := mine and str(state.get("question_mode", "")) == "voice" and bool(state.get("pending_question", false)) and not bool(state.get("awaiting_confirmation", false)) and not bool(state.get("finished", false))
  if should_send and not voice_question_active:
-  voice_question_active = true
-  mic_probe.start_voice()
+  voice_question_active = mic_probe.start_voice()
+  if not voice_question_active:
+   _status("اسمح باستخدام الميكروفون ثم أعد تفعيل السؤال الصوتي")
  elif not should_send and voice_question_active:
   voice_question_active = false
   mic_probe.stop_voice()

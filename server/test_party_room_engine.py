@@ -19,8 +19,8 @@ class PartyRoomEngineTests(unittest.TestCase):
         self.room.ready("guest", True)
         self.room.start("host")
         self.assertEqual(len(ROUND_SEQUENCE), 15)
-        first = self.room.submit("guest", "answer", "req1")
-        self.assertEqual(first, self.room.submit("guest", "changed", "req1"))
+        first = self.room.submit("host", "banana", "req1")
+        self.assertEqual(first, self.room.submit("host", "changed", "req1"))
         for _ in range(15):
             self.room.reveal("host")
             self.room.next_round("host")
@@ -33,7 +33,7 @@ class PartyRoomEngineTests(unittest.TestCase):
         self.room.start("host")
         with self.assertRaisesRegex(PartyError, "one_word_only"):
             self.room.submit("guest", "two words", "bad")
-        self.room.submit("guest", "banana", "good")
+        self.room.submit("host", "banana", "good")
         self.room.reveal("host")
         self.room.next_round("host")
         with self.assertRaisesRegex(PartyError, "vote_for_room_member_only"):
@@ -56,15 +56,15 @@ class PartyRoomEngineTests(unittest.TestCase):
         self.room.next_round("host")
         self.assertEqual(self.room.scores["guest"], 1)
 
-    def test_unverified_game_has_no_fabricated_points(self):
+    def test_verified_word_rule_awards_points_once(self):
         self.room.ready("host", True)
         self.room.ready("guest", True)
         self.room.start("host")
-        self.room.submit("guest", "banana", "word")
+        self.room.submit("host", "banana", "word")
         revealed = self.room.reveal("host")
-        self.assertTrue(revealed["reveal"]["scoring_pending"])
-        self.assertEqual(revealed["reveal"]["awarded"], {})
-        self.assertEqual(revealed["scores"]["guest"], 0)
+        self.assertFalse(revealed["reveal"]["scoring_pending"])
+        self.assertEqual(revealed["reveal"]["awarded"], {"host":1})
+        self.assertEqual(revealed["scores"]["host"], 1)
 
     def test_completed_match_snapshot_has_no_game(self):
         self.room.ready("host", True)

@@ -18,12 +18,21 @@ var answer: LineEdit
 var last_state := WebSocketPeer.STATE_CLOSED
 var page_scroll: ScrollContainer
 var saved_scroll_y := 0
+var chat_history: Array[String] = []
+var draft_round := -2
+var draft_text := ""
+var draft_strokes: Array = []
+var drawing_surface: Control
+var countdown_label: Label
+var countdown_until := 0
 
 func _ready() -> void:
  _lobby()
  set_process(true)
 
 func _process(_delta: float) -> void:
+ if is_instance_valid(countdown_label) and countdown_until > 0:
+  countdown_label.text = "الوقت المتبقي: " + str(maxi(0, (countdown_until - Time.get_ticks_msec()) / 1000)) + " ثانية"
  socket.poll()
  var current := socket.get_ready_state()
  if current == WebSocketPeer.STATE_OPEN:
@@ -77,6 +86,13 @@ func _receive(message: Dictionary) -> void:
    _status("تم الاتصال بالغرفة " + code)
   "party.state":
    room_state = message.get("state", {})
+   var remaining: Variant = room_state.get("remaining")
+   countdown_until = Time.get_ticks_msec() + int(remaining) * 1000 if remaining != null else 0
+   _room()
+  "party.chat":
+   chat_history.append(str(message.get("name", "")) + ": " + str(message.get("text", "")))
+   if chat_history.size() > 10:
+    chat_history.pop_front()
    _room()
   "party.error":
    _status("خطأ: " + str(message.get("error", "")))
@@ -86,9 +102,9 @@ func _clear(keep_position: bool = false) -> void:
  for child in get_children():
   remove_child(child)
   child.queue_free()
- var scroll := ScrollContainer.new()
+ var scroll := preload("res://scripts/touch_scroll.gd").new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
- scroll.scroll_horizontal_enabled = false
+ scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  scroll.scroll_deadzone = 12
  scroll.follow_focus = true
  scroll.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -106,8 +122,8 @@ func _clear(keep_position: bool = false) -> void:
  panel = VBoxContainer.new()
  panel.add_theme_constant_override("separation", 10)
  margin.add_child(panel)
- _label("🎉 Party Room — اختبار معزول", 26)
- _label("السيرفر تجريبي؛ الصوت غير مفعّل هنا", 15)
+ _label("🎉 حفلات الأصدقاء", 26)
+ _label("6 لاعبين • 8 ألعاب • 15 جولة", 15)
  status = _label("جاهز", 16)
 
 func _restore_scroll() -> void:
@@ -153,11 +169,30 @@ func _lobby() -> void:
  _button("العودة للرئيسية", func(): get_tree().change_scene_to_file(HOME))
 
 func _room() -> void:
+ if draft_round == int(room_state.get("round_index", -1)):
+  if is_instance_valid(answer):
+   draft_text = answer.text
+  if is_instance_valid(drawing_surface):
+   draft_strokes = drawing_surface.strokes.duplicate(true)
+ else:
+  draft_text = ""
+  draft_strokes.clear()
+ draft_round = int(room_state.get("round_index", -1))
+ answer = null
+ drawing_surface = null
  _clear(true)
+ countdown_label = _label("", 17)
  var phase := str(room_state.get("phase", "lobby"))
  _label("كود الغرفة: " + code, 25)
  _label("الحالة: " + phase + " | الجولة: " + str(int(room_state.get("round_index", -1)) + 1) + " / 15")
  _label("اللعبة: " + str(room_state.get("game", "لم تبدأ")))
+ var challenge: Dictionary = room_state.get("challenge", {})
+ _label(str(challenge.get("prompt", "")), 21)
+ if challenge.has("choices"):
+  _label(str(challenge["choices"]), 18)
+ if room_state.get("private_task") != null:
+  _label("مهمتك: " + str(room_state["private_task"]), 20)
+ _label("النقاط: " + str(room_state.get("scores", {})), 17)
  var rule: Dictionary = room_state.get("round_rule", {}) if room_state.get("round_rule", {}) is Dictionary else {}
  if not rule.is_empty():
   _label(str(rule.get("title_ar", "")) + " — " + str(rule.get("instruction_ar", "")), 17)
@@ -175,9 +210,24 @@ func _room() -> void:
   _button("أنا مستعد", func(): _send({"type":"party.ready", "ready":true}))
   if player_id == str(room_state.get("host_id", "")):
    _button("بدء المباراة", func(): _send({"type":"party.start"}))
+ elif phase == "active" and room_state.get("my_submission") != null:
+  _label("تم إرسال إجابتك؛ انتظر باقي اللاعبين")
+  if str(room_state.get("game", "")) == "truth_or_dare" and not room_state.get("my_completed", false):
+   _button("نفذت المهمة", func(): _send({"type":"party.complete"}))
+  if player_id == str(room_state.get("host_id", "")):
+   _button("كشف الإجابات", func(): _send({"type":"party.reveal"}))
  elif phase == "active":
   var kind := str(rule.get("answer_kind", "text"))
-  if kind == "player_vote":
+  if str(room_state.get("game", "")) == "pass_the_bomb" and str(room_state.get("bomb_player", "")) != player_id:
+   _label("القنبلة مع اللاعب: " + str(room_state.get("bomb_player", "")))
+  elif kind == "drawing":
+   var canvas := preload("res://scripts/party_drawing.gd").new()
+   canvas.strokes = draft_strokes.duplicate(true)
+   drawing_surface = canvas
+   panel.add_child(canvas)
+   _button("مسح الرسم", func(): canvas.strokes.clear(); canvas.queue_redraw())
+   _button("إرسال الرسم", func(): _send({"type":"party.submit", "answer":canvas.payload(), "request_id":str(Time.get_ticks_usec())}))
+  elif kind == "player_vote":
    _label("صوّت للاعب من الموجودين في الغرفة", 15)
    var selector := OptionButton.new()
    for member in members:
@@ -194,13 +244,38 @@ func _room() -> void:
    panel.add_child(selector)
    _button("إرسال الاختيار", func(): _send({"type":"party.submit", "answer":selector.get_item_text(selector.selected), "request_id":str(Time.get_ticks_usec())}))
   else:
-   answer = _field("إجابتك لهذه الجولة")
+   answer = _field("إجابتك لهذه الجولة", draft_text)
    _button("إرسال الإجابة", func(): _send({"type":"party.submit", "answer":answer.text, "request_id":str(Time.get_ticks_usec())}))
   if player_id == str(room_state.get("host_id", "")):
    _button("كشف الإجابات", func(): _send({"type":"party.reveal"}))
+ elif phase == "voting":
+  _label("صوّت لاختيار منافس؛ لا يمكن التصويت لنفسك")
+  var options: Dictionary = reveal_data.get("options", {})
+  if not room_state.get("has_voted", false):
+   for option_id in options:
+    var chosen: String = str(option_id)
+    if str(room_state.get("game", "")) == "draw_disaster":
+     var canvas := preload("res://scripts/party_drawing.gd").new()
+     canvas.read_only = true
+     var decoded: Variant = JSON.parse_string(str(options[option_id]))
+     canvas.strokes = decoded if decoded is Array else []
+     panel.add_child(canvas)
+    else:
+     _label(str(options[option_id]), 18)
+    _button("اختيار", func(): _send({"type":"party.vote", "option":chosen}))
+  if player_id == str(room_state.get("host_id", "")):
+   _button("إنهاء التصويت", func(): _send({"type":"party.finish_votes"}))
  elif phase == "reveal" and player_id == str(room_state.get("host_id", "")):
+  if str(room_state.get("game", "")) in ["truth_or_dare", "secret_mission"]:
+   for member in members:
+    var reviewed: String = str(member.get("id", ""))
+    _button("تأكيد إتمام: " + str(member.get("name", "")), func(): _send({"type":"party.approve", "player_id":reviewed}))
   _button("الجولة التالية", func(): _send({"type":"party.next"}))
  elif phase == "results":
   _label("انتهت الجولات الخمس عشرة")
+ for line in chat_history:
+  _label(line, 15)
+ var chat := _field("رسالة اختيارية للأصدقاء")
+ _button("إرسال الرسالة", func(): _send({"type":"party.chat", "text":chat.text}))
  _button("تحديث الحالة", func(): _send({"type":"party.state"}))
  _button("رجوع لشاشة الاتصال", _lobby)

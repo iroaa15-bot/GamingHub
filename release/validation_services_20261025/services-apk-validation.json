@@ -1,0 +1,17 @@
+{
+  "apk_sha256": "44d869216e6b1146aca767badf33d9b7010f063d550205c17b477874884d5650",
+  "apk_bytes": 186689359,
+  "core_images": 200,
+  "missing_core_images": [],
+  "party_scene_present": true,
+  "photo_scene_present": true,
+  "dex_files": 5,
+  "version_code": 119,
+  "version_name": "11.9-rc1",
+  "package": "com.iroaa15.gaminghub",
+  "target_sdk": 36,
+  "min_sdk": 24,
+  "signing": "DEBUG_ONLY_APKSIGNER_V2_VERIFIED",
+  "physical_android_tested": false,
+  "production_update_ready": false
+}

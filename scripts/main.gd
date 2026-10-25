@@ -998,7 +998,7 @@ func clear_ui() -> void:
  background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  background.mouse_filter = Control.MOUSE_FILTER_IGNORE
  add_child(background)
- var scroll := ScrollContainer.new()
+ var scroll := preload("res://scripts/touch_scroll.gd").new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  scroll.offset_left = 16
  scroll.offset_top = 36
@@ -1008,7 +1008,7 @@ func clear_ui() -> void:
  scroll.scroll_deadzone = 12
  scroll.follow_focus = true
  scroll.mouse_filter = Control.MOUSE_FILTER_PASS
- scroll.scroll_horizontal_enabled = false
+ scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  add_child(scroll)
  root = VBoxContainer.new()
  root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1843,6 +1843,8 @@ func show_games_list_v2() -> void:
  clear_ui()
  label(tr_ui("🎮 قائمة الألعاب", "🎮 GAMES LIST"), 30)
  label(tr_ui("كل الألعاب الحالية في مكان واحد", "ALL CURRENT GAMES IN ONE PLACE"), 17)
+ button(tr_ui("🖼️ خمن صورتك • تحدي الأصدقاء", "🖼️ PHOTO DUEL • FRIENDS"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelStaging.tscn"), GOLD)
+ button(tr_ui("🎉 حفلات الأصدقاء • 6 لاعبين • 15 جولة", "🎉 PARTY ROOM • 6 PLAYERS • 15 ROUNDS"), func(): get_tree().change_scene_to_file("res://scenes/PartyRoomStaging.tscn"), ACCENT)
  var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
  var favorites: Array = profile.get("favorites", [])
  var grid := GridContainer.new()

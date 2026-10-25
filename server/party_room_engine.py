@@ -47,6 +47,7 @@ class PartyRoom:
     scores: dict[str, int] = field(default_factory=dict)
     processed: dict[str, dict] = field(default_factory=dict)
     deadline: float | None = None
+    last_reveal: dict = field(default_factory=dict)
 
     def _member(self, player_id: str) -> Member:
         if player_id not in self.members:
@@ -64,6 +65,7 @@ class PartyRoom:
                         for m in self.members.values()],
             "scores": dict(self.scores), "submitted_count": len(self.submissions),
             "deadline": self.deadline,
+            "reveal": dict(self.last_reveal) if self.phase in ("reveal", "results") else None,
             "round_rule": public_rule(ROUND_SEQUENCE[self.round_index]) if self.phase != "results" and self.round_index >= 0 else None,
         }
 
@@ -100,6 +102,7 @@ class PartyRoom:
         self.round_index = 0
         self.phase = "active"
         self.submissions.clear()
+        self.last_reveal.clear()
         self.deadline = time.monotonic() + 60
         self.revision += 1
         return self.snapshot()
@@ -134,7 +137,23 @@ class PartyRoom:
             raise PartyError("host_only")
         if self.phase != "active":
             raise PartyError("round_not_active")
-        # Scoring is deliberately not guessed: individual games need validated rules.
+        game = ROUND_SEQUENCE[self.round_index]
+        awarded = {}
+        # Score only deterministic votes. Subjective games remain unscored.
+        if game == "whos_most_likely" and self.submissions:
+            counts = {}
+            for voted_for in self.submissions.values():
+                counts[voted_for] = counts.get(voted_for, 0) + 1
+            maximum = max(counts.values())
+            winners = sorted(pid for pid, votes in counts.items() if votes == maximum)
+            for winner in winners:
+                self.scores[winner] += 1
+                awarded[winner] = 1
+        self.last_reveal = {
+            "game": game, "answers": dict(self.submissions),
+            "awarded": awarded,
+            "scoring_pending": game != "whos_most_likely",
+        }
         self.phase = "reveal"
         self.deadline = None
         self.revision += 1
@@ -148,6 +167,8 @@ class PartyRoom:
         self.round_index += 1
         self.submissions.clear()
         self.processed.clear()
+        if self.round_index < len(ROUND_SEQUENCE):
+            self.last_reveal.clear()
         self.phase = "results" if self.round_index == len(ROUND_SEQUENCE) else "active"
         self.deadline = None if self.phase == "results" else time.monotonic() + 60
         self.revision += 1

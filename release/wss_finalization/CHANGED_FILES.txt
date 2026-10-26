@@ -1,0 +1,7 @@
+server/secure_duel_service.py — validated first frame, idle expiry, room-code validation, conservative proxy trust
+tests/wss_remaining_acceptance.py — previously executed 11 real-socket targeted checks
+tests/wss_moderation_remaining.py — 5 newly executed authorization/rate checks
+release/wss_finalization/REPORT_AR.md — Arabic results and exact blockers
+release/wss_finalization/reconnection_results.json — preserved interrupted-session results
+release/wss_finalization/moderation_results.json — new executed results
+release/wss_finalization/preservation.json — protected-file hash comparisons

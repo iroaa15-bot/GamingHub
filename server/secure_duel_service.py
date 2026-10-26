@@ -13,13 +13,10 @@ class SecureDuelHub(DuelHub):
         super().__init__();self.sessions=Sessions(secret);self.limits=Limits();self.moderation=Moderation(database)
         self.identities={};self.subjects={};self.voice={};self.trust_proxy=trust_proxy;self.epoch=0
     def ip(self,connection,request):
-        peer=str(connection.remote_address[0])
-        # Render edge is the only public entry when RENDER=true. Never trust forwarded headers in direct local mode.
-        if self.trust_proxy:
-            supplied=request.headers.get("X-Forwarded-For","").split(",")[-1].strip()
-            try:return str(ipaddress.ip_address(supplied))
-            except ValueError:pass
-        return peer
+        # Forwarded headers are client input until a documented trusted-proxy
+        # boundary is configured. Use the TCP peer even on Render: conservative
+        # shared-edge limits are safer than a spoofable per-client limit.
+        return str(connection.remote_address[0])
     async def http(self,connection,request):
         def response(status,payload):
             result=connection.respond(status,json.dumps(payload))
@@ -64,6 +61,7 @@ class SecureDuelHub(DuelHub):
         subject=identity["sub"]
         action=msg.get("type")
         if action in ("duel_join","duel_resume"):
+            if not isinstance(msg.get("code"),str):raise ProtocolError("Invalid room code")
             owners=self.subjects.get(msg.get("code"),{})
             if action=="duel_join" and any(self.moderation.blocked(subject,other) for other in owners.values()):raise ProtocolError("Room unavailable")
             if action=="duel_resume":
@@ -117,7 +115,9 @@ class SecureDuelHub(DuelHub):
     async def connection(self,ws):
         extension=False
         try:
-            first=json.loads(await asyncio.wait_for(ws.recv(),15))
+            raw=await asyncio.wait_for(ws.recv(),15)
+            if not isinstance(raw,str) or len(raw.encode())>8192:raise ProtocolError("Message too large or non-text")
+            first=json.loads(raw)
             if not isinstance(first,dict):raise ProtocolError("Expected object")
             kind=first.get("type","")
             if not isinstance(kind,str):raise ProtocolError("Invalid action")
@@ -160,6 +160,12 @@ class SecureDuelHub(DuelHub):
     async def mixer(self):
         while True:
             await asyncio.sleep(.02)
+            # Close expired transports even when idle, including receive-only
+            # voice and authenticated legacy connections. Never await close
+            # while holding the room lock (disconnect needs that lock).
+            expired=[ws for ws,claims in list(self.identities.items()) if claims["exp"]<=time.time()]
+            for ws in expired:
+                await ws.close(code=1008,reason="Session expired")
             async with self.lock:
                 for code,value in list(self.voice.items()):
                     room=self.rooms.get(code)

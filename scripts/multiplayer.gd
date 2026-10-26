@@ -237,6 +237,7 @@ func _exit_tree() -> void:
  socket.close()
 
 func _ready() -> void:
+ get_tree().quit_on_go_back = false
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
@@ -420,13 +421,32 @@ func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
   if event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK:
    get_viewport().set_input_as_handled()
-   _request_exit_to_games()
+   _queue_room_back()
+
+var _leaving_scene := false
+var _exit_dialog: ConfirmationDialog
+var _back_exit_pending := false
+
+func _notification(what: int) -> void:
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST: _queue_room_back()
+
+func _queue_room_back() -> void:
+ if _back_exit_pending or _leaving_scene or not is_inside_tree(): return
+ _back_exit_pending = true
+ _perform_room_back.call_deferred()
+
+func _perform_room_back() -> void:
+ _back_exit_pending = false
+ if is_inside_tree() and not _leaving_scene: _request_exit_to_games()
 
 func _request_exit_to_games() -> void:
+ if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
+ if is_instance_valid(_exit_dialog): return
  if room_code.is_empty() and not matchmaking_pending and pending_action.is_empty() and not lobby_request_pending and not leaving:
   _exit_to_games()
   return
  var dialog := ConfirmationDialog.new()
+ _exit_dialog = dialog
  dialog.title = _t("مغادرة الأونلاين؟", "LEAVE ONLINE GAME?")
  dialog.dialog_text = _t("سيتم إلغاء البحث أو مغادرة الغرفة الحالية.", "Matchmaking will be cancelled or you will leave your current room.")
  dialog.ok_button_text = _t("مغادرة", "LEAVE")
@@ -440,6 +460,9 @@ func _request_exit_to_games() -> void:
  )
 
 func _exit_to_games() -> void:
+ if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
+ _leaving_scene = true
+ var scene_tree := get_tree()
  _reset_voice_on_connection_loss()
  if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send({"type": "cancel_queue"})
@@ -447,7 +470,8 @@ func _exit_to_games() -> void:
   socket.poll()
  socket.close()
  pending_action.clear()
- get_tree().change_scene_to_file("res://scenes/Main.tscn")
+ var result := scene_tree.change_scene_to_file("res://scenes/Main.tscn")
+ if result != OK: _leaving_scene = false
 
 func _label(value: String, size: int = 20) -> Label:
  var l := Label.new()

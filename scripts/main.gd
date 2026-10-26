@@ -909,6 +909,7 @@ func toggle_language() -> void:
  show_home()
 
 func _ready() -> void:
+ get_tree().quit_on_go_back = false
  if not DailyRounds.changed.is_connected(_on_daily_rounds_changed):
   DailyRounds.changed.connect(_on_daily_rounds_changed)
  if not AdManager.reward_earned.is_connected(_on_earned_ad_reward):
@@ -961,7 +962,9 @@ func _on_earned_ad_reward(kind: String, amount: int) -> void:
 
 
 func _notification(what: int) -> void:
- if what == NOTIFICATION_APPLICATION_PAUSED:
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+  _queue_back_navigation()
+ elif what == NOTIFICATION_APPLICATION_PAUSED:
   blitz_background_paused = true
   if is_instance_valid(blitz_timer):
    blitz_timer.paused = true
@@ -1108,12 +1111,23 @@ func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
   if event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK:
    get_viewport().set_input_as_handled()
-   if active_play_screen:
-    confirm_leave_active_game()
-   elif game != -1:
-    show_home()
-   else:
-    confirm_quit_game()
+   _queue_back_navigation()
+
+var _back_navigation_pending := false
+func _queue_back_navigation() -> void:
+ if _back_navigation_pending or not is_inside_tree() or is_queued_for_deletion(): return
+ _back_navigation_pending = true
+ _perform_back_navigation.call_deferred(ui_action_generation)
+
+func _perform_back_navigation(generation: int) -> void:
+ _back_navigation_pending = false
+ if not is_inside_tree() or is_queued_for_deletion() or generation != ui_action_generation: return
+ if active_play_screen:
+  confirm_leave_active_game()
+ elif game != -1:
+  show_home()
+ else:
+  confirm_quit_game()
 
 func confirm_leave_active_game() -> void:
  if is_instance_valid(blitz_timer):

@@ -79,6 +79,7 @@ func _invoke(ref: WeakRef, action: Callable) -> void:
   action.call()
 
 func _ready() -> void:
+ get_tree().quit_on_go_back = false
  var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://progress_v10_all.json")) if FileAccess.file_exists("user://progress_v10_all.json") else null
  if saved is Dictionary: language = str(saved.get("language","ar"))
  var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/guess_picture_302/catalog.json"))
@@ -243,9 +244,15 @@ func _process(_delta: float) -> void:
  if left >= 0 and not bool(client.state.get("paused",false)): left = maxi(0,left-(Time.get_ticks_msec()-received_at))
  clock.text = tr_pair("بدون مؤقت","No timer") if left < 0 else tr_pair("المتبقي: %d ثانية","Remaining: %d seconds") % ceili(left/1000.0)
 
+var _leaving_scene := false
+
 func _home() -> void:
+ if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
+ _leaving_scene = true
+ var scene_tree := get_tree()
  if is_instance_valid(client) and not client.capabilities.is_empty() and not client.code.is_empty(): client.send_action("duel_leave")
- get_tree().change_scene_to_file("res://scenes/Main.tscn")
+ var result := scene_tree.change_scene_to_file("res://scenes/Main.tscn")
+ if result != OK: _leaving_scene = false
 
 func _notification(what: int) -> void:
  if what == NOTIFICATION_WM_GO_BACK_REQUEST: _home.call_deferred()

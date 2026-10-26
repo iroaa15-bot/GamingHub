@@ -35,6 +35,16 @@ var captions: Array[Label] = []
 var catalog: Dictionary = {}
 var received_at := 0
 var local_remaining := -1
+var endpoint_field: LineEdit
+var terms: CheckBox
+var voice_adapter: Node
+var voice_button: Button
+var voice_status: Label
+var target_player: OptionButton
+var report_reason: LineEdit
+var report_button: Button
+var block_button: Button
+
 
 func tr_pair(ar: String, en: String) -> String:
  return ar if language == "ar" else en
@@ -65,7 +75,7 @@ func button(value: String, action: Callable) -> Button:
 
 func _invoke(ref: WeakRef, action: Callable) -> void:
  var control: Variant = ref.get_ref()
- if is_inside_tree() and is_instance_valid(control) and control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
+ if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control) and control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
   action.call()
 
 func _ready() -> void:
@@ -91,15 +101,23 @@ func _ready() -> void:
  column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  column.add_theme_constant_override("separation",10)
  margin.add_child(column)
- VisualSkin.add_brand_banner(column,"res://assets/ui/gaming_hub_brand.png",tr_pair("تحدي الصور • خادم محلي منفصل","Photo Duel • isolated local server"))
- status = label(tr_pair("اتصال محلي فقط؛ لا يتغير خادم الإنتاج.","Local connection only; production is unchanged."))
+ VisualSkin.add_brand_banner(column,"res://assets/ui/gaming_hub_brand.png",tr_pair("غرف الأصدقاء • خمن صورتك","Friend rooms • Guess Your Picture"))
+ status = label(tr_pair("اختر إعدادات الغرفة واتصل بالخدمة عند تفعيلها.","Choose room settings and connect when the service is enabled."))
  heading = label("",24)
  clock = label("")
- label(Client.endpoint_from_args(),14)
+ endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
+ endpoint_field.text = Client.endpoint_from_args()
+ label(tr_pair("الدردشة والصوت اختياريان. يمنع الإساءة والتهديد ونشر المعلومات الشخصية والمحتوى غير الملائم. يمكنك الإبلاغ وحظر لاعب. لا يبدأ الميكروفون دون موافقتك.","Chat and voice are optional. Abuse, threats, personal information and inappropriate content are prohibited. You can report or block players. The microphone requires your consent."),15)
+ terms = CheckBox.new()
+ terms.custom_minimum_size.y = 54
+ terms.text = tr_pair("أوافق على قواعد الغرف واستخدام الدردشة","I accept the room and chat rules")
+ column.add_child(terms)
  players_field = OptionButton.new()
+ players_field.custom_minimum_size.y = 54
  for count in range(2,7): players_field.add_item(str(count),count)
  column.add_child(players_field)
  timer_field = OptionButton.new()
+ timer_field.custom_minimum_size.y = 54
  for seconds in [0,10,20,30,60]: timer_field.add_item(tr_pair("بدون مؤقت","No timer") if seconds == 0 else str(seconds),seconds)
  timer_field.select(3)
  column.add_child(timer_field)
@@ -109,11 +127,11 @@ func _ready() -> void:
  target_field.max_value = 50
  target_field.value = 10
  column.add_child(target_field)
- create_button = button(tr_pair("إنشاء غرفة محلية","Create local room"),func(): client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value)))
+ create_button = button(tr_pair("إنشاء غرفة","Create room"),func(): client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value)))
  code_field = field(tr_pair("كود الغرفة","Room code"))
  join_button = button(tr_pair("انضمام بكود","Join by code"),func(): client.join_room(code_field.text))
  resume_button = button(tr_pair("استعادة الاتصال","Reconnect session"),func(): client.resume_session())
- button(tr_pair("إعادة الاتصال بالخادم المحلي","Connect to local server"),func(): client.connect_endpoint(Client.endpoint_from_args()))
+ button(tr_pair("الاتصال بخدمة الغرف","Connect to room service"),_connect_service)
  for i in range(6):
   captions.append(label(""))
   var picture := TextureRect.new()
@@ -140,6 +158,15 @@ func _ready() -> void:
  chat_field = field(tr_pair("دردشة نصية لجميع لاعبي الغرفة","Text chat for everyone in the room"))
  chat_field.max_length = 280
  chat_button = button(tr_pair("إرسال الدردشة","Send chat"),_chat)
+ voice_button = button(tr_pair("تفعيل الميكروفون","Enable microphone"),func(): voice_adapter.enable(not voice_adapter.requested))
+ voice_status = label("")
+ target_player = OptionButton.new()
+ target_player.custom_minimum_size.y = 54
+ for index in range(6): target_player.add_item(tr_pair("اللاعب ","Player ")+str(index+1),index)
+ column.add_child(target_player)
+ report_reason = field(tr_pair("سبب الإبلاغ","Report reason"))
+ report_button = button(tr_pair("الإبلاغ عن اللاعب","Report player"),func(): client.send_action("duel_report",{"target":target_player.get_selected_id(),"reason":report_reason.text}))
+ block_button = button(tr_pair("حظر اللاعب ومغادرة الغرفة","Block player and leave room"),func(): client.send_action("duel_block",{"target":target_player.get_selected_id()}))
  button(tr_pair("مغادرة الغرفة","Leave room"),func(): client.send_action("duel_leave"))
  button(tr_pair("العودة إلى Gaming Hub","Back to Gaming Hub"),_home)
  client = Client.new()
@@ -147,10 +174,19 @@ func _ready() -> void:
  client.state_changed.connect(_state)
  client.event_received.connect(func(message: Dictionary):
   if message.get("type") == "duel_error": status.text = str(message.get("message",""))
+  elif message.get("type") == "duel_reported": status.text = tr_pair("حُفظ البلاغ: ","Report saved: ")+str(message.get("report_id",""))
+  elif message.get("type") == "duel_blocked": status.text = tr_pair("تم حظر اللاعب","Player blocked")
  )
  client.connection_changed.connect(func(_ready: bool): _state(client.state))
- client.connect_endpoint(Client.endpoint_from_args())
+ voice_adapter = load("res://scripts/photo_duel_voice_adapter.gd").new()
+ add_child(voice_adapter)
+ voice_adapter.attach(client)
+ voice_adapter.changed.connect(_voice_changed)
+ voice_adapter.unavailable.connect(func(reason: String): voice_status.text = reason)
+ if not Client.endpoint_from_args().is_empty() and Client.endpoint_from_args().begins_with("ws://"):
+  client.connect_endpoint(Client.endpoint_from_args())
  _state({})
+ _voice_changed()
 
 func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
@@ -173,10 +209,12 @@ func _state(value: Dictionary) -> void:
  wrong_button.disabled = correct_button.disabled
  for key in presets: presets[key].disabled = not turn or key not in value.get("preset_questions",[])
  chat_button.disabled = not ready or client.code.is_empty() or bool(value.get("closed",false))
+ report_button.disabled = chat_button.disabled or not bool(client.capabilities.get("moderation",false))
+ block_button.disabled = report_button.disabled
  heading.text = tr_pair("الغرفة %s • اللاعب %d • %d/%d متصلون • الدور %d • النقاط %s","Room %s • player %d • %d/%d joined • turn %d • scores %s") % [client.code,client.player+1,int(value.get("joined",0)),int(value.get("capacity",0)),int(value.get("current",0))+1,str(value.get("scores",[]))]
  if bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
- elif not ready: status.text = tr_pair("غير متصل بالخادم المحلي","Disconnected from local server")
+ elif not ready: status.text = tr_pair("خدمة الغرف غير متصلة؛ قد يكون تفعيلها معلقًا.","Room service is disconnected; activation may be pending.")
  elif not bool(value.get("started",false)): status.text = tr_pair("بانتظار اكتمال عدد اللاعبين","Waiting for the configured number of players")
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
  question_label.text = str(pending.get("text",""))
@@ -206,7 +244,7 @@ func _process(_delta: float) -> void:
  clock.text = tr_pair("بدون مؤقت","No timer") if left < 0 else tr_pair("المتبقي: %d ثانية","Remaining: %d seconds") % ceili(left/1000.0)
 
 func _home() -> void:
- if not client.capabilities.is_empty() and not client.code.is_empty(): client.send_action("duel_leave")
+ if is_instance_valid(client) and not client.capabilities.is_empty() and not client.code.is_empty(): client.send_action("duel_leave")
  get_tree().change_scene_to_file("res://scenes/Main.tscn")
 
 func _notification(what: int) -> void:
@@ -216,3 +254,19 @@ func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE,KEY_BACK]:
   get_viewport().set_input_as_handled()
   _home.call_deferred()
+
+func _connect_service() -> void:
+ client.terms_accepted = terms.button_pressed
+ client.connect_endpoint(endpoint_field.text.strip_edges())
+ if not client.last_error.is_empty(): status.text=client.last_error
+
+func _voice_changed() -> void:
+ if not is_instance_valid(voice_adapter): return
+ if not is_instance_valid(client):
+  voice_button.disabled=true
+  return
+ voice_button.disabled = not voice_adapter.is_available() or not bool(client.capabilities.get("voice",false)) or not bool(client.state.get("started",false)) or bool(client.state.get("closed",false)) or bool(client.state.get("paused",false))
+ voice_button.text = tr_pair("كتم الميكروفون","Mute microphone") if voice_adapter.requested else tr_pair("تفعيل الميكروفون","Enable microphone")
+ if not voice_adapter.is_available(): voice_status.text = tr_pair("الصوت يتطلب نسخة Android وجهازًا متوافقًا؛ لم يتم التحقق على هاتف بعد.","Voice requires Android hardware; device verification is still pending.")
+ elif voice_adapter.requested: voice_status.text = tr_pair("الصوت قيد التفعيل بموافقة اللاعبين","Voice enabling with player consent")
+ else: voice_status.text = tr_pair("الميكروفون مكتوم؛ التفعيل اختياري","Microphone muted; enabling is optional")

@@ -1892,14 +1892,12 @@ func show_modes(index: int) -> void:
  if game == 0:
   if age_group not in ["under13", "unknown"]:
    button(tr_ui("👥 إنشاء / انضمام لغرفة بكود", "👥 CREATE / JOIN ROOM BY CODE"), open_guess_multiplayer, GOLD)
-   var local_endpoint: String = load("res://scripts/photo_duel_extension_client.gd").endpoint_from_args()
-   if not local_endpoint.is_empty():
-    button(tr_ui("🧪 غرف الصور 2–6 • خادم محلي", "🧪 PHOTO ROOMS 2–6 • LOCAL SERVER"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
+   button(tr_ui("👥 غرف الأصدقاء 2–6 • الدردشة والصوت", "👥 FRIEND ROOMS 2–6 • CHAT & VOICE"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   button(tr_ui("🖼️ مكتبة الصور الأصلية • 200 صورة", "🖼️ ORIGINAL PICTURE LIBRARY • 200 IMAGES"), func(): picture_library_page = 0; show_picture_library(), ACCENT)
   button(tr_ui("🤖 العب خمن صورتك • بدون إنترنت", "🤖 PLAY GUESS YOUR PICTURE • OFFLINE"), start_picture_game, GREEN)
-  label(tr_ui("الخادم الحالي يدعم لاعبين وأسئلة جاهزة. غرف 3–6 والدردشة الحرة ومؤقت الدور وتأكيد المنافس تحتاج بروتوكول خادم متوافق؛ غير متاحة حاليًا.", "The current server supports two players and preset questions. Rooms for 3–6, free chat, turn timer and opponent confirmation require a compatible server protocol and are unavailable."), 16)
+  label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
  if game not in [0, 4]:
   button(tr_ui("طول الجولة: %d • تعديل", "ROUND LENGTH: %d • CHANGE") % session_length, show_accessibility)
  button(tr_ui("★ أضف أو أزل من المفضلة", "★ TOGGLE FAVORITE"), toggle_favorite)

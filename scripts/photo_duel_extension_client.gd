@@ -17,8 +17,21 @@ var error_count := 0
 var _previous := WebSocketPeer.STATE_CLOSED
 var _resume_requested := false
 var _started_at := 0
+var terms_accepted := false
+var authenticate_local := false
+var _auth_token := ""
+var _auth_expiry := 0
+var _request: HTTPRequest
+
+static func service_configuration() -> Dictionary:
+ var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/duel_service.json"))
+ return data if data is Dictionary else {}
+
 
 static func allowed_endpoint(value: String) -> bool:
+ if value.begins_with("wss://"):
+  var configuration := service_configuration()
+  return bool(configuration.get("enabled",false)) and bool(configuration.get("availability_verified",false)) and value == str(configuration.get("endpoint","")) and value.trim_prefix("wss://").trim_suffix("/") == str(configuration.get("verified_host","")) and str(configuration.get("verified_host","")).ends_with(".onrender.com") and "gaminghub-multiplayer.onrender.com" not in value
  var regex := RegEx.new()
  regex.compile("^ws://(127\\.0\\.0\\.1|localhost|10\\.[0-9]+\\.[0-9]+\\.[0-9]+|192\\.168\\.[0-9]+\\.[0-9]+|172\\.(1[6-9]|2[0-9]|3[01])\\.[0-9]+\\.[0-9]+):[0-9]{1,5}/?$")
  if regex.search(value) == null: return false
@@ -35,16 +48,56 @@ static func endpoint_from_args() -> String:
   if arg.begins_with("--duel-local="):
    var value := arg.trim_prefix("--duel-local=")
    return value if allowed_endpoint(value) else ""
- return ""
+ var configuration := service_configuration()
+ var configured := str(configuration.get("endpoint",""))
+ return configured if allowed_endpoint(configured) else ""
 
 func connect_endpoint(value: String) -> Error:
  if not allowed_endpoint(value):
-  _error("Only an explicit loopback/private LAN endpoint is allowed")
+  _error("Service is not configured or this endpoint is not approved")
   return ERR_INVALID_PARAMETER
  socket.close()
+ if not endpoint.is_empty() and endpoint != value:
+  _auth_token = ""
+  _auth_expiry = 0
+  token = ""
+  code = ""
+  state = {}
  endpoint = value
  capabilities = {}
+ if value.begins_with("wss://") or authenticate_local:
+  if not terms_accepted:
+   _error("Accept the room terms before connecting")
+   return ERR_UNAUTHORIZED
+  if not _auth_token.is_empty() and Time.get_ticks_msec() < _auth_expiry:
+   return _open_socket()
+  if is_instance_valid(_request): _request.queue_free()
+  _request = HTTPRequest.new()
+  _request.timeout = 65
+  _request.body_size_limit = 4096
+  add_child(_request)
+  _request.request_completed.connect(_authenticated)
+  var session_url := value.replace("wss://","https://").replace("ws://","http://").trim_suffix("/")+"/session"
+  return _request.request(session_url,PackedStringArray(["X-GamingHub-Terms: 1"]))
+ return _open_socket()
+
+func _authenticated(result: int, code_status: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+ if result != HTTPRequest.RESULT_SUCCESS or code_status != 200:
+  _error("Authentication service unavailable: " + str(code_status))
+  event_received.emit({"type":"duel_error","message":last_error})
+  return
+ var value: Variant = JSON.parse_string(body.get_string_from_utf8())
+ if not value is Dictionary or str(value.get("token","")).is_empty():
+  _error("Invalid authentication response")
+  return
+ _auth_token = str(value.token)
+ _auth_expiry = Time.get_ticks_msec()+maxi(0,int(value.get("expires_in",0))-30)*1000
+ _open_socket()
+
+func _open_socket() -> Error:
  socket = WebSocketPeer.new()
+ socket.inbound_buffer_size = 262144
+ if not _auth_token.is_empty(): socket.handshake_headers = PackedStringArray(["Authorization: Bearer "+_auth_token])
  _previous = WebSocketPeer.STATE_CLOSED
  _started_at = Time.get_ticks_msec()
  var result := socket.connect_to_url(endpoint)

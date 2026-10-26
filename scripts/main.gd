@@ -1892,6 +1892,9 @@ func show_modes(index: int) -> void:
  if game == 0:
   if age_group not in ["under13", "unknown"]:
    button(tr_ui("👥 إنشاء / انضمام لغرفة بكود", "👥 CREATE / JOIN ROOM BY CODE"), open_guess_multiplayer, GOLD)
+   var local_endpoint: String = load("res://scripts/photo_duel_extension_client.gd").endpoint_from_args()
+   if not local_endpoint.is_empty():
+    button(tr_ui("🧪 غرف الصور 2–6 • خادم محلي", "🧪 PHOTO ROOMS 2–6 • LOCAL SERVER"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   button(tr_ui("🖼️ مكتبة الصور الأصلية • 200 صورة", "🖼️ ORIGINAL PICTURE LIBRARY • 200 IMAGES"), func(): picture_library_page = 0; show_picture_library(), ACCENT)

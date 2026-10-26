@@ -44,6 +44,10 @@ var target_player: OptionButton
 var report_reason: LineEdit
 var report_button: Button
 var block_button: Button
+var _match_controls: VBoxContainer
+var _lobby_controls: VBoxContainer
+var _scores: Label
+var _menu_touch_guard: Node
 
 
 func tr_pair(ar: String, en: String) -> String:
@@ -52,6 +56,8 @@ func tr_pair(ar: String, en: String) -> String:
 func label(value: String, size: int = 18) -> Label:
  var control := Label.new()
  control.text = value
+ control.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if language == "ar" else HORIZONTAL_ALIGNMENT_LEFT
+ control.mouse_filter = Control.MOUSE_FILTER_IGNORE
  control.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  control.add_theme_font_size_override("font_size", size)
  column.add_child(control)
@@ -67,13 +73,26 @@ func field(hint: String) -> LineEdit:
 func button(value: String, action: Callable) -> Button:
  var control := Button.new()
  control.text = value
- control.custom_minimum_size.y = 54
+ control.custom_minimum_size.y = 56
  VisualSkin.decorate_button(control,"gold")
  control.pressed.connect(_invoke.bind(weakref(control),action),CONNECT_DEFERRED)
  column.add_child(control)
  return control
 
+func _section(title: String, expanded: bool = false) -> VBoxContainer:
+ var body := VBoxContainer.new()
+ body.add_theme_constant_override("separation",8)
+ body.visible = expanded
+ var toggle := button(title,func(): body.visible = not body.visible)
+ VisualSkin.decorate_button(toggle,"secondary")
+ column.add_child(body)
+ return body
+
 func _invoke(ref: WeakRef, action: Callable) -> void:
+ if is_instance_valid(_menu_touch_guard): _menu_touch_guard.dispatch(_execute_menu_action.bind(ref,action))
+ else: _execute_menu_action(ref,action)
+
+func _execute_menu_action(ref: WeakRef, action: Callable) -> void:
  var control: Variant = ref.get_ref()
  if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control) and control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
   action.call()
@@ -82,6 +101,7 @@ func _ready() -> void:
  get_tree().quit_on_go_back = false
  var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://progress_v10_all.json")) if FileAccess.file_exists("user://progress_v10_all.json") else null
  if saved is Dictionary: language = str(saved.get("language","ar"))
+ layout_direction = Control.LAYOUT_DIRECTION_RTL if language == "ar" else Control.LAYOUT_DIRECTION_LTR
  var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/guess_picture_302/catalog.json"))
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
@@ -91,8 +111,11 @@ func _ready() -> void:
  var scroll := ScrollContainer.new()
  scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
- scroll.scroll_deadzone = 22
+ scroll.scroll_deadzone = 14
  scroll.follow_focus = true
+ _menu_touch_guard = load("res://scripts/menu_touch_guard.gd").new()
+ _menu_touch_guard.scroll_area = scroll
+ scroll.add_child(_menu_touch_guard)
  add_child(scroll)
  var margin := MarginContainer.new()
  for side in ["left","right","top","bottom"]: margin.add_theme_constant_override("margin_"+side,16)
@@ -100,23 +123,29 @@ func _ready() -> void:
  scroll.add_child(margin)
  column = VBoxContainer.new()
  column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- column.add_theme_constant_override("separation",10)
+ column.add_theme_constant_override("separation",8)
  margin.add_child(column)
  VisualSkin.add_brand_banner(column,"res://assets/ui/gaming_hub_brand.png",tr_pair("غرف الأصدقاء • خمن صورتك","Friend rooms • Guess Your Picture"))
  status = label(tr_pair("اختر إعدادات الغرفة واتصل بالخدمة عند تفعيلها.","Choose room settings and connect when the service is enabled."))
- heading = label("",24)
+ heading = label("",22)
+ _scores = label("",16)
  clock = label("")
+ var main_column := column
+ column = _section(tr_pair("⚙ إعدادات الغرفة والاتصال","⚙ Room & connection settings"))
  endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
  endpoint_field.text = Client.endpoint_from_args()
+ endpoint_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
  label(tr_pair("الدردشة والصوت اختياريان. يمنع الإساءة والتهديد ونشر المعلومات الشخصية والمحتوى غير الملائم. يمكنك الإبلاغ وحظر لاعب. لا يبدأ الميكروفون دون موافقتك.","Chat and voice are optional. Abuse, threats, personal information and inappropriate content are prohibited. You can report or block players. The microphone requires your consent."),15)
  terms = CheckBox.new()
  terms.custom_minimum_size.y = 54
  terms.text = tr_pair("أوافق على قواعد الغرف واستخدام الدردشة","I accept the room and chat rules")
  column.add_child(terms)
+ label(tr_pair("عدد اللاعبين","Number of players"))
  players_field = OptionButton.new()
  players_field.custom_minimum_size.y = 54
  for count in range(2,7): players_field.add_item(str(count),count)
  column.add_child(players_field)
+ label(tr_pair("مدة الدور بالثواني","Turn time in seconds"))
  timer_field = OptionButton.new()
  timer_field.custom_minimum_size.y = 54
  for seconds in [0,10,20,30,60]: timer_field.add_item(tr_pair("بدون مؤقت","No timer") if seconds == 0 else str(seconds),seconds)
@@ -128,11 +157,21 @@ func _ready() -> void:
  target_field.max_value = 50
  target_field.value = 10
  column.add_child(target_field)
+ column = main_column
+ _lobby_controls = VBoxContainer.new()
+ _lobby_controls.add_theme_constant_override("separation",8)
+ main_column.add_child(_lobby_controls)
+ column = _lobby_controls
  create_button = button(tr_pair("إنشاء غرفة","Create room"),func(): client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value)))
  code_field = field(tr_pair("كود الغرفة","Room code"))
+ code_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
  join_button = button(tr_pair("انضمام بكود","Join by code"),func(): client.join_room(code_field.text))
  resume_button = button(tr_pair("استعادة الاتصال","Reconnect session"),func(): client.resume_session())
  button(tr_pair("الاتصال بخدمة الغرف","Connect to room service"),_connect_service)
+ _match_controls = VBoxContainer.new()
+ _match_controls.add_theme_constant_override("separation",8)
+ main_column.add_child(_match_controls)
+ column = _match_controls
  for i in range(6):
   captions.append(label(""))
   var picture := TextureRect.new()
@@ -145,9 +184,12 @@ func _ready() -> void:
  question_label = label("")
  question_field = field(tr_pair("سؤال نصي للمجيب المحدد","Text question for the designated opponent"))
  question_button = button(tr_pair("إرسال السؤال","Send question"),func(): client.send_action("duel_question",{"text":question_field.text}))
+ var match_column := column
+ column = _section(tr_pair("☷ الأسئلة الجاهزة","☷ Preset questions"))
  for key in FACTS:
   var fact: String = key
   presets[fact] = button(str(FACTS[fact][0 if language == "ar" else 1]),func(): client.send_action("duel_preset",{"question_id":fact}))
+ column = match_column
  yes_button = button(tr_pair("نعم","Yes"),func(): client.send_action("duel_reply",{"answer":true}))
  no_button = button(tr_pair("لا","No"),func(): client.send_action("duel_reply",{"answer":false}))
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
@@ -155,12 +197,15 @@ func _ready() -> void:
  correct_button = button(tr_pair("التخمين صحيح","Guess is correct"),func(): client.send_action("duel_confirm",{"correct":true}))
  wrong_button = button(tr_pair("التخمين خطأ","Guess is incorrect"),func(): client.send_action("duel_confirm",{"correct":false}))
  pass_button = button(tr_pair("تمرير الدور","Pass turn"),func(): client.send_action("duel_pass"))
+ column = _section(tr_pair("✉ الدردشة النصية","✉ Text chat"))
  chat_log = label("")
  chat_field = field(tr_pair("دردشة نصية لجميع لاعبي الغرفة","Text chat for everyone in the room"))
  chat_field.max_length = 280
  chat_button = button(tr_pair("إرسال الدردشة","Send chat"),_chat)
+ column = match_column
  voice_button = button(tr_pair("تفعيل الميكروفون","Enable microphone"),func(): voice_adapter.enable(not voice_adapter.requested))
  voice_status = label("")
+ column = _section(tr_pair("⚙ الإبلاغ والحظر","⚙ Report & block"))
  target_player = OptionButton.new()
  target_player.custom_minimum_size.y = 54
  for index in range(6): target_player.add_item(tr_pair("اللاعب ","Player ")+str(index+1),index)
@@ -168,6 +213,7 @@ func _ready() -> void:
  report_reason = field(tr_pair("سبب الإبلاغ","Report reason"))
  report_button = button(tr_pair("الإبلاغ عن اللاعب","Report player"),func(): client.send_action("duel_report",{"target":target_player.get_selected_id(),"reason":report_reason.text}))
  block_button = button(tr_pair("حظر اللاعب ومغادرة الغرفة","Block player and leave room"),func(): client.send_action("duel_block",{"target":target_player.get_selected_id()}))
+ column = main_column
  button(tr_pair("مغادرة الغرفة","Leave room"),func(): client.send_action("duel_leave"))
  button(tr_pair("العودة إلى Gaming Hub","Back to Gaming Hub"),_home)
  client = Client.new()
@@ -188,6 +234,7 @@ func _ready() -> void:
   client.connect_endpoint(Client.endpoint_from_args())
  _state({})
  _voice_changed()
+ VisualSkin.enable_menu_swipe(column)
 
 func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
@@ -212,7 +259,14 @@ func _state(value: Dictionary) -> void:
  chat_button.disabled = not ready or client.code.is_empty() or bool(value.get("closed",false))
  report_button.disabled = chat_button.disabled or not bool(client.capabilities.get("moderation",false))
  block_button.disabled = report_button.disabled
- heading.text = tr_pair("الغرفة %s • اللاعب %d • %d/%d متصلون • الدور %d • النقاط %s","Room %s • player %d • %d/%d joined • turn %d • scores %s") % [client.code,client.player+1,int(value.get("joined",0)),int(value.get("capacity",0)),int(value.get("current",0))+1,str(value.get("scores",[]))]
+ heading.text = tr_pair("غرف الأصدقاء • 2–6 لاعبين","Friend rooms • 2–6 players") if client.code.is_empty() else tr_pair("الغرفة %s • اللاعب %d","Room %s • player %d") % [client.code,client.player+1]
+ var score_parts := PackedStringArray()
+ var score_values: Array = value.get("scores",[])
+ for index in range(score_values.size()): score_parts.append(str(index+1)+": "+str(score_values[index]))
+ _scores.text = tr_pair("النقاط • ","Scores • ")+"  |  ".join(score_parts) if not score_parts.is_empty() else ""
+ clock.visible = bool(value.get("started",false))
+ _match_controls.visible = bool(value.get("started",false))
+ _lobby_controls.visible = not active
  if bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
  elif not ready: status.text = tr_pair("خدمة الغرف غير متصلة؛ قد يكون تفعيلها معلقًا.","Room service is disconnected; activation may be pending.")

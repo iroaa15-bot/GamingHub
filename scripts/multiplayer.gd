@@ -6,6 +6,7 @@ const BG := Color("0b1027")
 const PANEL := Color("19234b")
 var socket := WebSocketPeer.new()
 var android_voice_bridge: Node = null
+var _menu_touch_guard: Node
 var voice_local_enabled := false
 var voice_peer_enabled := false
 var voice_requested := false
@@ -262,6 +263,9 @@ func _ready() -> void:
  scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  scroll.scroll_deadzone = 22
  scroll.follow_focus = true
+ _menu_touch_guard = load("res://scripts/menu_touch_guard.gd").new()
+ _menu_touch_guard.scroll_area = scroll
+ scroll.add_child(_menu_touch_guard)
  add_child(scroll)
  output = VBoxContainer.new()
  output.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -284,7 +288,7 @@ func _ready() -> void:
  language_button = Button.new()
  language_button.text = "العربية / English"
  language_button.custom_minimum_size.y = 52
- language_button.pressed.connect(_toggle_language)
+ language_button.pressed.connect(_invoke_room_action.bind(weakref(language_button), _toggle_language), CONNECT_DEFERRED)
  VisualSkin.decorate_button(language_button, "secondary")
  output.add_child(language_button)
  var network_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/network_config.json"))
@@ -306,7 +310,7 @@ func _ready() -> void:
  _setup_native_voice()
  voice_button = Button.new()
  voice_button.custom_minimum_size.y = 52
- voice_button.pressed.connect(func(): set_voice_opt_in(not voice_requested))
+ voice_button.pressed.connect(_invoke_room_action.bind(weakref(voice_button), func(): set_voice_opt_in(not voice_requested)), CONNECT_DEFERRED)
  _style_button(voice_button)
  output.add_child(voice_button)
  voice_label = _label("", 14)
@@ -332,7 +336,7 @@ func _ready() -> void:
  create_button = Button.new()
  create_button.text = _t("إنشاء غرفة لصديق", "Create a friend room")
  create_button.custom_minimum_size.y = 64
- create_button.pressed.connect(func(): _request_action({"type":"create"}))
+ create_button.pressed.connect(_invoke_room_action.bind(weakref(create_button), func(): _request_action({"type":"create"})), CONNECT_DEFERRED)
  _style_button(create_button, true)
  lobby_controls.add_child(create_button)
  code_input = _text_input("كود الغرفة - 6 حروف أو أرقام")
@@ -342,27 +346,27 @@ func _ready() -> void:
  join_button = Button.new()
  join_button.text = _t("انضمام بكود", "Join with code")
  join_button.custom_minimum_size.y = 64
- join_button.pressed.connect(_join_room)
+ join_button.pressed.connect(_invoke_room_action.bind(weakref(join_button), _join_room), CONNECT_DEFERRED)
  _style_button(join_button)
  lobby_controls.add_child(join_button)
  match_button = Button.new()
  match_button.text = _t("منافس عشوائي", "Find an opponent")
  match_button.custom_minimum_size.y = 64
- match_button.pressed.connect(func(): _request_action({"type":"matchmake"}))
+ match_button.pressed.connect(_invoke_room_action.bind(weakref(match_button), func(): _request_action({"type":"matchmake"})), CONNECT_DEFERRED)
  _style_button(match_button, true)
  lobby_controls.add_child(match_button)
  share_button = Button.new()
  share_button.text = _t("نسخ دعوة الغرفة", "Copy room invitation")
  share_button.custom_minimum_size.y = 52
  share_button.disabled = true
- share_button.pressed.connect(_copy_invite)
+ share_button.pressed.connect(_invoke_room_action.bind(weakref(share_button), _copy_invite), CONNECT_DEFERRED)
  _style_button(share_button)
  lobby_controls.add_child(share_button)
  _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
  var advanced_toggle := Button.new()
  advanced_toggle.text = _t("إعدادات الاتصال (متقدمة)", "Connection settings (advanced)")
  VisualSkin.decorate_button(advanced_toggle, "secondary")
- advanced_toggle.pressed.connect(func(): advanced_panel.visible = not advanced_panel.visible)
+ advanced_toggle.pressed.connect(_invoke_room_action.bind(weakref(advanced_toggle), func(): advanced_panel.visible = not advanced_panel.visible), CONNECT_DEFERRED)
  output.add_child(advanced_toggle)
  advanced_panel = VBoxContainer.new()
  advanced_panel.visible = false
@@ -375,6 +379,7 @@ func _ready() -> void:
  _button(_t("اتصال يدوي", "Connect manually"), _connect_server, advanced_panel)
  _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
  _update_lobby()
+ VisualSkin.enable_menu_swipe(output)
 
 func _voice_diagnostics_text() -> String:
  _setup_native_voice()
@@ -383,9 +388,9 @@ func _voice_diagnostics_text() -> String:
  var permission := "unknown"
  if plugin_found:
   var plugin := Engine.get_singleton("GamingHubVoice")
-  if plugin != null and plugin.has_method("getVoiceApiVersion"):
+  if plugin != null:
    api_version = int(plugin.call("getVoiceApiVersion"))
-  if plugin != null and plugin.has_method("hasMicrophonePermission"):
+  if plugin != null:
    permission = str(plugin.call("hasMicrophonePermission"))
  var bridge_ready: bool = android_voice_bridge != null and android_voice_bridge.is_available()
  var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
@@ -476,6 +481,7 @@ func _exit_to_games() -> void:
 func _label(value: String, size: int = 20) -> Label:
  var l := Label.new()
  l.text = _local(value)
+ l.mouse_filter = Control.MOUSE_FILTER_IGNORE
  l.set_meta("ui_source", value)
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.add_theme_font_size_override("font_size", size)
@@ -514,10 +520,6 @@ func _style_button(button: Button, primary: bool = false) -> void:
   if not reduced_motion:
    var animation := button.create_tween()
    animation.tween_property(button, "scale", Vector2.ONE, 0.09)
- )
- button.pressed.connect(func() -> void:
-  if OS.get_name() == "Android":
-   Input.vibrate_handheld(12)
  )
 
 func _clear_match_view() -> void:
@@ -1357,7 +1359,12 @@ func _next_questions() -> void:
  _refresh_actions()
 
 func _invoke_room_action(ref: WeakRef, callback: Callable) -> void:
+ if is_instance_valid(_menu_touch_guard): _menu_touch_guard.dispatch(_execute_room_action.bind(ref,callback))
+ else: _execute_room_action(ref,callback)
+
+func _execute_room_action(ref: WeakRef, callback: Callable) -> void:
  var control: Variant = ref.get_ref()
- if is_inside_tree() and is_instance_valid(control):
-  if control.is_inside_tree() and not control.is_queued_for_deletion():
+ if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control):
+  if control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
+   if OS.get_name() == "Android": Input.vibrate_handheld(12)
    callback.call()

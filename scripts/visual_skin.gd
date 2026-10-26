@@ -94,6 +94,7 @@ static func decorate_button(target: Button, tone: String = "secondary") -> void:
  target.add_theme_color_override("font_disabled_color", MUTED)
  target.add_theme_font_size_override("font_size", 19)
  target.focus_mode = Control.FOCUS_ALL
+ target.mouse_filter = Control.MOUSE_FILTER_PASS
 
 static func decorate_input(target: LineEdit) -> void:
  var input_style: StyleBoxFlat = card(Color("101e38"), 16)
@@ -112,6 +113,7 @@ static func decorate_input(target: LineEdit) -> void:
 static func add_hero(parent: VBoxContainer, title_value: String, description: String, kicker: String) -> void:
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ panel.mouse_filter = Control.MOUSE_FILTER_PASS
  var skin: StyleBoxFlat = card(Color("222e5e"), 28)
  skin.border_color = Color("6dcbcf", 0.55)
  skin.set_border_width_all(2)
@@ -154,6 +156,7 @@ static func add_hero(parent: VBoxContainer, title_value: String, description: St
 static func add_brand_banner(parent: VBoxContainer, image_path: String, tagline: String) -> void:
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ panel.mouse_filter = Control.MOUSE_FILTER_PASS
  var frame: StyleBoxFlat = card(Color("162653"), 26)
  frame.border_color = Color("ffd481", 0.80)
  frame.set_border_width_all(2)
@@ -170,11 +173,13 @@ static func add_brand_banner(parent: VBoxContainer, image_path: String, tagline:
  art.texture = load(image_path) as Texture2D
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- art.custom_minimum_size.y = 218
+ art.custom_minimum_size.y = 124
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  stack.add_child(art)
  var tagline_label := Label.new()
  tagline_label.text = tagline
+ tagline_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
  tagline_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  tagline_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  tagline_label.add_theme_font_size_override("font_size", 16)
@@ -184,6 +189,7 @@ static func add_brand_banner(parent: VBoxContainer, image_path: String, tagline:
 static func add_question_panel(parent: VBoxContainer, question_text: String, reading_scale: float = 1.0, eyebrow_text: String = "✦ THE CHALLENGE ✦") -> void:
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ panel.mouse_filter = Control.MOUSE_FILTER_PASS
  var skin: StyleBoxFlat = card(Color("21366b"), 22)
  skin.border_color = Color("65e8e0", 0.72)
  skin.set_border_width_all(2)
@@ -209,6 +215,7 @@ static func add_question_panel(parent: VBoxContainer, question_text: String, rea
 static func add_feedback_panel(parent: VBoxContainer, headline: String, detail: String, is_success: bool) -> void:
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ panel.mouse_filter = Control.MOUSE_FILTER_PASS
  var skin: StyleBoxFlat = card(Color("14554e") if is_success else Color("57364b"), 25)
  skin.border_color = CYAN if is_success else Color("ff9eae")
  skin.set_border_width_all(2)
@@ -244,3 +251,13 @@ static func decorate_progress(progress: ProgressBar, gold: bool = false) -> void
  fill.set_corner_radius_all(9)
  progress.add_theme_stylebox_override("fill", fill)
  progress.custom_minimum_size.y = maxf(progress.custom_minimum_size.y, 15.0)
+
+# Let native ScrollContainer cancel a pressed menu button when a swipe starts.
+# Custom scripted controls and explicit gui_input handlers keep their own gestures.
+static func enable_menu_swipe(node: Node) -> void:
+ if node is Control and node.get_script() == null and node.get_signal_connection_list("gui_input").is_empty():
+  if node is Label or node is TextureRect:
+   node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+  elif (node is Container and not node is ScrollContainer) or node is BaseButton:
+   node.mouse_filter = Control.MOUSE_FILTER_PASS
+ for child in node.get_children(): enable_menu_swipe(child)

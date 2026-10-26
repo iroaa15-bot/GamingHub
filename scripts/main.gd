@@ -984,8 +984,10 @@ func _process(_delta: float) -> void:
   blitz_counter.text = tr_ui("⏱ متبقي %d ثانية", "⏱ %d SECONDS LEFT") % ceili(remaining)
 
 var ui_action_generation := 0
+var _menu_touch_guard: Node
 
 func clear_ui() -> void:
+ layout_direction = Control.LAYOUT_DIRECTION_RTL if selected_language == "ar" else Control.LAYOUT_DIRECTION_LTR
  ui_action_generation += 1
  active_play_screen = false
  if is_instance_valid(blitz_timer):
@@ -1010,12 +1012,16 @@ func clear_ui() -> void:
  scroll.offset_right = -16
  scroll.offset_bottom = -36
  # Allow a finger swipe to scroll without accidentally pressing a quiz answer.
- scroll.scroll_deadzone = 22
+ scroll.scroll_deadzone = 14
+ scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  scroll.follow_focus = true
+ _menu_touch_guard = load("res://scripts/menu_touch_guard.gd").new()
+ _menu_touch_guard.scroll_area = scroll
+ scroll.add_child(_menu_touch_guard)
  add_child(scroll)
  root = VBoxContainer.new()
  root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- root.add_theme_constant_override("separation", 17)
+ root.add_theme_constant_override("separation", 10)
  var margins := MarginContainer.new()
  margins.add_theme_constant_override("margin_left", 5)
  margins.add_theme_constant_override("margin_right", 5)
@@ -1023,15 +1029,21 @@ func clear_ui() -> void:
  margins.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margins)
  margins.add_child(root)
+ _configure_menu_swipe.call_deferred(ui_action_generation)
  if reduced_motion:
   root.modulate.a = 1.0
  else:
   root.modulate.a = 0.0
   root.create_tween().tween_property(root, "modulate:a", 1.0, 0.18)
 
+func _configure_menu_swipe(generation: int) -> void:
+ if is_inside_tree() and generation == ui_action_generation and is_instance_valid(root):
+  VisualSkin.enable_menu_swipe(root)
+
 func label(text_value: String, font_size: int = 23) -> Label:
  var l := Label.new()
  l.text = text_value
+ l.mouse_filter = Control.MOUSE_FILTER_IGNORE
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  l.add_theme_font_size_override("font_size", int(font_size * reading_scale))
@@ -1042,7 +1054,7 @@ func label(text_value: String, font_size: int = 23) -> Label:
 func button(text_value: String, action: Callable, color: Color = PANEL) -> Button:
  var b := Button.new()
  b.text = text_value
- b.custom_minimum_size = Vector2(0, 80 if reading_scale >= 1.25 or audience == "children" else 66)
+ b.custom_minimum_size = Vector2(0, 68 if reading_scale >= 1.25 or audience == "children" else 56)
  b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  b.add_theme_font_size_override("font_size", int(19 * reading_scale))
  b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1063,6 +1075,7 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  VisualSkin.decorate_button(b, tone)
  # Consistent touch targets and immediate tactile feedback for all game modes.
  b.focus_mode = Control.FOCUS_ALL
+ b.mouse_filter = Control.MOUSE_FILTER_PASS
  b.add_theme_color_override("font_hover_color", Color("ffffff"))
  b.add_theme_color_override("font_pressed_color", Color("ffffff"))
  b.mouse_entered.connect(func() -> void:
@@ -1078,12 +1091,6 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  )
  b.button_up.connect(func() -> void:
   animate_touch_button(b, Vector2.ONE, 0.10)
- )
- b.pressed.connect(func() -> void:
-  if haptics_enabled and OS.get_name() == "Android":
-   Input.vibrate_handheld(14)
-  if sound_enabled:
-   play_tap()
  )
  b.pressed.connect(_run_ui_action.bind(weakref(b), ui_action_generation, action), CONNECT_DEFERRED)
  root.add_child(b)
@@ -1284,6 +1291,7 @@ func feature_card(title_text: String, description: String, action_text: String, 
 
 func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContainer:
  var tile := PanelContainer.new()
+ tile.mouse_filter = Control.MOUSE_FILTER_PASS
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
  skin.bg_color = Color("142447")
@@ -1302,17 +1310,20 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.add_child(column)
  var art := TextureRect.new()
  art.texture = card_texture(art_id)
- art.custom_minimum_size.y = 150
+ art.custom_minimum_size.y = 84
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
  column.add_child(art)
  var idx: int = index
- var b := button(("★ " if favorite else "") + game_title(index) + "\n" + game_subtitle(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
+ var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
+ b.tooltip_text = game_subtitle(index)
+ b.add_theme_font_size_override("font_size", int(16 * reading_scale))
  root.remove_child(b)
  column.add_child(b)
  b.icon = cached_texture("res://assets/ui/game_%d.svg" % index)
  b.expand_icon = true
- b.add_theme_constant_override("icon_max_width", 28)
+ b.add_theme_constant_override("icon_max_width", 22)
  return tile
 
 # World journey: a persistent stage map with themed chapters and replayable challenges.
@@ -1883,7 +1894,7 @@ func show_more_games() -> void:
  label(tr_ui("الألعاب", "GAMES"), 30)
  button(tr_ui("🖼️ خمن صورتك • ابدأ هنا", "🖼️ GUESS YOUR PICTURE • START HERE"), func(): show_modes(0), GOLD)
  var grid := GridContainer.new()
- grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 650 else 2
+ grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 380 else (3 if get_viewport_rect().size.x >= 780 else 2)
  root.add_child(grid)
  var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
  var favorites: Array = profile.get("favorites", [])
@@ -3498,9 +3509,16 @@ func open_photo_duel() -> void:
  open_guess_multiplayer()
 
 func _run_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
+ if is_instance_valid(_menu_touch_guard):
+  _menu_touch_guard.dispatch(_execute_ui_action.bind(ref,generation,action))
+ else: _execute_ui_action(ref,generation,action)
+
+func _execute_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
  var control: Variant = ref.get_ref()
  if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
   if control.is_inside_tree() and not control.is_queued_for_deletion():
+   if haptics_enabled and OS.get_name() == "Android": Input.vibrate_handheld(14)
+   if sound_enabled: play_tap()
    action.call()
 
 var picture_library_page := 0

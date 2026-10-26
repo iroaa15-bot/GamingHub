@@ -99,7 +99,7 @@ func _t(ar: String, en: String) -> String:
 func _setup_native_voice() -> void:
  if android_voice_bridge != null:
   return
- android_voice_bridge = load("res://scripts/android_voice_bridge.gd").new()
+ android_voice_bridge = load("res://scripts/android_voice_integration_bridge.gd").new()
  android_voice_bridge.outgoing_pcm.connect(_send_native_voice_pcm)
  android_voice_bridge.permission_ready.connect(_on_voice_permission)
  android_voice_bridge.voice_unavailable.connect(_on_voice_unavailable)
@@ -187,10 +187,15 @@ func _reset_voice_on_connection_loss() -> void:
  voice_sequence = 0
  _refresh_native_voice()
 
+var _handling_voice_failure := false
+
 func _on_voice_unavailable(reason: String) -> void:
+ if _handling_voice_failure: return
+ _handling_voice_failure = true
  set_voice_opt_in(false)
  if is_instance_valid(voice_label):
   voice_label.text = _t("الصوت متوقف: ", "Voice unavailable: ") + _voice_failure_text(reason)
+ _handling_voice_failure = false
 
 func _voice_failure_text(reason: String) -> String:
  match reason:

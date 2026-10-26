@@ -1,0 +1,23 @@
+10-26 15:01:40.379  8133  8165 I godot   : GH_ISOLATE original_main_no_touch
+10-26 15:01:50.952  8133  8165 I godot   : GH_ISOLATE transition_no_touch_no_sound
+10-26 15:02:43.393  8625  8656 I godot   : GH_ISOLATE voice_bridge_only_no_microphone
+10-26 15:02:43.407  8625  8656 I godot   : GH_ISOLATE native_available=false
+10-26 15:02:58.241  8625  8656 I godot   : GH_ISOLATE voice_bridge_survived15
+10-26 15:03:30.430  8805  8838 I godot   : GH_ISOLATE original_main_to_empty_no_touch
+10-26 15:03:41.006  8805  8838 I godot   : GH_ISOLATE transition_no_touch_no_sound
+10-26 15:03:56.008  8805  8838 I godot   : GH_ISOLATE empty_transition_survived15
+10-26 15:05:08.752  9148  9179 I godot   : GH_ROOT singleton=true
+10-26 15:05:08.752  9148  9179 I godot   : GH_ROOT api_method=false
+10-26 15:05:08.767  9148  9179 I godot   : GH_ROOT synchronous_failure_depth=1 reason=Android voice plugin needs an update
+10-26 15:05:08.767  9148  9179 I godot   : GH_ROOT synchronous_failure_depth=2 reason=Android voice plugin needs an update
+10-26 15:05:08.767  9148  9179 I godot   : GH_ROOT synchronous_failure_depth=3 reason=Android voice plugin needs an update
+10-26 15:05:08.767  9148  9179 I godot   : GH_ROOT synchronous_failure_depth=4 reason=Android voice plugin needs an update
+10-26 15:05:08.767  9148  9179 I godot   : GH_ROOT available=false
+10-26 15:06:17.862  9884  9918 I godot   : GH_ROOT singleton=true
+10-26 15:06:17.862  9884  9918 I godot   : GH_ROOT api_method=false
+10-26 15:06:17.862  9884  9918 I godot   : GH_ROOT direct_api_version=2
+10-26 15:06:17.876  9884  9918 I godot   : GH_ROOT synchronous_failure_depth=1 reason=Android voice plugin needs an update
+10-26 15:06:17.876  9884  9918 I godot   : GH_ROOT synchronous_failure_depth=2 reason=Android voice plugin needs an update
+10-26 15:06:17.876  9884  9918 I godot   : GH_ROOT synchronous_failure_depth=3 reason=Android voice plugin needs an update
+10-26 15:06:17.876  9884  9918 I godot   : GH_ROOT synchronous_failure_depth=4 reason=Android voice plugin needs an update
+10-26 15:06:17.876  9884  9918 I godot   : GH_ROOT available=false

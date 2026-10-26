@@ -1,0 +1,36 @@
+10-26 14:42:12.780 31656 31656 V Godot   : InitEngine with params: [--xr_mode_regular, --xr-mode, off, --fullscreen, --background_color, #000000]
+10-26 14:42:12.780 31656 31656 V Godot   : Initializing Godot plugin registry
+10-26 14:42:12.964 31656 31656 D Godot   : background color = -16777216
+10-26 14:42:13.132 31656 31656 V Godot   : Godot native layer initialization completed: true
+10-26 14:42:13.330 31656 31656 V Godot   : Godot native layer setup completed
+10-26 14:42:13.332 31656 31656 V Godot   : OnInitRenderView: GodotFragment{c8bd1ab} (e2ce5170-31d4-4dca-a6ec-4802fbcefa1a id=0x7f0800ae)
+10-26 14:42:13.413 31656 31656 D Godot   : Render view should be transparent: false
+10-26 14:42:13.419 31656 31656 D Godot   : usesVulkan(): false
+10-26 14:42:13.419 31656 31656 D Godot   : 			renderingDevice: opengl3 (ProjectSettings)
+10-26 14:42:13.419 31656 31656 D Godot   : 			renderer: gl_compatibility (ProjectSettings)
+10-26 14:42:13.562 31656 31656 V Godot   : OnStart: GodotFragment{c8bd1ab} (e2ce5170-31d4-4dca-a6ec-4802fbcefa1a id=0x7f0800ae)
+10-26 14:42:13.578 31656 31656 V Godot   : OnResume: GodotFragment{c8bd1ab} (e2ce5170-31d4-4dca-a6ec-4802fbcefa1a id=0x7f0800ae)
+10-26 14:42:13.776 31656 31689 I godot   : Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+10-26 14:42:14.107 31656 31689 I godot   : OpenGL API OpenGL ES 3.2 build 1.10@5130912 - Compatibility - Using Device: Imagination Technologies - PowerVR Rogue GE8320
+10-26 14:42:14.167 31656 31689 I godot   : 
+10-26 14:42:16.862 31656 31689 V Godot   : OnGodotSetupCompleted
+10-26 14:42:19.240 31656 31689 V Godot   : OnGodotMainLoopStarted
+10-26 14:42:26.001 31656 31689 F libc    : Fatal signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0x76768cafb0 in tid 31689 (GLThread 14011), pid 31656 (oaa15.gaminghub)
+10-26 14:42:26.210 31834 31834 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+10-26 14:42:26.210 31834 31834 F DEBUG   : Build fingerprint: 'OPPO/CPH2015/OP4C7D:9/PPR1.180610.011/1640680627:user/release-keys'
+10-26 14:42:26.210 31834 31834 F DEBUG   : Revision: '0'
+10-26 14:42:26.210 31834 31834 F DEBUG   : ABI: 'arm64'
+10-26 14:42:26.210 31834 31834 F DEBUG   : pid: 31656, tid: 31689, name: GLThread 14011  >>> com.iroaa15.gaminghub <<<
+10-26 14:42:26.210 31834 31834 F DEBUG   : signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0x76768cafb0
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x0  000000766d035a10  x1  00000076705ff240  x2  00000076768cb228  x3  0000000000000000
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x4  00000076768cb5d0  x5  00000076768cb5d0  x6  0000000000000050  x7  0000000000000000
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x8  00000076768cb010  x9  0000007678adf98c  x10 0000007671cde0a8  x11 00000000000000e5
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x12 00000076768cb238  x13 00000076768cb198  x14 0000000000000005  x15 0000000000000018
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x16 000000000000010d  x17 0000000000000000  x18 000000772547b000  x19 00000076768cb0a0
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x20 00000076768cb5d0  x21 000000766b9f1a10  x22 0000000000000000  x23 00000076768cb228
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x24 00000076705ff240  x25 00000076769ce588  x26 00000076768cb010  x27 0000000b800005bb
+10-26 14:42:26.210 31834 31834 F DEBUG   :     x28 00000076768cb0a8  x29 00000076768cb030
+10-26 14:42:26.210 31834 31834 F DEBUG   :     sp  00000076768cafa0  lr  000000767b9ca2e8  pc  0000007678adf990
+10-26 14:42:26.229 31834 31834 F DEBUG   : 
+10-26 14:42:26.229 31834 31834 F DEBUG   : backtrace:
+10-26 14:42:26.229 31834 31834 F DEBUG   :     #00 pc 0000000001fc5990  /data/app/com.iroaa15.gaminghub-XXpCWCqSCuJLHuuH8Pt-AA==/base.apk (offset 0x1c1c000)

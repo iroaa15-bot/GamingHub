@@ -8,9 +8,10 @@ var requested := false
 var epoch := -1
 var sequence := 0
 var last_status := ""
+var _handling_failure := false
 func attach(connection: Node) -> void:
  client = connection
- bridge = load("res://scripts/android_voice_bridge.gd").new()
+ bridge = load("res://scripts/android_voice_integration_bridge.gd").new()
  bridge.outgoing_pcm.connect(_outgoing)
  bridge.permission_ready.connect(_permission)
  bridge.voice_unavailable.connect(_failure)
@@ -74,6 +75,8 @@ func _exit_tree() -> void:
  _stop()
 
 func _failure(reason: String) -> void:
+ if _handling_failure: return
+ _handling_failure=true
  var was_requested := requested
  requested=false
  last_status=reason
@@ -82,3 +85,4 @@ func _failure(reason: String) -> void:
  if is_instance_valid(bridge): bridge.set_consent(false,false)
  unavailable.emit(reason)
  changed.emit()
+ _handling_failure=false

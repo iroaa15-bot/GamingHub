@@ -471,6 +471,8 @@ func save_progress() -> void:
   save_warning = false
  else:
   save_warning = true
+ var account_client=get_tree().root.get_node_or_null("PlayerAccountSession") if is_inside_tree() else null
+ if account_client!=null: account_client.sync_progress(profile)
 
 func panel_style(color: Color) -> StyleBoxFlat:
  var style := StyleBoxFlat.new()
@@ -1848,6 +1850,7 @@ func show_home() -> void:
  game = -1
  clear_ui()
  VisualSkin.compact_header(root, tr_ui("Gaming Hub • الرئيسية", "Gaming Hub • HOME"))
+ button(tr_ui("حسابي والأصدقاء", "MY ACCOUNT & FRIENDS"),show_player_account,PANEL)
  button(tr_ui("🎮 الألعاب", "🎮 GAMES"), show_more_games, GOLD)
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
@@ -1875,6 +1878,21 @@ func show_home() -> void:
  button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
 
  VisualSkin.compact_menu(root)
+
+func show_player_account() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.back_requested.connect(show_home)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+
+func _merge_account_progress(value: Dictionary) -> void:
+ for key in ["xp","wins","matches","picture_wins"]:
+  if value.get(key) is int or value.get(key) is float: profile[key]=maxi(int(profile.get(key,0)),int(value[key]))
+ save_progress()
+
 
 func start_championship() -> void:
  # No network, matchmaking, ads, or paid rewards. A deterministic 15-question local run.

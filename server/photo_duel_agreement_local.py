@@ -8,11 +8,11 @@ class AgreementHub(FilterHub):
  async def send(self,ws,message):
   message=message.copy()
   if message.get('type')=='duel_capabilities':
-   message.update(room_agreement=True,primary_modes=['text','tap'],voice=False)
+   message.update(room_agreement=True,primary_modes=['voice','text','tap'] if getattr(self,'membership_voice',False) else ['text','tap'],voice=bool(getattr(self,'membership_voice',False)),voice_room_lifetime=bool(getattr(self,'membership_voice',False)))
   if message.get('type')=='duel_state' and ws in self.bindings:
    room=self.rooms.get(self.bindings[ws][0])
    if getattr(room,'agreement',False):
-    message.update(room_agreement=True,config_revision=room.config_revision,primary_mode=room.primary_mode,confirmed=room.confirmed.copy(),host=0)
+    message.update(room_agreement=True,config_revision=room.config_revision,primary_mode=room.primary_mode,confirmed=room.confirmed.copy(),host=0,match_finished=bool(getattr(room,'match_finished',False)))
     if not room.started: message.update(opponents=[],preset_questions=[])
   await super().send(ws,message)
  def pool(self,category,difficulty):
@@ -38,10 +38,12 @@ class AgreementHub(FilterHub):
   bound=self.bindings.get(ws);room=self.rooms.get(bound[0]) if bound else None
   if not getattr(room,'agreement',False):return await super().handle(ws,msg)
   room,player=self.binding(ws);room.activity=time.monotonic()
+  if getattr(room,'match_finished',False) and action not in ('duel_sync','duel_leave','duel_chat','duel_voice_state','duel_voice_audio','duel_report','duel_block'):
+   raise ProtocolError('Match finished; voice remains available until room exit')
   if action=='duel_propose':
    if room.started or player!=0:raise ProtocolError('Only the host may propose before start')
    category=msg.get('picture_category');mode=msg.get('primary_mode')
-   if not isinstance(category,str) or not isinstance(mode,str) or mode not in ('text','tap'):raise ProtocolError('Mode unavailable; voice requires a voice-capable service')
+   if not isinstance(category,str) or not isinstance(mode,str) or mode not in (('voice','text','tap') if getattr(self,'membership_voice',False) else ('text','tap')):raise ProtocolError('Mode unavailable; voice requires a voice-capable service')
    pool=self.pool(category,room.picture_difficulty)
    if len(pool)<=room.capacity:raise ProtocolError('Need one spare distinct picture for score and reveal rounds')
    if category!=room.picture_category or mode!=room.primary_mode:
@@ -67,16 +69,22 @@ class AgreementHub(FilterHub):
     if correct:
      room.scores[room.current]+=1
      if room.scores[room.current]>=room.target:
-      room.winner=room.current;room.closed=True;room.tokens=['']*room.capacity
+      room.winner=room.current
+      if getattr(self,'membership_voice',False):room.match_finished=True;room.deadline=None;room.remaining=None
+      else:room.closed=True;room.tokens=['']*room.capacity
      else:
       room.images[room.current]=secrets.choice([key for key in room.catalog if key not in room.images]);room.round+=1
-    if not room.closed:room.advance('confirmed')
+    if not room.closed and not getattr(room,'match_finished',False):room.advance('confirmed')
     else:room.pending=None
     await self.publish(room)
     if room.closed:
      self.rooms.pop(room.code,None)
      for peer in room.peers:self.bindings.pop(peer,None)
     return
+   if action=='duel_voice_question':
+    if room.primary_mode!='voice' or room.paused or player!=room.current or room.pending is not None:raise ProtocolError('Only active asker may request a voice answer')
+    room.pending={'kind':'question','mode':'voice','question_id':None,'text':'','asker':player,'responder':room.responder}
+    return await self.publish(room)
    if action=='duel_question' and room.primary_mode!='text':raise ProtocolError('Text questions are not the agreed mode')
    if action=='duel_preset' and room.primary_mode!='tap':raise ProtocolError('Preset questions are not the agreed mode')
    if action=='duel_reply' and room.primary_mode=='text':raise ProtocolError('Use the agreed text answer control')

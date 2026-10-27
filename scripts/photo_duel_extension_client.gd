@@ -22,6 +22,8 @@ var authenticate_local := false
 var _auth_token := ""
 var _auth_expiry := 0
 var _request: HTTPRequest
+var _renewing := false
+var _renew_retry_at := 0
 
 static func service_configuration() -> Dictionary:
  var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/duel_service.json"))
@@ -105,6 +107,8 @@ func _open_socket() -> Error:
  return result
 
 func _process(_delta: float) -> void:
+ if not _renewing and not _auth_token.is_empty() and bool(capabilities.get("session_refresh",false)) and Time.get_ticks_msec()>=_renew_retry_at and Time.get_ticks_msec()>=_auth_expiry-60000:
+  _renew_authentication()
  socket.poll()
  var current := socket.get_ready_state()
  if current == WebSocketPeer.STATE_OPEN:
@@ -185,3 +189,29 @@ func _error(value: String) -> void:
 
 func _exit_tree() -> void:
  socket.close()
+
+# Renew an existing identity; a fresh guest identity must never replace a resume owner.
+func _renew_authentication() -> void:
+ _renewing=true
+ if is_instance_valid(_request): _request.queue_free()
+ _request=HTTPRequest.new()
+ _request.timeout=15
+ _request.body_size_limit=4096
+ add_child(_request)
+ _request.request_completed.connect(_renewed)
+ var url: String=endpoint.replace("wss://","https://").replace("ws://","http://").trim_suffix("/")+"/session/refresh"
+ var error: Error=_request.request(url,PackedStringArray(["X-GamingHub-Terms: 1","Authorization: Bearer "+_auth_token]))
+ if error!=OK:
+  _renewing=false
+  _renew_retry_at=Time.get_ticks_msec()+5000
+
+func _renewed(result: int, code_status: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+ _renewing=false
+ _renew_retry_at=Time.get_ticks_msec()+5000
+ if result!=HTTPRequest.RESULT_SUCCESS or code_status!=200: return
+ var value: Variant=JSON.parse_string(body.get_string_from_utf8())
+ if not value is Dictionary or str(value.get("token","")).is_empty(): return
+ _auth_token=str(value.token)
+ _auth_expiry=Time.get_ticks_msec()+maxi(0,int(value.get("expires_in",0))-30)*1000
+ if socket.get_ready_state()==WebSocketPeer.STATE_OPEN:
+  send_action("duel_session_refresh",{"token":_auth_token})

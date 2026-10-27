@@ -1990,11 +1990,14 @@ func show_modes(index: int) -> void:
  family_active = false
  campaign_active = false
  clear_ui()
- VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
+ if game==0:
+  VisualSkin.compact_header(root,game_title(game))
+ else:
+  VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
  if game == 0:
   if age_group not in ["under13", "unknown"]:
-   button(tr_ui("👥 إنشاء / انضمام لغرفة بكود", "👥 CREATE / JOIN ROOM BY CODE"), open_guess_multiplayer, GOLD)
-   button(tr_ui("👥 غرف الأصدقاء 2–6 • الدردشة والصوت", "👥 FRIEND ROOMS 2–6 • CHAT & VOICE"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
+   button(tr_ui("غرف الأصدقاء • إنشاء / انضمام", "FRIEND ROOMS • CREATE / JOIN"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
+   _home_activity_section(tr_ui("الخدمة الكلاسيكية الحالية","Existing classic service"),[[tr_ui("فتح غرفة كلاسيكية • لاعبان","Open classic room • two players"),open_guess_multiplayer]])
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   if _admin_ui_authorized():
@@ -2040,11 +2043,14 @@ func show_modes(index: int) -> void:
  else:
   if game > 0 and game not in [4, 8]:
    button(tr_ui("🚀 مباراة سريعة • 10 أسئلة فقط", "🚀 QUICK MATCH • JUST 10 QUESTIONS"), start_quick_match, GREEN)
-  label(tr_ui("بدون إنترنت • اختر المستوى", "OFFLINE • CHOOSE DIFFICULTY") if game==0 else tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
-  label(match_style_name(), 19)
-  for level in range(1, 4):
-   var chosen: int = level
-   button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
+  if game==0:
+   button(tr_ui("ابدأ اللعب بدون إنترنت", "START OFFLINE GAME"),func(): quick_match_active=false;start_game(),GREEN)
+  else:
+   label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
+   label(match_style_name(), 19)
+   for level in range(1, 4):
+    var chosen: int = level
+    button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
  label(tr_ui("أفضل نتيجة: %d", "Personal best: %d") % int(profile.get("best_" + str(game), 0)), 17)
  if not (game == 0 and age_group not in ["under13", "unknown"]):
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)

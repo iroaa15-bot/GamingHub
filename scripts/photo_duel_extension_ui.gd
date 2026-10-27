@@ -58,6 +58,9 @@ var terms: CheckBox
 var voice_adapter: Node
 var voice_button: Button
 var voice_status: Label
+var voice_mute_button: Button
+var _voice_controls: VBoxContainer
+var _voice_question: Button
 var target_player: OptionButton
 var report_reason: LineEdit
 var report_button: Button
@@ -275,7 +278,7 @@ func _ready() -> void:
  _online_category.reparent(_agreement_box)
  _mode_field=OptionButton.new()
  _mode_field.custom_minimum_size.y=54
- for title in ["صوت • يحتاج خدمة صوت متوافقة","نص • سؤال وجواب مكتوب","نقر • أسئلة جاهزة"] if language=="ar" else ["Voice • requires voice-capable service","Text • written questions and answers","Tap • preset questions"]: _mode_field.add_item(title)
+ for title in ["صوت • أسئلة شفهية","نص • سؤال وجواب مكتوب","نقر • أسئلة جاهزة"] if language=="ar" else ["Voice • spoken questions","Text • written questions and answers","Tap • preset questions"]: _mode_field.add_item(title)
  _mode_field.select(2)
  column.add_child(_mode_field)
  _propose_button=button(tr_pair("اقتراح الصنف وطريقة اللعب","Propose category & mode"),_propose_configuration)
@@ -296,6 +299,7 @@ func _ready() -> void:
   column.add_child(picture)
   images.append(picture)
  question_label = label("")
+ _voice_question=button(tr_pair("طلب إجابة نعم / لا","Request Yes / No answer"),func(): client.send_action("duel_voice_question"))
  question_field = field(tr_pair("سؤال نصي للمجيب المحدد","Text question for the designated opponent"))
  question_button = button(tr_pair("إرسال السؤال","Send question"),func(): client.send_action("duel_question",{"text":question_field.text}))
  var match_column := column
@@ -334,6 +338,7 @@ func _ready() -> void:
  correct_button = button(tr_pair("التخمين صحيح","Guess is correct"),func(): client.send_action("duel_confirm",{"correct":true}))
  wrong_button = button(tr_pair("التخمين خطأ","Guess is incorrect"),func(): client.send_action("duel_confirm",{"correct":false}))
  pass_button = button(tr_pair("تمرير الدور","Pass turn"),func(): client.send_action("duel_pass"))
+ pass_button.reparent(_settings_body)
  var chat_index := column.get_child_count()
  column = _section(tr_pair("الدردشة النصية","Text chat"))
  _chat_body=column
@@ -343,9 +348,20 @@ func _ready() -> void:
  chat_field.max_length = 280
  chat_button = button(tr_pair("إرسال الدردشة","Send chat"),_chat)
  column = match_column
- voice_button = button(tr_pair("تفعيل الميكروفون","Enable microphone"),func(): voice_adapter.enable(not voice_adapter.requested))
+ _voice_controls=VBoxContainer.new()
+ main_column.add_child(_voice_controls)
+ column=_voice_controls
+ voice_button = button(tr_pair("اتصال الصوت","Voice connection"),func(): voice_adapter.enable(not voice_adapter.requested))
+ voice_mute_button=button(tr_pair("كتم إرسال الميكروفون","Mute microphone transmission"),func(): voice_adapter.set_muted(not voice_adapter.muted))
+ var voice_row := HBoxContainer.new()
+ voice_row.add_theme_constant_override("separation",12)
+ column.add_child(voice_row)
+ voice_button.reparent(voice_row)
+ voice_mute_button.reparent(voice_row)
+ for control in [voice_button,voice_mute_button]:control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  voice_status = label("")
- column = _section(tr_pair("⚙ الإبلاغ والحظر","⚙ Report & block"))
+ column=_settings_body
+ column = _section(tr_pair("الإبلاغ والحظر","Report & block"))
  target_player = OptionButton.new()
  target_player.custom_minimum_size.y = 54
  for index in range(6): target_player.add_item(tr_pair("اللاعب ","Player ")+str(index+1),index)
@@ -382,6 +398,10 @@ func _ready() -> void:
  VisualSkin.decorate_button(guess_button,"amber")
  for primary in [yes_button,no_button,guess_button]:
   primary.add_theme_font_size_override("font_size",14)
+ for option in [_online_category,_online_rank,_mode_field,players_field,timer_field]:
+  option.add_theme_stylebox_override("normal",VisualSkin.card(Color("10283f"),10))
+  option.add_theme_stylebox_override("disabled",VisualSkin.card(Color("102033"),10))
+  option.add_theme_font_size_override("font_size",16)
  VisualSkin.enable_menu_swipe(column)
 
 func _chat() -> void:
@@ -389,7 +409,7 @@ func _chat() -> void:
 
 func _state(value: Dictionary) -> void:
  var ready: bool = not client.capabilities.is_empty()
- var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false))
+ var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false)) and not bool(value.get("match_finished",false))
  _match_header.visible=active
  if active:
   if heading.get_parent()!=_match_header: heading.reparent(_match_header)
@@ -472,8 +492,9 @@ func _state(value: Dictionary) -> void:
  no_button.visible=yes_button.visible
  _chat_toggle.visible=not agreement or mode=="text"
  _chat_body.visible=agreement and mode=="text" and active
- voice_button.visible=not agreement or mode=="voice"
- voice_status.visible=voice_button.visible
+ _voice_controls.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and (not agreement or mode=="voice")
+ _voice_question.visible=active and mode=="voice" and turn
+ if mode=="voice" and pending.get("kind")=="question": question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  question_button.disabled = not turn
  guess_button.disabled = not turn
  guess_button.visible=turn
@@ -511,15 +532,19 @@ func _state(value: Dictionary) -> void:
   var name_value: String = tr_pair("اللاعب %d","Player %d") % (i+1)
   var score_value: int = int(value.get("scores",[])[i]) if i < value.get("scores",[]).size() else 0
   _seat_labels[i].text = name_value+ (tr_pair(" • أنت"," • You") if i==client.player and occupied else "")+"\n"+(str(score_value) if bool(value.get("started",false)) and occupied else (tr_pair("متصل","Connected") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))))
+  if not bool(value.get("started",false)) and occupied and agreement:
+   var confirmations: Array=value.get("confirmed",[])
+   _seat_labels[i].text=name_value+(tr_pair(" • أنت"," • You") if i==client.player else "")+"\n"+(tr_pair("جاهز","Ready") if i<confirmations.size() and confirmations[i] else tr_pair("بانتظار الموافقة","Awaiting agreement"))
   _seat_labels[i].add_theme_color_override("font_color",Color("59ed9b") if online else Color("b4c4df"))
  var score_parts := PackedStringArray()
  var score_values: Array = value.get("scores",[])
  for index in range(score_values.size()): score_parts.append(str(index+1)+": "+str(score_values[index]))
  _scores.text = tr_pair("النقاط • ","Scores • ")+"  |  ".join(score_parts) if not score_parts.is_empty() else ""
  clock.visible = bool(value.get("started",false))
- _match_controls.visible = bool(value.get("started",false))
+ _match_controls.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _lobby_controls.visible = client.code.is_empty()
- if bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
+ if bool(value.get("match_finished",false)): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
+ elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
  elif not ready: status.text = tr_pair("خدمة الغرف غير متصلة؛ قد يكون تفعيلها معلقًا.","Room service is disconnected; activation may be pending.")
  elif not bool(client.capabilities.get("room_agreement",false)): status.text=tr_pair("هذه الخدمة لا تدعم اتفاق الغرفة؛ استخدم الخدمة المحلية المتوافقة أو الغرفة الكلاسيكية المنفصلة.","This service does not support room agreement; use the compatible local service or the separate classic room.")
@@ -527,6 +552,7 @@ func _state(value: Dictionary) -> void:
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
  question_label.text = str(pending.get("text",""))
  question_label.visible=not pending.is_empty()
+ if mode=="voice" and pending.get("kind")=="question":question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  var key: String = str(pending.get("question_id",""))
  if FACTS.has(key): question_label.text = str(FACTS[key][0 if language == "ar" else 1])
  for i in range(6): images[i].hide(); captions[i].hide()
@@ -563,6 +589,7 @@ func _home() -> void:
  if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
  _leaving_scene = true
  var scene_tree := get_tree()
+ if is_instance_valid(voice_adapter):voice_adapter.enable(false)
  if is_instance_valid(client) and not client.capabilities.is_empty() and not client.code.is_empty(): client.send_action("duel_leave")
  var result := scene_tree.change_scene_to_file("res://scenes/Main.tscn")
  if result != OK: _leaving_scene = false
@@ -577,6 +604,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _connect_service() -> void:
  client.terms_accepted = terms.button_pressed
+ # This agreement UI uses the authenticated local service; generic clients retain old opt-in behavior.
+ client.authenticate_local=endpoint_field.text.strip_edges().begins_with("ws://")
  client.connect_endpoint(endpoint_field.text.strip_edges())
  if not client.last_error.is_empty(): status.text=client.last_error
 
@@ -585,11 +614,13 @@ func _voice_changed() -> void:
  if not is_instance_valid(client):
   voice_button.disabled=true
   return
- voice_button.disabled = not voice_adapter.is_available() or not bool(client.capabilities.get("voice",false)) or not bool(client.state.get("started",false)) or bool(client.state.get("closed",false)) or bool(client.state.get("paused",false))
- VisualSkin.icon_action(voice_button,"mic" if voice_adapter.requested else "mic_off",tr_pair("كتم الميكروفون","Mute microphone") if voice_adapter.requested else tr_pair("تفعيل الميكروفون","Enable microphone"))
- if not voice_adapter.is_available(): voice_status.text = tr_pair("الصوت يتطلب نسخة Android وجهازًا متوافقًا؛ لم يتم التحقق على هاتف بعد.","Voice requires Android hardware; device verification is still pending.")
- elif voice_adapter.requested: voice_status.text = tr_pair("الصوت قيد التفعيل بموافقة اللاعبين","Voice enabling with player consent")
- else: voice_status.text = tr_pair("الميكروفون مكتوم؛ التفعيل اختياري","Microphone muted; enabling is optional")
+ voice_button.disabled = not voice_adapter.is_available() or not bool(client.capabilities.get("voice",false)) or client.code.is_empty() or bool(client.state.get("closed",false)) or bool(client.state.get("paused",false))
+ voice_mute_button.disabled=not voice_adapter.requested
+ VisualSkin.icon_action(voice_button,"phone_off" if voice_adapter.requested else "phone",tr_pair("إنهاء اتصال الصوت","End voice connection") if voice_adapter.requested else tr_pair("بدء اتصال الصوت","Start voice connection"))
+ VisualSkin.icon_action(voice_mute_button,"mic_off" if voice_adapter.muted else "mic",tr_pair("إلغاء كتم الإرسال","Unmute transmission") if voice_adapter.muted else tr_pair("كتم إرسال الميكروفون","Mute microphone transmission"))
+ if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت يحتاج Android وإذن الميكروفون؛ التحقق السمعي على هاتفين لم يكتمل.","Voice requires Android and microphone permission; two-device acoustic verification is pending.")
+ elif voice_adapter.requested:voice_status.text=tr_pair("إرسال الميكروفون مكتوم • الاستقبال متاح","Microphone transmission muted • receiving remains available") if voice_adapter.muted else tr_pair("جلسة الصوت مفعلة طوال عضوية الغرفة","Voice enabled throughout room membership")
+ else:voice_status.text=tr_pair("الصوت اختياري • ابدأ الاتصال لمنح إذن الميكروفون","Voice is optional • start connection to grant microphone permission")
 
 func _create_filtered_room() -> void:
  var rank: String=_online_rank_keys[_online_rank.selected] if _online_rank.selected>=0 else "medium"

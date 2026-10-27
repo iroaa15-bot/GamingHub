@@ -38,7 +38,7 @@ func run() -> void:
  await snap("agreement-room-joiner")
  ui.client.player=0;v.started=true;v.current=0;v.responder=1;v.timer=30;v.remaining_ms=30000;v.confirmed=[true,true,true,true,true,true];v.preset_questions=["animal","living"];v.opponents=[{"player":1,"image":"res://assets/generated/elephant.webp"}]
  apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
- check(ui._preset_toggle.visible and not ui.question_field.visible and not ui._chat_toggle.visible and not ui.voice_button.visible,"tap controls only")
+ check(ui._preset_toggle.visible and not ui.question_field.visible and not ui._chat_toggle.visible and not ui.voice_button.is_visible_in_tree(),"tap controls only")
  await snap("agreement-match-tap")
  v.primary_mode="text";v.pending={"kind":"question","text":"هل هو حيوان؟","asker":0,"responder":1};ui.client.player=1
  apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
@@ -48,6 +48,14 @@ func run() -> void:
  apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
  check(ui.yes_button.visible and ui.no_button.visible and not ui.guess_button.visible and not ui.question_field.visible,"only authorized yes no controls")
  await snap("agreement-match-responder")
+ v.primary_mode="voice";v.started=false;v.pending=null;ui.client.capabilities.voice=true
+ apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
+ check(ui._voice_controls.is_visible_in_tree() and not ui._match_controls.visible,"voice controls available in waiting room")
+ await snap("membership-voice-waiting")
+ v.started=true;v.match_finished=true;v.winner=1
+ apply(v)
+ check(ui._voice_controls.is_visible_in_tree() and not ui._match_controls.visible,"voice controls remain after match")
+ await snap("membership-voice-finished")
  print("ROOM_AGREEMENT_UI ",failures.is_empty()," ",failures)
  ui.queue_free();await process_frame
  quit(0 if failures.is_empty() else 1)

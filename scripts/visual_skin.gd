@@ -306,6 +306,9 @@ static func compact_menu(parent: Node) -> void:
   if node is Button:
    var style := card(Color("0078cf") if node.get_theme_color("font_color")==INK else Color("10243b"),12)
    style.border_color = Color("27709c")
+   if node.has_meta("compact_game_tile"):
+    style.content_margin_left = 4
+    style.content_margin_right = 4
    style.content_margin_top = 8
    style.content_margin_bottom = 8
    node.add_theme_stylebox_override("normal",style)

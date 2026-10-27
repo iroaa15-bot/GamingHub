@@ -1333,7 +1333,8 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  b.add_theme_font_size_override("font_size", int(14 * reading_scale))
  root.remove_child(b)
  column.add_child(b)
- b.icon = cached_texture("res://assets/ui/game_%d.svg" % index)
+ b.set_meta("compact_game_tile",true)
+ b.icon = null # Existing artwork already identifies the game; keep Arabic title width.
  b.expand_icon = true
  b.add_theme_constant_override("icon_max_width", 22)
  return tile

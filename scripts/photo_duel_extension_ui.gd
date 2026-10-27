@@ -46,6 +46,8 @@ var report_button: Button
 var block_button: Button
 var _match_controls: VBoxContainer
 var _lobby_controls: VBoxContainer
+var _seat_labels: Array[Label] = []
+var _seats: GridContainer
 var _scores: Label
 var _menu_touch_guard: Node
 
@@ -133,6 +135,23 @@ func _ready() -> void:
  heading = label("",22)
  _scores = label("",16)
  clock = label("")
+ _seats = GridContainer.new()
+ _seats.columns = 3
+ _seats.add_theme_constant_override("h_separation",8)
+ _seats.add_theme_constant_override("v_separation",8)
+ column.add_child(_seats)
+ for seat in range(6):
+  var panel := PanelContainer.new()
+  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+  panel.custom_minimum_size.y = 76
+  panel.add_theme_stylebox_override("panel",VisualSkin.card(Color("082033"),12))
+  _seats.add_child(panel)
+  var name_label := Label.new()
+  name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+  name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+  name_label.add_theme_font_size_override("font_size",14)
+  panel.add_child(name_label)
+  _seat_labels.append(name_label)
  var main_column := column
  column = _section(tr_pair("⚙ إعدادات الغرفة والاتصال","⚙ Room & connection settings"))
  endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
@@ -179,7 +198,7 @@ func _ready() -> void:
   captions.append(label(""))
   var picture := TextureRect.new()
   picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-  picture.custom_minimum_size.y = 180
+  picture.custom_minimum_size.y = 240
   picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
   picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
   column.add_child(picture)
@@ -248,6 +267,8 @@ func _ready() -> void:
   client.connect_endpoint(Client.endpoint_from_args())
  _state({})
  _voice_changed()
+ VisualSkin.compact_menu(main_column)
+ VisualSkin.decorate_button(yes_button,"teal")
  VisualSkin.enable_menu_swipe(column)
 
 func _chat() -> void:
@@ -274,6 +295,17 @@ func _state(value: Dictionary) -> void:
  report_button.disabled = chat_button.disabled or not bool(client.capabilities.get("moderation",false))
  block_button.disabled = report_button.disabled
  heading.text = tr_pair("غرف الأصدقاء • 2–6 لاعبين","Friend rooms • 2–6 players") if client.code.is_empty() else tr_pair("الغرفة %s • اللاعب %d","Room %s • player %d") % [client.code,client.player+1]
+ var connected: Array = value.get("connected",[])
+ var seats: int = int(value.get("capacity",players_field.get_selected_id()))
+ var joined: int = int(value.get("joined",0))
+ for i in range(6):
+  _seat_labels[i].get_parent().visible = i < seats
+  var occupied: bool = i < joined
+  var online: bool = i < connected.size() and bool(connected[i])
+  var name_value: String = tr_pair("اللاعب %d","Player %d") % (i+1)
+  var score_value: int = int(value.get("scores",[])[i]) if i < value.get("scores",[]).size() else 0
+  _seat_labels[i].text = name_value+ (tr_pair(" • أنت"," • You") if i==client.player and occupied else "")+"\n"+(str(score_value) if bool(value.get("started",false)) and occupied else (tr_pair("متصل","Connected") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))))
+  _seat_labels[i].add_theme_color_override("font_color",Color("59ed9b") if online else Color("b4c4df"))
  var score_parts := PackedStringArray()
  var score_values: Array = value.get("scores",[])
  for index in range(score_values.size()): score_parts.append(str(index+1)+": "+str(score_values[index]))
@@ -293,10 +325,10 @@ func _state(value: Dictionary) -> void:
  for opponent in value.get("opponents",[]):
   var index: int = int(opponent.player)
   var path: String = str(opponent.image)
-  if index >= 0 and index < 6 and catalog.has(path) and ResourceLoader.exists(path):
+  if index == int(value.get("responder",-1)) and index >= 0 and index < 6 and catalog.has(path) and ResourceLoader.exists(path):
    images[index].texture = load(path)
    images[index].show()
-   captions[index].text = tr_pair("صورة اللاعب ","Player picture ") + str(index+1)
+   captions[index].text = tr_pair("صورة اللاعب ","Player picture ") + str(index+1)+" • "+str(catalog[path].get(language,catalog[path].get("en","")))
    captions[index].show()
  var lines := PackedStringArray()
  for entry in value.get("chat",[]): lines.append(str(int(entry.player)+1)+": "+str(entry.text))

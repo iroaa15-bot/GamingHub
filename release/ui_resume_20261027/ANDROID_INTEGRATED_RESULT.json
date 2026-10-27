@@ -1,0 +1,27 @@
+{
+  "source_commit": "480591d55ea9376217cbc329126bb1d12b98bcf6",
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-122-integrated-480591d-debug.apk",
+  "sha256": "03d4e82e08169223e15a6e8f0aaa635d8661ca1ebad4b2b7b17321c1223263f1",
+  "package": "com.iroaa15.gaminghub",
+  "versionCode": 122,
+  "versionName": "12.2",
+  "physical_device": "CPH2015 Android 9",
+  "PASS": [
+    "install-r preserved data",
+    "catalog opens",
+    "category fruits 27",
+    "hard fruits 9",
+    "scroll over content retains selection",
+    "PID 19721 remains alive during tested flow"
+  ],
+  "BLOCKED": [
+    "two-device prolonged voice and reconnect acoustic test",
+    "post-match production voice capability",
+    "external OAuth and approved HTTPS admin access"
+  ],
+  "UI": "partial reference parity, not declared complete",
+  "exported_catalog_assets": {
+    "cards": 200,
+    "missing_import_or_texture": 0
+  }
+}

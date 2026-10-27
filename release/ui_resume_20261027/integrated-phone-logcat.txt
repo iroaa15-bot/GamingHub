@@ -1,0 +1,5 @@
+--------- beginning of main
+10-27 17:08:58.922 19721 19766 I godot   : Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+10-27 17:08:59.208 19721 19766 I godot   : OpenGL API OpenGL ES 3.2 build 1.10@5130912 - Compatibility - Using Device: Imagination Technologies - PowerVR Rogue GE8320
+10-27 17:08:59.293 19721 19766 I godot   : 
+--------- beginning of system

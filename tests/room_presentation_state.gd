@@ -9,7 +9,7 @@ func run() -> void:
  var opponents=[]
  for i in range(1,6): opponents.append({"player":i,"image":"res://assets/generated/lion.webp"})
  room._state({"capacity":6,"joined":6,"connected":[true,true,true,true,false,true],"started":true,"current":0,"responder":1,"scores":[2,4,0,1,0,3],"opponents":opponents})
- var valid=room._seats.columns==3 and room._seat_labels.size()==6 and room._seat_labels[4].text.contains("0")
+ var valid=room._seats.columns==6 and room._seat_labels.size()==6 and room._seat_labels[4].text.contains("0")
  var visible_images=0
  for image in room.images:
   if image.visible: visible_images+=1

@@ -46,6 +46,11 @@ var report_button: Button
 var block_button: Button
 var _match_controls: VBoxContainer
 var _lobby_controls: VBoxContainer
+var _main_column: VBoxContainer
+var _settings_body: VBoxContainer
+var _settings_toggle: Button
+var _reply_row: HBoxContainer
+var _was_active := false
 var _seat_labels: Array[Label] = []
 var _seats: GridContainer
 var _scores: Label
@@ -153,7 +158,11 @@ func _ready() -> void:
   panel.add_child(name_label)
   _seat_labels.append(name_label)
  var main_column := column
+ _main_column=main_column
+ var settings_index := column.get_child_count()
  column = _section(tr_pair("⚙ إعدادات الغرفة والاتصال","⚙ Room & connection settings"))
+ _settings_body=column
+ _settings_toggle=main_column.get_child(settings_index)
  endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
  endpoint_field.text = Client.endpoint_from_args()
  endpoint_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
@@ -200,7 +209,7 @@ func _ready() -> void:
   picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
   picture.custom_minimum_size.y = 240
   picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-  picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+  picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
   column.add_child(picture)
   images.append(picture)
  question_label = label("")
@@ -212,7 +221,8 @@ func _ready() -> void:
   var fact: String = key
   presets[fact] = button(str(FACTS[fact][0 if language == "ar" else 1]),func(): client.send_action("duel_preset",{"question_id":fact}))
  column = match_column
- var reply_row := HBoxContainer.new()
+ _reply_row = HBoxContainer.new()
+ var reply_row := _reply_row
  reply_row.add_theme_constant_override("separation",8)
  column.add_child(reply_row)
  yes_button = button(tr_pair("نعم","Yes"),func(): client.send_action("duel_reply",{"answer":true}))
@@ -221,6 +231,7 @@ func _ready() -> void:
   column.remove_child(reply)
   reply.size_flags_horizontal = Control.SIZE_EXPAND_FILL
   reply_row.add_child(reply)
+ column.move_child(reply_row,column.get_children().find(question_label)+1)
  VisualSkin.decorate_button(yes_button,"teal")
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
  guess_button = button(tr_pair("طلب تأكيد التخمين","Request guess confirmation"),func(): client.send_action("duel_guess",{"guess":guess_field.text}))
@@ -277,6 +288,17 @@ func _chat() -> void:
 func _state(value: Dictionary) -> void:
  var ready: bool = not client.capabilities.is_empty()
  var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false))
+ _main_column.get_node("CompactHeader").visible=not active
+ _scores.visible=not active
+ _seats.columns=6 if active else 3
+ if active:
+  if _seats.get_parent()!=_match_controls: _seats.reparent(_match_controls)
+  _match_controls.move_child(_seats,_match_controls.get_children().find(_reply_row)+1)
+  if not _was_active: _settings_body.hide()
+ else:
+  if _seats.get_parent()!=_main_column: _seats.reparent(_main_column)
+  _main_column.move_child(_seats,_main_column.get_children().find(_settings_toggle))
+ _was_active=active
  var pending: Dictionary = value.get("pending") if value.get("pending") is Dictionary else {}
  var turn: bool = active and int(value.get("current",-1)) == client.player and pending.is_empty()
  var responder: bool = active and int(pending.get("responder",-1)) == client.player
@@ -295,11 +317,20 @@ func _state(value: Dictionary) -> void:
  report_button.disabled = chat_button.disabled or not bool(client.capabilities.get("moderation",false))
  block_button.disabled = report_button.disabled
  heading.text = tr_pair("غرف الأصدقاء • 2–6 لاعبين","Friend rooms • 2–6 players") if client.code.is_empty() else tr_pair("الغرفة %s • اللاعب %d","Room %s • player %d") % [client.code,client.player+1]
+ if active: heading.text=tr_pair("الدور: اللاعب %d","Turn: player %d") % (int(value.get("current",0))+1)
+ clock.add_theme_font_size_override("font_size",28 if active else 18)
  var connected: Array = value.get("connected",[])
  var seats: int = int(value.get("capacity",players_field.get_selected_id()))
  var joined: int = int(value.get("joined",0))
  for i in range(6):
   _seat_labels[i].get_parent().visible = i < seats
+  _seat_labels[i].add_theme_font_size_override("font_size",11 if active else 14)
+  var seat_skin=VisualSkin.card(Color("082033"),12)
+  seat_skin.content_margin_left=4 if active else 18
+  seat_skin.content_margin_right=4 if active else 18
+  seat_skin.content_margin_top=8
+  seat_skin.content_margin_bottom=8
+  _seat_labels[i].get_parent().add_theme_stylebox_override("panel",seat_skin)
   var occupied: bool = i < joined
   var online: bool = i < connected.size() and bool(connected[i])
   var name_value: String = tr_pair("اللاعب %d","Player %d") % (i+1)
@@ -319,6 +350,7 @@ func _state(value: Dictionary) -> void:
  elif not bool(value.get("started",false)): status.text = tr_pair("بانتظار اكتمال عدد اللاعبين","Waiting for the configured number of players")
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
  question_label.text = str(pending.get("text",""))
+ question_label.visible=not pending.is_empty()
  var key: String = str(pending.get("question_id",""))
  if FACTS.has(key): question_label.text = str(FACTS[key][0 if language == "ar" else 1])
  for i in range(6): images[i].hide(); captions[i].hide()

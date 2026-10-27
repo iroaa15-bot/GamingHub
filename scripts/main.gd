@@ -402,6 +402,12 @@ func load_upgrade() -> void:
   var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(profile_path()))
   if saved is Dictionary:
    profile.merge(saved, true)
+ _picture_filter_data=PictureFilters.definition()
+ picture_category=str(profile.get("picture_category","all"))
+ picture_guess_difficulty=str(profile.get("picture_guess_difficulty","all"))
+ if picture_category!="all" and not _picture_filter_data.get("categories",{}).has(picture_category): picture_category="all"
+ if not _picture_filter_data.get("difficulties",{}).has(picture_guess_difficulty): picture_guess_difficulty="all"
+ if PictureFilters.select(CARDS,_picture_filter_data,picture_category,picture_guess_difficulty).size()<2: picture_guess_difficulty="all"
  reading_scale = clampf(float(profile.get("reading_scale", reading_scale)), 1.0, 1.5)
  if int(profile.get("session_version", 0)) < 15:
   session_length = maxi(session_length, int(profile.get("session_length", session_length)))
@@ -461,6 +467,8 @@ func save_progress() -> void:
  profile["reading_scale"] = reading_scale
  profile["session_length"] = session_length
  profile["session_version"] = 15
+ profile["picture_category"] = picture_category
+ profile["picture_guess_difficulty"] = picture_guess_difficulty
  profile["difficulty"] = difficulty
  profile["family_all_ages"] = family_all_ages
  profile["selected_campaign"] = selected_campaign
@@ -3220,6 +3228,10 @@ func show_languages() -> void:
  button(tr_ui("العودة", "BACK"), show_home)
 
 var deck: String = "all"
+var picture_category := "all"
+var picture_guess_difficulty := "all"
+var _picture_filter_data: Dictionary = {}
+const PictureFilters = preload("res://scripts/picture_filter_catalog.gd")
 var player_candidates: Array = []
 var card_name_page: int = 0
 var order_picks: Array[int] = []
@@ -3236,6 +3248,11 @@ var memory_generation: int = 0
 var memory_status: Label
 
 func deck_title(key: String = "") -> String:
+ if key.is_empty() and game==0:
+  _ensure_picture_filters()
+  var labels: Dictionary=_picture_filter_data.get("categories",{}).get(picture_category,{"ar":"كل الصور","en":"All pictures"})
+  var rank: Dictionary=_picture_filter_data.get("difficulties",{}).get(picture_guess_difficulty,{})
+  return str(labels.get(selected_language,labels.get("en","")))+" • "+str(rank.get(selected_language,rank.get("en","")))
  if key.is_empty():
   key = deck
  var ar: Dictionary = {"all": "كل الصور", "Animal": "الحيوانات", "Food": "الأطعمة", "Object": "الأدوات", "Place": "المعالم"}
@@ -3243,6 +3260,9 @@ func deck_title(key: String = "") -> String:
  return tr_ui(str(ar.get(key, key)), str(en.get(key, key)))
 
 func deck_cards() -> Array:
+ if game==0:
+  _ensure_picture_filters()
+  return PictureFilters.select(CARDS,_picture_filter_data,picture_category,picture_guess_difficulty)
  var pool: Array = []
  for card in CARDS:
   if deck == "all" or str(card["category"]) == deck:
@@ -3250,6 +3270,9 @@ func deck_cards() -> Array:
  return pool
 
 func show_decks() -> void:
+ if game==0:
+  show_picture_filters()
+  return
  clear_ui()
  label(tr_ui("اختر مجموعة الصور", "CHOOSE A CARD COLLECTION"), 28)
  for key in ["all", "Animal", "Food", "Object", "Place"]:
@@ -3512,6 +3535,9 @@ var picture_stage_count: int = 5
 var picture_order: Array = []
 
 func start_picture_game() -> void:
+ if deck_cards().size()<2:
+  show_picture_filters()
+  return
  campaign_active = false
  picture_stage = 1
  picture_order = deck_cards().duplicate(true)
@@ -3610,3 +3636,43 @@ func show_picture_library() -> void:
  if first + 8 < CARDS.size():
   button(tr_ui("الصفحة التالية", "NEXT PAGE"), func(): picture_library_page += 1; show_picture_library())
  button(tr_ui("خمن صورتك • الغرف واللعب", "GUESS YOUR PICTURE • ROOMS & PLAY"), func(): show_modes(0), GOLD)
+
+func _ensure_picture_filters() -> void:
+ if _picture_filter_data.is_empty(): _picture_filter_data=PictureFilters.definition()
+
+func show_picture_filters() -> void:
+ _ensure_picture_filters()
+ clear_ui()
+ VisualSkin.compact_header(root,tr_ui("صنف الصور وصعوبتها","Picture category & difficulty"))
+ label(tr_ui("اختر الصنف","Choose a category"),20)
+ var grid := GridContainer.new()
+ grid.columns=1 if reading_scale>=1.25 else 2
+ grid.add_theme_constant_override("h_separation",8)
+ grid.add_theme_constant_override("v_separation",8)
+ root.add_child(grid)
+ var keys: Array=["all"]+_picture_filter_data.get("categories",{}).keys()
+ for key in keys:
+  var selected: String=str(key)
+  var labels: Dictionary=_picture_filter_data.get("categories",{}).get(selected,{"ar":"كل الصور","en":"All pictures"})
+  var count: int=PictureFilters.select(CARDS,_picture_filter_data,selected,"all").size()
+  var option := button(str(labels.get(selected_language,labels.get("en","")))+" (%d)"%count,func(): picture_category=selected;picture_guess_difficulty="all";save_progress();show_picture_filters(),GREEN if selected==picture_category else PANEL)
+  option.add_theme_font_size_override("font_size",int(15*reading_scale))
+  option.disabled=count<2
+  option.reparent(grid)
+ label(tr_ui("صعوبة التعرف على الصور","Picture recognition difficulty"),20)
+ var ranks := GridContainer.new()
+ ranks.columns=1 if reading_scale>=1.25 else 2
+ ranks.add_theme_constant_override("h_separation",8)
+ ranks.add_theme_constant_override("v_separation",8)
+ root.add_child(ranks)
+ for key in ["all","easy","medium","hard"]:
+  var rank: String=str(key)
+  var labels: Dictionary=_picture_filter_data.get("difficulties",{}).get(rank,{})
+  var count: int=PictureFilters.select(CARDS,_picture_filter_data,picture_category,rank).size()
+  var option := button(str(labels.get(selected_language,labels.get("en","")))+" (%d)"%count,func(): picture_guess_difficulty=rank;save_progress();show_picture_filters(),GREEN if rank==picture_guess_difficulty else PANEL)
+  option.disabled=count<2
+  option.tooltip_text=tr_ui("تحتاج المجموعة صورتين مختلفتين على الأقل","A collection needs at least two different pictures")
+  option.reparent(ranks)
+ label(tr_ui("هذا الاختيار للعب دون إنترنت؛ داخل الغرف تظهر خيارات الصنف عندما تدعمها الخدمة.","These choices apply offline; room category controls appear when the service supports them."),14)
+ button(tr_ui("العودة لخيارات اللعب","Back to play options"),func(): show_modes(0),GOLD)
+ VisualSkin.compact_menu(root)

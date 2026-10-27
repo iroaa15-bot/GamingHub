@@ -158,8 +158,12 @@ func send_action(kind: String, fields: Dictionary = {}) -> Error:
  message["protocol"] = PROTOCOL
  return socket.send_text(JSON.stringify(message))
 
-func create_room(players: int, timer: int, target: int = 10) -> Error:
- return send_action("duel_create", {"players":players,"timer":timer,"target":target})
+func create_room(players: int, timer: int, target: int = 10, picture_filters: Dictionary = {}) -> Error:
+ var fields := {"players":players,"timer":timer,"target":target}
+ if bool(capabilities.get("picture_filters",false)):
+  for key in ["picture_category","picture_difficulty"]:
+   if picture_filters.has(key): fields[key]=picture_filters[key]
+ return send_action("duel_create",fields)
 
 func join_room(room_code: String) -> Error:
  return send_action("duel_join", {"code":room_code.strip_edges().to_upper()})

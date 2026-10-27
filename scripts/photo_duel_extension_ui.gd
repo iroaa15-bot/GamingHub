@@ -17,6 +17,11 @@ var question_field: LineEdit
 var guess_field: LineEdit
 var players_field: OptionButton
 var timer_field: OptionButton
+var _online_category: OptionButton
+var _online_rank: OptionButton
+var _online_filter_box: VBoxContainer
+var _online_category_keys: Array=["all"]
+var _online_rank_keys: Array=["all"]
 var target_field: SpinBox
 var create_button: Button
 var join_button: Button
@@ -222,12 +227,24 @@ func _ready() -> void:
  target_field.max_value = 50
  target_field.value = 10
  column.add_child(target_field)
+ _online_filter_box=VBoxContainer.new()
+ column.add_child(_online_filter_box)
+ var prior_column := column
+ column=_online_filter_box
+ label(tr_pair("صنف الصور وصعوبتها","Picture category & difficulty"))
+ _online_category=OptionButton.new()
+ _online_category.custom_minimum_size.y=54
+ column.add_child(_online_category)
+ _online_rank=OptionButton.new()
+ _online_rank.custom_minimum_size.y=54
+ column.add_child(_online_rank)
+ column=prior_column
  column = main_column
  _lobby_controls = VBoxContainer.new()
  _lobby_controls.add_theme_constant_override("separation",8)
  main_column.add_child(_lobby_controls)
  column = _lobby_controls
- create_button = button(tr_pair("إنشاء غرفة","Create room"),func(): client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value)))
+ create_button = button(tr_pair("إنشاء غرفة","Create room"),_create_filtered_room)
  code_field = field(tr_pair("كود الغرفة","Room code"))
  code_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
  join_button = button(tr_pair("انضمام بكود","Join by code"),func(): client.join_room(code_field.text))
@@ -365,6 +382,25 @@ func _state(value: Dictionary) -> void:
  var turn: bool = active and int(value.get("current",-1)) == client.player and pending.is_empty()
  var responder: bool = active and int(pending.get("responder",-1)) == client.player
  create_button.disabled = not ready or not client.code.is_empty()
+ _online_filter_box.visible=bool(client.capabilities.get("picture_filters",false)) and client.capabilities.get("picture_categories") is Dictionary and client.capabilities.get("picture_difficulties") is Dictionary
+ if _online_filter_box.visible and _online_category.item_count==0:
+  _online_category.add_item(tr_pair("كل الصور","All pictures"))
+  for key in client.capabilities.get("picture_categories",{}):
+   if not client.capabilities.picture_categories[key] is Dictionary: continue
+   _online_category_keys.append(key)
+   _online_category.add_item(str(client.capabilities.picture_categories[key].get(language,client.capabilities.picture_categories[key].get("en",key))))
+  _online_rank_keys.clear()
+  for key in client.capabilities.get("picture_difficulties",{}):
+   if not client.capabilities.picture_difficulties[key] is Dictionary: continue
+   _online_rank_keys.append(key)
+   _online_rank.add_item(str(client.capabilities.picture_difficulties[key].get(language,client.capabilities.picture_difficulties[key].get("en",key))))
+ if not client.code.is_empty():
+  var category_index: int=_online_category_keys.find(value.get("picture_category","all"))
+  var rank_index: int=_online_rank_keys.find(value.get("picture_difficulty","all"))
+  if category_index>=0: _online_category.select(category_index)
+  if rank_index>=0: _online_rank.select(rank_index)
+ _online_category.disabled=create_button.disabled
+ _online_rank.disabled=create_button.disabled
  join_button.disabled = create_button.disabled
  resume_button.disabled = client.token.is_empty() or ready
  question_button.disabled = not turn
@@ -476,3 +512,9 @@ func _voice_changed() -> void:
  if not voice_adapter.is_available(): voice_status.text = tr_pair("الصوت يتطلب نسخة Android وجهازًا متوافقًا؛ لم يتم التحقق على هاتف بعد.","Voice requires Android hardware; device verification is still pending.")
  elif voice_adapter.requested: voice_status.text = tr_pair("الصوت قيد التفعيل بموافقة اللاعبين","Voice enabling with player consent")
  else: voice_status.text = tr_pair("الميكروفون مكتوم؛ التفعيل اختياري","Microphone muted; enabling is optional")
+
+func _create_filtered_room() -> void:
+ var filters := {}
+ if bool(client.capabilities.get("picture_filters",false)):
+  filters={"picture_category":_online_category_keys[_online_category.selected] if _online_category.selected>=0 and _online_category.selected<_online_category_keys.size() else "all","picture_difficulty":_online_rank_keys[_online_rank.selected] if _online_rank.selected>=0 and _online_rank.selected<_online_rank_keys.size() else "all"}
+ client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value),filters)

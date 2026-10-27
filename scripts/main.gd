@@ -1879,34 +1879,52 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
- VisualSkin.compact_header(root, tr_ui("Gaming Hub • الرئيسية", "Gaming Hub • HOME"))
- button(tr_ui("حسابي والأصدقاء", "MY ACCOUNT & FRIENDS"),show_player_account,PANEL)
- button(tr_ui("🎮 الألعاب", "🎮 GAMES"), show_more_games, GOLD)
- xp_progress()
- stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
- label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
- if age_group != "under13":
-  button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
- button(tr_ui("🖼️ خمن صورتك • الصور والغرف", "🖼️ GUESS YOUR PICTURE • IMAGES & ROOMS"), func(): show_modes(0), GOLD)
- button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
- button(tr_ui("⚡ جولات جديدة: سباق السرعة ورحلة الكنز", "⚡ NEW ARCADE: BLITZ & TREASURE"), func(): show_modes(5), GOLD)
- button(tr_ui("🎲 مفاجأة الجولة • لعبة مختلفة كل مرة", "🎲 SURPRISE ME • A DIFFERENT GAME EACH TIME"), start_surprise_arcade, ACCENT)
- button(tr_ui("🏆 بطولة الأبطال • 3 مراحل وزعماء", "🏆 CHAMPIONSHIP • 3 STAGES & BOSSES"), start_championship, GOLD)
- if not DailyRounds.current_pack.is_empty():
-  label(tr_ui("🌟 تحديات اليوم جديدة • محفوظ لديك %d سؤال إضافي", "🌟 TODAY'S CHALLENGES FIRST • %d STORED EXTRA QUESTIONS") % [DailyRounds.total_questions()], 17)
- else:
-  label(tr_ui("🌐 تحديث الجولات اليومية قيد الانتظار • الألعاب الأساسية متاحة", "🌐 Daily refresh pending • built-in games available"), 16)
- button(tr_ui("🔄 جلب تحديات جديدة", "🔄 FETCH NEW CHALLENGES"), func(): DailyRounds.refresh(true), PANEL)
- button(tr_ui("📚 إضافة أسئلة أقدم للأرشيف", "📚 LOAD OLDER QUESTION PACKS"), func(): DailyRounds.load_older(), PANEL)
- button(tr_ui("🖼️ خمن الصورة • 6 ألغاز جديدة يوميًا", "🖼️ GUESS THE PICTURE • 6 NEW DAILY CHALLENGES"), show_ai_daily, GOLD)
- label(tr_ui("الأونلاين يحتاج سيرفر متصل. اللعب ضد الكمبيوتر متاح دون سيرفر.", "Online requires a connected server. AI/offline mode works without one."), 16)
- label(tr_ui("ألعاب إضافية", "MORE GAMES"), 23)
- button(tr_ui("🧩 اكتشف الألعاب الأخرى", "🧩 EXPLORE OTHER GAMES"), show_more_games, PANEL)
- button("العربية / English", show_languages, PANEL)
- button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
- button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
-
+ VisualSkin.compact_header(root,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))
+ var xp: int=maxi(0,int(profile.get("xp",0)))
+ label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
+ _add_unique_game_catalog()
+ var navigation := HBoxContainer.new()
+ navigation.add_theme_constant_override("separation",8)
+ root.add_child(navigation)
+ for entry in [[tr_ui("حسابي والأصدقاء", "ACCOUNT & FRIENDS"),show_player_account],[tr_ui("الإعدادات", "SETTINGS"),show_accessibility]]:
+  var item := button(entry[0],entry[1],PANEL)
+  item.reparent(navigation)
+ _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
+  [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
+  [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
+  [tr_ui("الإنجازات", "ACHIEVEMENTS"),show_achievements]
+ ])
+ _home_activity_section(tr_ui("المحتوى اليومي والخصوصية", "DAILY CONTENT & PRIVACY"),[
+  [tr_ui("جلب تحديات جديدة", "FETCH NEW CHALLENGES"),func(): DailyRounds.refresh(true)],
+  [tr_ui("إضافة أسئلة أقدم للأرشيف", "LOAD OLDER QUESTION PACKS"),func(): DailyRounds.load_older()],
+  [tr_ui("الخصوصية والإعلانات", "PRIVACY & ADS"),show_privacy_and_ads]
+ ])
  VisualSkin.compact_menu(root)
+
+func _add_unique_game_catalog() -> void:
+ var grid := GridContainer.new()
+ grid.name="UnifiedGameCatalog"
+ grid.columns=1 if reading_scale>=1.25 or get_viewport_rect().size.x<380 else (3 if get_viewport_rect().size.x>=420 else 2)
+ root.add_child(grid)
+ var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
+ var favorites: Array=profile.get("favorites",[])
+ for index in range(GAMES.size()):
+  var tile := make_game_tile(index,previews[index],index in favorites)
+  tile.set_meta("game_id",index)
+  grid.add_child(tile)
+
+func _home_activity_section(title: String, entries: Array) -> void:
+ var body := VBoxContainer.new()
+ body.visible=false
+ body.add_theme_constant_override("separation",8)
+ var toggle := button(title,func(): body.visible=not body.visible,PANEL)
+ toggle.icon=VisualSkin.menu_icon("list")
+ toggle.expand_icon=true
+ toggle.add_theme_constant_override("icon_max_width",20)
+ root.add_child(body)
+ for entry in entries:
+  var item := button(entry[0],entry[1],PANEL)
+  item.reparent(body)
 
 func show_player_account() -> void:
  clear_ui()
@@ -1952,21 +1970,8 @@ func start_surprise_arcade() -> void:
  start_quick_match()
 
 func show_more_games() -> void:
- clear_ui()
- VisualSkin.compact_header(root,tr_ui("الألعاب", "GAMES"))
- button(tr_ui("🖼️ خمن صورتك • ابدأ هنا", "🖼️ GUESS YOUR PICTURE • START HERE"), func(): show_modes(0), GOLD)
- var grid := GridContainer.new()
- grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 380 else (3 if get_viewport_rect().size.x >= 420 else 2)
- root.add_child(grid)
- var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
- var favorites: Array = profile.get("favorites", [])
- for i in range(GAMES.size()):
-  grid.add_child(make_game_tile(i, previews[i], i in favorites))
- button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
- button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
- button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)
-
- VisualSkin.compact_menu(root)
+ # Existing back/menu routes resolve to the same catalog, never a second game list.
+ show_home()
 
 func show_modes(index: int) -> void:
  if index != game:
@@ -1986,8 +1991,10 @@ func show_modes(index: int) -> void:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   if _admin_ui_authorized():
    button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
-  button(tr_ui("🤖 العب خمن صورتك • بدون إنترنت", "🤖 PLAY GUESS YOUR PICTURE • OFFLINE"), start_picture_game, GREEN)
+  button(tr_ui("ألغاز الصور اليومية", "DAILY PICTURE PUZZLES"),show_ai_daily,PANEL)
   label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
+ if game == 5:
+  button(tr_ui("بطولة الأبطال • 3 مراحل", "CHAMPIONSHIP • 3 STAGES"),start_championship,ACCENT)
  if game not in [0, 4]:
   button(tr_ui("طول الجولة: %d • تعديل", "ROUND LENGTH: %d • CHANGE") % session_length, show_accessibility)
  button(tr_ui("★ أضف أو أزل من المفضلة", "★ TOGGLE FAVORITE"), toggle_favorite)
@@ -2025,7 +2032,7 @@ func show_modes(index: int) -> void:
  else:
   if game > 0 and game not in [4, 8]:
    button(tr_ui("🚀 مباراة سريعة • 10 أسئلة فقط", "🚀 QUICK MATCH • JUST 10 QUESTIONS"), start_quick_match, GREEN)
-  label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"), 21)
+  label(tr_ui("بدون إنترنت • اختر المستوى", "OFFLINE • CHOOSE DIFFICULTY") if game==0 else tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
   label(match_style_name(), 19)
   for level in range(1, 4):
    var chosen: int = level

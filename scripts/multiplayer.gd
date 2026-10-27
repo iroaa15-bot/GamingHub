@@ -81,6 +81,25 @@ var reconnect_pending := false
 var reconnect_deadline_ms: int = 0
 var reconnect_next_ms: int = 0
 var opponent_paused := false
+var _room_header: HBoxContainer
+var _settings_control: Button
+var _history_panel: VBoxContainer
+var _player_strip: HBoxContainer
+var _player_labels: Array[Label] = []
+var _room_heading: Label
+var _room_settings: VBoxContainer
+var _room_toolbar: HBoxContainer
+var _intro_label: Label
+var _guess_panel: VBoxContainer
+var _questions_panel: VBoxContainer
+var _candidates_panel: VBoxContainer
+var _guess_toggle: Button
+var _questions_toggle: Button
+var _details_toggle: Button
+var _latest_reply: Label
+var _show_guess := false
+var _show_questions := false
+var _show_candidates := false
 var match_view: VBoxContainer
 var lobby_controls: VBoxContainer
 var match_label: Label
@@ -219,7 +238,9 @@ func _update_voice_ui() -> void:
  if not is_instance_valid(voice_button):
   return
  voice_button.disabled = not _voice_room_ready() or not android_voice_bridge.is_available()
- voice_button.text = _t("إيقاف المحادثة الصوتية", "Turn voice off") if voice_requested else _t("تفعيل المحادثة الصوتية", "Enable voice chat")
+ var voice_title := _t("إيقاف المحادثة الصوتية", "Turn voice off") if voice_requested else _t("تفعيل المحادثة الصوتية", "Enable voice chat")
+ if player_index>=0 and not room_code.is_empty(): VisualSkin.icon_action(voice_button,"mic" if voice_requested else "mic_off",voice_title)
+ else: voice_button.text=voice_title
  if not android_voice_bridge.is_available():
   voice_label.text = _t("الصوت غير متاح في هذه النسخة؛ استخدم نسخة Android المحدثة.", "Voice is unavailable in this version; use the updated Android app.")
  elif not voice_requested:
@@ -297,7 +318,7 @@ func _ready() -> void:
    var staging_url := str(staging_settings.get("server_url", "")).strip_edges()
    if staging_url == "wss://gaminghub-voice-staging.onrender.com":
     server_url = staging_url
- _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
+ _intro_label = _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
  # The active match is placed ABOVE lobby actions for portrait phones.
  status = _label(_t("جاهز للاتصال", "Ready to connect"), 18)
  health_label = _label(_t("الشبكة: غير متصل", "Network: offline"), 14)
@@ -357,7 +378,7 @@ func _ready() -> void:
  share_button.pressed.connect(_invoke_room_action.bind(weakref(share_button), _copy_invite), CONNECT_DEFERRED)
  _style_button(share_button)
  lobby_controls.add_child(share_button)
- _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
+ var leave_control := _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
  var advanced_toggle := Button.new()
  advanced_toggle.text = _t("إعدادات الاتصال (متقدمة)", "Connection settings (advanced)")
  VisualSkin.decorate_button(advanced_toggle, "secondary")
@@ -372,7 +393,86 @@ func _ready() -> void:
  address_input.custom_minimum_size.y = 52
  advanced_panel.add_child(address_input)
  _button(_t("اتصال يدوي", "Connect manually"), _connect_server, advanced_panel)
- _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
+ var back_control := _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
+ _room_header=HBoxContainer.new()
+ _room_header.add_theme_constant_override("separation",8)
+ output.add_child(_room_header)
+ output.move_child(_room_header,0)
+ _room_heading=Label.new()
+ _room_heading.add_theme_font_size_override("font_size",22)
+ _room_heading.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ _room_heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ _room_heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ _room_header.add_child(_room_heading)
+ _room_toolbar=HBoxContainer.new()
+ _room_toolbar.add_theme_constant_override("separation",8)
+ match_view.add_child(_room_toolbar)
+ _guess_toggle=Button.new()
+ _guess_toggle.text=_t("تخمين","Guess")
+ _guess_toggle.pressed.connect(_invoke_room_action.bind(weakref(_guess_toggle),func(): _show_guess=not _show_guess; _apply_action_panels()),CONNECT_DEFERRED)
+ VisualSkin.decorate_button(_guess_toggle,"amber")
+ _room_toolbar.add_child(_guess_toggle)
+ _questions_toggle=Button.new()
+ _questions_toggle.text=_t("الأسئلة","Questions")
+ _questions_toggle.icon=VisualSkin.menu_icon("list")
+ _questions_toggle.expand_icon=true
+ _questions_toggle.add_theme_constant_override("icon_max_width",20)
+ _questions_toggle.pressed.connect(_invoke_room_action.bind(weakref(_questions_toggle),func(): _show_questions=not _show_questions; _apply_action_panels()),CONNECT_DEFERRED)
+ VisualSkin.decorate_button(_questions_toggle,"gold")
+ _room_toolbar.add_child(_questions_toggle)
+ voice_button.reparent(_room_toolbar)
+ for control in [_guess_toggle,_questions_toggle,voice_button]:
+  control.custom_minimum_size=Vector2(56,56)
+  control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  control.add_theme_font_size_override("font_size",16)
+ _player_strip=HBoxContainer.new()
+ _player_strip.add_theme_constant_override("separation",8)
+ match_view.add_child(_player_strip)
+ for index in range(2):
+  var frame := PanelContainer.new()
+  frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  frame.add_theme_stylebox_override("panel",VisualSkin.card(Color("10243b"),12))
+  _player_strip.add_child(frame)
+  var player := HBoxContainer.new()
+  player.add_theme_constant_override("separation",8)
+  frame.add_child(player)
+  var avatar := TextureRect.new()
+  avatar.texture=VisualSkin.menu_icon("player")
+  avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+  avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+  avatar.custom_minimum_size=Vector2(28,28)
+  avatar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+  player.add_child(avatar)
+  var player_name := Label.new()
+  player_name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  player_name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  player_name.add_theme_font_size_override("font_size",14)
+  player.add_child(player_name)
+  _player_labels.append(player_name)
+ _latest_reply=Label.new()
+ _latest_reply.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ _latest_reply.add_theme_font_size_override("font_size",18)
+ _latest_reply.visible=false
+ match_view.add_child(_latest_reply)
+ _room_settings=VBoxContainer.new()
+ _room_settings.visible=false
+ _room_settings.add_theme_constant_override("separation",8)
+ output.add_child(_room_settings)
+ for control in [language_button,health_label,share_button,advanced_toggle,advanced_panel,leave_control,back_control]: control.reparent(_room_settings)
+ _history_panel=VBoxContainer.new()
+ _history_panel.add_theme_constant_override("separation",8)
+ _room_settings.add_child(_history_panel)
+ var settings_control := Button.new()
+ _settings_control=settings_control
+ settings_control.text=_t("إعدادات الغرفة ومغادرتها","Room settings & leave")
+ settings_control.icon=VisualSkin.menu_icon("settings")
+ settings_control.expand_icon=true
+ settings_control.add_theme_constant_override("icon_max_width",20)
+ settings_control.custom_minimum_size.y=52
+ VisualSkin.decorate_button(settings_control)
+ settings_control.pressed.connect(_invoke_room_action.bind(weakref(settings_control),func(): _room_settings.visible=not _room_settings.visible),CONNECT_DEFERRED)
+ output.add_child(settings_control)
+ output.move_child(settings_control,output.get_child_count()-2)
  _update_lobby()
  VisualSkin.enable_menu_swipe(output)
 
@@ -493,7 +593,7 @@ func _text_input(hint: String) -> LineEdit:
  output.add_child(i)
  return i
 
-func _button(value: String, callback: Callable, parent: VBoxContainer = null) -> void:
+func _button(value: String, callback: Callable, parent: VBoxContainer = null) -> Button:
  var b := Button.new()
  b.text = _local(value)
  b.set_meta("ui_source", value)
@@ -502,6 +602,7 @@ func _button(value: String, callback: Callable, parent: VBoxContainer = null) ->
  _style_button(b)
  var target: VBoxContainer = parent if parent != null else output
  target.add_child(b)
+ return b
 
 func _style_button(button: Button, primary: bool = false) -> void:
  VisualSkin.decorate_button(button, "violet" if primary else "secondary")
@@ -521,13 +622,19 @@ func _clear_match_view() -> void:
  if not is_instance_valid(match_view):
   return
  for child in match_view.get_children():
-  if child != action_area and child != match_label:
+  if child != action_area and child != match_label and child != _room_toolbar and child != _latest_reply and child != _player_strip:
    child.queue_free()
  match_label.text = ""
+ if is_instance_valid(_latest_reply):
+  _latest_reply.text=""
+  _latest_reply.hide()
+ if is_instance_valid(_history_panel):
+  for item in _history_panel.get_children(): item.queue_free()
  deduction_status = null
 
 func _update_lobby() -> void:
  _update_voice_ui()
+ _update_match_layout()
  if not is_instance_valid(lobby_controls):
   return
  var active := not room_code.is_empty() or matchmaking_pending or not pending_action.is_empty() or lobby_request_pending or leaving
@@ -983,18 +1090,18 @@ func _handle(msg: Dictionary) -> void:
    match_view.add_child(deduction_status)
    _update_deduction_status()
    var art_frame := PanelContainer.new()
-   art_frame.custom_minimum_size.y = 255
+   art_frame.custom_minimum_size.y = 250
    art_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
    var art_style_box := StyleBoxFlat.new()
    art_style_box.bg_color = PANEL
    art_style_box.set_corner_radius_all(18)
-   art_style_box.set_content_margin_all(10)
+   art_style_box.set_content_margin_all(0)
    art_frame.add_theme_stylebox_override("panel", art_style_box)
    card_art = TextureRect.new()
    card_art.texture = online_card_texture(opponent_card)
    card_art.custom_minimum_size.y = 235
    card_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-   card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+   card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
    art_frame.add_child(card_art)
    match_view.add_child(art_frame)
    match_view.move_child(art_frame, 1)
@@ -1135,12 +1242,16 @@ func _next_candidates() -> void:
  _refresh_actions()
 
 func _match_note(value: String, size: int = 16) -> void:
+ if is_instance_valid(_latest_reply):
+  _latest_reply.text=value
+  _latest_reply.visible=player_index>=0 and not room_code.is_empty()
  var l := Label.new()
  l.text = value
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.add_theme_font_size_override("font_size", size)
  l.add_theme_color_override("font_color", Color.WHITE)
- match_view.add_child(l)
+ if is_instance_valid(_history_panel): _history_panel.add_child(l)
+ else: match_view.add_child(l)
 
 func _copy_invite() -> void:
  if room_code.is_empty():
@@ -1240,6 +1351,7 @@ func _recommended_question_index() -> int:
 
 func _refresh_actions() -> void:
  _update_voice_ui()
+ _update_match_layout()
  for child in action_area.get_children():
   child.queue_free()
  if finished or not my_turn or action_in_flight or reconnecting or opponent_paused:
@@ -1272,6 +1384,7 @@ func _refresh_actions() -> void:
   ready_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
   ready_note.add_theme_color_override("font_color", Color("a7f3d0"))
   action_area.add_child(ready_note)
+ var candidate_start := action_area.get_child_count()
  if not possible_cards.is_empty():
   var page_count_cards := ceili(float(possible_cards.size()) / float(CANDIDATES_PER_PAGE))
   candidate_page = clampi(candidate_page, 0, page_count_cards - 1)
@@ -1299,16 +1412,20 @@ func _refresh_actions() -> void:
    _style_button(forward)
    paging.add_child(forward)
  # Manual guess remains available for aliases and accessibility.
+ var guess_start := action_area.get_child_count()
  guess_input = LineEdit.new()
  guess_input.placeholder_text = _t("اكتب اسم صورتك السرية", "Guess your secret picture")
  guess_input.custom_minimum_size.y = 52
  guess_input.max_length = 80
  action_area.add_child(guess_input)
  _button(_t("تأكيد التخمين", "Submit guess"), _submit_guess, action_area)
+ var questions_start := action_area.get_child_count()
  if questions.is_empty():
+  _arrange_action_panels(candidate_start,guess_start,questions_start)
   return
  var available: Array[int] = _available_question_indices()
  if available.is_empty():
+  _arrange_action_panels(candidate_start,guess_start,questions_start)
   return
  var page_count := int(ceil(float(available.size()) / float(QUESTIONS_PER_PAGE)))
  question_page = clampi(question_page, 0, page_count - 1)
@@ -1341,6 +1458,8 @@ func _refresh_actions() -> void:
   _style_button(next)
   nav.add_child(next)
 
+ _arrange_action_panels(candidate_start,guess_start,questions_start)
+
 func _submit_guess() -> void:
  if not is_instance_valid(guess_input):
   return
@@ -1366,3 +1485,70 @@ func _execute_room_action(ref: WeakRef, callback: Callable) -> void:
   if control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
    if OS.get_name() == "Android": Input.vibrate_handheld(12)
    callback.call()
+
+func _update_match_layout() -> void:
+ if not is_instance_valid(_room_heading): return
+ var playing: bool=player_index>=0 and not room_code.is_empty()
+ output.get_node("CompactHeader").visible=not playing
+ _intro_label.visible=not playing
+ _room_header.visible=playing
+ _room_heading.visible=playing
+ if playing:
+  if _settings_control.get_parent()!=_room_header: _settings_control.reparent(_room_header)
+  VisualSkin.icon_action(_settings_control,"settings",_t("إعدادات الغرفة ومغادرتها","Room settings & leave"))
+ else:
+  if _settings_control.get_parent()!=output: _settings_control.reparent(output)
+  output.move_child(_settings_control,output.get_children().find(_room_settings))
+  _settings_control.text=_t("إعدادات الغرفة ومغادرتها","Room settings & leave")
+ _room_toolbar.visible=playing
+ _player_strip.visible=playing
+ lobby_controls.visible=not playing
+ voice_label.visible=playing
+ status.add_theme_font_size_override("font_size",14 if playing else 18)
+ match_label.add_theme_font_size_override("font_size",14)
+ if playing:
+  _room_heading.text=(_t("دورك","Your turn") if my_turn else _t("دور المنافس","Opponent turn"))+" • "+(_t("متوقف مؤقتًا","Paused") if opponent_paused else "2/2")
+  if finished: _room_heading.text=_t("انتهت المباراة","Match finished")
+  match_view.move_child(_room_toolbar,match_view.get_children().find(action_area))
+  match_view.move_child(_latest_reply,match_view.get_children().find(_room_toolbar))
+  match_view.move_child(_player_strip,match_view.get_children().find(action_area))
+  for index in range(2):
+   var local_player: bool=index==0
+   var taking_turn: bool=my_turn if local_player else not my_turn
+   var title := _t("أنت","You") if local_player else _t("المنافس","Opponent")
+   var state := _t("دوره","Taking turn") if taking_turn else _t("ينتظر","Waiting")
+   if finished: state=_t("انتهت","Finished")
+   elif opponent_paused and not local_player: state=_t("إعادة اتصال","Reconnecting")
+   _player_labels[index].text=title+"\n"+state
+   _player_labels[index].add_theme_color_override("font_color",Color("59ed9b") if taking_turn and not finished else Color("b4c4df"))
+  if is_instance_valid(deduction_status): deduction_status.hide()
+ var may_act: bool=playing and my_turn and not finished and not action_in_flight and not reconnecting and not opponent_paused
+ _guess_toggle.disabled=not may_act
+ _questions_toggle.disabled=not may_act or questions.is_empty()
+
+func _arrange_action_panels(candidate_start: int,guess_start: int,questions_start: int) -> void:
+ var controls := action_area.get_children()
+ _candidates_panel=VBoxContainer.new()
+ _guess_panel=VBoxContainer.new()
+ _questions_panel=VBoxContainer.new()
+ for panel in [_guess_panel,_questions_panel,_candidates_panel]:
+  panel.add_theme_constant_override("separation",8)
+  action_area.add_child(panel)
+ for i in range(controls.size()):
+  var node: Node=controls[i]
+  if i<2 or (i>=candidate_start and i<guess_start): node.reparent(_candidates_panel)
+  elif i>=guess_start and i<questions_start: node.reparent(_guess_panel)
+  elif i>=questions_start: node.reparent(_questions_panel)
+ _details_toggle=Button.new()
+ _details_toggle.text=_t("الصور المحتملة والتفاصيل","Candidate pictures & details")
+ _details_toggle.custom_minimum_size.y=52
+ VisualSkin.decorate_button(_details_toggle)
+ _details_toggle.pressed.connect(_invoke_room_action.bind(weakref(_details_toggle),func(): _show_candidates=not _show_candidates; _apply_action_panels()),CONNECT_DEFERRED)
+ action_area.add_child(_details_toggle)
+ action_area.move_child(_details_toggle,action_area.get_child_count()-2)
+ _apply_action_panels()
+
+func _apply_action_panels() -> void:
+ if is_instance_valid(_guess_panel): _guess_panel.visible=_show_guess
+ if is_instance_valid(_questions_panel): _questions_panel.visible=_show_questions
+ if is_instance_valid(_candidates_panel): _candidates_panel.visible=_show_candidates

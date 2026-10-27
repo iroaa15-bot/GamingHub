@@ -1,0 +1,33 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+CHECK capability true
+CHECK opt in true
+CHECK two joined true
+CHECK no autostart or lobby photo disclosure true
+CHECK start requires all confirmations true
+CHECK host only true
+CHECK no fake voice service true
+CHECK both confirm true
+CHECK configuration sync true
+CHECK change resets confirmations and preserves difficulty true
+CHECK stale or different difficulty rejected true
+CHECK reconfirmed true
+CHECK server validated start true
+CHECK wrong mode rejected true
+CHECK text question sync true
+CHECK turn authorized response true
+CHECK text reply switches turn true
+CHECK free text answer sync true
+CHECK pause on connection loss true
+CHECK real client resume true
+CHECK six protocol ready true
+CHECK six room true
+CHECK six joined without autostart true
+CHECK six waiting for agreement true
+CHECK insufficient real category rejected true
+CHECK six confirm true
+CHECK six agreed start true
+CHECK tap question sync true
+CHECK tap authorized yes no true
+CHECK unmodified payload autostarts compatibly true
+ROOM_AGREEMENT_REAL_GODOT_WS true failures=[]

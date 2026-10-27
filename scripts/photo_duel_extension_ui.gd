@@ -46,12 +46,17 @@ var report_button: Button
 var block_button: Button
 var _match_controls: VBoxContainer
 var _lobby_controls: VBoxContainer
+var _match_header: HBoxContainer
+var _clock_bar: ProgressBar
+var _turn_ms := 30000
 var _main_column: VBoxContainer
 var _settings_body: VBoxContainer
 var _settings_toggle: Button
 var _reply_row: HBoxContainer
 var _was_active := false
 var _seat_labels: Array[Label] = []
+var _seat_panels: Array[PanelContainer] = []
+var _seat_avatars: Array[TextureRect] = []
 var _seats: GridContainer
 var _scores: Label
 var _menu_touch_guard: Node
@@ -91,6 +96,7 @@ func _section(title: String, expanded: bool = false) -> VBoxContainer:
  body.add_theme_constant_override("separation",8)
  body.visible = expanded
  var toggle := button(title,func(): body.visible = not body.visible)
+ toggle.text=title.trim_prefix("⚙ ").trim_prefix("☷ ").trim_prefix("✉ ")
  VisualSkin.decorate_button(toggle,"secondary")
  toggle.icon = VisualSkin.menu_icon("chat" if title.contains("✉") else ("list" if title.contains("☷") else "settings"))
  toggle.expand_icon = true
@@ -140,6 +146,19 @@ func _ready() -> void:
  heading = label("",22)
  _scores = label("",16)
  clock = label("")
+ clock.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ _clock_bar=ProgressBar.new()
+ _clock_bar.show_percentage=false
+ _clock_bar.custom_minimum_size.y=7
+ _clock_bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+ var track := StyleBoxFlat.new()
+ track.bg_color=Color("102b4a")
+ track.set_corner_radius_all(4)
+ var fill := track.duplicate() as StyleBoxFlat
+ fill.bg_color=Color("00cf81")
+ _clock_bar.add_theme_stylebox_override("background",track)
+ _clock_bar.add_theme_stylebox_override("fill",fill)
+ column.add_child(_clock_bar)
  _seats = GridContainer.new()
  _seats.columns = 3
  _seats.add_theme_constant_override("h_separation",8)
@@ -151,14 +170,29 @@ func _ready() -> void:
   panel.custom_minimum_size.y = 76
   panel.add_theme_stylebox_override("panel",VisualSkin.card(Color("082033"),12))
   _seats.add_child(panel)
+  _seat_panels.append(panel)
+  var seat_content := VBoxContainer.new()
+  seat_content.add_theme_constant_override("separation",4)
+  panel.add_child(seat_content)
+  var avatar := TextureRect.new()
+  avatar.texture=VisualSkin.menu_icon("player")
+  avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+  avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+  avatar.custom_minimum_size=Vector2(36,36)
+  avatar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+  seat_content.add_child(avatar)
+  _seat_avatars.append(avatar)
   var name_label := Label.new()
   name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
   name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
   name_label.add_theme_font_size_override("font_size",14)
-  panel.add_child(name_label)
+  seat_content.add_child(name_label)
   _seat_labels.append(name_label)
  var main_column := column
  _main_column=main_column
+ _match_header=HBoxContainer.new()
+ _match_header.add_theme_constant_override("separation",8)
+ main_column.add_child(_match_header)
  var settings_index := column.get_child_count()
  column = _section(tr_pair("⚙ إعدادات الغرفة والاتصال","⚙ Room & connection settings"))
  _settings_body=column
@@ -235,6 +269,13 @@ func _ready() -> void:
  VisualSkin.decorate_button(yes_button,"teal")
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
  guess_button = button(tr_pair("طلب تأكيد التخمين","Request guess confirmation"),func(): client.send_action("duel_guess",{"guess":guess_field.text}))
+ guess_button.reparent(_reply_row)
+ guess_button.text=tr_pair("تأكيد التخمين","Confirm guess")
+ guess_button.tooltip_text=tr_pair("أدخل تخمينك ثم اطلب تأكيد المنافس","Enter your guess, then request opponent confirmation")
+ for primary in [yes_button,no_button,guess_button]:
+  primary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  primary.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  primary.add_theme_font_size_override("font_size",14)
  correct_button = button(tr_pair("التخمين صحيح","Guess is correct"),func(): client.send_action("duel_confirm",{"correct":true}))
  wrong_button = button(tr_pair("التخمين خطأ","Guess is incorrect"),func(): client.send_action("duel_confirm",{"correct":false}))
  pass_button = button(tr_pair("تمرير الدور","Pass turn"),func(): client.send_action("duel_pass"))
@@ -280,6 +321,10 @@ func _ready() -> void:
  _voice_changed()
  VisualSkin.compact_menu(main_column)
  VisualSkin.decorate_button(yes_button,"teal")
+ VisualSkin.decorate_button(no_button,"danger")
+ VisualSkin.decorate_button(guess_button,"amber")
+ for primary in [yes_button,no_button,guess_button]:
+  primary.add_theme_font_size_override("font_size",14)
  VisualSkin.enable_menu_swipe(column)
 
 func _chat() -> void:
@@ -288,6 +333,23 @@ func _chat() -> void:
 func _state(value: Dictionary) -> void:
  var ready: bool = not client.capabilities.is_empty()
  var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false))
+ _match_header.visible=active
+ if active:
+  if heading.get_parent()!=_match_header: heading.reparent(_match_header)
+  if _settings_toggle.get_parent()!=_match_header: _settings_toggle.reparent(_match_header)
+  heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  _settings_toggle.size_flags_horizontal=Control.SIZE_SHRINK_END
+  VisualSkin.icon_action(_settings_toggle,"settings",tr_pair("إعدادات الغرفة","Room settings"))
+  _main_column.move_child(_match_header,_main_column.get_children().find(status)+1)
+  _main_column.move_child(clock,_main_column.get_children().find(_match_header)+1)
+  _main_column.move_child(_clock_bar,_main_column.get_children().find(clock)+1)
+ else:
+  if heading.get_parent()!=_main_column: heading.reparent(_main_column)
+  if _settings_toggle.get_parent()!=_main_column: _settings_toggle.reparent(_main_column)
+  _main_column.move_child(heading,_main_column.get_children().find(status)+1)
+  _main_column.move_child(_settings_toggle,_main_column.get_children().find(_settings_body))
+  _settings_toggle.text=tr_pair("إعدادات الغرفة والاتصال","Room & connection settings")
+  _settings_toggle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  _main_column.get_node("CompactHeader").visible=not active
  _scores.visible=not active
  _seats.columns=6 if active else 3
@@ -323,14 +385,15 @@ func _state(value: Dictionary) -> void:
  var seats: int = int(value.get("capacity",players_field.get_selected_id()))
  var joined: int = int(value.get("joined",0))
  for i in range(6):
-  _seat_labels[i].get_parent().visible = i < seats
+  _seat_panels[i].visible = i < seats
   _seat_labels[i].add_theme_font_size_override("font_size",11 if active else 14)
+  _seat_avatars[i].custom_minimum_size=Vector2(24,24) if active else Vector2(36,36)
   var seat_skin=VisualSkin.card(Color("082033"),12)
   seat_skin.content_margin_left=4 if active else 18
   seat_skin.content_margin_right=4 if active else 18
   seat_skin.content_margin_top=8
   seat_skin.content_margin_bottom=8
-  _seat_labels[i].get_parent().add_theme_stylebox_override("panel",seat_skin)
+  _seat_panels[i].add_theme_stylebox_override("panel",seat_skin)
   var occupied: bool = i < joined
   var online: bool = i < connected.size() and bool(connected[i])
   var name_value: String = tr_pair("اللاعب %d","Player %d") % (i+1)
@@ -367,6 +430,7 @@ func _state(value: Dictionary) -> void:
  for event in value.get("history",[]):
   if event.get("kind") in ["reply","confirmation"]: lines.append(str(int(event.player)+1)+": "+str(event.get("text",""))+" → "+tr_pair("نعم" if event.answer else "لا","Yes" if event.answer else "No"))
  chat_log.text = "\n".join(lines)
+ _turn_ms=maxi(1000,int(value.get("timer",30))*1000)
  local_remaining = int(value.get("remaining_ms",-1)) if value.get("remaining_ms") != null else -1
  received_at = Time.get_ticks_msec()
 
@@ -374,7 +438,10 @@ func _process(_delta: float) -> void:
  if not is_instance_valid(client): return
  var left := local_remaining
  if left >= 0 and not bool(client.state.get("paused",false)): left = maxi(0,left-(Time.get_ticks_msec()-received_at))
- clock.text = tr_pair("بدون مؤقت","No timer") if left < 0 else tr_pair("المتبقي: %d ثانية","Remaining: %d seconds") % ceili(left/1000.0)
+ var seconds: int=ceili(left/1000.0)
+ clock.text = tr_pair("بدون مؤقت","No timer") if left < 0 else "%02d:%02d" % [floori(seconds/60.0),seconds%60]
+ _clock_bar.visible=clock.visible and left>=0
+ _clock_bar.value=clampf(float(left)/float(_turn_ms)*100.0,0.0,100.0)
 
 var _leaving_scene := false
 

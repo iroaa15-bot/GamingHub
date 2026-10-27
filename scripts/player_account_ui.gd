@@ -72,7 +72,7 @@ func _ready() -> void:
  _column.add_child(listing)
  _column=self
  admin=_button("لوحة الإدارة • وصول مخول",func(): OS.shell_open(client.endpoint))
- admin.visible=client.user.get("role","")=="super_admin"
+ admin.visible=not client.token.is_empty() and not client.endpoint.is_empty() and client.user.get("role","")=="super_admin"
  _button("تسجيل خروج الحساب",func(): client.request("/auth/logout"))
  _button("العودة",func(): back_requested.emit.call_deferred())
  MenuSkin.compact_menu(self)
@@ -108,7 +108,7 @@ func _credentials(route: String) -> void:
 func _result(route: String, data: Dictionary, ok: bool) -> void:
  if not is_inside_tree(): return
  status.text=str(data.get("error","تم الاتصال بالحساب المحلي")) if not ok else "الحساب: "+str(client.user.get("name",""))+" • "+str(client.user.get("id",""))
- admin.visible=client.user.get("role","")=="super_admin"
+ admin.visible=not client.token.is_empty() and not client.endpoint.is_empty() and client.user.get("role","")=="super_admin"
  if ok and route in ["/me","/auth/link-guest"] and data.get("progress") is Dictionary: progress_received.emit(data.progress)
  _auth_group.visible=client.user.is_empty() or bool(client.user.get("guest",false))
  if ok and route in ["/friends","/invites"]: listing.text=JSON.stringify(data,"  ")

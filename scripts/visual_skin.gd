@@ -57,20 +57,28 @@ static func decorate_button(target: Button, tone: String = "secondary") -> void:
  var fill_color: Color = Color("25385d")
  var edge_color: Color = Color("657eae", 0.52)
  if tone == "gold":
-  fill_color = Color("f2c76c")
-  edge_color = Color("ffe6ad")
+  fill_color = Color("0078cf")
+  edge_color = Color("36bcff")
+ elif tone == "danger":
+  fill_color = Color("bb3158")
+  edge_color = Color("fa6b8b")
+ elif tone == "amber":
+  fill_color = Color("af6200")
+  edge_color = Color("ffc35a")
  elif tone == "teal":
   fill_color = Color("087e85")
   edge_color = Color("58e4db")
  elif tone == "violet":
   fill_color = Color("5847b7")
   edge_color = Color("ad9dfc")
- var base: StyleBoxFlat = card(fill_color, 19)
+ target.set_meta("menu_primary",tone=="gold")
+ target.set_meta("menu_tone",tone)
+ var base: StyleBoxFlat = card(fill_color, 12)
  base.border_color = edge_color
  base.set_border_width_all(2 if tone != "secondary" else 1)
  base.shadow_size = 7
- base.content_margin_top = 12
- base.content_margin_bottom = 12
+ base.content_margin_top = 8
+ base.content_margin_bottom = 8
  target.add_theme_stylebox_override("normal", base)
  var hover: StyleBoxFlat = base.duplicate() as StyleBoxFlat
  hover.bg_color = fill_color.lightened(0.10)
@@ -88,7 +96,7 @@ static func decorate_button(target: Button, tone: String = "secondary") -> void:
  focus.border_color = CYAN
  focus.set_border_width_all(2)
  target.add_theme_stylebox_override("focus", focus)
- var text_color: Color = INK if tone == "gold" else TEXT
+ var text_color: Color = TEXT
  for state_name in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
   target.add_theme_color_override(state_name, text_color)
  target.add_theme_color_override("font_disabled_color", MUTED)
@@ -114,27 +122,27 @@ static func add_hero(parent: VBoxContainer, title_value: String, description: St
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  panel.mouse_filter = Control.MOUSE_FILTER_PASS
- var skin: StyleBoxFlat = card(Color("222e5e"), 28)
+ var skin: StyleBoxFlat = card(Color("162744"), 14)
  skin.border_color = Color("6dcbcf", 0.55)
  skin.set_border_width_all(2)
- skin.content_margin_top = 22
- skin.content_margin_bottom = 22
+ skin.content_margin_top = 12
+ skin.content_margin_bottom = 12
  panel.add_theme_stylebox_override("panel", skin)
  parent.add_child(panel)
  var stack := VBoxContainer.new()
- stack.add_theme_constant_override("separation", 9)
+ stack.add_theme_constant_override("separation", 6)
  panel.add_child(stack)
  var eyebrow := Label.new()
- eyebrow.text = "✦  " + kicker + "  ✦"
+ eyebrow.text = kicker
  eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
- eyebrow.add_theme_font_size_override("font_size", 14)
+ eyebrow.add_theme_font_size_override("font_size", 12)
  eyebrow.add_theme_color_override("font_color", SUN)
  stack.add_child(eyebrow)
  var title_label := Label.new()
  title_label.text = title_value
  title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
- title_label.add_theme_font_size_override("font_size", 32)
+ title_label.add_theme_font_size_override("font_size", 24)
  title_label.add_theme_color_override("font_color", TEXT)
  stack.add_child(title_label)
  var line := ColorRect.new()
@@ -146,7 +154,7 @@ static func add_hero(parent: VBoxContainer, title_value: String, description: St
  description_label.text = description
  description_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
- description_label.add_theme_font_size_override("font_size", 17)
+ description_label.add_theme_font_size_override("font_size", 14)
  description_label.add_theme_color_override("font_color", MUTED)
  stack.add_child(description_label)
 
@@ -267,6 +275,7 @@ static var _menu_icons: Dictionary = {}
 static func menu_icon(kind: String) -> Texture2D:
  if _menu_icons.has(kind): return _menu_icons[kind]
  var paths := {
+  "player":"<circle cx='12' cy='7' r='4'/><path d='M4 22v-3a8 8 0 0 1 16 0v3'/>",
   "back":"<path d='m14 5-7 7 7 7M7 12h14'/>",
   "settings":"<circle cx='12' cy='12' r='4'/><path d='M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2'/>",
   "chat":"<path d='M4 4h16v12H9l-5 4Z'/><path d='M8 8h8M8 12h5'/>",
@@ -303,8 +312,9 @@ static func compact_header(parent: VBoxContainer, title: String) -> void:
 
 static func compact_menu(parent: Node) -> void:
  for node in parent.get_children():
-  if node is Button:
-   var style := card(Color("0078cf") if node.get_theme_color("font_color")==INK else Color("10243b"),12)
+  if node is Button and not node is CheckButton:
+   var menu_color: Color=Color({"gold":"0078cf","teal":"0078cf","violet":"5140a8","danger":"bb3158","amber":"af6200"}.get(str(node.get_meta("menu_tone","secondary")),"10243b"))
+   var style := card(menu_color,12)
    style.border_color = Color("27709c")
    if node.has_meta("compact_game_tile"):
     style.content_margin_left = 4
@@ -327,3 +337,25 @@ static func icon_action(control: Button, kind: String, accessible_label: String)
  control.expand_icon = true
  control.add_theme_constant_override("icon_max_width",22)
  control.custom_minimum_size = Vector2(56,56)
+
+static func decorate_switch(control: CheckButton, title: String, enabled: bool) -> void:
+ control.text=title+"  "+("ON" if enabled else "OFF")
+ control.tooltip_text=title+" • "+("ON" if enabled else "OFF")
+ control.set_meta("committed_value",enabled)
+ control.add_theme_font_size_override("font_size",17)
+ control.add_theme_color_override("font_color",TEXT)
+ for on in [false,true]:
+  var key := "switch_on" if on else "switch_off"
+  if not _menu_icons.has(key):
+   var svg := "<svg xmlns='http://www.w3.org/2000/svg' width='48' height='28'><rect x='1' y='2' width='46' height='24' rx='12' fill='%s'/><circle cx='%d' cy='14' r='9' fill='#ffffff'/></svg>" % ["#008df0" if on else "#42516b",35 if on else 13]
+   var image := Image.new()
+   if image.load_svg_from_string(svg)==OK: _menu_icons[key]=ImageTexture.create_from_image(image)
+  if _menu_icons.has(key):
+   for state in ["checked","checked_mirrored"] if on else ["unchecked","unchecked_mirrored"]:
+    control.add_theme_icon_override(state,_menu_icons[key])
+ var normal := card(Color("10243b"),12)
+ normal.content_margin_left=12
+ normal.content_margin_right=12
+ normal.content_margin_top=8
+ normal.content_margin_bottom=8
+ for state in ["normal","hover","pressed"]: control.add_theme_stylebox_override(state,normal)

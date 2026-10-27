@@ -255,6 +255,7 @@ func _ready() -> void:
   language = str(saved.get("language", "ar"))
  if language not in ["ar", "en"]:
   language = "ar"
+ layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
  var bg := VisualSkin.new()
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
@@ -278,13 +279,7 @@ func _ready() -> void:
  margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margin)
  margin.add_child(output)
- VisualSkin.add_hero(output, _t("🎭 خمن صورتك", "🎭 GUESS YOUR PICTURE"), _t("العب مع صاحبك واكشف صورتك السرية", "Play with a friend. Discover your secret picture."), _t("ساحة الأصدقاء", "FRIENDS ARENA"))
- var lobby_brand := TextureRect.new()
- lobby_brand.texture = load("res://assets/ui/gaming_hub_brand.png") as Texture2D
- lobby_brand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- lobby_brand.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- lobby_brand.custom_minimum_size.y = 125
- output.add_child(lobby_brand)
+ VisualSkin.compact_header(output, _t("خمن صورتك", "GUESS YOUR PICTURE"))
  language_button = Button.new()
  language_button.text = "العربية / English"
  language_button.custom_minimum_size.y = 52
@@ -1155,6 +1150,9 @@ func _copy_invite() -> void:
 
 func _toggle_language() -> void:
  language = ["ar", "en"][(["ar", "en"].find(language) + 1) % 2]
+ layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
+ var compact_title=output.get_node_or_null("CompactHeader")
+ if compact_title!=null: compact_title.get_child(1).text=_t("خمن صورتك", "GUESS YOUR PICTURE")
  refresh_localized_controls(output)
  language_button.text = "العربية / English"
  if is_instance_valid(create_button):

@@ -15,7 +15,7 @@ func run() -> void:
   if image.visible: visible_images+=1
  valid=valid and visible_images==1 and room.images[1].visible and not room.images[0].visible
  room._state({"capacity":2,"joined":1,"connected":[true,false],"started":false})
- valid=valid and room._seat_labels[0].get_parent().visible and not room._seat_labels[2].get_parent().visible
+ valid=valid and room._seat_panels[0].visible and not room._seat_panels[2].visible
  print("ROOM_PRESENTATION_STATE ",valid," — UI fixture only; no multiplayer claim")
  room.queue_free()
  await process_frame

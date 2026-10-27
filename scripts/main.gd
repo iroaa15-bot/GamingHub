@@ -140,11 +140,10 @@ func show_accessibility() -> void:
   var option := button(str(chosen), func(): session_length = chosen; save_progress(); show_accessibility(), GREEN if chosen == session_length else PANEL)
   option.reparent(round_sizes)
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
- button(tr_ui("📳 اهتزاز اللمس: يعمل", "📳 TOUCH FEEDBACK: ON") if haptics_enabled else tr_ui("📳 اهتزاز اللمس: مغلق", "📳 TOUCH FEEDBACK: OFF"), func(): haptics_enabled = not haptics_enabled; save_progress(); show_accessibility(), GREEN if haptics_enabled else PANEL)
- button(tr_ui("🔊 الصوت: يعمل", "🔊 SOUND: ON") if sound_enabled else tr_ui("🔇 الصوت: مغلق", "🔇 SOUND: OFF"), func(): sound_enabled = not sound_enabled; save_progress(); show_accessibility(), GREEN if sound_enabled else PANEL)
- button(tr_ui("✨ الحركة: خفيفة", "✨ MOTION: REDUCED") if reduced_motion else tr_ui("✨ الحركة: عادية", "✨ MOTION: NORMAL"), func(): reduced_motion = not reduced_motion; save_progress(); show_accessibility(), GREEN if reduced_motion else PANEL)
- label(tr_ui("إيقاف الحركة يقلل التحريك الزائد؛ الأصوات قصيرة ويمكن إيقافها.", "Reduced motion limits UI animation; short sounds can be muted."), 16)
- label(tr_ui("يمكن تعديل القراءة دون تغيير مستوى الصعوبة", "Reading size is independent of difficulty"), 17)
+ setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
+ setting_switch(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; save_progress())
+ setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
+ button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
 
  VisualSkin.compact_menu(root)
@@ -1112,6 +1111,37 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
 
 # Kill a previous animation before starting another: rapid taps cannot queue
 # overlapping tweens that keep changing button scale after the touch ends.
+func _admin_ui_authorized() -> bool:
+ var account_client=get_tree().root.get_node_or_null("PlayerAccountSession") if is_inside_tree() else null
+ return account_client!=null and not account_client.token.is_empty() and not account_client.endpoint.is_empty() and account_client.user.get("role","")=="super_admin"
+
+func setting_switch(title: String, enabled: bool, action: Callable) -> CheckButton:
+ var control := CheckButton.new()
+ control.name = "SettingSwitch"+str(root.get_child_count())
+ control.custom_minimum_size.y=56
+ control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ control.mouse_filter=Control.MOUSE_FILTER_PASS
+ control.set_pressed_no_signal(enabled)
+ VisualSkin.decorate_switch(control,title,enabled)
+ control.toggled.connect(_setting_switch_requested.bind(weakref(control),ui_action_generation,title,enabled,action),CONNECT_DEFERRED)
+ root.add_child(control)
+ return control
+
+func _setting_switch_requested(value: bool, ref: WeakRef, generation: int, title: String, original: bool, action: Callable) -> void:
+ var control: Variant=ref.get_ref()
+ if generation!=ui_action_generation or not is_instance_valid(control) or not control.is_inside_tree(): return
+ # Revert the native preview until the existing swipe guard accepts this tap.
+ # Read the last committed value; repeated toggles must not restore the initial value.
+ var committed: bool=bool(control.get_meta("committed_value",original))
+ control.set_pressed_no_signal(committed)
+ _run_ui_action(ref,generation,func():
+  if not is_instance_valid(control): return
+  control.set_pressed_no_signal(value)
+  VisualSkin.decorate_switch(control,title,value)
+  action.call(value)
+ )
+
+
 func animate_touch_button(target: Button, desired_scale: Vector2, seconds: float) -> void:
  if not is_instance_valid(target):
   return
@@ -1857,7 +1887,6 @@ func show_home() -> void:
  label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
-  button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
  button(tr_ui("🖼️ خمن صورتك • الصور والغرف", "🖼️ GUESS YOUR PICTURE • IMAGES & ROOMS"), func(): show_modes(0), GOLD)
  button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
  button(tr_ui("⚡ جولات جديدة: سباق السرعة ورحلة الكنز", "⚡ NEW ARCADE: BLITZ & TREASURE"), func(): show_modes(5), GOLD)
@@ -1955,7 +1984,8 @@ func show_modes(index: int) -> void:
    button(tr_ui("👥 غرف الأصدقاء 2–6 • الدردشة والصوت", "👥 FRIEND ROOMS 2–6 • CHAT & VOICE"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
-  button(tr_ui("🖼️ مكتبة الصور الأصلية • 200 صورة", "🖼️ ORIGINAL PICTURE LIBRARY • 200 IMAGES"), func(): picture_library_page = 0; show_picture_library(), ACCENT)
+  if _admin_ui_authorized():
+   button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
   button(tr_ui("🤖 العب خمن صورتك • بدون إنترنت", "🤖 PLAY GUESS YOUR PICTURE • OFFLINE"), start_picture_game, GREEN)
   label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
  if game not in [0, 4]:
@@ -2001,9 +2031,7 @@ func show_modes(index: int) -> void:
    var chosen: int = level
    button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
  label(tr_ui("أفضل نتيجة: %d", "Personal best: %d") % int(profile.get("best_" + str(game), 0)), 17)
- if game == 0 and age_group not in ["under13", "unknown"]:
-  button(tr_ui("غرفة الأصدقاء • كود دعوة", "FRIENDS ROOM • INVITE CODE"), open_guess_multiplayer, ACCENT)
- else:
+ if not (game == 0 and age_group not in ["under13", "unknown"]):
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
 
@@ -3558,6 +3586,9 @@ func _execute_ui_action(ref: WeakRef, generation: int, action: Callable) -> void
 
 var picture_library_page := 0
 func show_picture_library() -> void:
+ if not _admin_ui_authorized():
+  show_modes(0)
+  return
  clear_ui()
  game = 0
  label(tr_ui("مكتبة الصور الأصلية • %d", "ORIGINAL PICTURE LIBRARY • %d") % CARDS.size(), 26)

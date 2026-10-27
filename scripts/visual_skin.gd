@@ -276,6 +276,8 @@ static func menu_icon(kind: String) -> Texture2D:
  if _menu_icons.has(kind): return _menu_icons[kind]
  var paths := {
   "player":"<circle cx='12' cy='7' r='4'/><path d='M4 22v-3a8 8 0 0 1 16 0v3'/>",
+  "phone":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3Z'/>",
+  "phone_off":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3ZM3 3l18 18'/>",
   "back":"<path d='m14 5-7 7 7 7M7 12h14'/>",
   "settings":"<circle cx='12' cy='12' r='4'/><path d='M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2'/>",
   "chat":"<path d='M4 4h16v12H9l-5 4Z'/><path d='M8 8h8M8 12h5'/>",

@@ -85,6 +85,9 @@ func _section(title: String, expanded: bool = false) -> VBoxContainer:
  body.visible = expanded
  var toggle := button(title,func(): body.visible = not body.visible)
  VisualSkin.decorate_button(toggle,"secondary")
+ toggle.icon = VisualSkin.menu_icon("chat" if title.contains("✉") else ("list" if title.contains("☷") else "settings"))
+ toggle.expand_icon = true
+ toggle.add_theme_constant_override("icon_max_width",22)
  column.add_child(body)
  return body
 
@@ -125,7 +128,7 @@ func _ready() -> void:
  column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  column.add_theme_constant_override("separation",8)
  margin.add_child(column)
- VisualSkin.add_brand_banner(column,"res://assets/ui/gaming_hub_brand.png",tr_pair("غرف الأصدقاء • خمن صورتك","Friend rooms • Guess Your Picture"))
+ VisualSkin.compact_header(column,tr_pair("غرف الأصدقاء • خمن صورتك","Friend rooms • Guess Your Picture"))
  status = label(tr_pair("اختر إعدادات الغرفة واتصل بالخدمة عند تفعيلها.","Choose room settings and connect when the service is enabled."))
  heading = label("",22)
  _scores = label("",16)
@@ -190,8 +193,16 @@ func _ready() -> void:
   var fact: String = key
   presets[fact] = button(str(FACTS[fact][0 if language == "ar" else 1]),func(): client.send_action("duel_preset",{"question_id":fact}))
  column = match_column
+ var reply_row := HBoxContainer.new()
+ reply_row.add_theme_constant_override("separation",8)
+ column.add_child(reply_row)
  yes_button = button(tr_pair("نعم","Yes"),func(): client.send_action("duel_reply",{"answer":true}))
  no_button = button(tr_pair("لا","No"),func(): client.send_action("duel_reply",{"answer":false}))
+ for reply in [yes_button,no_button]:
+  column.remove_child(reply)
+  reply.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+  reply_row.add_child(reply)
+ VisualSkin.decorate_button(yes_button,"teal")
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
  guess_button = button(tr_pair("طلب تأكيد التخمين","Request guess confirmation"),func(): client.send_action("duel_guess",{"guess":guess_field.text}))
  correct_button = button(tr_pair("التخمين صحيح","Guess is correct"),func(): client.send_action("duel_confirm",{"correct":true}))
@@ -215,7 +226,10 @@ func _ready() -> void:
  block_button = button(tr_pair("حظر اللاعب ومغادرة الغرفة","Block player and leave room"),func(): client.send_action("duel_block",{"target":target_player.get_selected_id()}))
  column = main_column
  button(tr_pair("مغادرة الغرفة","Leave room"),func(): client.send_action("duel_leave"))
- button(tr_pair("العودة إلى Gaming Hub","Back to Gaming Hub"),_home)
+ var back_button := button(tr_pair("العودة إلى Gaming Hub","Back to Gaming Hub"),_home)
+ back_button.icon = VisualSkin.menu_icon("back")
+ back_button.expand_icon = true
+ back_button.add_theme_constant_override("icon_max_width",22)
  client = Client.new()
  add_child(client)
  client.state_changed.connect(_state)
@@ -327,7 +341,7 @@ func _voice_changed() -> void:
   voice_button.disabled=true
   return
  voice_button.disabled = not voice_adapter.is_available() or not bool(client.capabilities.get("voice",false)) or not bool(client.state.get("started",false)) or bool(client.state.get("closed",false)) or bool(client.state.get("paused",false))
- voice_button.text = tr_pair("كتم الميكروفون","Mute microphone") if voice_adapter.requested else tr_pair("تفعيل الميكروفون","Enable microphone")
+ VisualSkin.icon_action(voice_button,"mic" if voice_adapter.requested else "mic_off",tr_pair("كتم الميكروفون","Mute microphone") if voice_adapter.requested else tr_pair("تفعيل الميكروفون","Enable microphone"))
  if not voice_adapter.is_available(): voice_status.text = tr_pair("الصوت يتطلب نسخة Android وجهازًا متوافقًا؛ لم يتم التحقق على هاتف بعد.","Voice requires Android hardware; device verification is still pending.")
  elif voice_adapter.requested: voice_status.text = tr_pair("الصوت قيد التفعيل بموافقة اللاعبين","Voice enabling with player consent")
  else: voice_status.text = tr_pair("الميكروفون مكتوم؛ التفعيل اختياري","Microphone muted; enabling is optional")

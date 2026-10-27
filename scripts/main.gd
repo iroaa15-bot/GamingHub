@@ -120,15 +120,25 @@ func show_audiences() -> void:
 
 func show_accessibility() -> void:
  clear_ui()
- label(tr_ui("القراءة ومدة الجلسة", "READING AND SESSION LENGTH"), 29)
+ VisualSkin.compact_header(root,tr_ui("الإعدادات", "SETTINGS"))
  label(tr_ui("حجم النص", "TEXT SIZE"), 22)
+ var text_sizes := HBoxContainer.new()
+ text_sizes.add_theme_constant_override("separation",8)
+ root.add_child(text_sizes)
  for scale_value in [1.0, 1.25, 1.5]:
   var chosen: float = float(scale_value)
-  button("%d%%" % int(chosen * 100), func(): reading_scale = chosen; save_progress(); show_accessibility(), GREEN if is_equal_approx(chosen, reading_scale) else PANEL)
+  var option := button("%d%%" % int(chosen * 100), func(): reading_scale = chosen; save_progress(); show_accessibility(), GREEN if is_equal_approx(chosen, reading_scale) else PANEL)
+  option.reparent(text_sizes)
  label(tr_ui("الحد الأقصى لأسئلة الجلسة", "MAX QUESTIONS PER SESSION"), 22)
+ var round_sizes := GridContainer.new()
+ round_sizes.columns = 2 if reading_scale >= 1.25 else 3
+ round_sizes.add_theme_constant_override("h_separation",8)
+ round_sizes.add_theme_constant_override("v_separation",8)
+ root.add_child(round_sizes)
  for length_value in [10, 15, 20, 50, 100, 150]:
   var chosen: int = int(length_value)
-  button(str(chosen), func(): session_length = chosen; save_progress(); show_accessibility(), GREEN if chosen == session_length else PANEL)
+  var option := button(str(chosen), func(): session_length = chosen; save_progress(); show_accessibility(), GREEN if chosen == session_length else PANEL)
+  option.reparent(round_sizes)
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
  button(tr_ui("📳 اهتزاز اللمس: يعمل", "📳 TOUCH FEEDBACK: ON") if haptics_enabled else tr_ui("📳 اهتزاز اللمس: مغلق", "📳 TOUCH FEEDBACK: OFF"), func(): haptics_enabled = not haptics_enabled; save_progress(); show_accessibility(), GREEN if haptics_enabled else PANEL)
  button(tr_ui("🔊 الصوت: يعمل", "🔊 SOUND: ON") if sound_enabled else tr_ui("🔇 الصوت: مغلق", "🔇 SOUND: OFF"), func(): sound_enabled = not sound_enabled; save_progress(); show_accessibility(), GREEN if sound_enabled else PANEL)
@@ -136,6 +146,8 @@ func show_accessibility() -> void:
  label(tr_ui("إيقاف الحركة يقلل التحريك الزائد؛ الأصوات قصيرة ويمكن إيقافها.", "Reduced motion limits UI animation; short sounds can be muted."), 16)
  label(tr_ui("يمكن تعديل القراءة دون تغيير مستوى الصعوبة", "Reading size is independent of difficulty"), 17)
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
+
+ VisualSkin.compact_menu(root)
 
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
@@ -1310,7 +1322,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.add_child(column)
  var art := TextureRect.new()
  art.texture = card_texture(art_id)
- art.custom_minimum_size.y = 84
+ art.custom_minimum_size.y = 64
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
@@ -1318,7 +1330,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  var idx: int = index
  var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
  b.tooltip_text = game_subtitle(index)
- b.add_theme_font_size_override("font_size", int(16 * reading_scale))
+ b.add_theme_font_size_override("font_size", int(14 * reading_scale))
  root.remove_child(b)
  column.add_child(b)
  b.icon = cached_texture("res://assets/ui/game_%d.svg" % index)
@@ -1834,7 +1846,7 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
- VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
+ VisualSkin.compact_header(root, tr_ui("Gaming Hub • الرئيسية", "Gaming Hub • HOME"))
  button(tr_ui("🎮 الألعاب", "🎮 GAMES"), show_more_games, GOLD)
  xp_progress()
  stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
@@ -1860,6 +1872,8 @@ func show_home() -> void:
  button("العربية / English", show_languages, PANEL)
  button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
  button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
+
+ VisualSkin.compact_menu(root)
 
 func start_championship() -> void:
  # No network, matchmaking, ads, or paid rewards. A deterministic 15-question local run.
@@ -1891,10 +1905,10 @@ func start_surprise_arcade() -> void:
 
 func show_more_games() -> void:
  clear_ui()
- label(tr_ui("الألعاب", "GAMES"), 30)
+ VisualSkin.compact_header(root,tr_ui("الألعاب", "GAMES"))
  button(tr_ui("🖼️ خمن صورتك • ابدأ هنا", "🖼️ GUESS YOUR PICTURE • START HERE"), func(): show_modes(0), GOLD)
  var grid := GridContainer.new()
- grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 380 else (3 if get_viewport_rect().size.x >= 780 else 2)
+ grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 380 else (3 if get_viewport_rect().size.x >= 420 else 2)
  root.add_child(grid)
  var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
  var favorites: Array = profile.get("favorites", [])
@@ -1903,6 +1917,8 @@ func show_more_games() -> void:
  button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
  button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
  button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)
+
+ VisualSkin.compact_menu(root)
 
 func show_modes(index: int) -> void:
  if index != game:

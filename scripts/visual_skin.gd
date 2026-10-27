@@ -261,3 +261,66 @@ static func enable_menu_swipe(node: Node) -> void:
   elif (node is Container and not node is ScrollContainer) or node is BaseButton:
    node.mouse_filter = Control.MOUSE_FILTER_PASS
  for child in node.get_children(): enable_menu_swipe(child)
+
+# Presentation-only helpers for the approved compact menu screens.
+static var _menu_icons: Dictionary = {}
+static func menu_icon(kind: String) -> Texture2D:
+ if _menu_icons.has(kind): return _menu_icons[kind]
+ var paths := {
+  "back":"<path d='m14 5-7 7 7 7M7 12h14'/>",
+  "settings":"<circle cx='12' cy='12' r='4'/><path d='M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2'/>",
+  "chat":"<path d='M4 4h16v12H9l-5 4Z'/><path d='M8 8h8M8 12h5'/>",
+  "list":"<path d='M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1'/>",
+  "mic":"<rect x='9' y='2' width='6' height='13' rx='3'/><path d='M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8'/>",
+  "mic_off":"<path d='m3 3 18 18M9 9v3a3 3 0 0 0 5 2M9 5a3 3 0 0 1 6 0v6M5 10v2a7 7 0 0 0 12 5M19 10v2M12 19v3M8 22h8'/>"}
+ var image := Image.new()
+ var svg := "<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'><g fill='none' stroke='#f5f7ff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>%s</g></svg>" % paths.get(kind,paths["settings"])
+ if image.load_svg_from_string(svg) != OK: return null
+ var texture := ImageTexture.create_from_image(image)
+ _menu_icons[kind] = texture
+ return texture
+
+static func compact_header(parent: VBoxContainer, title: String) -> void:
+ var bar := HBoxContainer.new()
+ bar.name = "CompactHeader"
+ bar.add_theme_constant_override("separation",12)
+ parent.add_child(bar)
+ var art := TextureRect.new()
+ art.texture = load("res://assets/ui/gaming_hub_brand.png")
+ art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+ art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+ art.custom_minimum_size = Vector2(58,58)
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+ bar.add_child(art)
+ var heading := Label.new()
+ heading.text = title
+ heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+ heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+ heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+ heading.add_theme_font_size_override("font_size",22)
+ heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+ bar.add_child(heading)
+
+static func compact_menu(parent: Node) -> void:
+ for node in parent.get_children():
+  if node is Button:
+   var style := card(Color("0078cf") if node.get_theme_color("font_color")==INK else Color("10243b"),12)
+   style.border_color = Color("27709c")
+   style.content_margin_top = 8
+   style.content_margin_bottom = 8
+   node.add_theme_stylebox_override("normal",style)
+   var pressed := style.duplicate() as StyleBoxFlat
+   pressed.bg_color = Color("006fbb")
+   node.add_theme_stylebox_override("pressed",pressed)
+   node.add_theme_stylebox_override("hover",pressed)
+   for state in ["font_color","font_hover_color","font_pressed_color"]: node.add_theme_color_override(state,TEXT)
+  compact_menu(node)
+
+static func icon_action(control: Button, kind: String, accessible_label: String) -> void:
+ control.icon = menu_icon(kind)
+ control.text = ""
+ control.tooltip_text = accessible_label
+ control.set_meta("accessible_label",accessible_label)
+ control.expand_icon = true
+ control.add_theme_constant_override("icon_max_width",22)
+ control.custom_minimum_size = Vector2(56,56)

@@ -12,6 +12,7 @@ var state: Dictionary = {}
 var code := ""
 var token := ""
 var player := -1
+var requested_game := ""
 var last_error := ""
 var error_count := 0
 var _previous := WebSocketPeer.STATE_CLOSED
@@ -113,7 +114,9 @@ func _process(_delta: float) -> void:
  var current := socket.get_ready_state()
  if current == WebSocketPeer.STATE_OPEN:
   if _previous != WebSocketPeer.STATE_OPEN:
-   socket.send_text(JSON.stringify({"type":"duel_hello","protocol":PROTOCOL}))
+   var hello := {"type":"duel_hello","protocol":PROTOCOL}
+   if not requested_game.is_empty():hello["game_id"]=requested_game
+   socket.send_text(JSON.stringify(hello))
   while socket.get_available_packet_count() > 0:
    var value: Variant = JSON.parse_string(socket.get_packet().get_string_from_utf8())
    if value is Dictionary: _received(value)

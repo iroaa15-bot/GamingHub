@@ -66,6 +66,7 @@ func _quiz_state(value: Dictionary) -> void:
  if not quiz_panel.visible:
   audio_player.stop();return
  var phase: String=str(quiz.get("phase",""))
+ status.text=tr_pair("نفس السؤال للجميع • اختر إجابة واحدة","Same question for everyone • choose one answer") if phase=="question" else tr_pair("نتائج مشتركة لكل اللاعبين","Shared results for all players")
  _server_offset=int(quiz.get("server_unix_ms",Time.get_unix_time_from_system()*1000))-int(Time.get_unix_time_from_system()*1000)
  current_question=str(question.get("id",""))
  quiz_title.text=tr_pair("سؤال %d من %d • ","Question %d of %d • ") % [int(quiz.get("round",1)),int(quiz.get("rounds",1))]+str(question.get(language,question.get("en","")))
@@ -85,12 +86,16 @@ func _quiz_state(value: Dictionary) -> void:
   for row in quiz.get("results",[]):lines.append(tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
  quiz_results.text="\n".join(lines)
  var serial: int=int(quiz.get("audio_serial",-1))
- if bool(value.get("paused",false)) or phase!="question":audio_player.stop();_audio_pending=false
+ if phase!="question":audio_player.stop();audio_player.stream_paused=false;_audio_pending=false
+ elif bool(value.get("paused",false)):audio_player.stream_paused=true
  elif question.has("audio") and serial!=_audio_serial:
   _audio_serial=serial;_audio_start=int(quiz.get("audio_start_unix_ms",0));_audio_pending=true
   var path: String=str(question.audio)
   if path.begins_with("res://assets/audio/") and path.ends_with(".wav") and ResourceLoader.exists(path):audio_player.stream=load(path)
   else:_audio_pending=false
+ if phase=="question" and not bool(value.get("paused",false)):
+  audio_player.stream_paused=false
+  _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
 func _process(delta: float) -> void:
  super._process(delta)

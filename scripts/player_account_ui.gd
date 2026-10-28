@@ -17,6 +17,8 @@ var friend_id: LineEdit
 var room_code: LineEdit
 var listing: Label
 var admin: Button
+var _profile_name: Label
+var _xp_bar: ProgressBar
 func _ready() -> void:
  _column=self
  layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
@@ -28,12 +30,23 @@ func _ready() -> void:
   get_tree().root.add_child(client)
  client.changed.connect(_result)
  MenuSkin.compact_header(self,_t("حسابي • Gaming Hub"))
+ var profile_card:=PanelContainer.new()
+ profile_card.add_theme_stylebox_override("panel",MenuSkin.card(Color("0b1649"),18));add_child(profile_card)
+ var profile_stack:=VBoxContainer.new();profile_stack.add_theme_constant_override("separation",8);profile_card.add_child(profile_stack)
+ _profile_name=Label.new();_profile_name.text=str(client.user.get("name","ضيف" if language=="ar" else "Guest"));_profile_name.add_theme_font_size_override("font_size",24);profile_stack.add_child(_profile_name)
+ var xp: int=maxi(0,int(local_progress.get("xp",0)))
+ var level:=Label.new();level.text=("المستوى %d • %d XP" if language=="ar" else "Level %d • %d XP") % [1+floori(xp/100.0),xp];profile_stack.add_child(level)
+ _xp_bar=ProgressBar.new();_xp_bar.show_percentage=false;_xp_bar.value=xp%100;_xp_bar.custom_minimum_size.y=12;profile_stack.add_child(_xp_bar)
+ var stats:=Label.new();stats.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ stats.text=("%d انتصارات  •  %d مباريات" if language=="ar" else "%d wins  •  %d matches") % [int(local_progress.get("wins",0)),int(local_progress.get("matches",0))];profile_stack.add_child(stats)
  status=Label.new()
  status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  status.text="الحساب اختياري. تقدم الضيف المحلي محفوظ. لا تُحفظ كلمات المرور أو رموز الجلسة على الجهاز." if language=="ar" else "Accounts are optional. Local guest progress is preserved. Passwords and session tokens are not saved on this device."
  add_child(status)
  _button("الاستمرار كضيف محلي",func(): back_requested.emit.call_deferred())
+ _button("الحساب وتسجيل الدخول",func(): _auth_group.visible=not _auth_group.visible)
  _auth_group=VBoxContainer.new()
+ _auth_group.visible=false
  add_child(_auth_group)
  _column=_auth_group
  display_name=_field("اسم اللاعب")
@@ -80,6 +93,7 @@ func _field(hint: String) -> LineEdit:
  var input := LineEdit.new()
  input.placeholder_text=_t(hint)
  input.custom_minimum_size.y=56
+ MenuSkin.decorate_input(input)
  _column.add_child(input)
  return input
 func _button(title: String, action: Callable) -> Button:
@@ -110,7 +124,8 @@ func _result(route: String, data: Dictionary, ok: bool) -> void:
  status.text=str(data.get("error","تم الاتصال بالحساب المحلي")) if not ok else "الحساب: "+str(client.user.get("name",""))+" • "+str(client.user.get("id",""))
  admin.visible=not client.token.is_empty() and not client.endpoint.is_empty() and client.user.get("role","")=="super_admin"
  if ok and route in ["/me","/auth/link-guest"] and data.get("progress") is Dictionary: progress_received.emit(data.progress)
- _auth_group.visible=client.user.is_empty() or bool(client.user.get("guest",false))
+ _profile_name.text=str(client.user.get("name","ضيف" if language=="ar" else "Guest"))
+ if ok and route in ["/auth/login","/auth/register"]:_auth_group.hide()
  if ok and route in ["/friends","/invites"]: listing.text=JSON.stringify(data,"  ")
 
 func _section(title: String) -> VBoxContainer:
@@ -123,6 +138,7 @@ func _t(ar: String) -> String:
  if language=="ar": return ar
  return str({
  "حسابي • Gaming Hub":"My account • Gaming Hub",
+ "الحساب وتسجيل الدخول":"Account & sign in",
  "الاستمرار كضيف محلي":"Continue as local guest",
  "اسم اللاعب":"Player name",
  "البريد الإلكتروني":"Email",

@@ -1,6 +1,7 @@
 extends SceneTree
 var folder="user://quiz_captures"
 var failures=[]
+var game_id="1"
 func _initialize() -> void:call_deferred("run")
 func until(predicate: Callable) -> bool:
  var end=Time.get_ticks_msec()+6000
@@ -18,8 +19,9 @@ func run() -> void:
  create_timer(30).timeout.connect(func():print("QUIZ_UI_TIMEOUT");quit(1))
  for arg in OS.get_cmdline_user_args():
   if arg.begins_with("--capture-dir="):folder=arg.trim_prefix("--capture-dir=")
+  if arg.begins_with("--quiz="):game_id=arg.trim_prefix("--quiz=")
  DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(folder));root.content_scale_size=Vector2i(420,900)
- var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game="1"
+ var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game=game_id
  var a=script.new();root.add_child(a);a.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var b=script.new();root.add_child(b);b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);b.hide()
  a.endpoint_field.text="ws://127.0.0.1:8884";a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
@@ -31,10 +33,12 @@ func run() -> void:
  a.client.send_action("duel_start")
  ck(await until(func():return a.quiz_panel.visible and b.quiz_panel.visible),"quiz controls actually rendered")
  ck(a.answer_buttons[0].text==b.answer_buttons[0].text and not a._match_controls.visible,"same choices with duel controls hidden")
- await create_timer(1.6).timeout;await snap("cinema-shared-question")
+ await create_timer(1.6).timeout
+ if game_id=="6":ck(a.audio_player.stream!=null and a.audio_player.playing,"scheduled original audio actually playing in Godot")
+ await snap(("sound" if game_id=="6" else "cinema")+"-shared-question")
  a.answer_buttons[0].pressed.emit();b.answer_buttons[1].pressed.emit()
  ck(await until(func():return a.client.state.quiz.phase=="finished"),"actual answer callbacks reach shared results")
- await snap("cinema-shared-results")
+ await snap(("sound" if game_id=="6" else "cinema")+"-shared-results")
  a.client.send_action("duel_leave")
  for ui in [a,b]:ui.client.close_transport();ui.queue_free()
  await process_frame

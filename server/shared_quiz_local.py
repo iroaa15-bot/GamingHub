@@ -92,7 +92,8 @@ class SharedQuizHub(SecureAgreementHub):
    result=await super().handle(ws,msg)
    binding=self.bindings.get(ws);restored=self.rooms.get(binding[0]) if binding else None
    if isinstance(restored,QuizRoom) and not restored.paused and restored.pause_started is not None:
-    restored.start_clock+=time.monotonic()-restored.pause_started;restored.pause_started=None
+    pause_duration=time.monotonic()-restored.pause_started
+    restored.start_clock+=pause_duration;restored.audio_at+=int(pause_duration*1000);restored.pause_started=None
     restored.start_at=int(time.time()*1000-max(0,time.monotonic()-restored.start_clock)*1000)
     await self.publish(restored)
    return result

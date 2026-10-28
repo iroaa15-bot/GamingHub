@@ -8,6 +8,11 @@ from collections import defaultdict, deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+try:
+ from .wallet import Wallet, WalletError
+except ImportError:
+ from wallet import Wallet, WalletError
+
 class Fault(Exception):
  def __init__(self,status,message): self.status,self.message=status,message
 
@@ -25,7 +30,7 @@ def password_hash(password,salt):
 
 class Store:
  def __init__(self,path):
-  self.path=path;self.started=time.time();self.lock=threading.Lock();self.attempts=defaultdict(deque)
+  self.path=path;self.started=time.time();self.lock=threading.Lock();self.attempts=defaultdict(deque);self.wallet=Wallet()
   with self.db() as c:
    c.executescript("""
    PRAGMA journal_mode=WAL;
@@ -40,6 +45,7 @@ class Store:
    CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit BEGIN SELECT RAISE(ABORT,'append-only audit'); END;
    CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit BEGIN SELECT RAISE(ABORT,'append-only audit'); END;
    """)
+  with self.db() as c:self.wallet.install(c)
  @contextlib.contextmanager
  def db(self):
   c=sqlite3.connect(self.path,timeout=10);c.row_factory=sqlite3.Row;c.execute("PRAGMA foreign_keys=ON")
@@ -90,6 +96,16 @@ class Store:
     session=self.session(c,uid);self.audit(c,uid,path)
     return {'token':session,'user':self.public(c.execute("SELECT * FROM users WHERE id=?",(uid,)).fetchone())}
    user=self.identity(c,token);uid=user['id'];self.limit(uid)
+   if path=="/wallet" and method=="GET":return {'balance':self.wallet.balance(c,uid),'prices':self.wallet.settings(c),'ssv_ready':False,'spending_ready':False,'trust':'authoritative server ledger only'}
+   if path in ('/wallet/reward','/wallet/spend','/ads/ssv'):
+    raise Fault(503,'Verified AdMob SSV and game authorization are not configured; no coins granted or spent')
+   if path=="/admin/economy":
+    require(user['role']=='super_admin','Administrator authorization required',403)
+    if method=='GET':return {'prices':self.wallet.settings(c),'ssv_ready':False}
+    if method=='POST':
+     try:self.wallet.configure(c,body.get('prices'))
+     except WalletError as exc:raise Fault(400,str(exc))
+     self.audit(c,uid,'economy-settings');return {'ok':True,'prices':self.wallet.settings(c)}
    if path=="/me" and method=="GET":return {'user':self.public(user),'progress':self.progress(c,uid)}
    if path=="/auth/logout" and method=="POST":
     c.execute("DELETE FROM sessions WHERE digest=?",(hashlib.sha256(token.encode()).hexdigest(),));self.audit(c,uid,'logout');return {'ok':True}
@@ -99,6 +115,7 @@ class Store:
     merged=self.progress(c,uid)
     for k,v in self.progress(c,guest['id']).items():merged[k]=max(merged.get(k,0),v)
     c.execute("INSERT OR REPLACE INTO progress VALUES(?,?)",(uid,json.dumps(merged)))
+    self.wallet.link_guest(c,guest['id'],uid)
     c.execute("DELETE FROM sessions WHERE user=?",(guest['id'],));self.audit(c,uid,'link-guest',guest['id']);return {'ok':True,'progress':merged}
    if path=="/progress" and method=="POST":
     stats=body.get('progress');require(isinstance(stats,dict) and set(stats)<= {'xp','wins','matches','picture_wins'})

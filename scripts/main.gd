@@ -970,13 +970,10 @@ func show_age_group_selection() -> void:
  button("العربية / English", show_languages, PANEL)
 
 func _on_earned_ad_reward(kind: String, amount: int) -> void:
- # AdManager emits only after the real native earned-reward callback for a pending ID.
- if kind != "Coins" or amount != 50 or age_group != "18plus":
-  return
- profile["coins"] = int(profile.get("coins", 0)) + amount
- save_progress()
- if is_inside_tree():
-  show_ad_status()
+ # Native completion is NOT server-side verification. Preserve old saved balances,
+ # but never mint spendable coins from a client callback.
+ if kind!="Coins" or amount<=0:return
+ if is_inside_tree():show_rewards()
 
 
 func _notification(what: int) -> void:
@@ -1344,7 +1341,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
  skin.bg_color = Color("142447")
- skin.border_color = Color("3a5893")
+ skin.border_color = [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
  skin.set_border_width_all(2)
  skin.set_corner_radius_all(20)
  skin.content_margin_left = 8
@@ -1358,11 +1355,11 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  column.add_theme_constant_override("separation", 6)
  tile.add_child(column)
  var art := TextureRect.new()
- art.texture = card_texture(art_id)
+ art.texture = card_texture(art_id) if index==0 else VisualSkin.game_cover(index)
  art.custom_minimum_size.y = 64
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+ art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
  column.add_child(art)
  var idx: int = index
  var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
@@ -1897,7 +1894,8 @@ func show_home() -> void:
  _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
   [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
   [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
-  [tr_ui("الإنجازات", "ACHIEVEMENTS"),show_achievements]
+  [tr_ui("الإنجازات", "ACHIEVEMENTS"),show_achievements],
+  [tr_ui("المساعدات والعملات","HINTS & COINS"),show_rewards]
  ])
  _home_activity_section(tr_ui("المحتوى اليومي والخصوصية", "DAILY CONTENT & PRIVACY"),[
   [tr_ui("جلب تحديات جديدة", "FETCH NEW CHALLENGES"),func(): DailyRounds.refresh(true)],
@@ -1909,7 +1907,7 @@ func show_home() -> void:
 func _add_unique_game_catalog() -> void:
  var grid := GridContainer.new()
  grid.name="UnifiedGameCatalog"
- grid.columns=1 if reading_scale>=1.25 or get_viewport_rect().size.x<380 else (3 if get_viewport_rect().size.x>=420 else 2)
+ grid.columns=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
  root.add_child(grid)
  var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
  var favorites: Array=profile.get("favorites",[])
@@ -3590,7 +3588,7 @@ func show_ad_status() -> void:
  label(tr_ui("الإعلانات والأرباح", "ADS & MONETIZATION"), 32)
  label(tr_ui("لا توجد إعلانات إنتاج أو أرباح. الإعلانات التجريبية تتطلب SDK واختبار الهاتف.", "No production ads or revenue. Test ads require SDK and device verification."), 19)
  label(AdManager.status_text(), 16)
- label(tr_ui("رصيد العملات: %d", "COINS BALANCE: %d") % int(profile.get("coins", 0)), 20)
+ label(tr_ui("رصيد محلي سابق غير قابل للإنفاق: %d", "LEGACY LOCAL BALANCE • NOT SPENDABLE: %d") % int(profile.get("coins", 0)),20)
  label(tr_ui("ملفات الأطفال والمراهقين والعائلات: بدون إعلانات. لا مكافأة قبل إشارة المشاهدة الحقيقية.", "Children, teens and families: no ads. Rewards require the native earned callback."), 17)
  if age_group == "18plus" and AdManager.is_ad_eligible():
   button(tr_ui("🎬 إعلان تجريبي اختياري • 50 عملة", "🎬 OPTIONAL TEST AD • 50 COINS"), func(): AdManager.request_rewarded_ad(), GREEN)
@@ -3720,3 +3718,10 @@ func show_welcome_account() -> void:
  account.back_requested.connect(show_welcome)
  account.progress_received.connect(_merge_account_progress)
  root.add_child(account)
+
+func show_rewards() -> void:
+ clear_ui()
+ var view=load("res://scripts/rewards_ui.gd").new()
+ view.language=selected_language
+ view.back_requested.connect(show_home)
+ root.add_child(view)

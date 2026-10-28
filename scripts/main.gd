@@ -939,10 +939,7 @@ func _ready() -> void:
  load_upgrade()
  _load_age_group()
  AdManager.set_audience("adults" if age_group == "18plus" else "children")
- if age_group == "unknown":
-  show_age_group_selection()
- else:
-  show_home()
+ show_welcome()
 
 func _load_age_group() -> void:
  age_group = "unknown"
@@ -3682,3 +3679,39 @@ func show_picture_filters() -> void:
  label(tr_ui("هذا الاختيار للعب دون إنترنت؛ داخل الغرف تظهر خيارات الصنف عندما تدعمها الخدمة.","These choices apply offline; room category controls appear when the service supports them."),14)
  button(tr_ui("العودة لخيارات اللعب","Back to play options"),func(): show_modes(0),GOLD)
  VisualSkin.compact_menu(root)
+
+# First-run navigation reuses the existing account and age-group systems.
+func show_welcome() -> void:
+ clear_ui()
+ var artwork := TextureRect.new()
+ artwork.texture=load("res://assets/ui/gaming_hub_brand.png")
+ artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+ artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+ artwork.custom_minimum_size.y=clampf(get_viewport_rect().size.y*0.34,200,340)
+ artwork.mouse_filter=Control.MOUSE_FILTER_IGNORE
+ root.add_child(artwork)
+ var guest := button(tr_ui("العب كضيف","Guest Play"),_welcome_guest,GOLD)
+ guest.set_meta("welcome_action","guest")
+ for provider in ["Google","Facebook"]:
+  var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider+tr_ui(" • غير مهيأ"," • setup required"),func(): pass,PANEL)
+  login.disabled=true
+  login.tooltip_text=tr_ui("إعداد OAuth والخدمة الآمنة غير مكتملين؛ اللعب كضيف متاح","OAuth and secure service setup are pending; guest play is available")
+  login.set_meta("welcome_action",provider.to_lower())
+ var account := button(tr_ui("حساب Gaming Hub","Gaming Hub account"),show_welcome_account,PANEL)
+ account.set_meta("welcome_action","account")
+ button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),show_welcome_account,PANEL)
+ button("العربية / English",func(): selected_language="en" if selected_language=="ar" else "ar";save_progress();show_welcome(),PANEL)
+ VisualSkin.compact_menu(root)
+
+func _welcome_guest() -> void:
+ if age_group=="unknown":show_age_group_selection()
+ else:show_home()
+
+func show_welcome_account() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.back_requested.connect(show_welcome)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)

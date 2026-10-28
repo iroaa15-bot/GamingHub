@@ -17,6 +17,12 @@ var question_field: LineEdit
 var guess_field: LineEdit
 var players_field: OptionButton
 var timer_field: OptionButton
+var _invite_box: VBoxContainer
+var _invite_code: LineEdit
+var _copy_code_button: Button
+var _advanced_connection: VBoxContainer
+var _pending_room_action := ""
+var _pending_join_code := ""
 var _online_category: OptionButton
 var _online_rank: OptionButton
 var _online_filter_box: VBoxContainer
@@ -215,17 +221,27 @@ func _ready() -> void:
  _match_header.add_theme_constant_override("separation",8)
  main_column.add_child(_match_header)
  var settings_index := column.get_child_count()
- column = _section(tr_pair("⚙ إعدادات الغرفة والاتصال","⚙ Room & connection settings"))
+ column = _section(tr_pair("خيارات الغرفة","Room options"))
  _settings_body=column
  _settings_toggle=main_column.get_child(settings_index)
+ var room_settings_column := column
+ var advanced_index := column.get_child_count()
+ column=_section(tr_pair("إعداد اتصال الاختبار","Test connection setup"))
+ _advanced_connection=column
+ room_settings_column.get_child(advanced_index).visible=OS.has_feature("debug")
  endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
  endpoint_field.text = Client.endpoint_from_args()
  endpoint_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
+ endpoint_field.text_changed.connect(func(_text: String):
+  if is_instance_valid(client):_state(client.state))
  label(tr_pair("الدردشة والصوت اختياريان. يمنع الإساءة والتهديد ونشر المعلومات الشخصية والمحتوى غير الملائم. يمكنك الإبلاغ وحظر لاعب. لا يبدأ الميكروفون دون موافقتك.","Chat and voice are optional. Abuse, threats, personal information and inappropriate content are prohibited. You can report or block players. The microphone requires your consent."),15)
  terms = CheckBox.new()
  terms.custom_minimum_size.y = 54
  terms.text = tr_pair("أوافق على قواعد الغرف واستخدام الدردشة","I accept the room and chat rules")
  column.add_child(terms)
+ var test_connect := button(tr_pair("فحص اتصال الاختبار","Test connection"),_connect_service)
+ test_connect.tooltip_text=tr_pair("للتطوير المحلي فقط","Local development only")
+ column=room_settings_column
  label(tr_pair("عدد اللاعبين","Number of players"))
  players_field = OptionButton.new()
  players_field.custom_minimum_size.y = 54
@@ -263,13 +279,29 @@ func _ready() -> void:
  main_column.add_child(_lobby_controls)
  _online_filter_box.reparent(_lobby_controls)
  column = _lobby_controls
- create_button = button(tr_pair("إنشاء غرفة","Create room"),_create_filtered_room)
+ terms.reparent(_lobby_controls)
+ terms.text=tr_pair("أوافق على قواعد الغرف والدردشة","I accept the room and chat rules")
+ terms.tooltip_text=tr_pair("الصوت اختياري ولا يبدأ دون إذن الميكروفون؛ يمنع الإساءة ونشر المعلومات الشخصية.","Voice is optional and requires microphone permission; abuse and sharing personal information are prohibited.")
+ create_button = button(tr_pair("إنشاء غرفة","Create room"),func(): _request_room_action("create"))
  code_field = field(tr_pair("كود الغرفة","Room code"))
  code_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
- join_button = button(tr_pair("انضمام بكود","Join by code"),func(): client.join_room(code_field.text))
+ code_field.max_length=12
+ join_button = button(tr_pair("انضمام بالكود","Join with code"),func(): _request_room_action("join"))
  resume_button = button(tr_pair("استعادة الاتصال","Reconnect session"),func(): client.resume_session())
  resume_button.reparent(_settings_body)
- button(tr_pair("الاتصال بخدمة الغرف","Connect to room service"),_connect_service)
+ _invite_box=VBoxContainer.new()
+ main_column.add_child(_invite_box)
+ column=_invite_box
+ label(tr_pair("كود الغرفة","Room code"),16)
+ _invite_code=LineEdit.new()
+ _invite_code.editable=false
+ _invite_code.custom_minimum_size.y=56
+ _invite_code.add_theme_font_size_override("font_size",28)
+ column.add_child(_invite_code)
+ _invite_code.layout_direction=Control.LAYOUT_DIRECTION_LTR
+ _invite_code.alignment=HORIZONTAL_ALIGNMENT_CENTER
+ _copy_code_button=button(tr_pair("نسخ الكود للمشاركة","Copy code to share"),_copy_room_code)
+ column=main_column
  _agreement_box=VBoxContainer.new()
  _agreement_box.add_theme_constant_override("separation",8)
  main_column.add_child(_agreement_box)
@@ -377,8 +409,11 @@ func _ready() -> void:
  client = Client.new()
  add_child(client)
  client.state_changed.connect(_state)
+ client.protocol_ready.connect(_room_protocol_ready)
  client.event_received.connect(func(message: Dictionary):
-  if message.get("type") == "duel_error": status.text = str(message.get("message",""))
+  if message.get("type") == "duel_error":
+   _pending_room_action=""
+   status.text = str(message.get("message",""))
   elif message.get("type") == "duel_reported": status.text = tr_pair("حُفظ البلاغ: ","Report saved: ")+str(message.get("report_id",""))
   elif message.get("type") == "duel_blocked": status.text = tr_pair("تم حظر اللاعب","Player blocked")
  )
@@ -388,8 +423,7 @@ func _ready() -> void:
  voice_adapter.attach(client)
  voice_adapter.changed.connect(_voice_changed)
  voice_adapter.unavailable.connect(func(reason: String): voice_status.text = reason)
- if not Client.endpoint_from_args().is_empty() and Client.endpoint_from_args().begins_with("ws://"):
-  client.connect_endpoint(Client.endpoint_from_args())
+ # Connection is initiated by Create/Join; players never need a separate Connect step.
  _state({})
  _voice_changed()
  VisualSkin.compact_menu(main_column)
@@ -427,11 +461,13 @@ func _state(value: Dictionary) -> void:
   var body_index: int=_main_column.get_children().find(_settings_body)
   if _settings_toggle.get_index()<body_index: body_index-=1
   _main_column.move_child(_settings_toggle,body_index)
-  _settings_toggle.text=tr_pair("إعدادات الغرفة والاتصال","Room & connection settings")
+  _settings_toggle.text=tr_pair("خيارات الغرفة","Room options")
   _settings_toggle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  _main_column.get_node("CompactHeader").visible=not active
  _scores.visible=not active and bool(value.get("started",false))
  _seats.columns=6 if active else 3
+ _seats.visible=not client.code.is_empty()
+ heading.visible=not client.code.is_empty()
  if active:
   if _seats.get_parent()!=_match_controls: _seats.reparent(_match_controls)
   _match_controls.move_child(_seats,_match_controls.get_children().find(_reply_row)+1)
@@ -443,10 +479,11 @@ func _state(value: Dictionary) -> void:
  var pending: Dictionary = value.get("pending") if value.get("pending") is Dictionary else {}
  var turn: bool = active and int(value.get("current",-1)) == client.player and pending.is_empty()
  var responder: bool = active and int(pending.get("responder",-1)) == client.player
- create_button.disabled = not ready or not bool(client.capabilities.get("room_agreement",false)) or not client.code.is_empty()
+ var service_available: bool=Client.allowed_endpoint(endpoint_field.text.strip_edges())
+ create_button.disabled = not client.code.is_empty() or (not ready and not service_available) or (ready and not bool(client.capabilities.get("room_agreement",false)))
  var agreement: bool=bool(value.get("room_agreement",false))
  var in_room: bool=not client.code.is_empty()
- _online_filter_box.visible=bool(client.capabilities.get("room_agreement",false)) and not in_room
+ _online_filter_box.visible=not in_room
  if _online_category.item_count==0 and client.capabilities.get("picture_categories") is Dictionary:
   _online_category.add_item(tr_pair("كل الصور","All pictures"))
   for key in client.capabilities.picture_categories:
@@ -545,10 +582,16 @@ func _state(value: Dictionary) -> void:
  clock.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _match_controls.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _lobby_controls.visible = client.code.is_empty()
+ _invite_box.visible=not client.code.is_empty() and not active and not bool(value.get("closed",false))
+ _invite_code.text=client.code
+ _copy_code_button.disabled=client.code.is_empty()
+ if _invite_box.visible:
+  _main_column.move_child(_invite_box,_main_column.get_children().find(heading)+1)
+  heading.text=tr_pair("أنت اللاعب %d","You are player %d") % (client.player+1)
  if bool(value.get("match_finished",false)): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
- elif not ready: status.text = tr_pair("خدمة الغرف غير متصلة؛ قد يكون تفعيلها معلقًا.","Room service is disconnected; activation may be pending.")
+ elif not ready: status.text=tr_pair("خدمة غرف 2–6 لم تُفعّل بعد. الغرفة الكلاسيكية متاحة من صفحة اللعبة.","Rooms for 2–6 are not activated yet. Classic rooms remain available on the game page.") if not service_available else tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend’s code")
  elif not bool(client.capabilities.get("room_agreement",false)): status.text=tr_pair("هذه الخدمة لا تدعم اتفاق الغرفة؛ استخدم الخدمة المحلية المتوافقة أو الغرفة الكلاسيكية المنفصلة.","This service does not support room agreement; use the compatible local service or the separate classic room.")
  elif not bool(value.get("started",false)): status.text = tr_pair("بانتظار اكتمال عدد اللاعبين","Waiting for the configured number of players")
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
@@ -635,3 +678,46 @@ func _propose_configuration() -> void:
 
 func _accept_configuration() -> void:
  client.send_action("duel_accept",{"config_revision":int(client.state.get("config_revision",-1)),"picture_difficulty":client.state.get("picture_difficulty","")})
+
+func _copy_room_code() -> void:
+ if client.code.is_empty():return
+ var code: String=client.code
+ DisplayServer.clipboard_set(code)
+ await get_tree().process_frame
+ if not is_inside_tree() or client.code!=code:return
+ if DisplayServer.clipboard_get()==code:
+  status.text=tr_pair("تم نسخ الكود • أرسله لصديقك ليدخل به الغرفة","Code copied • send it to your friend to join")
+ else:
+  _invite_code.grab_focus()
+  _invite_code.select_all()
+  status.text=tr_pair("تعذر النسخ التلقائي • الكود محدد للنسخ يدويًا","Automatic copy unavailable • code selected for manual copy")
+
+func _request_room_action(kind: String) -> void:
+ if not client.code.is_empty():return
+ if not terms.button_pressed:
+  status.text=tr_pair("وافق على قواعد الغرف أولًا","Accept the room rules first")
+  return
+ if kind=="join":
+  var normalized: String=code_field.text.strip_edges().replace(" ","").replace("-","").to_upper()
+  var pattern := RegEx.new()
+  pattern.compile("^[A-F0-9]{8}$")
+  if pattern.search(normalized)==null:
+   status.text=tr_pair("أدخل كود الغرفة المكوّن من 8 حروف وأرقام","Enter the 8-character room code")
+   return
+  _pending_join_code=normalized
+ _pending_room_action=kind
+ if not client.capabilities.is_empty():_room_protocol_ready(client.capabilities)
+ else:
+  status.text=tr_pair("جار الاتصال…","Connecting…")
+  _connect_service()
+
+func _room_protocol_ready(capabilities: Dictionary) -> void:
+ if _pending_room_action.is_empty():return
+ if not bool(capabilities.get("room_agreement",false)):
+  _pending_room_action=""
+  status.text=tr_pair("هذه الخدمة لا تدعم الغرف المطلوبة","This service does not support these rooms")
+  return
+ var action: String=_pending_room_action
+ _pending_room_action=""
+ if action=="create":_create_filtered_room()
+ elif action=="join":client.join_room(_pending_join_code)

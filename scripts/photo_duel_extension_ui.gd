@@ -424,7 +424,9 @@ func _state(value: Dictionary) -> void:
   if heading.get_parent()!=_main_column: heading.reparent(_main_column)
   if _settings_toggle.get_parent()!=_main_column: _settings_toggle.reparent(_main_column)
   _main_column.move_child(heading,_main_column.get_children().find(status)+1)
-  _main_column.move_child(_settings_toggle,_main_column.get_children().find(_settings_body))
+  var body_index: int=_main_column.get_children().find(_settings_body)
+  if _settings_toggle.get_index()<body_index: body_index-=1
+  _main_column.move_child(_settings_toggle,body_index)
   _settings_toggle.text=tr_pair("إعدادات الغرفة والاتصال","Room & connection settings")
   _settings_toggle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  _main_column.get_node("CompactHeader").visible=not active
@@ -540,7 +542,7 @@ func _state(value: Dictionary) -> void:
  var score_values: Array = value.get("scores",[])
  for index in range(score_values.size()): score_parts.append(str(index+1)+": "+str(score_values[index]))
  _scores.text = tr_pair("النقاط • ","Scores • ")+"  |  ".join(score_parts) if not score_parts.is_empty() else ""
- clock.visible = bool(value.get("started",false))
+ clock.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _match_controls.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _lobby_controls.visible = client.code.is_empty()
  if bool(value.get("match_finished",false)): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
@@ -619,6 +621,7 @@ func _voice_changed() -> void:
  VisualSkin.icon_action(voice_button,"phone_off" if voice_adapter.requested else "phone",tr_pair("إنهاء اتصال الصوت","End voice connection") if voice_adapter.requested else tr_pair("بدء اتصال الصوت","Start voice connection"))
  VisualSkin.icon_action(voice_mute_button,"mic_off" if voice_adapter.muted else "mic",tr_pair("إلغاء كتم الإرسال","Unmute transmission") if voice_adapter.muted else tr_pair("كتم إرسال الميكروفون","Mute microphone transmission"))
  if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت يحتاج Android وإذن الميكروفون؛ التحقق السمعي على هاتفين لم يكتمل.","Voice requires Android and microphone permission; two-device acoustic verification is pending.")
+ elif voice_adapter.requested and not voice_adapter.bridge.active:voice_status.text=tr_pair("بانتظار موافقة الطرف الآخر أو استعادة الصوت","Waiting for peer consent or audio recovery")
  elif voice_adapter.requested:voice_status.text=tr_pair("إرسال الميكروفون مكتوم • الاستقبال متاح","Microphone transmission muted • receiving remains available") if voice_adapter.muted else tr_pair("جلسة الصوت مفعلة طوال عضوية الغرفة","Voice enabled throughout room membership")
  else:voice_status.text=tr_pair("الصوت اختياري • ابدأ الاتصال لمنح إذن الميكروفون","Voice is optional • start connection to grant microphone permission")
 

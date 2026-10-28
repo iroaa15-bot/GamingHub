@@ -32,6 +32,7 @@ func run() -> void:
  ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
  check(not ui._online_filter_box.is_visible_in_tree() and ui._agreement_box.is_visible_in_tree(),"difficulty read only inside room")
  check(ui._start_button.disabled,"not all confirmed cannot start")
+ check(ui._settings_toggle.get_index()<ui._settings_body.get_index(),"settings heading precedes expanded content")
  await snap("agreement-room-host")
  ui.client.player=1;apply(v)
  check(ui._online_category.disabled and ui._mode_field.disabled and not ui._propose_button.visible,"joiner accepts host configuration")
@@ -54,7 +55,7 @@ func run() -> void:
  await snap("membership-voice-waiting")
  v.started=true;v.match_finished=true;v.winner=1
  apply(v)
- check(ui._voice_controls.is_visible_in_tree() and not ui._match_controls.visible,"voice controls remain after match")
+ check(ui._voice_controls.is_visible_in_tree() and not ui._match_controls.visible and not ui.clock.visible,"voice controls remain after match without stale timer")
  await snap("membership-voice-finished")
  print("ROOM_AGREEMENT_UI ",failures.is_empty()," ",failures)
  ui.queue_free();await process_frame

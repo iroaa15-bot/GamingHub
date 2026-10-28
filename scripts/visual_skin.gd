@@ -284,7 +284,7 @@ static func menu_icon(kind: String) -> Texture2D:
   "mic":"<rect x='9' y='2' width='6' height='13' rx='3'/><path d='M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8'/>",
   "mic_off":"<path d='m3 3 18 18M9 9v3a3 3 0 0 0 5 2M9 5a3 3 0 0 1 6 0v6M5 10v2a7 7 0 0 0 12 5M19 10v2M12 19v3M8 22h8'/>"}
  var image := Image.new()
- var svg := "<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'><g fill='none' stroke='#f5f7ff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>%s</g></svg>" % paths.get(kind,paths["settings"])
+ var svg := "<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 32 32'><defs><linearGradient id='badge' x2='.8' y2='1'><stop stop-color='#6cecff'/><stop offset='.45' stop-color='#1454be'/><stop offset='1' stop-color='#32116d'/></linearGradient><linearGradient id='metal' x2='.4' y2='1'><stop stop-color='#ffffff'/><stop offset='.45' stop-color='#b9faff'/><stop offset='1' stop-color='#37a9ed'/></linearGradient></defs><rect x='2' y='4' width='28' height='27' rx='9' fill='#080b32'/><rect x='2' y='1' width='28' height='28' rx='9' fill='url(#badge)' stroke='#38e2ff'/><path d='M6 8Q6 4 11 4h10' fill='none' stroke='#dcffff' stroke-opacity='.7' stroke-linecap='round'/><g transform='translate(4 5)' fill='none' stroke='#11265f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'>%s</g><g transform='translate(4 3)' fill='none' stroke='url(#metal)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'>%s</g></svg>" % [paths.get(kind,paths["settings"]),paths.get(kind,paths["settings"])]
  if image.load_svg_from_string(svg) != OK: return null
  var texture := ImageTexture.create_from_image(image)
  _menu_icons[kind] = texture

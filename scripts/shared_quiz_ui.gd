@@ -16,6 +16,11 @@ var _audio_pending := false
 var _quiz_categories_ready := false
 func _ready() -> void:
  super._ready()
+ var title_text: String=tr_pair("تحدي السينما","Cinema Challenge") if selected_game=="1" else tr_pair("خمن الصوت","Guess the Sound")
+ for child in _main_column.get_children():
+  if child.name=="CompactHeader":
+   for entry in child.get_children():
+    if entry is Label:entry.text=title_text
  client.requested_game=selected_game
  target_field.value=5
  for child in _settings_body.get_children():

@@ -2,6 +2,7 @@
 import asyncio,json,secrets
 from pathlib import Path
 from websockets.asyncio.server import serve
+from room_codes_local import new_room_code
 from photo_duel_extension import DuelHub,Room,ProtocolError,integer,TIMERS,VERSION
 
 class FilterHub(DuelHub):
@@ -29,8 +30,7 @@ class FilterHub(DuelHub):
   if not isinstance(difficulty,str) or difficulty not in self.filters['difficulties']:raise ProtocolError('Invalid picture difficulty')
   pool={k:v for k,v in self.catalog.items() if (category=='all' or self.filter_items[k]['category']==category) and (difficulty=='all' or self.filter_items[k]['difficulty']==difficulty)}
   if len(pool)<capacity:raise ProtocolError('Not enough different pictures for the requested player count')
-  code=secrets.token_hex(4).upper()
-  while code in self.rooms:code=secrets.token_hex(4).upper()
+  code=new_room_code(self.rooms)
   room=Room(code,capacity,timer,target,pool);room.picture_category=category;room.picture_difficulty=difficulty
   self.rooms[code]=room;room.peers[0]=ws;room.joined=1;self.bindings[ws]=(code,0)
   await self.send(ws,{'type':'duel_created','code':code,'token':room.tokens[0],'player':0})

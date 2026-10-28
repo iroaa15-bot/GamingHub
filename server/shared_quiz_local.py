@@ -1,6 +1,7 @@
 """Shared simultaneous quiz adapters on authenticated loopback only.
 Reuses room membership, security, moderation and existing PCM mixer unchanged.
 """
+from room_codes_local import new_room_code
 import asyncio,json,secrets,time,re
 from pathlib import Path
 from websockets.asyncio.server import serve
@@ -106,8 +107,7 @@ class SharedQuizHub(SecureAgreementHub):
    if adapter is None:raise ProtocolError('Unsupported game adapter')
    capacity=integer(msg.get('players',2),range(2,7));timer=integer(msg.get('timer',30),TIMERS);rounds=integer(msg.get('rounds',5),range(1,31));difficulty=msg.get('difficulty')
    if len(adapter.pool(difficulty,'all'))<rounds:raise ProtocolError('Not enough existing questions for the requested round count')
-   code=secrets.token_hex(4).upper()
-   while code in self.rooms:code=secrets.token_hex(4).upper()
+   code=new_room_code(self.rooms)
    room=QuizRoom(code,capacity,timer,rounds,self.catalog,adapter,difficulty);room.peers[0]=ws;room.joined=1;self.rooms[code]=room;self.bindings[ws]=(code,0);self.subjects[code]={0:identity['sub']}
    await self.send(ws,{'type':'duel_created','code':code,'token':room.tokens[0],'player':0});return await self.publish(room)
   binding=self.bindings.get(ws);room=self.rooms.get(binding[0]) if binding else None

@@ -17,7 +17,7 @@ var _audio_pending := false
 var _quiz_categories_ready := false
 func _ready() -> void:
  super._ready()
- var title_text: String=tr_pair("تحدي السينما","Cinema Challenge") if selected_game=="1" else tr_pair("خمن الصوت","Guess the Sound")
+ var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
  for child in _main_column.get_children():
   if child.name=="CompactHeader":
    for entry in child.get_children():

@@ -22,7 +22,7 @@ class QuestionAdapter:
    self.validate_media(item)
    self.questions.append(item)
   if not self.questions or len({x['id'] for x in self.questions})!=len(self.questions):raise ValueError('Quiz catalog requires unique playable IDs')
-  self.categories={str(x.get('topic','all')):{'ar':{'cinema':'معرفة سينمائية','craft':'صناعة السينما','audio':'المقاطع المحلية'}.get(x.get('topic'),x.get('topic','')),'en':str(x.get('topic',''))} for x in self.questions}
+  self.categories={str(x.get('topic','all')):{'ar':{'cinema':'معرفة سينمائية','craft':'صناعة السينما','audio':'المقاطع المحلية','logic':'التفكير المنطقي','numbers':'الأرقام والحساب','math':'رياضيات وتفكير'}.get(x.get('topic'),x.get('topic','')),'en':str(x.get('topic',''))} for x in self.questions}
  def validate_media(self,item):pass
  def pool(self,difficulty,category):
   level={'easy':1,'medium':2,'hard':3}.get(difficulty)
@@ -75,7 +75,7 @@ class QuizRoom(Room):
   value['quiz']=quiz;return value
 
 class SharedQuizHub(SecureAgreementHub):
- def __init__(self,secret,database):super().__init__(secret,database);self.adapters={'1':CinemaAdapter(),'6':SoundAdapter()};self.requested_games={}
+ def __init__(self,secret,database):super().__init__(secret,database);self.adapters={'1':CinemaAdapter(),'6':SoundAdapter(),'3':QuestionAdapter('3')};self.requested_games={}
  async def send(self,ws,message):
   if message.get('type')=='duel_capabilities':
    adapter=self.adapters.get(self.requested_games.get(ws))

@@ -181,7 +181,9 @@ func create_room(players: int, timer: int, target: int = 10, picture_filters: Di
  return send_action("duel_create",fields)
 
 func join_room(room_code: String) -> Error:
- return send_action("duel_join", {"code":room_code.strip_edges().to_upper()})
+ var invites=preload("res://scripts/room_invite_code.gd")
+ if not invites.valid(room_code):return ERR_INVALID_PARAMETER
+ return send_action("duel_join", {"code":invites.normalize(room_code)})
 
 func resume_session() -> Error:
  if code.is_empty() or token.is_empty(): return ERR_UNAVAILABLE

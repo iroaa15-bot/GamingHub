@@ -726,8 +726,9 @@ func _reset_match_state() -> void:
  _update_lobby()
 
 func _join_room() -> void:
- var code := code_input.text.strip_edges().to_upper()
- if code.length() != 6:
+ var invites=preload("res://scripts/room_invite_code.gd")
+ var code: String=invites.normalize(code_input.text)
+ if not invites.valid(code,true):
   status.text = _t("كود الغرفة لازم يكون 6 حروف أو أرقام", "Room code must be 6 characters")
   return
  _request_action({"type":"join", "code":code})

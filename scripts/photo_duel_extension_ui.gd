@@ -702,11 +702,10 @@ func _request_room_action(kind: String) -> void:
   status.text=tr_pair("وافق على قواعد الغرف أولًا","Accept the room rules first")
   return
  if kind=="join":
-  var normalized: String=code_field.text.strip_edges().replace(" ","").replace("-","").to_upper()
-  var pattern := RegEx.new()
-  pattern.compile("^[A-F0-9]{8}$")
-  if pattern.search(normalized)==null:
-   status.text=tr_pair("أدخل كود الغرفة المكوّن من 8 حروف وأرقام","Enter the 8-character room code")
+  var invites=preload("res://scripts/room_invite_code.gd")
+  var normalized: String=invites.normalize(code_field.text)
+  if not invites.valid(normalized):
+   status.text=tr_pair("أدخل كود الغرفة المكوّن من 6 أرقام","Enter the 6-digit room code")
    return
   _pending_join_code=normalized
  _pending_room_action=kind

@@ -1,0 +1,10 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+INVITE_NORMALIZATION_LEGACY_COMPAT true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+REAL_NUMERIC_UI_JOIN_ARABIC_DIGITS true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true

@@ -289,6 +289,8 @@ func _update_voice_ui() -> void:
   voice_label.text = _t("في انتظار تفعيل الطرف الآخر للصوت…", "Waiting for the other player to enable voice…")
 
 func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.membership(self,false)
  _reset_voice_on_connection_loss()
  socket.close()
 
@@ -732,6 +734,7 @@ func _leave_match() -> void:
  if leaving:
   return
  if reconnecting:
+  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
   socket.close()
   socket = WebSocketPeer.new()
   _reset_match_state()
@@ -1083,6 +1086,7 @@ func _handle(msg: Dictionary) -> void:
    _refresh_actions()
    _resume_voice_after_sync()
   "left":
+   load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
    _reset_match_state()
    status.text = _t("خرجت من الغرفة", "Left the room")
   "queue":
@@ -1096,6 +1100,7 @@ func _handle(msg: Dictionary) -> void:
    my_turn = false
    finished = false
    room_code = str(msg.get("code", ""))
+   if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
    _update_lobby()
    status.text = _local("ROOM CODE: ") + room_code + " • " + _local(str(msg.get("status", "")))
   "started":
@@ -1104,6 +1109,7 @@ func _handle(msg: Dictionary) -> void:
    if assigned_room != room_code:
     _reset_voice_on_connection_loss()
    room_code = assigned_room
+   if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
    voice_room_membership_supported=bool(msg.get("voice_room_lifetime",false))
    pending_action.clear()
    matchmaking_pending = false

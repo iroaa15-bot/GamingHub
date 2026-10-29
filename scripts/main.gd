@@ -142,6 +142,7 @@ func show_accessibility() -> void:
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
  setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
  setting_switch(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; save_progress())
+ setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
  button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
@@ -267,6 +268,7 @@ var picture_recorded: bool = false
 var picture_question_page: int = 0
 var art_style: String = "realistic"
 var sound_enabled: bool = true
+var music_enabled: bool = true
 var haptics_enabled: bool = true
 var reduced_motion: bool = false
 # The Android Back key must never silently discard an active round.
@@ -419,6 +421,8 @@ func load_upgrade() -> void:
  selected_language = str(profile.get("language", "ar"))
  art_style = str(profile.get("art_style", "realistic"))
  sound_enabled = bool(profile.get("sound_enabled", true))
+ music_enabled = bool(profile.get("music_enabled",true))
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(music_enabled)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
  reduced_motion = bool(profile.get("reduced_motion", false))
  selected_campaign = str(profile.get("selected_campaign", "island"))
@@ -462,6 +466,7 @@ func save_progress() -> void:
  profile["language"] = selected_language
  profile["art_style"] = art_style
  profile["sound_enabled"] = sound_enabled
+ profile["music_enabled"] = music_enabled
  profile["haptics_enabled"] = haptics_enabled
  profile["reduced_motion"] = reduced_motion
  profile["reading_scale"] = reading_scale
@@ -560,7 +565,9 @@ func show_hint() -> void:
 
 func play_clip(id: String) -> void:
  stop_audio()
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player = AudioStreamPlayer.new()
+ audio_player.bus="Game SFX"
  audio_player.stream = load("res://assets/audio/" + id + ".wav")
  audio_player.volume_db = -8
  add_child(audio_player)
@@ -572,7 +579,9 @@ func play_tap() -> void:
  var tap_path: String = "res://assets/audio/ui_tap.wav"
  if not ResourceLoader.exists(tap_path):
   return
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  var tap_player := AudioStreamPlayer.new()
+ tap_player.bus="UI SFX"
  tap_player.stream = load(tap_path)
  tap_player.volume_db = -21.0
  add_child(tap_player)
@@ -587,7 +596,9 @@ func play_feedback(effect: String) -> void:
  var path: String = "res://assets/audio/feedback_" + effect + ".wav"
  if not ResourceLoader.exists(path):
   return
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  var player := AudioStreamPlayer.new()
+ player.bus="Game SFX"
  player.stream = load(path)
  player.volume_db = -13.0
  add_child(player)

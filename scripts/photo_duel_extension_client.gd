@@ -145,12 +145,14 @@ func _received(message: Dictionary) -> void:
    code = str(message.get("code", ""))
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
+   if bool(capabilities.get("voice",false)):load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
   "duel_state":
    if str(message.get("code", "")) == code:
     state = message
     if bool(state.get("closed",false)):
      token = ""
      code = ""
+     load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
     state_changed.emit(state)
   "duel_error":
    _error(str(message.get("message", "Protocol error")))
@@ -191,6 +193,8 @@ func _error(value: String) -> void:
  error_count += 1
 
 func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.membership(self,false)
  socket.close()
 
 # Renew an existing identity; a fresh guest identity must never replace a resume owner.

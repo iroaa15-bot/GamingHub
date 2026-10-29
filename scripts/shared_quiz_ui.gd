@@ -36,7 +36,8 @@ func _ready() -> void:
  quiz_results=label("")
  next_button=button(tr_pair("السؤال التالي","Next question"),func():client.send_action("duel_quiz_next"))
  column=_main_column
- audio_player=AudioStreamPlayer.new();audio_player.volume_db=-8;add_child(audio_player)
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ audio_player=AudioStreamPlayer.new();audio_player.bus="Game SFX";audio_player.volume_db=-8;add_child(audio_player)
  _quiz_state(client.state)
  client.state_changed.connect(_quiz_state)
 func _create_filtered_room() -> void:

@@ -18,6 +18,11 @@ var step_picks: Array[int]=[]
 var step_controls: Array[Button]=[]
 var order_submit: Button
 var order_undo: Button
+var question_image: TextureRect
+var story_text: Label
+var memory_grid: GridContainer
+var memory_controls: Array[Button]=[]
+var memory_sync_at: int=0
 var _sound_phase_key: String=""
 var _server_offset := 0
 var _audio_serial := -1
@@ -26,7 +31,7 @@ var _audio_pending := false
 var _quiz_categories_ready := false
 func _ready() -> void:
  super._ready()
- var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"2":tr_pair("معركة الكلمات","Word Battle"),"7":tr_pair("من أنا؟","Who Am I?"),"9":tr_pair("ترتيب الخطوات","Step Builder"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
+ var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"4":tr_pair("رحلة الأسرار","Mystery Quest"),"5":tr_pair("ساحة المعلومات","Trivia Arena"),"8":tr_pair("ذاكرة الصور","Picture Memory"),"2":tr_pair("معركة الكلمات","Word Battle"),"7":tr_pair("من أنا؟","Who Am I?"),"9":tr_pair("ترتيب الخطوات","Step Builder"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
  for child in _main_column.get_children():
   if child.name=="CompactHeader":
    for entry in child.get_children():
@@ -39,6 +44,9 @@ func _ready() -> void:
  quiz_panel=VBoxContainer.new();quiz_panel.add_theme_constant_override("separation",8);_main_column.add_child(quiz_panel)
  column=quiz_panel
  quiz_title=label("",21)
+ story_text=label("")
+ question_image=TextureRect.new();question_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;question_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;question_image.custom_minimum_size.y=180;quiz_panel.add_child(question_image)
+ memory_grid=GridContainer.new();memory_grid.columns=4;memory_grid.add_theme_constant_override("h_separation",6);memory_grid.add_theme_constant_override("v_separation",6);quiz_panel.add_child(memory_grid)
  replay_button=button(tr_pair("إعادة الصوت للجميع • مرة واحدة","Replay for everyone • once"),func():client.send_action("duel_quiz_replay",{"question_id":current_question}))
  for i in range(6):
   var index: int=i
@@ -106,11 +114,17 @@ func _quiz_state(value: Dictionary) -> void:
     var scores: Array=value.get("scores",[])
     var won: bool=client.player>=0 and client.player<scores.size() and scores[client.player]==scores.max()
     get_tree().create_timer(.65).timeout.connect(func():audio_policy.effect("victory" if won else "results"))
- status.text=tr_pair("نفس السؤال للجميع • اختر إجابة واحدة","Same question for everyone • choose one answer") if phase=="question" else tr_pair("نتائج مشتركة لكل اللاعبين","Shared results for all players")
+ status.text=tr_pair("تحدٍ متزامن للجميع","Synchronized challenge for everyone") if phase=="question" else tr_pair("نتائج مشتركة لكل اللاعبين","Shared results for all players")
  _server_offset=int(quiz.get("server_unix_ms",Time.get_unix_time_from_system()*1000))-int(Time.get_unix_time_from_system()*1000)
  var changed: bool=current_question!=str(question.get("id",""))
  current_question=str(question.get("id",""))
  var mechanic: String=str(question.get("mode","choice"))
+ story_text.text=str(question.get("narrative_"+language,question.get("narrative_en","")))
+ story_text.visible=not story_text.text.is_empty()
+ var image_path: String=str(question.get("image",""))
+ question_image.visible=image_path.begins_with("res://assets/") and ResourceLoader.exists(image_path)
+ if changed:question_image.texture=load(image_path) if question_image.visible else null
+ memory_grid.visible=mechanic=="memory"
  var can_answer: bool=phase=="question" and not bool(value.get("paused",false)) and quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0))
  written_field.visible=mechanic in ["write","identity"];written_submit.visible=written_field.visible
  written_field.editable=can_answer;written_submit.disabled=not can_answer
@@ -119,7 +133,13 @@ func _quiz_state(value: Dictionary) -> void:
  if mechanic=="identity":mechanic_info.text="\n".join(quiz.get("clues",{}).get(language,quiz.get("clues",{}).get("en",[])))
  steps_box.visible=mechanic=="order";order_submit.visible=steps_box.visible;order_undo.visible=steps_box.visible
  if changed:
-  written_field.clear();step_picks.clear();step_controls.clear()
+  written_field.clear();step_picks.clear();step_controls.clear();memory_controls.clear()
+  for child in memory_grid.get_children():child.queue_free()
+  for i in range(int(question.get("size",0))):
+   var card_index: int=i
+   var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(90,85);card.expand_icon=true
+   card.pressed.connect(func():client.send_action("duel_quiz_flip",{"question_id":current_question,"index":card_index}))
+   memory_grid.add_child(card);memory_controls.append(card)
   for child in steps_box.get_children():child.queue_free()
   var steps: Array=question.get("steps_"+language,question.get("steps_en",[]))
   for i in range(steps.size()):
@@ -129,6 +149,17 @@ func _quiz_state(value: Dictionary) -> void:
     if index not in step_picks:step_picks.append(index)
     _show_step_picks())
    steps_box.add_child(control);step_controls.append(control)
+ if mechanic=="memory":
+  var board: Dictionary=quiz.get("memory",{})
+  mechanic_info.visible=true;mechanic_info.text=tr_pair("المحاولات: %d","Moves: %d") % int(board.get("moves",0))
+  memory_sync_at=int(board.get("hide_unix_ms",0))
+  for i in range(memory_controls.size()):
+   var shown: Dictionary=board.get("revealed",{}).get(str(i),{})
+   var card=memory_controls[i]
+   card.text=str(shown.get(language,shown.get("en","?")))
+   var path: String=str(shown.get("image",""))
+   card.icon=load(path) if path.begins_with("res://assets/") and ResourceLoader.exists(path) else null
+   card.disabled=not can_answer or float(i) in board.get("matched",[]) or (memory_sync_at>_quiz_now()) or not shown.is_empty()
  if mechanic=="order":
   for i in range(step_controls.size()):step_controls[i].disabled=not can_answer or i in step_picks
   order_submit.disabled=not can_answer or step_picks.size()!=step_controls.size();order_undo.disabled=not can_answer or step_picks.is_empty()
@@ -170,6 +201,10 @@ func _show_step_picks() -> void:
  var picked: Array=[]
  for index in step_picks:picked.append(step_controls[index].text)
  mechanic_info.text=" → ".join(picked)
+ var quiz: Dictionary=client.state.get("quiz",{})
+ var enabled: bool=quiz.get("phase")=="question" and quiz.get("your_answer")==null and not bool(client.state.get("paused",false)) and _quiz_now()>=int(quiz.get("start_unix_ms",0))
+ order_submit.disabled=not enabled or step_picks.size()!=step_controls.size()
+ order_undo.disabled=not enabled or step_picks.is_empty()
  for i in range(step_controls.size()):
   if i in step_picks:step_controls[i].disabled=true
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
@@ -178,9 +213,14 @@ func _process(delta: float) -> void:
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,is_instance_valid(audio_player) and audio_player.playing and not audio_player.stream_paused)
  if not is_instance_valid(client) or not is_instance_valid(quiz_panel):return
  var quiz: Dictionary=client.state.get("quiz",{})
+ if memory_sync_at>0 and _quiz_now()>=memory_sync_at:
+  memory_sync_at=0;client.send_action("duel_sync")
  if quiz.get("phase")=="question" and not bool(client.state.get("paused",false)):
   if quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0)):
    for b in answer_buttons:b.disabled=false
+   if str(quiz.get("question",{}).get("mode",""))=="memory":
+    var board: Dictionary=quiz.get("memory",{})
+    for i in range(memory_controls.size()):memory_controls[i].disabled=float(i) in board.get("matched",[]) or board.get("revealed",{}).has(str(i)) or memory_sync_at>_quiz_now()
    written_field.editable=true;written_submit.disabled=false
    clue_control.disabled=not bool(quiz.get("more_clues",false))
    for i in range(step_controls.size()):step_controls[i].disabled=i in step_picks

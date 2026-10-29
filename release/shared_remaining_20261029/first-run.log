@@ -1,0 +1,93 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:335)
+OpenGL API 3.3.0 Core Profile Context 23.19.24.251211 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon (TM) Graphics
+
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 2 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 2 actual controls visible true
+MECHANICS_UI 2 same question payload true
+MECHANICS_UI 2 typed controls not MCQ true
+GH_AUDIO_EFFECT click bus=UI SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+MECHANICS_UI 2 shared final results true
+MECHANICS_UI 2 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+MECHANICS_UI 7 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 7 actual controls visible true
+MECHANICS_UI 7 same question payload true
+MECHANICS_UI 7 typed controls not MCQ true
+GH_AUDIO_EFFECT click bus=UI SFX
+MECHANICS_UI private progressive clue true
+MECHANICS_UI opponent clue remains private true
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+MECHANICS_UI 7 shared final results true
+MECHANICS_UI 7 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 9 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 9 actual controls visible true
+MECHANICS_UI 9 same question payload true
+MECHANICS_UI ordering retains step selection true
+MECHANICS_UI order undo false
+MECHANICS_UI 9 shared final results false
+MECHANICS_UI 9 authoritative identical scores false
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 4 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 4 actual controls visible true
+MECHANICS_UI 4 same question payload true
+GH_AUDIO_EFFECT click bus=UI SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+MECHANICS_UI 4 shared final results true
+MECHANICS_UI 4 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 5 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 5 actual controls visible true
+MECHANICS_UI 5 same question payload true
+GH_AUDIO_EFFECT click bus=UI SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+MECHANICS_UI 5 shared final results true
+MECHANICS_UI 5 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+MECHANICS_UI 8 create false
+ORIGINAL_ALL_REAL_GODOT_UI_WS false ["order undo", "9 shared final results", "9 authoritative identical scores", "8 create"]

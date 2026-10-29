@@ -2000,7 +2000,7 @@ func show_modes(index: int) -> void:
    button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
   button(tr_ui("ألغاز الصور اليومية", "DAILY PICTURE PUZZLES"),show_ai_daily,PANEL)
   label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
- if game in [1,2,3,6,7,9] and age_group not in ["under13","unknown"]:
+ if game in [1,2,3,4,5,6,7,8,9] and age_group not in ["under13","unknown"]:
   button(tr_ui("غرفة أسئلة مع الأصدقاء • معاينة محلية","Quiz room with friends • local preview"),func():
    var screen=load("res://scripts/shared_quiz_ui.gd")
    screen.selected_game=str(game)

@@ -34,6 +34,7 @@ class QuestionAdapter:
  def public(self,item):
   order=list(range(len(item['choices_ar'])));secrets.SystemRandom().shuffle(order)
   result={'id':item['id'],'ar':item['ar'],'en':item['en'],'choices_ar':[item['choices_ar'][i] for i in order],'choices_en':[item['choices_en'][i] for i in order]}
+  if len(item.get('choices_tr',[]))==len(order):result.update(tr=item.get('tr',''),choices_tr=[item['choices_tr'][i] for i in order])
   if 'audio' in item:result['audio']='res://assets/audio/'+item['audio']+'.wav'
   return result,order.index(item['correct'])
 class CinemaAdapter(QuestionAdapter):
@@ -51,7 +52,7 @@ class QuizRoom(Room):
   self.agreement=True;self.config_revision=1;self.confirmed=[False]*capacity;self.primary_mode='voice'
   self.pause_started=None;self.phase='lobby';self.match_finished=False;self.quiz_rounds=rounds;self.queue=[];self.index=-1;self.question=None;self.answer=None;self.answers={};self.results=[];self.start_at=0;self.start_clock=0;self.audio_at=0;self.audio_serial=0;self.replays=0
  def begin_question(self):
-  self.index+=1;self.question,self.answer=self.adapter.public(self.queue[self.index]);self.answers={};self.clues_used={};self.results=[];self.phase='question';self.pending=None
+  self.index+=1;self.question,self.answer=self.adapter.public(self.queue[self.index]);self.answers={};self.clues_used={};self.memory={};self.results=[];self.phase='question';self.pending=None
   self.start_at=int(time.time()*1000)+1500;self.start_clock=time.monotonic()+1.5
   self.deadline=self.start_clock+self.timer if self.timer else None;self.remaining=None
   self.audio_at=self.start_at;self.audio_serial+=1;self.replays=0
@@ -63,7 +64,10 @@ class QuizRoom(Room):
    # Correct answers earn 1000; distinct server-receipt speed ranks share up to 500 bonus.
    # Exact millisecond ties receive equal rewards, without arbitrary player-index tie breaks.
    bonus=int(500*(len(correct_times)-correct_times.index(elapsed))/len(correct_times)) if correct and self.timer and elapsed is not None else 0
-   points=max(100,1000+bonus-200*self.clues_used.get(player,0)) if correct else 0;self.scores[player]+=points
+   points=max(100,1000+bonus-200*self.clues_used.get(player,0)) if correct else 0
+   if self.question.get('mode')=='memory' and correct:
+    pairs=len(self.answer['board'])//2;moves=self.memory[player]['moves'];points=max(10,pairs*15-max(0,moves-pairs)*2)
+   self.scores[player]+=points
    self.results.append({'player':player,'choice':choice,'correct':correct,'points':points,'elapsed_ms':elapsed})
   self.phase='finished' if self.index+1>=self.quiz_rounds else 'results';self.match_finished=self.phase=='finished';self.deadline=None;self.remaining=None
   if self.match_finished:self.winner=max(range(self.capacity),key=lambda i:self.scores[i])
@@ -75,6 +79,12 @@ class QuizRoom(Room):
   value=super().view(player);value.update(opponents=[],preset_questions=[],match_finished=self.match_finished)
   quiz={'game_id':self.adapter.game_id,'phase':self.phase,'round':self.index+1,'rounds':self.quiz_rounds,'question':self.question,'answered_count':len(self.answers),'your_answer':self.answers.get(player,[None])[0],'start_unix_ms':self.start_at,'audio_start_unix_ms':self.audio_at,'audio_serial':self.audio_serial,'replay_available':self.phase=='question' and self.replays<1,'server_unix_ms':int(time.time()*1000)}
   if self.phase in ('results','finished'):quiz.update(**self.adapter.reveal(self.answer),results=self.results)
+  if isinstance(self.answer,dict) and self.answer.get('mode')=='memory':
+   from shared_game_adapters import media_path
+   state=self.memory.get(player,{'open':[],'matched':[],'moves':0,'hide_at':0})
+   opened=state['open'] if len(state['open'])<2 or time.monotonic()<state['hide_at'] else []
+   visible=set(state['matched']+opened)
+   quiz['memory']={'hide_unix_ms':int(time.time()*1000+max(0,state['hide_at']-time.monotonic())*1000) if len(state['open'])==2 else 0,'moves':state['moves'],'matched':state['matched'],'revealed':{str(i):{**{lang:card.get(lang,card['name']) for lang in ('ar','en','tr')},'image':media_path(card['image'])} for i,card in enumerate(self.answer['board']) if i in visible}}
   if isinstance(self.answer,dict) and self.answer.get('mode')=='identity':
    count=self.clues_used.get(player,0)+1
    quiz['clues']={lang:items[:count] for lang,items in self.answer['clues'].items()};quiz['more_clues']=count<len(self.answer['clues']['ar'])
@@ -83,9 +93,10 @@ class QuizRoom(Room):
 class SharedQuizHub(SecureAgreementHub):
  def __init__(self,secret,database):
   super().__init__(secret,database)
-  from shared_game_adapters import MechanicsAdapter
+  from shared_game_adapters import MechanicsAdapter,KnowledgeAdapter,AdventureAdapter,MemoryAdapter,media_path
   self.adapters={'1':CinemaAdapter(),'6':SoundAdapter(),'3':QuestionAdapter('3')}
   self.adapters.update({key:MechanicsAdapter(key,QuestionAdapter) for key in ('2','7','9')})
+  self.adapters.update({'4':AdventureAdapter(QuestionAdapter),'5':KnowledgeAdapter(QuestionAdapter),'8':MemoryAdapter()})
   self.requested_games={}
  async def send(self,ws,message):
   if message.get('type')=='duel_capabilities':
@@ -137,8 +148,8 @@ class SharedQuizHub(SecureAgreementHub):
    if player!=0 or room.started or room.paused or room.joined!=room.capacity or not all(room.confirmed) or not all(room.peers):raise ProtocolError('All players must confirm before quiz start')
    pool=room.adapter.pool(room.picture_difficulty,room.picture_category)
    if len(pool)<room.quiz_rounds:raise ProtocolError('Insufficient real questions')
-   room.queue=secrets.SystemRandom().sample(pool,room.quiz_rounds);room.started=True;room.begin_question();return await self.publish(room)
-  if action in ('duel_quiz_answer','duel_quiz_next','duel_quiz_replay','duel_quiz_clue'):
+   room.queue=pool[:room.quiz_rounds] if room.adapter.game_id=='4' else secrets.SystemRandom().sample(pool,room.quiz_rounds);room.started=True;room.begin_question();return await self.publish(room)
+  if action in ('duel_quiz_answer','duel_quiz_next','duel_quiz_replay','duel_quiz_clue','duel_quiz_flip'):
    if room.expire():await self.publish(room)
    if room.paused:raise ProtocolError('Room paused until reconnect')
    if action=='duel_quiz_next':
@@ -149,10 +160,27 @@ class SharedQuizHub(SecureAgreementHub):
     if 'audio' not in room.question or room.replays>=1 or player in room.answers:raise ProtocolError('Replay unavailable')
     room.replays+=1;room.audio_serial+=1;room.audio_at=int(time.time()*1000)+500;return await self.publish(room)
    if player in room.answers or time.monotonic()<room.start_clock:raise ProtocolError('Answer already submitted or countdown not started')
+   if action=='duel_quiz_flip':
+    if not isinstance(room.answer,dict) or room.answer.get('mode')!='memory':raise ProtocolError('Not a memory board')
+    index=integer(msg.get('index'),range(len(room.answer['board'])))
+    state=room.memory.setdefault(player,{'open':[],'matched':[],'moves':0,'hide_at':0})
+    if time.monotonic()<state['hide_at']:raise ProtocolError('Wait for cards to turn back')
+    if len(state['open'])==2:state['open']=[]
+    if index in state['open'] or index in state['matched']:raise ProtocolError('Card already revealed')
+    state['open'].append(index)
+    if len(state['open'])==2:
+     state['moves']+=1;a,b=state['open']
+     if room.answer['board'][a]['name']==room.answer['board'][b]['name']:state['matched']+=state['open'];state['open']=[]
+     else:state['hide_at']=time.monotonic()+{'easy':1.6,'medium':1.2,'hard':.9}[room.picture_difficulty]
+    if len(state['matched'])==len(room.answer['board']):
+     room.answers[player]=(True,int(max(0,time.monotonic()-room.start_clock)*1000))
+     if len(room.answers)==room.capacity:room.finish_question()
+    return await self.publish(room)
    if action=='duel_quiz_clue':
     if not isinstance(room.answer,dict) or room.answer.get('mode')!='identity' or room.clues_used.get(player,0)+1>=len(room.answer['clues']['ar']):raise ProtocolError('No further clue')
     room.clues_used[player]=room.clues_used.get(player,0)+1
     return await self.publish(room)
+   if room.question.get('mode')=='memory':raise ProtocolError('Memory requires card flips')
    choice=room.adapter.decode(msg,room.question)
    room.answers[player]=(choice,int(max(0,time.monotonic()-room.start_clock)*1000))
    if len(room.answers)==room.capacity:room.finish_question()

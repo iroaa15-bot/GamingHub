@@ -9,6 +9,7 @@ var next_button: Button
 var replay_button: Button
 var audio_player: AudioStreamPlayer
 var current_question := ""
+var _sound_phase_key: String=""
 var _server_offset := 0
 var _audio_serial := -1
 var _audio_start := 0
@@ -72,6 +73,18 @@ func _quiz_state(value: Dictionary) -> void:
  if not quiz_panel.visible:
   audio_player.stop();return
  var phase: String=str(quiz.get("phase",""))
+ var sound_key: String=str(question.get("id",""))+":"+phase
+ if sound_key!=_sound_phase_key:
+  _sound_phase_key=sound_key
+  var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+  if phase=="question":audio_policy.effect("round_start")
+  elif phase in ["results","finished"]:
+   audio_player.stop();audio_policy.sample_playback(self,false)
+   audio_policy.effect("correct" if quiz.get("your_answer")==quiz.get("correct_index") and quiz.get("your_answer")!=null else "incorrect")
+   if phase=="finished":
+    var scores: Array=value.get("scores",[])
+    var won: bool=client.player>=0 and client.player<scores.size() and scores[client.player]==scores.max()
+    get_tree().create_timer(.65).timeout.connect(func():audio_policy.effect("victory" if won else "results"))
  status.text=tr_pair("نفس السؤال للجميع • اختر إجابة واحدة","Same question for everyone • choose one answer") if phase=="question" else tr_pair("نتائج مشتركة لكل اللاعبين","Shared results for all players")
  _server_offset=int(quiz.get("server_unix_ms",Time.get_unix_time_from_system()*1000))-int(Time.get_unix_time_from_system()*1000)
  current_question=str(question.get("id",""))
@@ -105,6 +118,7 @@ func _quiz_state(value: Dictionary) -> void:
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
 func _process(delta: float) -> void:
  super._process(delta)
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,is_instance_valid(audio_player) and audio_player.playing and not audio_player.stream_paused)
  if not is_instance_valid(client) or not is_instance_valid(quiz_panel):return
  var quiz: Dictionary=client.state.get("quiz",{})
  if quiz.get("phase")=="question" and not bool(client.state.get("paused",false)):
@@ -114,3 +128,7 @@ func _process(delta: float) -> void:
    _audio_pending=false
    var elapsed: float=maxf(0,float(_quiz_now()-_audio_start)/1000.0)
    if is_instance_valid(audio_player.stream) and elapsed<audio_player.stream.get_length():audio_player.play(elapsed)
+
+func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.sample_playback(self,false)

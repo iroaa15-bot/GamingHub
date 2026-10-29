@@ -47,6 +47,10 @@ static func allowed_endpoint(value: String) -> bool:
  return true
 
 static func endpoint_from_args() -> String:
+ # adb/run-as fixture, debug APK only; never a public endpoint or production setting.
+ if OS.is_debug_build() and FileAccess.file_exists("user://gaminghub_debug_endpoint.txt"):
+  var local_value: String=FileAccess.get_file_as_string("user://gaminghub_debug_endpoint.txt").strip_edges()
+  if local_value.begins_with("ws://127.0.0.1:") and allowed_endpoint(local_value):return local_value
  for arg in OS.get_cmdline_user_args():
   if arg.begins_with("--duel-local="):
    var value := arg.trim_prefix("--duel-local=")
@@ -145,6 +149,7 @@ func _received(message: Dictionary) -> void:
    code = str(message.get("code", ""))
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
+   if message.get("type")!="duel_resumed":load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("room_create" if message.get("type")=="duel_created" else "player_join")
    if bool(capabilities.get("voice",false)):load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
   "duel_state":
    if str(message.get("code", "")) == code:

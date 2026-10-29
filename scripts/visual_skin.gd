@@ -311,8 +311,41 @@ static func compact_header(parent: VBoxContainer, title: String) -> void:
  heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
  bar.add_child(heading)
 
+static func decorate_selector(control: OptionButton) -> void:
+ control.custom_minimum_size.y=maxf(control.custom_minimum_size.y,52)
+ control.add_theme_stylebox_override("normal",neon_surface(Color("183b69"),Color("36cfff")))
+ control.add_theme_stylebox_override("hover",neon_surface(Color("325aa2"),Color("84f7ff")))
+ control.add_theme_stylebox_override("pressed",neon_surface(Color("5838a4"),Color("d8a0ff")))
+ control.add_theme_stylebox_override("disabled",neon_surface(Color("253452"),Color("657993")))
+ for state in ["normal","hover","pressed","disabled"]:
+  control.add_theme_stylebox_override(state+"_mirrored",control.get_theme_stylebox(state))
+ control.add_theme_color_override("font_color",TEXT)
+ control.add_theme_color_override("font_disabled_color",Color("b1bfd4"))
+ control.add_theme_constant_override("h_separation",12)
+ var popup=control.get_popup()
+ popup.add_theme_stylebox_override("panel",card(Color("12284b"),18))
+ popup.add_theme_stylebox_override("hover",card(Color("50369a"),12))
+ popup.add_theme_color_override("font_color",TEXT)
+ popup.add_theme_color_override("font_hover_color",Color("fff0b5"))
+ popup.add_theme_constant_override("v_separation",16)
+ if not control.has_meta("premium_selection_sound"):
+  control.set_meta("premium_selection_sound",true)
+  control.item_selected.connect(func(_index: int):load("res://scripts/room_audio_policy.gd").acquire(control.get_tree()).effect("selection",true))
+
 static func compact_menu(parent: Node) -> void:
  for node in parent.get_children():
+  if node is OptionButton:decorate_selector(node)
+  elif node is SpinBox:
+   node.custom_minimum_size.y=maxf(node.custom_minimum_size.y,52)
+   var edit: LineEdit=node.get_line_edit()
+   edit.add_theme_stylebox_override("normal",neon_surface(Color("183b69"),Color("36cfff")))
+   edit.add_theme_stylebox_override("focus",neon_surface(Color("325aa2"),CYAN))
+   edit.add_theme_color_override("font_color",TEXT)
+  elif node is LineEdit:
+   node.add_theme_stylebox_override("normal",neon_surface(Color("102d50"),Color("537da6")))
+   node.add_theme_stylebox_override("focus",neon_surface(Color("193a62"),CYAN))
+   node.add_theme_color_override("font_color",TEXT)
+   node.add_theme_color_override("font_placeholder_color",Color("afc7df"))
   if node is Button and not node is CheckButton and not node is OptionButton:
    var font_size: int=node.get_theme_font_size("font_size")
    decorate_button(node,str(node.get_meta("menu_tone","secondary")))
@@ -329,7 +362,7 @@ static func icon_action(control: Button, kind: String, accessible_label: String)
  control.tooltip_text = accessible_label
  control.set_meta("accessible_label",accessible_label)
  control.expand_icon = true
- control.add_theme_constant_override("icon_max_width",22)
+ control.add_theme_constant_override("icon_max_width",30)
  control.custom_minimum_size = Vector2(56,56)
 
 static func decorate_switch(control: CheckButton, title: String, enabled: bool) -> void:
@@ -360,7 +393,12 @@ static func game_cover(index: int) -> Texture2D:
  var paths: Array=["","<path d='M8 16h32v25H8zM8 9l30-5 2 9-31 6zM15 8l6 8M26 6l6 8'/>","<path d='M11 12h26v28H11zM17 21h14M17 28h10M17 35h14'/>","<path d='M13 34c-12-8-4-24 7-20 4-12 22-7 20 4 12 7 4 21-6 20H14M24 13v25M14 21h7M28 20h8M30 29h8'/>","<path d='m6 39 14-29 7 16 6-12 10 25zM20 11v-5l12 3-12 4'/>","<path d='M15 8h18v18c0 11-18 11-18 0zM15 12H8v9c0 7 9 8 9 8M33 12h7v9c0 7-9 8-9 8M24 33v8M16 42h16'/>","<path d='M6 21v8M12 15v20M18 9v30M24 17v14M30 5v38M36 12v24M42 19v10'/>","<circle cx='24' cy='17' r='9'/><path d='M9 43v-3c0-16 30-16 30 0v3M21 15c0-5 9-4 6 1l-3 3M24 23v1'/>","<path d='m6 12 22-5 7 32-22 5zM24 10l17 4-6 28M16 24l5-6 7 10-5 7z'/>","<path d='M10 10h6M10 24h6M10 38h6M23 10h17M23 24h17M23 38h17'/>"]
  var colors: Array=["ffb01c","b343ff","008eff","9a34f0","02bfa8","ffb01c","00cffa","02bfc2","a129ec","239cff"]
  var body: String=str(paths[clampi(index,0,9)])
- var svg: String="<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 48 48'><defs><linearGradient id='g' x2='0.8' y2='1'><stop stop-color='#ffffff' stop-opacity='.28'/><stop offset='.5' stop-color='#"+str(colors[index])+"'/><stop offset='1' stop-color='#111044'/></linearGradient></defs><rect x='2' y='2' width='44' height='44' rx='11' fill='url(#g)' stroke='#"+str(colors[index])+"' stroke-width='2'/><g fill='none' stroke='#fff4bc' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'>"+body+"</g></svg>"
+ var tone: String=str(colors[clampi(index,0,9)])
+ var jewel: Color=Color(["ffcf42","a985ff","65dfff","ff83c7","77f1bf","ffd14c","fa75ed","ffc075","83dfff","66efda"][clampi(index,0,9)])
+ var light: String=jewel.lightened(.6).to_html(false)
+ var mid: String=jewel.to_html(false)
+ var deep: String=jewel.darkened(.48).to_html(false)
+ var svg: String="<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 48 48'><defs><linearGradient id='g' x2='.7' y2='1'><stop stop-color='#caffff'/><stop offset='.23' stop-color='#"+tone+"'/><stop offset='1' stop-color='#221457'/></linearGradient><linearGradient id='gold' x2='.3' y2='1'><stop stop-color='#"+light+"'/><stop offset='.35' stop-color='#"+mid+"'/><stop offset='.7' stop-color='#"+mid+"'/><stop offset='1' stop-color='#"+deep+"'/></linearGradient><linearGradient id='glass' x2='.3' y2='1'><stop stop-color='#ffffff' stop-opacity='.65'/><stop offset='1' stop-color='#ffffff' stop-opacity='0'/></linearGradient></defs><rect x='3' y='5' width='42' height='41' rx='12' fill='#111b48'/><rect x='2' y='1' width='44' height='42' rx='12' fill='url(#g)' stroke='#8cedff' stroke-width='1'/><path d='M7 16Q7 5 19 5h13Q39 5 40 11L12 24Z' fill='url(#glass)'/><g transform='translate(0 3)' fill='#713d54' stroke='#38204b' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'>"+body+"</g><g fill='url(#gold)' stroke='#fff2aa' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'>"+body+"</g><path d='m38 6 1.2 3.5L43 11l-3.8 1.2L38 16l-1.2-3.8L33 11l3.8-1.5Z' fill='#ffffff' fill-opacity='.9'/></svg>"
  var image:=Image.new()
  if image.load_svg_from_string(svg)!=OK:return menu_icon("player")
  _game_covers[index]=ImageTexture.create_from_image(image)

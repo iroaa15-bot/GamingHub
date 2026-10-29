@@ -141,7 +141,7 @@ func show_accessibility() -> void:
   option.reparent(round_sizes)
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
  setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
- setting_switch(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; save_progress())
+ setting_switch(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_effects_enabled(value); save_progress())
  setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
  button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
@@ -421,6 +421,7 @@ func load_upgrade() -> void:
  selected_language = str(profile.get("language", "ar"))
  art_style = str(profile.get("art_style", "realistic"))
  sound_enabled = bool(profile.get("sound_enabled", true))
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_effects_enabled(sound_enabled)
  music_enabled = bool(profile.get("music_enabled",true))
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(music_enabled)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
@@ -571,41 +572,21 @@ func play_clip(id: String) -> void:
  audio_player.stream = load("res://assets/audio/" + id + ".wav")
  audio_player.volume_db = -8
  add_child(audio_player)
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,true)
+ audio_player.finished.connect(func():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,false))
  audio_player.play()
 
 # Short original feedback tones, generated offline and bundled locally.
 # Never loads remote audio or blocks the main thread waiting for network.
 func play_tap() -> void:
- var tap_path: String = "res://assets/audio/ui_tap.wav"
- if not ResourceLoader.exists(tap_path):
-  return
- load("res://scripts/room_audio_policy.gd").acquire(get_tree())
- var tap_player := AudioStreamPlayer.new()
- tap_player.bus="UI SFX"
- tap_player.stream = load(tap_path)
- tap_player.volume_db = -21.0
- add_child(tap_player)
- tap_player.finished.connect(tap_player.queue_free)
- tap_player.play()
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("click",true)
 
 func play_feedback(effect: String) -> void:
- if not sound_enabled:
-  return
- if effect not in ["success", "celebrate", "retry"]:
-  return
- var path: String = "res://assets/audio/feedback_" + effect + ".wav"
- if not ResourceLoader.exists(path):
-  return
- load("res://scripts/room_audio_policy.gd").acquire(get_tree())
- var player := AudioStreamPlayer.new()
- player.bus="Game SFX"
- player.stream = load(path)
- player.volume_db = -13.0
- add_child(player)
- player.finished.connect(player.queue_free)
- player.play()
+ if not sound_enabled:return
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect({"success":"correct","retry":"incorrect","celebrate":"victory"}.get(effect,"results"))
 
 func stop_audio() -> void:
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,false)
  if is_instance_valid(audio_player):
   audio_player.stop()
   audio_player.queue_free()
@@ -3631,7 +3612,8 @@ func _execute_ui_action(ref: WeakRef, generation: int, action: Callable) -> void
  if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
   if control.is_inside_tree() and not control.is_queued_for_deletion():
    if haptics_enabled and OS.get_name() == "Android": Input.vibrate_handheld(14)
-   if sound_enabled: play_tap()
+   if sound_enabled:
+    load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("navigation" if control.text.contains("العودة") or control.text.to_lower().contains("back") else "click",true)
    action.call()
 
 var picture_library_page := 0
@@ -3736,3 +3718,7 @@ func show_rewards() -> void:
  view.language=selected_language
  view.back_requested.connect(show_home)
  root.add_child(view)
+
+func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.sample_playback(self,false)

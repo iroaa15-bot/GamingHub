@@ -138,6 +138,7 @@ func _invoke(ref: WeakRef, action: Callable) -> void:
 func _execute_menu_action(ref: WeakRef, action: Callable) -> void:
  var control: Variant = ref.get_ref()
  if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control) and control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
+  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("navigation" if control.text.contains("العودة") else "click",true)
   action.call()
 
 func _ready() -> void:
@@ -433,8 +434,7 @@ func _ready() -> void:
  for primary in [yes_button,no_button,guess_button]:
   primary.add_theme_font_size_override("font_size",14)
  for option in [_online_category,_online_rank,_mode_field,players_field,timer_field]:
-  option.add_theme_stylebox_override("normal",VisualSkin.card(Color("10283f"),10))
-  option.add_theme_stylebox_override("disabled",VisualSkin.card(Color("102033"),10))
+  VisualSkin.decorate_selector(option)
   option.add_theme_font_size_override("font_size",16)
  VisualSkin.enable_menu_swipe(column)
 
@@ -442,6 +442,7 @@ func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
 
 func _state(value: Dictionary) -> void:
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).room_snapshot(self,value)
  var ready: bool = not client.capabilities.is_empty()
  var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false)) and not bool(value.get("match_finished",false))
  _match_header.visible=active
@@ -624,10 +625,13 @@ func _process(_delta: float) -> void:
  var left := local_remaining
  if left >= 0 and not bool(client.state.get("paused",false)): left = maxi(0,left-(Time.get_ticks_msec()-received_at))
  var seconds: int=ceili(left/1000.0)
+ if seconds in [1,2,3] and seconds!=_countdown_second and clock.visible and not bool(client.state.get("paused",false)):
+  _countdown_second=seconds;load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("countdown")
  clock.text = tr_pair("بدون مؤقت","No timer") if left < 0 else "%02d:%02d" % [floori(seconds/60.0),seconds%60]
  _clock_bar.visible=clock.visible and left>=0
  _clock_bar.value=clampf(float(left)/float(_turn_ms)*100.0,0.0,100.0)
 
+var _countdown_second: int=-1
 var _leaving_scene := false
 
 func _home() -> void:

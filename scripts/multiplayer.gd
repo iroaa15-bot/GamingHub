@@ -32,6 +32,9 @@ var voice_button: Button
 var voice_label: Label
 var connected := false
 var room_code := ""
+var _audio_restoring := false
+func _room_effect(name: String) -> void:
+ if not _audio_restoring:load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect(name)
 var opponent_card := ""
 var questions: Array = []
 var my_turn := false
@@ -1065,10 +1068,12 @@ func _handle(msg: Dictionary) -> void:
    # A sync snapshot deliberately has no credential: preserve our existing token.
    if kind == "synced":
     started_message["resume_token"] = resume_token
+   _audio_restoring=true
    _handle(started_message)
    for event in replay:
     if event is Dictionary and str(event.get("type", "")) in ["question", "guess", "finished"]:
      _handle(event)
+   _audio_restoring=false
    opponent_paused = bool(msg.get("paused", false))
    finished = bool(msg.get("finished", false))
    reconnecting = false
@@ -1099,6 +1104,7 @@ func _handle(msg: Dictionary) -> void:
    matchmaking_pending = false
    my_turn = false
    finished = false
+   _room_effect("room_create")
    room_code = str(msg.get("code", ""))
    if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
    _update_lobby()
@@ -1108,6 +1114,8 @@ func _handle(msg: Dictionary) -> void:
    var assigned_room := str(msg.get("room", room_code))
    if assigned_room != room_code:
     _reset_voice_on_connection_loss()
+   _room_effect("player_join")
+   _room_effect("round_start")
    room_code = assigned_room
    if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
    voice_room_membership_supported=bool(msg.get("voice_room_lifetime",false))
@@ -1174,6 +1182,7 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("سؤال: ", "Question: ") + str(msg.get("text_" + language, msg.get("text", ""))) + " → " + (_t("نعم", "YES") if msg.get("answer", false) else _t("لا", "NO")), 16)
    _update_deduction_status()
   "guess":
+   _room_effect("correct" if bool(msg.get("correct",false)) else "incorrect")
    if int(msg.get("player", -1)) == player_index and not bool(msg.get("correct", false)):
     _remove_wrong_guess(str(msg.get("guess", "")))
    _match_note(_t("تخمين: ", "Guess: ") + str(msg.get("guess", "")) + (" ✓" if msg.get("correct", false) else " ✗"), 16)
@@ -1186,6 +1195,7 @@ func _handle(msg: Dictionary) -> void:
    for name in msg.get("cards", []):
     names.append(display_card(str(name)))
    var winner := int(msg.get("winner", -1))
+   _room_effect("victory" if winner==player_index else "results")
    var result_text := _t("تعادل!", "Draw!") if winner == -1 else (_t("مبروك! أنت الفائز", "You won!") if winner == player_index else _t("المنافس فاز", "Opponent won"))
    _match_note(result_text + " • " + _t("الصور: ", "Cards: ") + " / ".join(names), 20)
    status.text = _t("المباراة انتهت. غادر الغرفة لبدء مباراة جديدة.", "Match finished. Leave the room to start a new game.")
@@ -1536,6 +1546,7 @@ func _execute_room_action(ref: WeakRef, callback: Callable) -> void:
  if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control):
   if control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
    if OS.get_name() == "Android": Input.vibrate_handheld(12)
+   load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("click",true)
    callback.call()
 
 func _update_match_layout() -> void:

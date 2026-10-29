@@ -1,0 +1,24 @@
+{
+  "source_commit": "4bbd7c841b220c061e8bf423a2ec9002629aa4a8",
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-122-numeric-4bbd7c8-debug.apk",
+  "sha256": "8d0004efd038f30943082f1cbb50b7d31328b7652dbb586f2bb1e58535fbf9e6",
+  "bytes": 187995943,
+  "invite_helper_exported": true,
+  "package": "com.iroaa15.gaminghub",
+  "version_code": 122,
+  "version_name": "12.2",
+  "android_test": "BLOCKED: phones locked after install; awaiting unlock",
+  "godot_numeric_join": "PASS real two-client UI/WebSocket with Arabic digits",
+  "devices": [
+    {
+      "model": "CPH2015",
+      "manufacturer": "OPPO",
+      "android": "9"
+    },
+    {
+      "model": "S23 SE",
+      "manufacturer": "reeder",
+      "android": "16"
+    }
+  ]
+}

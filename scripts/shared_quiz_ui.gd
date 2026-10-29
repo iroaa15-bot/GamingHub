@@ -9,6 +9,15 @@ var next_button: Button
 var replay_button: Button
 var audio_player: AudioStreamPlayer
 var current_question := ""
+var written_field: LineEdit
+var written_submit: Button
+var clue_control: Button
+var mechanic_info: Label
+var steps_box: VBoxContainer
+var step_picks: Array[int]=[]
+var step_controls: Array[Button]=[]
+var order_submit: Button
+var order_undo: Button
 var _sound_phase_key: String=""
 var _server_offset := 0
 var _audio_serial := -1
@@ -17,7 +26,7 @@ var _audio_pending := false
 var _quiz_categories_ready := false
 func _ready() -> void:
  super._ready()
- var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
+ var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"2":tr_pair("معركة الكلمات","Word Battle"),"7":tr_pair("من أنا؟","Who Am I?"),"9":tr_pair("ترتيب الخطوات","Step Builder"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
  for child in _main_column.get_children():
   if child.name=="CompactHeader":
    for entry in child.get_children():
@@ -34,6 +43,15 @@ func _ready() -> void:
  for i in range(6):
   var index: int=i
   answer_buttons.append(button("",func():client.send_action("duel_quiz_answer",{"question_id":current_question,"choice":index})))
+ written_field=LineEdit.new();written_field.placeholder_text=tr_pair("اكتب إجابتك","Type your answer");written_field.max_length=200;quiz_panel.add_child(written_field)
+ written_submit=button(tr_pair("تأكيد الإجابة","Confirm answer"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"text":written_field.text}))
+ mechanic_info=label("")
+ clue_control=button(tr_pair("دليل إضافي • يخفض النقاط","Another clue • reduces points"),func():client.send_action("duel_quiz_clue",{"question_id":current_question}))
+ steps_box=VBoxContainer.new();quiz_panel.add_child(steps_box)
+ order_undo=button(tr_pair("تراجع خطوة","Undo step"),func():
+  if not step_picks.is_empty():step_controls[step_picks.pop_back()].disabled=false
+  _show_step_picks())
+ order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"sequence":step_picks}))
  quiz_results=label("")
  next_button=button(tr_pair("السؤال التالي","Next question"),func():client.send_action("duel_quiz_next"))
  column=_main_column
@@ -80,18 +98,45 @@ func _quiz_state(value: Dictionary) -> void:
   if phase=="question":audio_policy.effect("round_start")
   elif phase in ["results","finished"]:
    audio_player.stop();audio_policy.sample_playback(self,false)
-   audio_policy.effect("correct" if quiz.get("your_answer")==quiz.get("correct_index") and quiz.get("your_answer")!=null else "incorrect")
+   var own_correct: bool=false
+   for result in quiz.get("results",[]):
+    if int(result.player)==client.player:own_correct=bool(result.correct)
+   audio_policy.effect("correct" if own_correct else "incorrect")
    if phase=="finished":
     var scores: Array=value.get("scores",[])
     var won: bool=client.player>=0 and client.player<scores.size() and scores[client.player]==scores.max()
     get_tree().create_timer(.65).timeout.connect(func():audio_policy.effect("victory" if won else "results"))
  status.text=tr_pair("نفس السؤال للجميع • اختر إجابة واحدة","Same question for everyone • choose one answer") if phase=="question" else tr_pair("نتائج مشتركة لكل اللاعبين","Shared results for all players")
  _server_offset=int(quiz.get("server_unix_ms",Time.get_unix_time_from_system()*1000))-int(Time.get_unix_time_from_system()*1000)
+ var changed: bool=current_question!=str(question.get("id",""))
  current_question=str(question.get("id",""))
+ var mechanic: String=str(question.get("mode","choice"))
+ var can_answer: bool=phase=="question" and not bool(value.get("paused",false)) and quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0))
+ written_field.visible=mechanic in ["write","identity"];written_submit.visible=written_field.visible
+ written_field.editable=can_answer;written_submit.disabled=not can_answer
+ clue_control.visible=mechanic=="identity";clue_control.disabled=not can_answer or not bool(quiz.get("more_clues",false))
+ mechanic_info.visible=mechanic in ["identity","order"]
+ if mechanic=="identity":mechanic_info.text="\n".join(quiz.get("clues",{}).get(language,quiz.get("clues",{}).get("en",[])))
+ steps_box.visible=mechanic=="order";order_submit.visible=steps_box.visible;order_undo.visible=steps_box.visible
+ if changed:
+  written_field.clear();step_picks.clear();step_controls.clear()
+  for child in steps_box.get_children():child.queue_free()
+  var steps: Array=question.get("steps_"+language,question.get("steps_en",[]))
+  for i in range(steps.size()):
+   var index: int=i
+   var control=Button.new();control.text=str(steps[i]);control.custom_minimum_size.y=48
+   control.pressed.connect(func():
+    if index not in step_picks:step_picks.append(index)
+    _show_step_picks())
+   steps_box.add_child(control);step_controls.append(control)
+ if mechanic=="order":
+  for i in range(step_controls.size()):step_controls[i].disabled=not can_answer or i in step_picks
+  order_submit.disabled=not can_answer or step_picks.size()!=step_controls.size();order_undo.disabled=not can_answer or step_picks.is_empty()
+  _show_step_picks()
  quiz_title.text=tr_pair("سؤال %d من %d • ","Question %d of %d • ") % [int(quiz.get("round",1)),int(quiz.get("rounds",1))]+str(question.get(language,question.get("en","")))
  var choices: Array=question.get("choices_"+language,question.get("choices_en",[]))
  for i in range(answer_buttons.size()):
-  answer_buttons[i].visible=i<choices.size()
+  answer_buttons[i].visible=mechanic=="choice" and i<choices.size()
   if i<choices.size():answer_buttons[i].text=str(choices[i])
   answer_buttons[i].disabled=phase!="question" or bool(value.get("paused",false)) or quiz.get("your_answer")!=null or _quiz_now()<int(quiz.get("start_unix_ms",0))
  replay_button.visible=question.has("audio") and phase=="question"
@@ -99,10 +144,16 @@ func _quiz_state(value: Dictionary) -> void:
  next_button.visible=phase=="results" and client.player==0
  var lines := PackedStringArray()
  lines.append(tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
+ if quiz.has("answer_labels"):lines.append(str(quiz.answer_labels.get(language,quiz.answer_labels.get("en",""))))
+ if quiz.has("correct_sequence"):
+  var ordered: Array=[]
+  var steps: Array=question.get("steps_"+language,question.get("steps_en",[]))
+  for index in quiz.correct_sequence:ordered.append(str(steps[int(index)]))
+  lines.append(" → ".join(ordered))
  if quiz.has("correct_index"):
   var correct: int=int(quiz.correct_index)
   if correct>=0 and correct<choices.size():lines.append(tr_pair("الإجابة: ","Answer: ")+str(choices[correct]))
-  for row in quiz.get("results",[]):lines.append(tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
+ for row in quiz.get("results",[]):lines.append(tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
  quiz_results.text="\n".join(lines)
  var serial: int=int(quiz.get("audio_serial",-1))
  if phase!="question":audio_player.stop();audio_player.stream_paused=false;_audio_pending=false
@@ -115,6 +166,12 @@ func _quiz_state(value: Dictionary) -> void:
  if phase=="question" and not bool(value.get("paused",false)):
   audio_player.stream_paused=false
   _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
+func _show_step_picks() -> void:
+ var picked: Array=[]
+ for index in step_picks:picked.append(step_controls[index].text)
+ mechanic_info.text=" → ".join(picked)
+ for i in range(step_controls.size()):
+  if i in step_picks:step_controls[i].disabled=true
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
 func _process(delta: float) -> void:
  super._process(delta)
@@ -124,6 +181,10 @@ func _process(delta: float) -> void:
  if quiz.get("phase")=="question" and not bool(client.state.get("paused",false)):
   if quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0)):
    for b in answer_buttons:b.disabled=false
+   written_field.editable=true;written_submit.disabled=false
+   clue_control.disabled=not bool(quiz.get("more_clues",false))
+   for i in range(step_controls.size()):step_controls[i].disabled=i in step_picks
+   order_submit.disabled=step_picks.size()!=step_controls.size();order_undo.disabled=step_picks.is_empty()
   if _audio_pending and _quiz_now()>=_audio_start:
    _audio_pending=false
    var elapsed: float=maxf(0,float(_quiz_now()-_audio_start)/1000.0)

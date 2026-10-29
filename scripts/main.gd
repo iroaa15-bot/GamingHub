@@ -1347,7 +1347,8 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  column.add_theme_constant_override("separation", 6)
  tile.add_child(column)
  var art := TextureRect.new()
- art.texture = card_texture(art_id) if index==0 else VisualSkin.game_cover(index)
+ var premium_art: Texture2D=VisualSkin.game_cover(index)
+ art.texture=premium_art if premium_art!=null else card_texture(art_id)
  art.custom_minimum_size.y = 64
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -1897,16 +1898,24 @@ func show_home() -> void:
  VisualSkin.compact_menu(root)
 
 func _add_unique_game_catalog() -> void:
+ var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
  var grid := GridContainer.new()
- grid.name="UnifiedGameCatalog"
- grid.columns=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
+ grid.name="UnifiedGameCatalog";grid.columns=columns
  root.add_child(grid)
  var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
  var favorites: Array=profile.get("favorites",[])
- for index in range(GAMES.size()):
+ # Six primary games mirror the approved board; every other original game remains reachable once.
+ for index in [0,1,6,3,8,9]:
   var tile := make_game_tile(index,previews[index],index in favorites)
-  tile.set_meta("game_id",index)
-  grid.add_child(tile)
+  tile.set_meta("game_id",index);grid.add_child(tile)
+ var more := GridContainer.new()
+ more.name="MoreOriginalGames";more.columns=columns;more.visible=false
+ var toggle := button(tr_ui("المزيد من الألعاب • 4", "MORE GAMES • 4"),func():more.visible=not more.visible,PANEL)
+ toggle.set_meta("more_original_games",true)
+ root.add_child(more)
+ for index in [2,4,5,7]:
+  var tile := make_game_tile(index,previews[index],index in favorites)
+  tile.set_meta("game_id",index);more.add_child(tile)
 
 func _home_activity_section(title: String, entries: Array) -> void:
  var body := VBoxContainer.new()

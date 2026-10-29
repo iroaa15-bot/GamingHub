@@ -1,0 +1,56 @@
+[
+  {
+    "file": "assets\\ui\\premium\\brain_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 1625334,
+    "sha256": "8067a73312f4a3800956c43d62e7f7cfa4209c0401825cc78fa7a1f671f62c86",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  },
+  {
+    "file": "assets\\ui\\premium\\cinema_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 1791895,
+    "sha256": "ae0020e80751eb338dfd0e3e5fda3ee454354dd7dbf595572ea63fd6f7684623",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  },
+  {
+    "file": "assets\\ui\\premium\\memory_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 1830344,
+    "sha256": "b1d87475421bf45d4b7993d78e774009f589a8463e9116365b13385a55293250",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  },
+  {
+    "file": "assets\\ui\\premium\\ordering_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 1451411,
+    "sha256": "7e099f34c95dd6ca8b4c71126fe8655eec82e7da1d0e913340eba012e9624ed7",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  },
+  {
+    "file": "assets\\ui\\premium\\picture_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 2162875,
+    "sha256": "aa09818feba5b45d8e142fcd3a3ff0e025a19003583aa107a311a4f6e4fed1a8",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  },
+  {
+    "file": "assets\\ui\\premium\\sound_icon_v1.png",
+    "source_width": 1254,
+    "source_height": 1254,
+    "bytes": 1194253,
+    "sha256": "106c434e3a7e141d52d96c03c12f6abde3d7b0f5518a4668384602065423ddbd",
+    "godot_import_max_size": 256,
+    "mipmaps": true
+  }
+]

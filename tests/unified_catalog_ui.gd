@@ -11,7 +11,8 @@ func run() -> void:
  main.show_home()
  var grid=main.root.get_node("UnifiedGameCatalog")
  var ids=[]
- for tile in grid.get_children(): ids.append(tile.get_meta("game_id"))
+ for catalog in [grid,main.root.get_node("MoreOriginalGames")]:
+  for tile in catalog.get_children():ids.append(tile.get_meta("game_id"))
  var valid=ids.size()==main.GAMES.size() and ids.count(0)==1
  for id in range(main.GAMES.size()): valid=valid and ids.count(id)==1
  var guess_buttons=0
@@ -19,7 +20,7 @@ func run() -> void:
   if control.text.contains("خمن صورتك"): guess_buttons+=1
  valid=valid and guess_buttons==1
  main.show_more_games()
- valid=valid and main.root.get_node("UnifiedGameCatalog").get_child_count()==ids.size()
+ valid=valid and main.root.get_node("UnifiedGameCatalog").get_child_count()+main.root.get_node("MoreOriginalGames").get_child_count()==ids.size()
  main.show_modes(0)
  var daily=0
  for control in main.root.find_children("*","Button",true,false):

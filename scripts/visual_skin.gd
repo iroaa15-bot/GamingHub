@@ -390,6 +390,13 @@ static func decorate_switch(control: CheckButton, title: String, enabled: bool) 
 static var _game_covers: Dictionary={}
 static func game_cover(index: int) -> Texture2D:
  if _game_covers.has(index):return _game_covers[index]
+ var premium: Dictionary={0:"picture_icon_v1.png",1:"cinema_icon_v1.png",6:"sound_icon_v1.png",3:"brain_icon_v1.png",8:"memory_icon_v1.png",9:"ordering_icon_v1.png"}
+ if premium.has(index):
+  var resource: String="res://assets/ui/premium/"+str(premium[index])
+  if ResourceLoader.exists(resource):
+   _game_covers[index]=load(resource)
+   return _game_covers[index]
+ if index==0:return null
  var paths: Array=["","<path d='M8 16h32v25H8zM8 9l30-5 2 9-31 6zM15 8l6 8M26 6l6 8'/>","<path d='M11 12h26v28H11zM17 21h14M17 28h10M17 35h14'/>","<path d='M13 34c-12-8-4-24 7-20 4-12 22-7 20 4 12 7 4 21-6 20H14M24 13v25M14 21h7M28 20h8M30 29h8'/>","<path d='m6 39 14-29 7 16 6-12 10 25zM20 11v-5l12 3-12 4'/>","<path d='M15 8h18v18c0 11-18 11-18 0zM15 12H8v9c0 7 9 8 9 8M33 12h7v9c0 7-9 8-9 8M24 33v8M16 42h16'/>","<path d='M6 21v8M12 15v20M18 9v30M24 17v14M30 5v38M36 12v24M42 19v10'/>","<circle cx='24' cy='17' r='9'/><path d='M9 43v-3c0-16 30-16 30 0v3M21 15c0-5 9-4 6 1l-3 3M24 23v1'/>","<path d='m6 12 22-5 7 32-22 5zM24 10l17 4-6 28M16 24l5-6 7 10-5 7z'/>","<path d='M10 10h6M10 24h6M10 38h6M23 10h17M23 24h17M23 38h17'/>"]
  var colors: Array=["ffb01c","b343ff","008eff","9a34f0","02bfa8","ffb01c","00cffa","02bfc2","a129ec","239cff"]
  var body: String=str(paths[clampi(index,0,9)])

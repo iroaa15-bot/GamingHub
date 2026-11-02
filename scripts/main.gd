@@ -152,6 +152,7 @@ func show_accessibility() -> void:
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
  for item in question_bank.get(str(index), []):
+  if not load("res://scripts/approved_content.gd").question_allowed(item):continue
   # Everyone plays the same challenge ladder. Hide elementary recognition prompts.
   if str(item.get("id", "")).begins_with("visual_v36_"):
    continue
@@ -398,7 +399,7 @@ func load_upgrade() -> void:
  session_length = 150
  var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/questions.json"))
  if parsed is Dictionary:
-  question_bank = parsed
+  question_bank = load("res://scripts/approved_content.gd").questions(parsed)
  apply_daily_rounds()
  if FileAccess.file_exists(profile_path()):
   var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(profile_path()))
@@ -814,6 +815,8 @@ func start_daily() -> void:
 
 func card_texture(card_name: String) -> Texture2D:
  var id: String = card_name.to_lower()
+ var approved_path: String="res://assets/imported_photos/"+id+".webp"
+ if ResourceLoader.exists(approved_path):return cached_texture(approved_path)
  var illustration: String = "res://assets/cards/" + id + ".png"
  if art_style == "illustration" and ResourceLoader.exists(illustration):
   return cached_texture(illustration)
@@ -3117,7 +3120,7 @@ var answer_feedback: String = ""
 func load_catalog() -> void:
  var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
  if data is Dictionary:
-  CARDS = data.get("cards", [])
+  CARDS = load("res://scripts/approved_content.gd").cards(data.get("cards", []))
   QUESTIONS = data.get("questions", [])
  CARD_NAMES_AR.clear()
  PICTURE_QUESTIONS_AR.clear()

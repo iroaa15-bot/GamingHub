@@ -16,7 +16,7 @@ def normalize(value):
 class MechanicsAdapter:
  def __init__(self,game_id,choice_adapter):
   self.game_id=game_id;self.choice_adapter=choice_adapter.__new__(choice_adapter)
-  self.questions=json.loads((ROOT/'data/questions.json').read_text(encoding='utf-8'))[game_id]
+  self.questions=__import__('approved_content').question_bank()[game_id]
   if len({q['id'] for q in self.questions})!=len(self.questions):raise ValueError('Duplicate question IDs')
   names={'language':('اللغة','Language'),'deduction':('الاستنتاج','Deduction'),'order':('ترتيب الخطوات','Step ordering'),'science':('العلوم','Science'),'geography':('الجغرافيا','Geography'),'nature':('الطبيعة','Nature'),'space':('الفضاء','Space'),'visual':('استكشف الصور','Picture explorer'),'numbers':('الأرقام والحساب','Numbers'),'math':('رياضيات وتفكير','Math & puzzles'),'logic':('التفكير المنطقي','Logic')}
   self.categories={q.get('topic','all'):{'ar':names.get(q.get('topic'),(q.get('topic'),q.get('topic')))[0],'en':names.get(q.get('topic'),('',q.get('topic')))[1]} for q in self.questions}

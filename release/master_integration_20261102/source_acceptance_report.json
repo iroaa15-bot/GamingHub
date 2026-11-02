@@ -1,0 +1,31 @@
+{
+  "total": 3000,
+  "structural_errors": 0,
+  "unique_ids": 3000,
+  "unique_normalized_questions": 3000,
+  "categories": {
+    "general": 265,
+    "sports": 240,
+    "cinema": 238,
+    "music": 244,
+    "geography": 237,
+    "animals": 259,
+    "science": 251,
+    "history": 246,
+    "food": 355,
+    "puzzles": 213,
+    "fun": 197,
+    "technology": 255
+  },
+  "difficulty": {
+    "easy": 1274,
+    "medium": 1157,
+    "hard": 569
+  },
+  "semantic_candidates_not_confirmed": 431,
+  "fact_candidates_not_verified": 330,
+  "difficulty_candidates_not_calibrated": 85,
+  "game_mapping_pending": 3000,
+  "source_sha256": "0c29b51ab65aa9500e9edd8b55b86a69711e39d2a3dff1b724a7aae2aa7102ab",
+  "publication_status": "BLOCKED_PENDING_FACT_VERIFICATION_SEMANTIC_EDITORIAL_REVIEW_AND_GAME_MAPPING"
+}

@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[1]
 class QuestionAdapter:
  def __init__(self,game_id):
   self.game_id=game_id
-  raw=json.loads((ROOT/'data/questions.json').read_text(encoding='utf-8'))[game_id]
+  raw=__import__('approved_content').question_bank()[game_id]
   self.questions=[]
   for item in raw:
    choices=item.get('choices_ar',[]);english=item.get('choices_en',[]);correct=item.get('correct')

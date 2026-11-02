@@ -147,6 +147,7 @@ func _ready() -> void:
  if saved is Dictionary: language = str(saved.get("language","ar"))
  layout_direction = Control.LAYOUT_DIRECTION_RTL if language == "ar" else Control.LAYOUT_DIRECTION_LTR
  var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/guess_picture_302/catalog.json"))
+ for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
  var bg := VisualSkin.new()

@@ -11,7 +11,14 @@ class FilterHub(DuelHub):
   root=Path(__file__).resolve().parents[1]
   self.filters=json.loads((root/'data/picture_filters.json').read_text(encoding='utf-8'))
   cards=json.loads((root/'data/cards.json').read_text(encoding='utf-8'))['cards']
+  from approved_content import pictures
+  approved=pictures()
+  for key in ('categories','items'):self.filters[key].update(approved['filters'][key])
+  for item in approved['catalog']:
+   if item['id'] in self.catalog:raise ValueError('Approved ID collision')
+   self.catalog[item['id']]=item
   by_asset={('res://assets/generated/'+c['image']+'.webp'):self.filters['items'][c['name']] for c in cards}
+  by_asset.update({item['image']:self.filters['items'][item['name']] for item in approved['catalog']})
   self.filter_items={key:by_asset[item['image']] for key,item in self.catalog.items()}
  async def send(self,ws,message):
   message=message.copy()

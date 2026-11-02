@@ -15,10 +15,13 @@
     "installation_oppo": "PASS verified installed SHA-256",
     "installation_reeder": "PASS verified installed SHA-256",
     "brain_two_device": "PASS room670380/core_3_4/both answers/final1000:0",
-    "sound_two_device": "PENDING",
+    "sound_two_device": "PASS room319063/core_6_3/drum.wav/both answers/final0:1000",
     "new_photo_two_device": "PENDING",
     "voice_quality": "NOT_RETESTED",
-    "production_online": "NOT_DEPLOYED"
+    "production_online": "NOT_DEPLOYED",
+    "sound_audibility": "PASS user confirmed audible on both devices",
+    "replay": "one shared replay observed in server audit",
+    "crashes": "No targeted fatal markers captured during these two matches; not a soak test"
   },
   "export_verifier_note": "Godot uses .webp.import -> .ctex. Initial .remap-only assertion was corrected; APK unchanged."
 }

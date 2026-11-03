@@ -232,3 +232,83 @@ def test_reconnect_requires_fresh_account_binding_for_winner_points():
     profile = api.get("/api/me", headers={"Authorization": "Bearer " + token})
     assert profile.status_code == 200
     assert profile.json()["user"]["points"] == 0
+
+
+def test_reconnect_with_fresh_auth_awards_once():
+    """Re-authentication on a resumed WebSocket restores winner award eligibility."""
+    import asyncio
+    import json
+    import sys
+    from pathlib import Path
+    from websockets.asyncio.server import serve
+    from websockets.asyncio.client import connect
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
+    import server as room_server
+
+    initialize()
+    api = TestClient(app)
+    response = api.post("/api/auth/guest")
+    assert response.status_code == 201
+    token = response.json()["access_token"]
+    room_server.rooms.clear()
+    room_server.connections.clear()
+    room_server.waiting.clear()
+    room_server.verified_accounts.clear()
+
+    async def send(ws, **payload):
+        await ws.send(json.dumps(payload))
+
+    async def recv(ws):
+        return json.loads(await asyncio.wait_for(ws.recv(), timeout=8))
+
+    async def scenario():
+        listener = await serve(room_server.handler, "127.0.0.1", 0)
+        port = listener.sockets[0].getsockname()[1]
+        url = f"ws://127.0.0.1:{port}"
+        try:
+            async with connect(url) as a, connect(url) as b:
+                await send(a, type="auth_bind", access_token=token)
+                assert await recv(a) == {"type": "auth_bound", "ok": True}
+                await send(a, type="create")
+                code = (await recv(a))["code"]
+                await send(b, type="join", code=code)
+                assert (await recv(b))["status"] == "joined"
+                started_a, started_b = await recv(a), await recv(b)
+                assert started_a["type"] == started_b["type"] == "started"
+                resume_token = started_a["resume_token"]
+                answer = room_server.rooms[code].cards[0]["aliases"][0]
+                await a.close()
+                for _ in range(100):
+                    if room_server.rooms[code].players[0] is None:
+                        break
+                    await asyncio.sleep(0.01)
+                assert room_server.rooms[code].players[0] is None
+                assert (await recv(b))["type"] == "paused"
+                async with connect(url) as resumed:
+                    await send(resumed, type="auth_bind", access_token=token)
+                    assert await recv(resumed) == {"type": "auth_bound", "ok": True}
+                    await send(resumed, type="resume", code=code, token=resume_token)
+                    assert (await recv(resumed))["type"] == "resumed"
+                    assert (await recv(b))["type"] == "peer_resumed"
+                    assert (await recv(resumed))["type"] == "peer_resumed"
+                    assert room_server.rooms[code].account_ids[0] is not None
+                    await send(resumed, type="guess", guess=answer)
+                    assert (await recv(resumed))["type"] == "guess"
+                    assert (await recv(b))["type"] == "guess"
+                    assert (await recv(resumed))["type"] == "finished"
+                    assert (await recv(b))["type"] == "finished"
+                    await send(resumed, type="guess", guess=answer)
+                    assert (await recv(resumed))["type"] == "error"
+        finally:
+            listener.close()
+            await listener.wait_closed()
+            room_server.rooms.clear()
+            room_server.connections.clear()
+            room_server.waiting.clear()
+            room_server.verified_accounts.clear()
+
+    asyncio.run(scenario())
+    profile = api.get("/api/me", headers={"Authorization": "Bearer " + token})
+    assert profile.status_code == 200
+    assert profile.json()["user"]["points"] == 10

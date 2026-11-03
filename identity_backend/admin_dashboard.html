@@ -47,12 +47,19 @@ function render(){
  const container=$("drafts");container.replaceChildren();
  for(const d of drafts){
   const article=document.createElement("article");
-  const heading=document.createElement("strong");heading.textContent=d.category+" · "+d.title;article.append(heading);
+  const heading=document.createElement("strong");heading.textContent=d.category+" · "+d.title+" ["+(d.review_status||"draft")+"]";article.append(heading);
   const pre=document.createElement("pre");pre.textContent=JSON.stringify(d.payload,null,2);article.append(pre);
   const edit=document.createElement("button");edit.className="secondary";edit.textContent="Edit / تعديل";
   edit.onclick=()=>{$("draftId").value=d.id;$("title").value=d.title;$("category").value=d.category;$("payload").value=JSON.stringify(d.payload,null,2);window.scrollTo({top:0,behavior:"smooth"})};
   const del=document.createElement("button");del.className="danger";del.textContent="Delete / حذف";
   del.onclick=async()=>{if(!confirm("Delete this draft? / حذف المسودة؟"))return;try{await request("/"+encodeURIComponent(d.id),"DELETE");await load()}catch(e){message(e.message)}};
+  for(const [decision,label] of [["submit","Submit / مراجعة"],["approve","Approve / اعتماد"],["reject","Reject / رفض"],["resubmit","Resubmit / إعادة مراجعة"]]){
+   const allowed={submit:"draft",approve:"in_review",reject:"in_review",resubmit:"rejected"};
+   if((d.review_status||"draft")!==allowed[decision])continue;
+   const action=document.createElement("button");action.className="secondary";action.textContent=label;
+   action.onclick=async()=>{try{await request("/"+encodeURIComponent(d.id)+"/review/"+decision,"POST");await load()}catch(e){message(e.message)}};
+   article.append(action);
+  }
   article.append(edit,del);container.append(article)
  }
  if(!drafts.length)container.textContent="No drafts / لا توجد مسودات";

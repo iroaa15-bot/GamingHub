@@ -147,3 +147,11 @@ def award_points(body: AwardPoints, authorization: str = Header(default=""), x_a
         total = db.execute("SELECT points FROM identity_users WHERE id=%s",(identity["id"],)).fetchone()[0]
         db.commit()
     return {"awarded": bool(inserted), "points": total}
+
+
+@app.get("/admin/dashboard", include_in_schema=False)
+def admin_dashboard():
+    """Serve the admin UI from the API origin so authenticated requests avoid CORS."""
+    from pathlib import Path
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse((Path(__file__).parent / "admin_dashboard.html").read_text(encoding="utf-8"))

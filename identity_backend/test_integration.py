@@ -143,3 +143,19 @@ def test_draft_rejects_missing_or_mismatched_staged_asset(monkeypatch):
     assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 409
     assert client.delete(f"/api/admin/content/{created.json()['id']}", headers=headers).status_code == 200
     assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 200
+
+
+def test_content_review_transitions_are_enforced(monkeypatch):
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-review-secret")
+    client = TestClient(app)
+    headers = {"X-Admin-Key": "ci-review-secret"}
+    draft = client.post("/api/admin/content", json={"category": "question", "title": "Review example", "payload": {}}, headers=headers)
+    assert draft.status_code == 201, draft.text
+    draft_id = draft.json()["id"]
+    url = f"/api/admin/content/{draft_id}/review/"
+    assert client.post(url + "approve", headers=headers).status_code == 409
+    assert client.post(url + "submit").status_code == 403
+    assert client.post(url + "submit", headers=headers).json()["review_status"] == "in_review"
+    assert client.post(url + "approve", headers=headers).json()["review_status"] == "approved"
+    assert client.post(url + "approve", headers=headers).status_code == 409
+    assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200

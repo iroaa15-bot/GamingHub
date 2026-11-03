@@ -32,7 +32,7 @@ func _ready() -> void:
     password_field.placeholder_text = "Password / كلمة المرور"
     password_field.secret = true
     panel.add_child(password_field)
-    for action in ["Login / دخول", "Register / تسجيل", "Guest / ضيف", "My profile / حسابي", "Logout / خروج", "Back / رجوع"]:
+    for action in ["Login / دخول", "Register / تسجيل", "Guest / ضيف", "Upgrade guest / ترقية الضيف", "My profile / حسابي", "Logout / خروج", "Back / رجوع"]:
         var button := Button.new()
         button.text = action
         button.pressed.connect(_on_action.bind(action))
@@ -52,6 +52,12 @@ func _on_action(action: String) -> void:
     if auth.api_base.is_empty():
         status_label.text = "Online account server not configured / سيرفر الحسابات غير مهيأ"
         return
+    if action.begins_with("Upgrade guest") and auth.access_token.is_empty():
+        status_label.text = "Start a guest session first / ابدأ بحساب ضيف أولا"
+        return
+    if (action.begins_with("Register") or action.begins_with("Upgrade guest")) and (email_field.text.strip_edges().is_empty() or password_field.text.is_empty() or name_field.text.strip_edges().is_empty()):
+        status_label.text = "Enter name, email and password / أدخل الاسم والبريد وكلمة المرور"
+        return
     submit_busy = true
     var result: Dictionary = {}
     if action.begins_with("Login"):
@@ -60,6 +66,8 @@ func _on_action(action: String) -> void:
         result = await auth.register_account(email_field.text.strip_edges(), password_field.text, name_field.text.strip_edges())
     elif action.begins_with("Guest"):
         result = await auth.guest()
+    elif action.begins_with("Upgrade guest"):
+        result = await auth.upgrade_guest(email_field.text.strip_edges(), password_field.text, name_field.text.strip_edges())
     elif action.begins_with("My profile"):
         result = await auth.profile()
     elif action.begins_with("Logout"):

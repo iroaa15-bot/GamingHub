@@ -57,3 +57,18 @@ def test_award_persists_after_new_login(monkeypatch):
     assert login.status_code==200,login.text
     fresh={"Authorization":"Bearer "+login.json()["access_token"]}
     assert client.get("/api/me",headers=fresh).json()["user"]["points"]==15
+
+def test_conflicting_duplicate_award_is_not_counted(monkeypatch):
+    initialize()
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY","ci-key")
+    client=TestClient(app)
+    guest=client.post("/api/auth/guest")
+    assert guest.status_code==201
+    headers={"Authorization":"Bearer "+guest.json()["access_token"],"X-Admin-Key":"ci-key"}
+    match="conflicting-match-001"
+    first=client.post("/api/admin/award-points",json={"match_id":match,"points":5},headers=headers)
+    assert first.status_code==200,first.text
+    second=client.post("/api/admin/award-points",json={"match_id":match,"points":100},headers=headers)
+    assert second.status_code==200,second.text
+    assert second.json()=={"awarded":False,"points":5}
+    assert client.get("/api/me",headers=headers).json()["user"]["points"]==5

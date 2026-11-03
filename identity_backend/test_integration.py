@@ -100,3 +100,25 @@ def test_admin_dashboard_is_served_as_html():
     assert "text/html" in response.headers["content-type"]
     assert "Gaming Hub" in response.text
     assert "admin" in response.text.lower()
+
+
+def test_admin_binary_upload_download_and_rejections(monkeypatch):
+    import hashlib
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-assets-key")
+    client = TestClient(app)
+    png = b"\\x89PNG\\r\\n\\x1a\\n" + b"staged-fixture"
+    headers = {"X-Admin-Key": "ci-assets-key", "Content-Type": "application/octet-stream"}
+    assert client.post("/api/admin/assets", data=png).status_code == 403
+    uploaded = client.post("/api/admin/assets", content=png, headers=headers)
+    assert uploaded.status_code == 201, uploaded.text
+    asset_id = uploaded.json()["id"]
+    assert uploaded.json()["sha256"] == hashlib.sha256(png).hexdigest()
+    assert uploaded.json()["status"] == "staged"
+    assert client.get(f"/api/admin/assets/{asset_id}").status_code == 403
+    downloaded = client.get(f"/api/admin/assets/{asset_id}", headers=headers)
+    assert downloaded.status_code == 200
+    assert downloaded.content == png
+    assert client.post("/api/admin/assets", content=b"not a media file", headers=headers).status_code == 415
+    assert client.post("/api/admin/assets", content=png + b"x" * (8 * 1024 * 1024), headers=headers).status_code == 413
+    assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 200
+    assert client.get(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 404

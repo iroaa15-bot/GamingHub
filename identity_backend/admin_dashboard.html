@@ -29,6 +29,7 @@ article{border-top:1px solid #52657e;padding:12px 0}pre{white-space:pre-wrap;ove
 <button id="save">Save draft / حفظ المسودة</button><button class="secondary" id="clear">Clear / جديد</button>
 </section>
 <p id="message" role="status" aria-live="polite"></p>
+<section><h2>Upload asset / رفع صورة أو صوت</h2><label for="assetFile">PNG, JPEG, WebP, WAV, MP3, OGG (max 8 MB)</label><input id="assetFile" type="file" accept="image/png,image/jpeg,image/webp,audio/wav,audio/mpeg,audio/ogg"><button id="uploadAsset">Upload / رفع الملف</button><p id="assetResult"></p><div id="assetPreview"></div></section>
 <section><h2>Saved drafts / المسودات</h2><div id="drafts"></div></section>
 <script>
 "use strict";
@@ -56,6 +57,34 @@ function render(){
  }
  if(!drafts.length)container.textContent="No drafts / لا توجد مسودات";
 }
+$("uploadAsset").onclick=async()=>{
+ try{
+  const file=$("assetFile").files[0];
+  if(!file)throw Error("Choose a file / اختر ملف");
+  if(file.size>8*1024*1024)throw Error("File exceeds 8 MB");
+  const response=await fetch(base()+"/api/admin/assets",{
+   method:"POST",headers:{"X-Admin-Key":$("key").value,"Content-Type":"application/octet-stream"},body:file
+  });
+  if(!response.ok)throw Error("Upload failed: HTTP "+response.status);
+  const data=await response.json();
+  $("assetResult").textContent="Staged asset ID: "+data.id+" ("+data.category+")";
+  const preview=$("assetPreview");preview.replaceChildren();
+  if(data.category==="image"){
+   const img=document.createElement("img");img.src=URL.createObjectURL(file);
+   img.alt=file.name;img.style.maxWidth="240px";img.onload=()=>URL.revokeObjectURL(img.src);preview.append(img);
+  }else{
+   const audio=document.createElement("audio");audio.controls=true;audio.src=URL.createObjectURL(file);
+   audio.onloadeddata=()=>URL.revokeObjectURL(audio.src);preview.append(audio);
+  }
+  const attach=document.createElement("button");attach.textContent="Attach ID to draft / ربط بالمسودة";
+  attach.onclick=()=>{
+   try{const payload=JSON.parse($("payload").value);payload.staged_asset_id=data.id;
+    $("payload").value=JSON.stringify(payload,null,2);message("Asset ID attached to draft JSON / تم ربط معرف الملف بالمسودة");
+   }catch(e){message("Invalid draft JSON")}};
+  preview.append(attach);
+  message("Asset uploaded privately / تم رفع الملف كمسودة خاصة");
+ }catch(e){message(e.message)}
+};
 async function load(){try{const data=await request("");drafts=data.drafts||[];render();message("Drafts loaded / تم تحميل المسودات")}catch(e){message(e.message)}}
 $("load").onclick=load;
 $("clear").onclick=clear;

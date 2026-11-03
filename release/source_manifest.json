@@ -769,7 +769,7 @@
     ".github/workflows/identity-postgres-smoke.yml": "ae60ef267ef9630615bc124f47176a49c54d97f0b04939baa8f1c03246959902",
     "scripts/network/gaminghub_auth.gd": "f0f3d4d35845ad454d1e3cd23678fb259e08474a3eb288907091559f0f97659c",
     "tests/auth_client_smoke.gd": "8ebefc9de773ec4ebbfa8297f486e91b2bb785905d73ca2ddca136130a370f93",
-    "scripts/account_screen.gd": "1127a0edc46211f732968527be79dc2e0c3be3cb3b05395a142124c0c933f699",
+    "scripts/account_screen.gd": "4c7cc451aadc5749df68b91aa3111393c359533f88b99d1a5874944465480268",
     "scenes/AccountScreen.tscn": "2f6c0ecc52174dae5501e39bce7edb10c55f35de6165777882e1b729eca6b372"
   }
 }

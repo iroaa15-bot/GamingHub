@@ -72,11 +72,12 @@ static func neon_surface(fill: Color, edge: Color) -> StyleBoxTexture:
      color=edge;color.a=0.26*pow(1.0-d/5.0,2)
     if d>-.5 and d<.5:color.a=lerpf(1.0,0.26,clampf(d+.5,0.0,1.0))
     image.set_pixel(x,y,color)
+  image.resize(64,64,Image.INTERPOLATE_LANCZOS)
   _neon_textures[key]=ImageTexture.create_from_image(image)
  var surface := StyleBoxTexture.new()
  surface.texture=_neon_textures[key]
  for side in [SIDE_LEFT,SIDE_TOP,SIDE_RIGHT,SIDE_BOTTOM]:
-  surface.set_texture_margin(side,36)
+  surface.set_texture_margin(side,18)
   surface.set_expand_margin(side,5)
  surface.content_margin_left=14;surface.content_margin_right=14
  surface.content_margin_top=10;surface.content_margin_bottom=10

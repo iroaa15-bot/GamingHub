@@ -115,6 +115,9 @@ func run() -> void:
   if arg.begins_with("--endpoint="):endpoint=arg.trim_prefix("--endpoint=")
   if arg.begins_with("--capture-dir="):folder=arg.trim_prefix("--capture-dir=");DirAccess.make_dir_recursive_absolute(folder)
   if arg.begins_with("--games="):games=Array(arg.trim_prefix("--games=").split(","))
- for game in games:await suite(str(game))
+ for index in range(games.size()):
+  # Two fresh authenticated clients per game; respect the real 10 sessions/minute limit.
+  if index>0:await create_timer(15).timeout
+  await suite(str(games[index]))
  print("ORIGINAL_ALL_REAL_GODOT_UI_WS ",failures.is_empty()," ",failures)
  quit(0 if failures.is_empty() else 1)

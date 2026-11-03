@@ -5,7 +5,12 @@ var music_enabled:=true
 var _members: Dictionary={}
 var _music: Array[WeakRef]=[]
 var _fade: Tween
-var effects_enabled:=true
+var ui_effects_enabled:=true
+var game_effects_enabled:=true
+# Compatibility for existing callers that intentionally toggle both effect buses.
+var effects_enabled: bool:
+ get:return ui_effects_enabled or game_effects_enabled
+ set(value):set_effects_enabled(value)
 var menu_player: AudioStreamPlayer
 var _samples: Dictionary={}
 var _last_effect: Dictionary={}
@@ -20,14 +25,25 @@ func _start_menu() -> void:
  if music_enabled and not music_blocked():_resume()
  effect("startup")
 func set_effects_enabled(enabled: bool) -> void:
- effects_enabled=enabled
- if not enabled:_stop_effects()
-func _stop_effects() -> void:
- for player in _effect_players:
-  player.stop();player.queue_free()
- _effect_players.clear();_active_effects=0
+ set_ui_effects_enabled(enabled)
+ set_game_effects_enabled(enabled)
+func set_ui_effects_enabled(enabled: bool) -> void:
+ ui_effects_enabled=enabled
+ var index=AudioServer.get_bus_index("UI SFX")
+ if index>=0:AudioServer.set_bus_mute(index,not enabled)
+ if not enabled:_stop_effects("UI SFX")
+func set_game_effects_enabled(enabled: bool) -> void:
+ game_effects_enabled=enabled
+ var index=AudioServer.get_bus_index("Game SFX")
+ if index>=0:AudioServer.set_bus_mute(index,not enabled)
+ if not enabled:_stop_effects("Game SFX")
+func _stop_effects(bus: String="") -> void:
+ for player in _effect_players.duplicate():
+  if not bus.is_empty() and player.bus!=bus:continue
+  player.stop();player.queue_free();_effect_players.erase(player)
+ _active_effects=_effect_players.size()
 func effect(name: String,ui: bool=false) -> void:
- if not effects_enabled or not _samples.is_empty():return
+ if (not ui_effects_enabled if ui else not game_effects_enabled) or not _samples.is_empty():return
  if name in ["all_ready","round_start","correct","incorrect","victory","results"] and _active_effects>=2:
   var old: AudioStreamPlayer=_effect_players.pop_front();old.stop();old.queue_free();_active_effects-=1
  if _active_effects>=3:return
@@ -80,6 +96,7 @@ func _ready() -> void:
    AudioServer.add_bus();AudioServer.set_bus_name(AudioServer.bus_count-1,bus)
    AudioServer.set_bus_send(AudioServer.bus_count-1,"Master")
  AudioServer.set_bus_volume_db(AudioServer.get_bus_index("UI SFX"),-6)
+ set_ui_effects_enabled(ui_effects_enabled);set_game_effects_enabled(game_effects_enabled)
  menu_player=AudioStreamPlayer.new();menu_player.name="MenuMusic"
  var stream: AudioStreamWAV=_asset("menu_sunrise")
  stream.loop_mode=AudioStreamWAV.LOOP_FORWARD;stream.loop_begin=0;stream.loop_end=int(round(stream.get_length()*stream.mix_rate))

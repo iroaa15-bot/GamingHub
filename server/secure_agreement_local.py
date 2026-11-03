@@ -20,6 +20,7 @@ class SecureAgreementHub(SecureDuelHub,AgreementHub):
   identity=self.identities.get(ws)
   if not identity or identity['exp']<=time.time():raise ProtocolError('Session expired')
   kind=msg.get('type')
+  if kind=='duel_auth_bind':return await super().handle(ws,msg)
   if kind=='duel_session_refresh':
    if msg.get('protocol')!=VERSION:raise ProtocolError('Unsupported protocol')
    try:claims=self.sessions.verify(msg.get('token'))

@@ -1,3 +1,4 @@
+from account_rooms import AccountRooms
 """Separate authenticated Render-ready service. No production modules are edited.
 TLS terminates at Render's edge; direct local tests bind loopback only.
 """
@@ -8,7 +9,7 @@ from websockets.exceptions import ConnectionClosed
 from photo_duel_extension import DuelHub, ProtocolError, VERSION, text, legacy
 from duel_security import Sessions, Limits, Moderation
 
-class SecureDuelHub(DuelHub):
+class SecureDuelHub(AccountRooms,DuelHub):
     def __init__(self, secret, database, trust_proxy=False):
         super().__init__();self.sessions=Sessions(secret);self.limits=Limits();self.moderation=Moderation(database)
         self.identities={};self.subjects={};self.voice={};self.trust_proxy=trust_proxy;self.epoch=0
@@ -49,6 +50,7 @@ class SecureDuelHub(DuelHub):
         self.epoch+=1
         self.voice[room.code]["epoch"]=self.epoch
     async def send(self,ws,message):
+        if message.get("type")=="duel_capabilities":message={**message,"identity_accounts":bool(os.environ.get("GAMINGHUB_DATABASE_URL"))}
         message=dict(message)
         if message.get("type")=="duel_capabilities":message.update(authenticated=True,voice=True,voice_codec="pcm16/16000/mono/20ms",moderation=True)
         if message.get("type")=="duel_state":
@@ -56,6 +58,8 @@ class SecureDuelHub(DuelHub):
             if room:message["voice"]=self.voice_state(room,message["player"])
         return await super().send(ws,message)
     async def handle(self,ws,msg):
+        if msg.get("type")=="duel_auth_bind":
+            return await self.bind_account(ws,msg)
         identity=self.identities.get(ws)
         if not identity or identity["exp"]<=time.time():raise ProtocolError("Session expired")
         subject=identity["sub"]
@@ -112,6 +116,7 @@ class SecureDuelHub(DuelHub):
             room=self.rooms.get(binding[0])
             if room:self.reset_voice(room)
         await super().disconnect(ws);self.identities.pop(ws,None)
+        self.account_connections.pop(ws,None)
     async def connection(self,ws):
         extension=False
         try:

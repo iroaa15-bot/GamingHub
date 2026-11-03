@@ -60,6 +60,7 @@ class Room:
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
     voice_packet_at: list = field(default_factory=lambda: [[], []])
+    account_ids: list = field(default_factory=lambda: [None, None])
 
 from photo_duel_staging import StagingHub
 from photo_match_protocol import MatchError
@@ -68,6 +69,7 @@ photo_hub = StagingHub()
 
 rooms = {}
 connections = {}
+verified_accounts = {}  # optional websocket-to-account binding
 waiting = []  # queued websocket clients for random matchmaking
 MAX_ROOMS = int(os.getenv('MAX_ROOMS', '500'))
 WAITING_TTL = int(os.getenv('WAITING_TTL', '300'))
@@ -99,6 +101,7 @@ async def start_room(room):
     room.winner = -1
     room.voice_enabled = [False, False]
     room.voice_packet_at = [[], []]
+    room.account_ids = [verified_accounts.get(player) for player in room.players]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -170,6 +173,30 @@ async def process(ws, msg):
     if action not in ('ping', 'sync') and code_for_activity in rooms:
         rooms[code_for_activity].last_activity = time.monotonic()
 
+    # Optional verified account binding; guests can continue without it.
+    if action == 'auth_bind':
+        # A failed rebind must never preserve a previously authenticated identity.
+        verified_accounts.pop(ws, None)
+        active_room = rooms.get(connections.get(ws))
+        if active_room is not None and ws in active_room.players:
+            active_room.account_ids[active_room.players.index(ws)] = None
+        token = msg.get('access_token')
+        db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
+        if not db_url or not isinstance(token, str) or not 32 <= len(token) <= 512:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        try:
+            import psycopg
+            digest = hashlib.sha256(token.encode('utf-8')).hexdigest()
+            with psycopg.connect(db_url, connect_timeout=3) as db:
+                row = db.execute('SELECT user_id FROM identity_sessions WHERE token_hash=%s AND NOT revoked', (digest,)).fetchone()
+        except Exception:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        if row is None:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        verified_accounts[ws] = row[0]
+        if active_room is not None and ws in active_room.players:
+            active_room.account_ids[active_room.players.index(ws)] = row[0]
+        return await send(ws, {'type':'auth_bound','ok':True})
     # Lightweight application heartbeat; it never reveals room or card state.
     if action == 'ping':
         nonce = msg.get('id')
@@ -209,6 +236,9 @@ async def process(ws, msg):
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
+        # A resume capability restores gameplay, never the previous account identity.
+        # Re-authentication on the new socket is required before awarding points.
+        room.account_ids[idx] = verified_accounts.get(ws)
         had_voice_consent = any(room.voice_enabled)
         room.voice_enabled = [False, False]
         room.detached_at[idx] = None
@@ -362,6 +392,12 @@ async def process(ws, msg):
         if correct:
             room.over = True
             room.winner = index
+            # Do not delay or break the match result if identity storage is unavailable.
+            if os.environ.get('GAMINGHUB_DATABASE_URL') and room.account_ids[index] and room.account_ids[index] == verified_accounts.get(room.players[index]):
+                try:
+                    await asyncio.wait_for(asyncio.to_thread(persist_verified_win, room, index), timeout=5)
+                except Exception:
+                    pass
             result = {'type':'finished','winner':index,'cards':[c['name'] for c in room.cards]}
             room.history.append(result)
             return await broadcast(room, result)
@@ -376,6 +412,31 @@ async def process(ws, msg):
         return await broadcast(room, result)
     room.turn = 1 - index
     await broadcast(room, {'type':'turn','player':room.turn,'moves':room.moves})
+
+def persist_verified_win(room, winner_index):
+    """Best-effort server-only award; never trusts a client-submitted score."""
+    db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
+    if not db_url or winner_index < 0 or winner_index >= len(room.players):
+        return False
+    account = room.account_ids[winner_index] if winner_index < len(room.account_ids) else None
+    if account != verified_accounts.get(room.players[winner_index]):
+        return False
+    if not account:
+        return False
+    import psycopg
+    # A room code may be reused in another match; started_at distinguishes sessions.
+    match_id = f"{room.code}:{room.started_at:.9f}"
+    with psycopg.connect(db_url, connect_timeout=3) as db:
+        db.execute("""CREATE TABLE IF NOT EXISTS identity_awards (
+            match_id TEXT NOT NULL, user_id TEXT NOT NULL REFERENCES identity_users(id),
+            points INTEGER NOT NULL, PRIMARY KEY(match_id,user_id))""")
+        inserted = db.execute("""INSERT INTO identity_awards(match_id,user_id,points)
+            VALUES (%s,%s,%s) ON CONFLICT DO NOTHING RETURNING points""",
+            (match_id, account, 10)).fetchone()
+        if inserted:
+            db.execute('UPDATE identity_users SET points=points+10 WHERE id=%s', (account,))
+        db.commit()
+    return bool(inserted)
 
 async def handler(ws):
     # Simple per-connection burst limiter; production still needs authentication and proxy limits.
@@ -421,6 +482,7 @@ async def handler(ws):
                     record['peers'].pop(player, None)
                     record['room'].disconnect(player)
                     await photo_hub.notify(code)
+        verified_accounts.pop(ws, None)
         if ws in waiting:
             waiting.remove(ws)
         code = connections.pop(ws, None)

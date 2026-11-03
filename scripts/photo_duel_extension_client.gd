@@ -140,6 +140,11 @@ func _received(message: Dictionary) -> void:
     close_transport()
     return
    capabilities = message
+   if bool(capabilities.get("identity_accounts",false)):
+    var account = preload("res://scripts/network/gaminghub_auth.gd")
+    var origin: String = endpoint.replace("wss://","https://").trim_suffix("/")
+    if origin == account.session_origin and not account.session_token.is_empty():
+     send_action("duel_auth_bind", {"access_token":account.session_token})
    connection_changed.emit(true)
    protocol_ready.emit(message)
    if _resume_requested:

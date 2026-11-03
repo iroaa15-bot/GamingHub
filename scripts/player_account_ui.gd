@@ -44,6 +44,7 @@ func _ready() -> void:
  status.text="الحساب اختياري. تقدم الضيف المحلي محفوظ. لا تُحفظ كلمات المرور أو رموز الجلسة على الجهاز." if language=="ar" else "Accounts are optional. Local guest progress is preserved. Passwords and session tokens are not saved on this device."
  add_child(status)
  _button("الاستمرار كضيف محلي",func(): back_requested.emit.call_deferred())
+ _button("حساب Gaming Hub المتصل / Online account",func(): get_tree().change_scene_to_file("res://scenes/AccountScreen.tscn"))
  _button("الحساب وتسجيل الدخول",func(): _auth_group.visible=not _auth_group.visible)
  _auth_group=VBoxContainer.new()
  _auth_group.visible=false

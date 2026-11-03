@@ -38,6 +38,7 @@ def text(value, limit=280):
 
 class Room:
     def __init__(self, code, capacity, timer, target, catalog):
+        self.match_id = secrets.token_hex(24)
         self.code, self.capacity, self.timer, self.target = code, capacity, timer, target
         self.catalog = catalog
         self.peers = [None] * capacity

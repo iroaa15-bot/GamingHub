@@ -108,6 +108,7 @@ class SharedQuizHub(SecureAgreementHub):
   if not identity or identity['exp']<=time.time():raise ProtocolError('Session expired')
   if type(msg.get('protocol')) is not int or msg['protocol']!=VERSION:raise ProtocolError('Unsupported protocol')
   action=msg.get('type')
+  if action=='duel_auth_bind':return await super().handle(ws,msg)
   if action=='duel_hello' and 'game_id' in msg:
    if msg['game_id'] not in self.adapters:raise ProtocolError('Unsupported game adapter')
    self.requested_games[ws]=msg['game_id']

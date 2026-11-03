@@ -141,7 +141,8 @@ func show_accessibility() -> void:
   option.reparent(round_sizes)
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
  setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
- setting_switch(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_effects_enabled(value); save_progress())
+ setting_switch(tr_ui("أصوات الأزرار", "BUTTON SOUNDS"),ui_sound_enabled,func(value: bool): ui_sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_ui_effects_enabled(value); save_progress())
+ setting_switch(tr_ui("مؤثرات وأصوات الألعاب", "GAME SOUNDS & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_game_effects_enabled(value); save_progress())
  setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
  button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
@@ -269,6 +270,7 @@ var picture_recorded: bool = false
 var picture_question_page: int = 0
 var art_style: String = "realistic"
 var sound_enabled: bool = true
+var ui_sound_enabled: bool = true
 var music_enabled: bool = true
 var haptics_enabled: bool = true
 var reduced_motion: bool = false
@@ -281,6 +283,7 @@ var texture_cache: Dictionary = {}
 var texture_cache_order: Array[String] = []
 
 func cached_texture(path: String) -> Texture2D:
+ if path.begins_with("pub_"):return PublishedContent.media.get(path) as Texture2D
  if path.is_empty() or not path.begins_with("res://assets/"):
   return null
  if texture_cache.has(path):
@@ -401,6 +404,7 @@ func load_upgrade() -> void:
  if parsed is Dictionary:
   question_bank = load("res://scripts/approved_content.gd").questions(parsed)
  apply_daily_rounds()
+ _apply_published_content()
  if FileAccess.file_exists(profile_path()):
   var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(profile_path()))
   if saved is Dictionary:
@@ -421,10 +425,7 @@ func load_upgrade() -> void:
  family_all_ages = bool(profile.get("family_all_ages", true))
  selected_language = str(profile.get("language", "ar"))
  art_style = str(profile.get("art_style", "realistic"))
- sound_enabled = bool(profile.get("sound_enabled", true))
- load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_effects_enabled(sound_enabled)
- music_enabled = bool(profile.get("music_enabled",true))
- load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(music_enabled)
+ _apply_audio_preferences(profile)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
  reduced_motion = bool(profile.get("reduced_motion", false))
  selected_campaign = str(profile.get("selected_campaign", "island"))
@@ -459,8 +460,26 @@ func apply_daily_rounds() -> void:
   combined.append_array(bundled)
   question_bank[key] = combined
 
+func _apply_published_content() -> void:
+ for key in ["1","3","5","6"]:
+  if not question_bank.has(key):continue
+  question_bank[key]=question_bank[key].filter(func(item):return not str(item.get("id","")).begins_with("pub_"))
+  for item in PublishedContent.questions.get(key,[]):
+   if load("res://scripts/approved_content.gd").question_allowed(item):question_bank[key].append(item.duplicate(true))
+
 func _on_daily_rounds_changed() -> void:
  apply_daily_rounds()
+ _apply_published_content()
+
+func _apply_audio_preferences(saved: Dictionary) -> void:
+ # Old profiles used one effects toggle. Preserve it for both buses until customized.
+ sound_enabled=bool(saved.get("sound_enabled",true))
+ ui_sound_enabled=bool(saved.get("ui_sound_enabled",sound_enabled))
+ music_enabled=bool(saved.get("music_enabled",true))
+ var policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ policy.set_ui_effects_enabled(ui_sound_enabled)
+ policy.set_game_effects_enabled(sound_enabled)
+ policy.set_music_enabled(music_enabled)
 
 func save_progress() -> void:
  if audience.is_empty():
@@ -468,6 +487,7 @@ func save_progress() -> void:
  profile["language"] = selected_language
  profile["art_style"] = art_style
  profile["sound_enabled"] = sound_enabled
+ profile["ui_sound_enabled"] = ui_sound_enabled
  profile["music_enabled"] = music_enabled
  profile["haptics_enabled"] = haptics_enabled
  profile["reduced_motion"] = reduced_motion
@@ -570,7 +590,10 @@ func play_clip(id: String) -> void:
  load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player = AudioStreamPlayer.new()
  audio_player.bus="Game SFX"
- audio_player.stream = load("res://assets/audio/" + id + ".wav")
+ audio_player.stream = PublishedContent.media.get(id) as AudioStream if id.begins_with("pub_") else load("res://assets/audio/" + id + ".wav")
+ if audio_player.stream==null:
+  audio_player.queue_free()
+  return
  audio_player.volume_db = -8
  add_child(audio_player)
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,true)
@@ -814,6 +837,7 @@ func start_daily() -> void:
  show_round()
 
 func card_texture(card_name: String) -> Texture2D:
+ if card_name.begins_with("pub_"):return PublishedContent.media.get(card_name) as Texture2D
  var id: String = card_name.to_lower()
  var approved_path: String="res://assets/imported_photos/"+id+".webp"
  if ResourceLoader.exists(approved_path):return cached_texture(approved_path)
@@ -926,6 +950,7 @@ func toggle_language() -> void:
 
 func _ready() -> void:
  get_tree().quit_on_go_back = false
+ PublishedContent.changed.connect(_apply_published_content)
  if not DailyRounds.changed.is_connected(_on_daily_rounds_changed):
   DailyRounds.changed.connect(_on_daily_rounds_changed)
  if not AdManager.reward_earned.is_connected(_on_earned_ad_reward):
@@ -1541,11 +1566,11 @@ func show_expedition() -> void:
   button(tr_ui("🌳 الغابة — استعادة الطاقة", "🌳 Forest — restore energy"), func(): expedition_choose("forest"), GREEN)
   button(tr_ui("🌉 الجسر — مفتاحان، مخاطرة أكبر", "🌉 Bridge — two keys, higher cost"), func(): expedition_choose("bridge"), GOLD)
  elif expedition_room == 1:
-  label(tr_ui("🔐 بوابة الأرقام: 2، 4، 8، 16، ؟", "🔐 Number gate: 2, 4, 8, 16, ?"), 26)
+  label(tr_ui("🔐 بوابة الكهف: ماذا تستخدم لإضاءة الطريق المظلم؟", "🔐 Cave gate: what lights a dark path?"), 26)
   label(tr_ui("الإجابة الصحيحة تمنحك مفتاحًا. الخطأ يستهلك طاقتين.", "Correct answer earns a key; a mistake costs two energy."), 18)
-  button("24", func(): expedition_puzzle(0))
-  button("30", func(): expedition_puzzle(1))
-  button("32", func(): expedition_puzzle(2), ACCENT)
+  button(tr_ui("بوصلة", "Compass"), func(): expedition_puzzle(0))
+  button(tr_ui("حبل", "Rope"), func(): expedition_puzzle(1))
+  button(tr_ui("مصباح", "Torch"), func(): expedition_puzzle(2), ACCENT)
  elif expedition_room == 2:
   label(tr_ui("⛺ قبل غرفة الكنز: ترتاح أم تبحث عن مفتاح آخر؟", "⛺ Before the treasure: rest or search for another key?"), 25)
   button(tr_ui("💚 استراحة: +2 طاقة", "💚 Rest: +2 energy"), func(): expedition_prepare("rest"), GREEN)
@@ -2549,7 +2574,7 @@ func show_round() -> void:
   round_picture_card(str(item["image"]))
  VisualSkin.add_question_panel(root, str(item.get(selected_language, item.get("en", ""))), reading_scale, tr_ui("✦ السؤال ✦", "✦ THE CHALLENGE ✦"))
  if item.has("audio"):
-  label(tr_ui("مقطع صوتي مُركّب • يمكنك إعادة الاستماع", "Synthesized clip • replay any time"), 15)
+  label(tr_ui("مقطع صوتي منشور • يمكنك إعادة الاستماع", "Published clip • replay any time") if str(item.get("audio","")).begins_with("pub_") else tr_ui("مقطع صوتي مُركّب • يمكنك إعادة الاستماع", "Synthesized clip • replay any time"), 15)
   button(tr_ui("▶ استمع للصوت", "▶ PLAY SOUND"), func(): play_clip(str(item["audio"])), GREEN)
  var mode: String = str(item.get("mode", "choice"))
  if mode == "order":
@@ -3624,7 +3649,7 @@ func _execute_ui_action(ref: WeakRef, generation: int, action: Callable) -> void
  if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
   if control.is_inside_tree() and not control.is_queued_for_deletion():
    if haptics_enabled and OS.get_name() == "Android": Input.vibrate_handheld(14)
-   if sound_enabled:
+   if ui_sound_enabled:
     load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("navigation" if control.text.contains("العودة") or control.text.to_lower().contains("back") else "click",true)
    action.call()
 

@@ -48,6 +48,11 @@ func run() -> void:
  v.primary_mode="tap";v.pending={"kind":"question","question_id":"animal","text":"","asker":0,"responder":1}
  apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"
  check(ui.yes_button.visible and ui.no_button.visible and not ui.guess_button.visible and not ui.question_field.visible,"only authorized yes no controls")
+ v.opponents=[{"player":0,"image":"res://assets/generated/elephant.webp"},{"player":1,"image":"res://assets/generated/cat.webp"}]
+ apply(v)
+ check(ui.images[0].visible and not ui.images[1].visible,"respondent sees active asker image and never local secret even if echoed")
+ check(ui.captions[0].text.contains("1"),"respondent image identifies active asker")
+
  await snap("agreement-match-responder")
  v.primary_mode="voice";v.started=false;v.pending=null;ui.client.capabilities.voice=true
  apply(v);ui.status.text="معاينة واجهة • ليست جلسة أونلاين"

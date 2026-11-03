@@ -606,7 +606,9 @@ func _state(value: Dictionary) -> void:
  for opponent in value.get("opponents",[]):
   var index: int = int(opponent.player)
   var path: String = str(opponent.image)
-  if index == int(value.get("responder",-1)) and index >= 0 and index < 6 and catalog.has(path) and ResourceLoader.exists(path):
+  # The respondent must see the active asker's card to judge guesses. Never show the local secret.
+  var relevant: bool=index==int(value.get("current",-1)) or (client.player==int(value.get("current",-1)) and index==int(value.get("responder",-1)))
+  if relevant and index!=client.player and index >= 0 and index < 6 and catalog.has(path) and ResourceLoader.exists(path):
    images[index].texture = load(path)
    images[index].show()
    captions[index].text = tr_pair("صورة اللاعب ","Player picture ") + str(index+1)+" • "+str(catalog[path].get(language,catalog[path].get("en","")))

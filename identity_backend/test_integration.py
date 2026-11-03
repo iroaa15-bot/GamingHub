@@ -131,7 +131,7 @@ def test_draft_rejects_missing_or_mismatched_staged_asset(monkeypatch):
     import uuid
     missing = {"category": "image", "title": "Missing", "payload": {"staged_asset_id": str(uuid.uuid4())}}
     assert client.post("/api/admin/content", json=missing, headers=headers).status_code == 422
-    wav = b"RIFF" + b"\\x00" * 4 + b"WAVE" + b"audio-fixture"
+    wav = b"RIFF" + bytes(4) + b"WAVE" + b"audio-fixture"
     uploaded = client.post("/api/admin/assets", content=wav, headers={**headers, "Content-Type": "application/octet-stream"})
     assert uploaded.status_code == 201, uploaded.text
     asset_id = uploaded.json()["id"]

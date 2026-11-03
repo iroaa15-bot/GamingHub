@@ -72,3 +72,22 @@ def test_conflicting_duplicate_award_is_not_counted(monkeypatch):
     assert second.status_code==200,second.text
     assert second.json()=={"awarded":False,"points":5}
     assert client.get("/api/me",headers=headers).json()["user"]["points"]==5
+
+
+def test_admin_content_drafts_crud_and_authorization(monkeypatch):
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-admin-secret")
+    client = TestClient(app)
+    draft = {"category": "question", "title": "Animal quiz", "payload": {"answer": "duck"}}
+    assert client.post("/api/admin/content", json=draft).status_code == 403
+    headers = {"X-Admin-Key": "ci-admin-secret"}
+    created = client.post("/api/admin/content", json=draft, headers=headers)
+    assert created.status_code == 201, created.text
+    draft_id = created.json()["id"]
+    listed = client.get("/api/admin/content", headers=headers)
+    assert listed.status_code == 200, listed.text
+    assert any(item["id"] == draft_id for item in listed.json()["drafts"])
+    edited = dict(draft, title="Updated quiz")
+    assert client.put(f"/api/admin/content/{draft_id}", json=edited, headers=headers).status_code == 200
+    assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200
+    assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 404
+    assert client.post("/api/admin/content", json={"category": "invalid", "title": "Bad"} , headers=headers).status_code == 422

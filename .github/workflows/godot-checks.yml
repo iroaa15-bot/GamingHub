@@ -34,6 +34,10 @@ jobs:
         run: |
           set -o pipefail
           godot --headless --path . --editor --import --quit 2>&1 | tee godot-import.log
+      - name: Optional account client smoke
+        run: |
+          timeout 45 godot --headless --path . --script res://tests/auth_client_smoke.gd 2>&1 | tee auth-client.log
+          grep -q AUTH_CLIENT_SMOKE_PASS auth-client.log
       - name: Main, multiplayer and offline game smoke
         shell: bash
         run: |

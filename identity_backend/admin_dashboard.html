@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gaming Hub — Content Drafts</title>
+<style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark;background:#101725;color:#f1f5f9}
+body{max-width:960px;margin:auto;padding:24px}h1{margin-bottom:4px}p{color:#b6c4d6}
+section{border:1px solid #34445a;border-radius:14px;padding:18px;margin:18px 0;background:#192538}
+label{display:block;margin:10px 0 4px}input,select,textarea,button{box-sizing:border-box;font:inherit;border-radius:8px;padding:10px}
+input,select,textarea{width:100%;background:#101725;color:white;border:1px solid #52657e}
+textarea{min-height:140px}button{background:#2563eb;color:white;border:0;cursor:pointer;margin:8px 6px 0 0}
+button.secondary{background:#475569}button.danger{background:#b91c1c}
+article{border-top:1px solid #52657e;padding:12px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere}
+#message{min-height:24px}small{color:#a9b9ce}
+</style></head><body>
+<h1>Gaming Hub — Admin Drafts</h1>
+<p>مسودات المحتوى فقط · Images / Questions / Sounds · No automatic publishing</p>
+<section>
+<label for="endpoint">Identity API HTTPS URL</label><input id="endpoint" placeholder="https://your-identity-server.example">
+<label for="key">Server admin key (never share or embed in Android)</label><input id="key" type="password" autocomplete="off">
+<small>Key stays in this page's memory; it is not saved in browser storage.</small>
+<button id="load">Load drafts / عرض المسودات</button>
+</section>
+<section>
+<h2>Create or edit draft / إضافة أو تعديل</h2>
+<input id="draftId" type="hidden">
+<label for="category">Category / القسم</label><select id="category"><option value="question">Question / سؤال</option><option value="image">Image / صورة</option><option value="sound">Sound / صوت</option></select>
+<label for="title">Title / العنوان</label><input id="title" maxlength="160">
+<label for="payload">JSON content / بيانات المحتوى</label><textarea id="payload" spellcheck="false">{}</textarea>
+<button id="save">Save draft / حفظ المسودة</button><button class="secondary" id="clear">Clear / جديد</button>
+</section>
+<p id="message" role="status" aria-live="polite"></p>
+<section><h2>Upload asset / رفع صورة أو صوت</h2><label for="assetFile">PNG, JPEG, WebP, WAV, MP3, OGG (max 8 MB)</label><input id="assetFile" type="file" accept="image/png,image/jpeg,image/webp,audio/wav,audio/mpeg,audio/ogg"><button id="uploadAsset">Upload / رفع الملف</button><p id="assetResult"></p><div id="assetPreview"></div></section>
+<section><h2>Saved drafts / المسودات</h2><div id="drafts"></div></section>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let drafts=[];
+function base(){const raw=$("endpoint").value.trim().replace(/\/+$/,"");if(!/^https:\/\//.test(raw))throw Error("HTTPS endpoint required");return raw}
+async function request(path,method="GET",body){
+ const response=await fetch(base()+"/api/admin/content"+path,{method,headers:{"X-Admin-Key":$("key").value,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});
+ if(!response.ok)throw Error("Request failed: HTTP "+response.status);
+ return response.json()
+}
+function message(text){$("message").textContent=text}
+function clear(){ $("draftId").value="";$("title").value="";$("payload").value="{}";$("category").value="question"}
+function render(){
+ const container=$("drafts");container.replaceChildren();
+ for(const d of drafts){
+  const article=document.createElement("article");
+  const heading=document.createElement("strong");heading.textContent=d.category+" · "+d.title+" ["+(d.review_status||"draft")+"]";article.append(heading);
+  const pre=document.createElement("pre");pre.textContent=JSON.stringify(d.payload,null,2);article.append(pre);
+  const edit=document.createElement("button");edit.className="secondary";edit.textContent="Edit / تعديل";
+  edit.onclick=()=>{$("draftId").value=d.id;$("title").value=d.title;$("category").value=d.category;$("payload").value=JSON.stringify(d.payload,null,2);window.scrollTo({top:0,behavior:"smooth"})};
+  const del=document.createElement("button");del.className="danger";del.textContent="Delete / حذف";
+  del.onclick=async()=>{if(!confirm("Delete this draft? / حذف المسودة؟"))return;try{await request("/"+encodeURIComponent(d.id),"DELETE");await load()}catch(e){message(e.message)}};
+  for(const [decision,label] of [["submit","Submit / مراجعة"],["approve","Approve / اعتماد"],["reject","Reject / رفض"],["resubmit","Resubmit / إعادة مراجعة"]]){
+   const allowed={submit:"draft",approve:"in_review",reject:"in_review",resubmit:"rejected"};
+   if((d.review_status||"draft")!==allowed[decision])continue;
+   const action=document.createElement("button");action.className="secondary";action.textContent=label;
+   action.onclick=async()=>{try{await request("/"+encodeURIComponent(d.id)+"/review/"+decision,"POST");await load()}catch(e){message(e.message)}};
+   article.append(action);
+  }
+  article.append(edit,del);container.append(article)
+ }
+ if(!drafts.length)container.textContent="No drafts / لا توجد مسودات";
+}
+$("uploadAsset").onclick=async()=>{
+ try{
+  const file=$("assetFile").files[0];
+  if(!file)throw Error("Choose a file / اختر ملف");
+  if(file.size>8*1024*1024)throw Error("File exceeds 8 MB");
+  const response=await fetch(base()+"/api/admin/assets",{
+   method:"POST",headers:{"X-Admin-Key":$("key").value,"Content-Type":"application/octet-stream"},body:file
+  });
+  if(!response.ok)throw Error("Upload failed: HTTP "+response.status);
+  const data=await response.json();
+  $("assetResult").textContent="Staged asset ID: "+data.id+" ("+data.category+")";
+  const preview=$("assetPreview");preview.replaceChildren();
+  if(data.category==="image"){
+   const img=document.createElement("img");img.src=URL.createObjectURL(file);
+   img.alt=file.name;img.style.maxWidth="240px";img.onload=()=>URL.revokeObjectURL(img.src);preview.append(img);
+  }else{
+   const audio=document.createElement("audio");audio.controls=true;audio.src=URL.createObjectURL(file);
+   audio.onloadeddata=()=>URL.revokeObjectURL(audio.src);preview.append(audio);
+  }
+  const attach=document.createElement("button");attach.textContent="Attach ID to draft / ربط بالمسودة";
+  attach.onclick=()=>{
+   try{const payload=JSON.parse($("payload").value);payload.staged_asset_id=data.id;
+    $("payload").value=JSON.stringify(payload,null,2);message("Asset ID attached to draft JSON / تم ربط معرف الملف بالمسودة");
+   }catch(e){message("Invalid draft JSON")}};
+  preview.append(attach);
+  message("Asset uploaded privately / تم رفع الملف كمسودة خاصة");
+ }catch(e){message(e.message)}
+};
+async function load(){try{const data=await request("");drafts=data.drafts||[];render();message("Drafts loaded / تم تحميل المسودات")}catch(e){message(e.message)}}
+$("load").onclick=load;
+$("clear").onclick=clear;
+$("save").onclick=async()=>{try{
+ const payload=JSON.parse($("payload").value);
+ if(!payload||Array.isArray(payload)||typeof payload!=="object")throw Error("JSON payload must be an object");
+ const body={category:$("category").value,title:$("title").value.trim(),payload};
+ if(!body.title)throw Error("Title is required");
+ const id=$("draftId").value;
+ await request(id?"/"+encodeURIComponent(id):"",id?"PUT":"POST",body);
+ clear();await load();message("Draft saved / تم حفظ المسودة");
+}catch(e){message(e.message)}};
+</script></body></html>

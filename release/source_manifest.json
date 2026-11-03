@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "file_count": 764,
+  "file_count": 769,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
-    ".github/workflows/godot-checks.yml": "bd476bdb12220e83d60c2a60cf08e875059885dc81c58458f8c8f8403d314d0b",
+    ".github/workflows/godot-checks.yml": "e7aa0433cd6d052b9771a9343aa232878186587a9e248199d370ed9394e8a250",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
@@ -679,9 +679,9 @@
     "scripts/daily_rounds.gd.uid": "9809759686236708dd2950794275781e8c4ccd1ea7c5ecb9bc64a82af52efda4",
     "scripts/live_ops.gd": "fe65c25afc4fbc6ad6d1b5b30bd958c83ca7c72a90f2b07e291a4485aca0b3e9",
     "scripts/live_ops.gd.uid": "ae3219c6457574fdf276f6a3680d2a40d44546a986c09e0559fed6a55d79d0fb",
-    "scripts/main.gd": "97ee885c50216ecc57709df413965a495bf93fe866ea5cdd119742e8f1595d76",
+    "scripts/main.gd": "2c8a3e83ef4986325785410c2faf35c1625deaf5f1ddd1e55fc9ea6113280e2c",
     "scripts/main.gd.uid": "cac4c13aa0f7d6065030662e0079a30bb90ea705f0ac4c53c0ba426761a2dd57",
-    "scripts/multiplayer.gd": "36f8ccd93d423367489e6a1c02b4f119af1ab36e07c731799d5a0534dbcb558c",
+    "scripts/multiplayer.gd": "2c104d60d935997bd30ac460b76d6e652339935507663de47d1162f467f7436d",
     "scripts/multiplayer.gd.uid": "b4e505439e2fd5e340f1013f1b8a94f319d038f3a15d32b1700a08dd89ccca51",
     "scripts/poing_admob_bridge.gd": "04792f756f0b631f36947d26cb7051aa30c467a006ea2c8eedc20da94e741244",
     "scripts/poing_admob_bridge.gd.uid": "d63838fbb36b289eab1b9e146fae96e0befb3e5a6fb942eaa7ab05c9522e0b37",
@@ -694,14 +694,14 @@
     "server/liveops_content.py": "7dd3312cc3bb465b24824037760e7c23bf2514969a191cd6ce67fac1e07f59e9",
     "server/liveops_rotation.json": "ab08107b814e860da6089301815d481840df44bc41c8400ef49e5ed3fbf818c7",
     "server/requirements.txt": "2324650b5371efe39ea9417a042cc9eee45c7b771028658a0bd509cde9cdfd94",
-    "server/server.py": "639760cd2c29f6a13bb35e31f4ffdb0b9e02ccac703b6cc112085d70c1395acc",
+    "server/server.py": "00aff7a14d94eaf202cad595dca2ec1dcf4ac9abbd00f8ecd317213b0fbab18f",
     "server/source_bundle.b85": "ca504b130a63825de48e0fc3837ea24616937629a42461bb58f5c21ad0f5e4f6",
     "server/test_additive_history_v114.py": "82edd1728f01c633744f94be49dddd940f272e91bb7f8e19e168982d8dca9ca0",
     "server/test_daily_content.py": "9516e7c8e4cd769ddce74fbe9eda0e107ff32c4c8fff7dc6c34c7744802440b7",
     "server/test_daily_images.py": "3485128b99cfec742bd23d4cf427af5beda034e253dd4dc934ccc182e74f9647",
     "server/test_live_match.py": "f1161a4d03c4e13a8a2164f52180907087d18ea849a32eea39bea9726e0a01bb",
     "server/test_liveops_v96.py": "5ba3be29d8565af4f47a115e6c402d48aaf9c166d1fb2d46527867b969e57326",
-    "server/test_multiplayer.py": "b719d5c22ef01a256afd24f2a81f066443bc39e21d03e16f63c50a67a2389e41",
+    "server/test_multiplayer.py": "f277bd101a36803c66ad5d5d9ca46e28a0db7d3b341ea18c88517e2368bb0e80",
     "server/test_network_sync_v88.py": "9a4395685cc081f97d5e30700e63f7b148b656da097a1aa65584ce43aad5ab6f",
     "server/test_reconnect_v87.py": "e464dd8c3d87afc2b1485830200a5352828969d47a9fd68a2db1ca1ce4d63a55",
     "server/test_recovery_v86.py": "31f3182d91db1d65e18a22aa5186aba0ef0210294658e1029ff819c7df82922f",
@@ -765,6 +765,11 @@
     "tests/test_visual_mystery_v45.py": "4d05ef49c1d6f43de3582763886f351f6fead42adea75488c882ae9baadd51a8",
     "tests/test_visual_results_sync_v85.py": "2a7f78c560ada217bfb287f31610e2448874c1799fb8c0c0ee7ca5c73b38ab16",
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
-    ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993"
+    ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993",
+    ".github/workflows/identity-postgres-smoke.yml": "ae60ef267ef9630615bc124f47176a49c54d97f0b04939baa8f1c03246959902",
+    "scripts/network/gaminghub_auth.gd": "f0f3d4d35845ad454d1e3cd23678fb259e08474a3eb288907091559f0f97659c",
+    "tests/auth_client_smoke.gd": "8ebefc9de773ec4ebbfa8297f486e91b2bb785905d73ca2ddca136130a370f93",
+    "scripts/account_screen.gd": "33f6d73c43bca8890bc979d844af5b7c6918fe16aa1e86ef0548e8be603664ea",
+    "scenes/AccountScreen.tscn": "2f6c0ecc52174dae5501e39bce7edb10c55f35de6165777882e1b729eca6b372"
   }
 }

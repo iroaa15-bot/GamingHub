@@ -4,6 +4,7 @@ const VisualSkin = preload("res://scripts/visual_skin.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
+const AuthClient = preload("res://scripts/network/gaminghub_auth.gd")
 var socket := WebSocketPeer.new()
 var connected := false
 var room_code := ""
@@ -463,6 +464,13 @@ func _start_reconnect() -> void:
  _refresh_actions()
  status.text = _t("انقطع الاتصال؛ جاري استكمال نفس المباراة...", "Connection lost; restoring your match...")
 
+func _bind_account_if_available() -> void:
+ # Identity is optional. Server verifies the token; no client-provided score or user ID.
+ # WebSocket ordering ensures the binding precedes lobby actions or resume.
+ var token: String = AuthClient.session_token
+ if not token.is_empty() and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+  _send({"type": "auth_bind", "access_token": token})
+
 func _process(_delta: float) -> void:
  socket.poll()
  var state := socket.get_ready_state()
@@ -499,6 +507,7 @@ func _process(_delta: float) -> void:
   if state == WebSocketPeer.STATE_OPEN and not reconnect_pending:
    reconnect_pending = true
    connect_started_ms = reconnect_now
+   _bind_account_if_available()
    _send({"type":"resume", "code":room_code, "token":resume_token})
   if state != WebSocketPeer.STATE_OPEN:
    return
@@ -547,6 +556,7 @@ func _process(_delta: float) -> void:
    status.text = _t("جاري مراجعة الحركة مع السيرفر...", "Checking move status with server...")
    _send({"type":"sync"})
   if not connected:
+   _bind_account_if_available()
    connected = true
    last_ping_ms = Time.get_ticks_msec()
    ping_waiting = false
@@ -632,6 +642,9 @@ func _handle(msg: Dictionary) -> void:
   lobby_request_pending = false
   lobby_request_started_ms = 0
  match kind:
+  "auth_bound":
+   # Optional account binding must never block guest gameplay.
+   pass
   "pong":
    if ping_waiting and int(msg.get("id", -1)) == ping_sent_ms:
     latency_ms = maxi(0, Time.get_ticks_msec() - ping_sent_ms)

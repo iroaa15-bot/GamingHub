@@ -1827,9 +1827,14 @@ func show_home() -> void:
  label(tr_ui("الأونلاين يحتاج سيرفر متصل. اللعب ضد الكمبيوتر متاح دون سيرفر.", "Online requires a connected server. AI/offline mode works without one."), 16)
  label(tr_ui("ألعاب إضافية", "MORE GAMES"), 23)
  button(tr_ui("🧩 اكتشف الألعاب الأخرى", "🧩 EXPLORE OTHER GAMES"), show_more_games, PANEL)
+ if age_group == "18plus":
+  button(tr_ui("👤 حساب اللاعب (اختياري)", "👤 PLAYER ACCOUNT (OPTIONAL)"), open_account_screen, PANEL)
  button("العربية / English", show_languages, PANEL)
  button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
  button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
+
+func open_account_screen() -> void:
+ get_tree().change_scene_to_file("res://scenes/AccountScreen.tscn")
 
 func start_championship() -> void:
  # No network, matchmaking, ads, or paid rewards. A deterministic 15-question local run.

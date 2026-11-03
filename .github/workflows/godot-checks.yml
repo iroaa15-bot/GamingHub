@@ -34,6 +34,10 @@ jobs:
         run: |
           set -o pipefail
           godot --headless --path . --editor --import --quit 2>&1 | tee godot-import.log
+      - name: Optional account client smoke
+        run: |
+          timeout 45 godot --headless --path . --script res://tests/auth_client_smoke.gd 2>&1 | tee auth-client.log
+          grep -q AUTH_CLIENT_SMOKE_PASS auth-client.log
       - name: Main, multiplayer and offline game smoke
         shell: bash
         run: |
@@ -143,3 +147,72 @@ jobs:
           path: build/GamingHub-v11.5-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+  identity-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gaminghub_identity_ci
+          POSTGRES_USER: gaminghub
+          POSTGRES_PASSWORD: test-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gaminghub -d gaminghub_identity_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install integration dependencies
+        run: python -m pip install 'fastapi>=0.115,<1' 'httpx>=0.27,<1' 'pytest>=8,<10' 'psycopg[binary]>=3.2,<4' 'websockets>=13,<17' 'Pillow>=10,<13'
+      - name: Exercise account lifecycle against PostgreSQL
+        env:
+          GAMINGHUB_DATABASE_URL: postgresql://gaminghub:test-only-password@localhost:5432/gaminghub_identity_ci
+        run: python -m pytest -q identity_backend/test_integration.py identity_backend/test_match_awards.py identity_backend/test_session_bindings.py
+  postgres-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: gaminghub_test
+          POSTGRES_USER: gaminghub
+          POSTGRES_PASSWORD: test-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gaminghub -d gaminghub_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PostgreSQL client
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Verify real PostgreSQL writes survive reconnection
+        env:
+          DATABASE_URL: postgresql://gaminghub:test-only-password@localhost:5432/gaminghub_test
+        run: |
+          python - <<'PY'
+          import os, uuid, psycopg
+          url = os.environ["DATABASE_URL"]
+          uid = str(uuid.uuid4())
+          with psycopg.connect(url) as db:
+              db.execute("CREATE TABLE ci_persistence (id TEXT PRIMARY KEY, score INTEGER NOT NULL)")
+              db.execute("INSERT INTO ci_persistence VALUES (%s,%s)", (uid,42))
+              db.commit()
+          with psycopg.connect(url) as db:
+              assert db.execute("SELECT score FROM ci_persistence WHERE id=%s",(uid,)).fetchone() == (42,)
+              db.execute("UPDATE ci_persistence SET score=50 WHERE id=%s",(uid,))
+              db.commit()
+          with psycopg.connect(url) as db:
+              assert db.execute("SELECT score FROM ci_persistence WHERE id=%s",(uid,)).fetchone() == (50,)
+          print("POSTGRES_SMOKE_PASS")
+          PY

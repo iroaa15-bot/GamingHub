@@ -38,6 +38,8 @@ def ensure_table(db):
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )""")
 
+    db.execute("ALTER TABLE admin_content_drafts ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'draft'")
+
 
 def validate_staged_asset(db, body: ContentDraft):
     """Validate an optional staged binary reference before storing the draft."""
@@ -107,11 +109,11 @@ def list_drafts(category: str | None = None, x_admin_key: str = Header(default="
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
         rows = db.execute(
-            "SELECT id,category,title,payload FROM admin_content_drafts "
+            "SELECT id,category,title,payload,review_status FROM admin_content_drafts "
             "WHERE (%s::text IS NULL OR category=%s) ORDER BY created_at DESC LIMIT 200",
             (category, category),
         ).fetchall()
-    return {"drafts": [{"id": r[0], "category": r[1], "title": r[2], "payload": r[3]} for r in rows]}
+    return {"drafts": [{"id": r[0], "category": r[1], "title": r[2], "payload": r[3], "review_status": r[4]} for r in rows]}
 
 
 @router.put("/{draft_id}")
@@ -121,7 +123,7 @@ def update_draft(draft_id: str, body: ContentDraft, x_admin_key: str = Header(de
         ensure_table(db)
         validate_staged_asset(db, body)
         updated = db.execute(
-            "UPDATE admin_content_drafts SET category=%s,title=%s,payload=%s::jsonb,updated_at=NOW() "
+            "UPDATE admin_content_drafts SET category=%s,title=%s,payload=%s::jsonb,review_status='draft',updated_at=NOW() "
             "WHERE id=%s RETURNING id",
             (body.category, body.title, json.dumps(body.payload), draft_id),
         ).fetchone()

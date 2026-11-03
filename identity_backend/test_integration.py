@@ -159,3 +159,23 @@ def test_content_review_transitions_are_enforced(monkeypatch):
     assert client.post(url + "approve", headers=headers).json()["review_status"] == "approved"
     assert client.post(url + "approve", headers=headers).status_code == 409
     assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200
+
+
+def test_approved_draft_edit_resets_review_status(monkeypatch):
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-edit-review")
+    client = TestClient(app)
+    headers = {"X-Admin-Key": "ci-edit-review"}
+    draft = {"category": "question", "title": "Initial", "payload": {"answer": "duck"}}
+    created = client.post("/api/admin/content", json=draft, headers=headers)
+    assert created.status_code == 201, created.text
+    draft_id = created.json()["id"]
+    for action in ("submit", "approve"):
+        response = client.post(f"/api/admin/content/{draft_id}/review/{action}", headers=headers)
+        assert response.status_code == 200, response.text
+    updated = client.put(f"/api/admin/content/{draft_id}", json={**draft, "title": "Changed"}, headers=headers)
+    assert updated.status_code == 200, updated.text
+    listed = client.get("/api/admin/content", headers=headers)
+    row = next(d for d in listed.json()["drafts"] if d["id"] == draft_id)
+    assert row["review_status"] == "draft"
+    assert client.post(f"/api/admin/content/{draft_id}/review/approve", headers=headers).status_code == 409
+    assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200

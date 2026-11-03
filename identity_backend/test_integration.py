@@ -21,3 +21,20 @@ def test_account_lifecycle():
     assert client.get("/api/me",headers=headers).status_code==401
     with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
         assert db.execute("SELECT count(*) FROM identity_users WHERE email=%s",("test@example.test",)).fetchone()[0]==1
+
+def test_award_points_idempotency(monkeypatch):
+    initialize()
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY","ci-secret")
+    client = TestClient(app)
+    token = client.post("/api/auth/guest").json()["access_token"]
+    headers = {"Authorization": "Bearer " + token}
+    data = {"match_id": "ci-match-unique-001", "points": 10}
+    assert client.post("/api/admin/award-points", json=data, headers=headers).status_code == 403
+    headers["X-Admin-Key"] = "ci-secret"
+    first = client.post("/api/admin/award-points", json=data, headers=headers)
+    assert first.status_code == 200, first.text
+    assert first.json()["points"] == 10
+    second = client.post("/api/admin/award-points", json=data, headers=headers)
+    assert second.status_code == 200, second.text
+    assert second.json()["points"] == 10
+    assert second.json()["awarded"] is False

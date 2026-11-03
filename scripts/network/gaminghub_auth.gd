@@ -12,7 +12,7 @@ func configure(https_api_url: String) -> bool:
     api_base = normalized + "/api"
     return true
 
-func _call(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -> Dictionary:
+func _call(endpoint: String, method: int, data: Dictionary = {}) -> Dictionary:
     if api_base.is_empty():
         return {"ok": false, "status": 0, "error": "Backend URL not configured"}
     var request_node := HTTPRequest.new()
@@ -21,7 +21,7 @@ func _call(endpoint: String, method: HTTPClient.Method, data: Dictionary = {}) -
     var headers := PackedStringArray(["Content-Type: application/json"])
     if not access_token.is_empty():
         headers.append("Authorization: Bearer " + access_token)
-    var body := JSON.stringify(data) if method != HTTPClient.METHOD_GET else ""
+    var body: String = JSON.stringify(data) if method != HTTPClient.METHOD_GET else ""
     var start_error := request_node.request(api_base + endpoint, headers, method, body)
     if start_error != OK:
         request_node.queue_free()

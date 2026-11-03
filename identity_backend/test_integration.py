@@ -106,7 +106,7 @@ def test_admin_binary_upload_download_and_rejections(monkeypatch):
     import hashlib
     monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-assets-key")
     client = TestClient(app)
-    png = b"\\x89PNG\\r\\n\\x1a\\n" + b"staged-fixture"
+    png = bytes.fromhex("89504e470d0a1a0a") + b"staged-fixture"
     headers = {"X-Admin-Key": "ci-assets-key", "Content-Type": "application/octet-stream"}
     assert client.post("/api/admin/assets", data=png).status_code == 403
     uploaded = client.post("/api/admin/assets", content=png, headers=headers)

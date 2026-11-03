@@ -91,3 +91,12 @@ def test_admin_content_drafts_crud_and_authorization(monkeypatch):
     assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200
     assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 404
     assert client.post("/api/admin/content", json={"category": "invalid", "title": "Bad"} , headers=headers).status_code == 422
+
+
+def test_admin_dashboard_is_served_as_html():
+    client = TestClient(app)
+    response = client.get("/admin/dashboard")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Gaming Hub" in response.text
+    assert "admin" in response.text.lower()

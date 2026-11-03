@@ -22,6 +22,16 @@ class MultiplayerTests(unittest.IsolatedAsyncioTestCase):
         await self.a.close(); await self.b.close()
         self.listener.close(); await self.listener.wait_closed()
 
+    async def test_invalid_auth_binding_does_not_break_guest_matchmaking(self):
+        await send(self.a, 'auth_bind', access_token='invalid')
+        response = await recv(self.a)
+        self.assertEqual(response, {'type': 'auth_bound', 'ok': False})
+        await send(self.a, 'matchmake')
+        self.assertEqual((await recv(self.a))['status'], 'waiting')
+        await send(self.b, 'matchmake')
+        self.assertEqual((await recv(self.a))['type'], 'room')
+        self.assertEqual((await recv(self.b))['type'], 'room')
+
     async def test_matchmaking_and_hidden_cards(self):
         await send(self.a, 'matchmake')
         self.assertEqual((await recv(self.a))['status'], 'waiting')

@@ -12,6 +12,8 @@ var _room := ""
 var epoch := -1
 var sequence := 0
 var last_status := ""
+var last_failure := ""
+var _health_elapsed := 0.0
 var _handling_failure := false
 func attach(connection: Node) -> void:
  client = connection
@@ -29,6 +31,7 @@ func attach(connection: Node) -> void:
 func is_available() -> bool:
  return is_instance_valid(bridge) and bridge.is_available()
 func enable(value: bool) -> void:
+ last_failure=""
  if not value:
   requested=false
   _sent_opt_in=false
@@ -119,9 +122,19 @@ func _failure(reason: String) -> void:
  _sent_opt_in=false
  _permission_granted=false
  last_status=reason
+ last_failure=reason
+ if OS.is_debug_build():print("GH_VOICE_FAILURE ",reason)
  if was_requested and is_instance_valid(client) and not client.capabilities.is_empty() and not client.code.is_empty() and not bool(client.state.get("paused",false)) and not bool(client.state.get("closed",false)):
   client.send_action("duel_voice_state",{"enabled":false})
  if is_instance_valid(bridge): bridge.set_consent(false,false)
  unavailable.emit(reason)
  changed.emit()
  _handling_failure=false
+
+# Diagnostic counters only in test builds; never PCM, speech, tokens or room codes.
+func _process(delta: float) -> void:
+ if not OS.is_debug_build() or not requested or not is_instance_valid(bridge):return
+ _health_elapsed+=delta
+ if _health_elapsed<5.0:return
+ _health_elapsed=0.0
+ if bridge.has_method("voice_health_snapshot"):print("GH_VOICE_HEALTH ",JSON.stringify(bridge.voice_health_snapshot()))

@@ -54,6 +54,10 @@ func run() -> void:
  ck(not b.active and not a.requested,"manual stop cancels reconnect intent")
  a.enable(true);state.voice.local_enabled=true;a._state(state);c.code="OTHER";state.code="OTHER";a._state(state)
  ck(not b.active and not a.requested,"different room never inherits microphone consent")
+ a._failure("audio_focus_lost")
+ ck(a.last_failure=="audio_focus_lost" and not a.requested,"interruption records retry status")
+ a.enable(true);ck(a.last_failure.is_empty(),"explicit retry clears stale interruption")
+ a.enable(false)
  a.queue_free();c.queue_free();b.queue_free();await process_frame
  print("AGREEMENT_VOICE_ADAPTER ",errors.is_empty()," fake JNI boundary only")
  quit(0 if errors.is_empty() else 1)

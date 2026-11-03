@@ -673,6 +673,7 @@ func _voice_changed() -> void:
  if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت يحتاج Android وإذن الميكروفون؛ التحقق السمعي على هاتفين لم يكتمل.","Voice requires Android and microphone permission; two-device acoustic verification is pending.")
  elif voice_adapter.requested and not voice_adapter.bridge.active:voice_status.text=tr_pair("بانتظار موافقة الطرف الآخر أو استعادة الصوت","Waiting for peer consent or audio recovery")
  elif voice_adapter.requested:voice_status.text=tr_pair("إرسال الميكروفون مكتوم • الاستقبال متاح","Microphone transmission muted • receiving remains available") if voice_adapter.muted else tr_pair("جلسة الصوت مفعلة طوال عضوية الغرفة","Voice enabled throughout room membership")
+ elif not voice_adapter.last_failure.is_empty():voice_status.text=tr_pair("توقف الاتصال الصوتي • اضغط زر الاتصال للمحاولة مجددًا","Voice connection stopped • tap the call button to try again")
  else:voice_status.text=tr_pair("الصوت اختياري • ابدأ الاتصال لمنح إذن الميكروفون","Voice is optional • start connection to grant microphone permission")
 
 func _create_filtered_room() -> void:

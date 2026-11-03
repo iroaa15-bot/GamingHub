@@ -767,6 +767,6 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993",
     ".github/workflows/identity-postgres-smoke.yml": "ae60ef267ef9630615bc124f47176a49c54d97f0b04939baa8f1c03246959902",
-    "scripts/network/gaminghub_auth.gd": "15d9d5127fd07e252fc774d09f4d86e98a1b594c85dc924d0118118dbca9f382"
+    "scripts/network/gaminghub_auth.gd": "975c5c1395d4c142295ea8525506cbc52e3e6fbb8f9799bbb1265bd8233e6d4d"
   }
 }

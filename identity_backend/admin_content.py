@@ -62,6 +62,28 @@ def validate_staged_asset(db, body: ContentDraft):
         raise HTTPException(422, "Staged asset category mismatch")
 
 
+
+@router.post("/{draft_id}/review/{decision}")
+def review_draft(draft_id: str, decision: str, x_admin_key: str = Header(default="")):
+    authorize(x_admin_key)
+    transitions = {"submit": ("draft", "in_review"), "approve": ("in_review", "approved"),
+                   "reject": ("in_review", "rejected"), "resubmit": ("rejected", "in_review")}
+    if decision not in transitions:
+        raise HTTPException(422, "Invalid review decision")
+    previous, next_status = transitions[decision]
+    with psycopg.connect(DATABASE_URL) as db:
+        ensure_table(db)
+        db.execute("ALTER TABLE admin_content_drafts ADD COLUMN IF NOT EXISTS review_status TEXT NOT NULL DEFAULT 'draft'")
+        row = db.execute(
+            "UPDATE admin_content_drafts SET review_status=%s,updated_at=NOW() WHERE id=%s AND review_status=%s RETURNING id",
+            (next_status, draft_id, previous),
+        ).fetchone()
+        if row is None:
+            raise HTTPException(409, "Draft missing or invalid review transition")
+        db.commit()
+    return {"id": draft_id, "review_status": next_status}
+
+
 @router.post("", status_code=201)
 def create_draft(body: ContentDraft, x_admin_key: str = Header(default="")):
     authorize(x_admin_key)

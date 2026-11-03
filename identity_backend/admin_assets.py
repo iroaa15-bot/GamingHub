@@ -96,6 +96,15 @@ def delete_asset(asset_id: str, x_admin_key: str = Header(default="")):
     authorize(x_admin_key)
     with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
         ensure_table(db)
+        # Do not orphan content drafts that reference this binary.
+        from identity_backend.admin_content import ensure_table as ensure_drafts
+        ensure_drafts(db)
+        referenced = db.execute(
+            "SELECT 1 FROM admin_content_drafts WHERE payload->>'staged_asset_id'=%s LIMIT 1",
+            (asset_id,),
+        ).fetchone()
+        if referenced:
+            raise HTTPException(409, "Asset is referenced by a content draft")
         removed = db.execute("DELETE FROM admin_staged_assets WHERE id=%s RETURNING id", (asset_id,)).fetchone()
         if not removed:
             raise HTTPException(404, "Asset not found")

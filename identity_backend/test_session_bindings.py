@@ -58,6 +58,7 @@ def test_websocket_auth_bind_with_real_postgres(monkeypatch):
 def test_server_authoritative_win_awards_once(monkeypatch):
     """The room server, not the Android client, awards verified winner points."""
     import sys
+    import psycopg
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
     import server as room_server

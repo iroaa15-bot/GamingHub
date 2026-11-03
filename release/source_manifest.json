@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "file_count": 766,
+  "file_count": 767,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
-    ".github/workflows/godot-checks.yml": "156f91a8a957c4fe4583ab310451c5b4c29bd97dfcfb1bf91714c41700b61c7f",
+    ".github/workflows/godot-checks.yml": "810442f35ca761c2bbb33c30b55f887ebdddfe3040d2cfb8f35d93d3faf63367",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",
     ".gitignore": "1e91962cb18b4e61d1c00d32f165d7ac70bffa240260bb7dea012662f9fe18ba",
@@ -767,6 +767,7 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993",
     ".github/workflows/identity-postgres-smoke.yml": "ae60ef267ef9630615bc124f47176a49c54d97f0b04939baa8f1c03246959902",
-    "scripts/network/gaminghub_auth.gd": "975c5c1395d4c142295ea8525506cbc52e3e6fbb8f9799bbb1265bd8233e6d4d"
+    "scripts/network/gaminghub_auth.gd": "975c5c1395d4c142295ea8525506cbc52e3e6fbb8f9799bbb1265bd8233e6d4d",
+    "tests/auth_client_smoke.gd": "8ebefc9de773ec4ebbfa8297f486e91b2bb785905d73ca2ddca136130a370f93"
   }
 }

@@ -179,3 +179,33 @@ def test_approved_draft_edit_resets_review_status(monkeypatch):
     assert row["review_status"] == "draft"
     assert client.post(f"/api/admin/content/{draft_id}/review/approve", headers=headers).status_code == 409
     assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200
+
+
+def test_approved_content_publish_snapshot_and_revoke(monkeypatch):
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-publish-secret")
+    client = TestClient(app)
+    headers = {"X-Admin-Key": "ci-publish-secret"}
+    original = {"category": "question", "title": "Published question", "payload": {"answer": "duck"}}
+    draft = client.post("/api/admin/content", json=original, headers=headers)
+    assert draft.status_code == 201, draft.text
+    draft_id = draft.json()["id"]
+    publish_url = f"/api/admin/content/{draft_id}/publish"
+    assert client.post(publish_url).status_code == 403
+    assert client.post(publish_url, headers=headers).status_code == 409
+    for action in ("submit", "approve"):
+        assert client.post(f"/api/admin/content/{draft_id}/review/{action}", headers=headers).status_code == 200
+    published = client.post(publish_url, headers=headers)
+    assert published.status_code == 201, published.text
+    item_id = published.json()["id"]
+    visible = client.get("/api/content?category=question")
+    assert visible.status_code == 200
+    assert any(item["id"] == item_id and item["payload"]["answer"] == "duck" for item in visible.json()["items"])
+    modified = {"category": "question", "title": "Edited question", "payload": {"answer": "goose"}}
+    assert client.put(f"/api/admin/content/{draft_id}", json=modified, headers=headers).status_code == 200
+    assert client.post(publish_url, headers=headers).status_code == 409
+    visible = client.get("/api/content?category=question")
+    assert any(item["id"] == item_id and item["payload"]["answer"] == "duck" for item in visible.json()["items"])
+    assert client.post(f"/api/admin/published/{item_id}/revoke").status_code == 403
+    assert client.post(f"/api/admin/published/{item_id}/revoke", headers=headers).status_code == 200
+    assert not any(item["id"] == item_id for item in client.get("/api/content?category=question").json()["items"])
+    assert client.delete(f"/api/admin/content/{draft_id}", headers=headers).status_code == 200

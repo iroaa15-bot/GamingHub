@@ -53,3 +53,33 @@ def test_websocket_auth_bind_with_real_postgres(monkeypatch):
             listener.close()
             await listener.wait_closed()
     asyncio.run(exercise())
+
+
+def test_server_authoritative_win_awards_once(monkeypatch):
+    """The room server, not the Android client, awards verified winner points."""
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "server"))
+    import server as room_server
+
+    initialize()
+    client = TestClient(app)
+    token = client.post("/api/auth/guest").json()["access_token"]
+    identity = verify_session(os.environ["GAMINGHUB_DATABASE_URL"], token)
+    assert identity is not None
+    winner_connection = object()
+    loser_connection = object()
+    room = room_server.Room(code="CIWINROOM", players=[winner_connection, loser_connection])
+    room.started_at = 123456.789
+    room_server.verified_accounts[winner_connection] = identity.user_id
+    try:
+        assert room_server.persist_verified_win(room, 0) is True
+        assert room_server.persist_verified_win(room, 0) is False
+        assert room_server.persist_verified_win(room, -1) is False
+        with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
+            row = db.execute("SELECT points FROM identity_users WHERE id=%s", (identity.user_id,)).fetchone()
+            assert row == (10,)
+            awards = db.execute("SELECT count(*) FROM identity_awards WHERE user_id=%s", (identity.user_id,)).fetchone()
+            assert awards == (1,)
+    finally:
+        room_server.verified_accounts.pop(winner_connection, None)

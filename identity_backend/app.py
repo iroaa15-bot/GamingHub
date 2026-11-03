@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 import psycopg
 from fastapi import FastAPI, Header, HTTPException
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 app = FastAPI(title="Gaming Hub Identity Integration")
 DATABASE_URL = os.environ.get("GAMINGHUB_DATABASE_URL", "")

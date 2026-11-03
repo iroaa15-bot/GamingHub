@@ -140,5 +140,6 @@ def test_draft_rejects_missing_or_mismatched_staged_asset(monkeypatch):
     valid = {"category": "sound", "title": "Correct type", "payload": {"staged_asset_id": asset_id}}
     created = client.post("/api/admin/content", json=valid, headers=headers)
     assert created.status_code == 201, created.text
+    assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 409
     assert client.delete(f"/api/admin/content/{created.json()['id']}", headers=headers).status_code == 200
     assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 200

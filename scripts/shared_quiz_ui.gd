@@ -138,7 +138,7 @@ func _quiz_state(value: Dictionary) -> void:
   for i in range(int(question.get("size",0))):
    var card_index: int=i
    var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(72,78);card.expand_icon=true;card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER
-   VisualSkin.decorate_button(card,"violet");card.add_theme_constant_override("icon_max_width",52)
+   VisualSkin.decorate_button(card,"violet");card.add_theme_constant_override("icon_max_width",52);card.add_theme_color_override("icon_disabled_color",Color.WHITE)
    card.pressed.connect(func():client.send_action("duel_quiz_flip",{"question_id":current_question,"index":card_index}))
    memory_grid.add_child(card);memory_controls.append(card)
   for child in steps_box.get_children():child.queue_free()

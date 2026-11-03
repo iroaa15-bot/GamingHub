@@ -51,7 +51,7 @@ func _ready() -> void:
  for i in range(6):
   var index: int=i
   answer_buttons.append(button("",func():client.send_action("duel_quiz_answer",{"question_id":current_question,"choice":index})))
- written_field=LineEdit.new();written_field.placeholder_text=tr_pair("اكتب إجابتك","Type your answer");written_field.max_length=200;quiz_panel.add_child(written_field)
+ written_field=LineEdit.new();written_field.placeholder_text=tr_pair("اكتب إجابتك","Type your answer");written_field.max_length=200;VisualSkin.decorate_input(written_field);quiz_panel.add_child(written_field)
  written_submit=button(tr_pair("تأكيد الإجابة","Confirm answer"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"text":written_field.text}))
  mechanic_info=label("")
  clue_control=button(tr_pair("دليل إضافي • يخفض النقاط","Another clue • reduces points"),func():client.send_action("duel_quiz_clue",{"question_id":current_question}))
@@ -137,14 +137,16 @@ func _quiz_state(value: Dictionary) -> void:
   for child in memory_grid.get_children():child.queue_free()
   for i in range(int(question.get("size",0))):
    var card_index: int=i
-   var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(90,85);card.expand_icon=true
+   var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(72,78);card.expand_icon=true
+   VisualSkin.decorate_button(card,"violet");card.add_theme_constant_override("icon_max_width",52)
    card.pressed.connect(func():client.send_action("duel_quiz_flip",{"question_id":current_question,"index":card_index}))
    memory_grid.add_child(card);memory_controls.append(card)
   for child in steps_box.get_children():child.queue_free()
   var steps: Array=question.get("steps_"+language,question.get("steps_en",[]))
   for i in range(steps.size()):
    var index: int=i
-   var control=Button.new();control.text=str(steps[i]);control.custom_minimum_size.y=48
+   var control=Button.new();control.text=str(steps[i]);control.custom_minimum_size.y=56
+   VisualSkin.decorate_button(control,"teal");control.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
    control.pressed.connect(func():
     if index not in step_picks:step_picks.append(index)
     _show_step_picks())

@@ -20,11 +20,11 @@ func run():
  assert(ids==[0,1,6,3,8,9,2,4,5,7])
  for id in range(10):assert(ids.count(id)==1)
  var skin=load("res://scripts/visual_skin.gd")
- for id in [0,1,6,3,8,9]:
+ for id in range(10):
   var texture: Texture2D=skin.game_cover(id)
   assert(texture!=null and texture.get_width()<=256 and texture.get_height()<=256)
   assert(texture.get_image().detect_alpha()!=Image.ALPHA_NONE)
- print("PREMIUM_SIX_RASTER_ICONS_RGBA_256 true")
+ print("PREMIUM_TEN_RASTER_ICONS_RGBA_256 true")
  await snap("home-primary-six")
  for button in main.root.find_children("*","Button",true,false):
   if button.has_meta("more_original_games"):button.pressed.emit();break

@@ -54,28 +54,29 @@ static func card(color_value: Color = Color("182748"), radius: int = 24) -> Styl
  return box_style
 
 static var _neon_textures: Dictionary={}
-# Cached 64px nine-slice surfaces: beveled neon depth without shaders or per-frame effects.
+# Cached antialiased nine-slice surfaces; generated once per palette, no per-frame work.
 static func neon_surface(fill: Color, edge: Color) -> StyleBoxTexture:
  var key: String=fill.to_html()+edge.to_html()
  if not _neon_textures.has(key):
-  var image := Image.create(64,64,false,Image.FORMAT_RGBA8)
-  for y in range(64):
-   for x in range(64):
-    var q: Vector2=(Vector2(x+0.5,y+0.5)-Vector2(32,32)).abs()-Vector2(14,14)
+  var image := Image.create(128,128,false,Image.FORMAT_RGBA8)
+  for y in range(128):
+   for x in range(128):
+    var q: Vector2=(Vector2(x+0.5,y+0.5)/2.0-Vector2(32,32)).abs()-Vector2(14,14)
     var d: float=q.max(Vector2.ZERO).length()+minf(maxf(q.x,q.y),0.0)-12.0
     var color := Color.TRANSPARENT
     if d<=0:
-     color=fill.lightened(0.22).lerp(fill.darkened(0.32),clampf(float(y-5)/54.0,0.0,1.0))
+     color=fill.lightened(0.22).lerp(fill.darkened(0.32),clampf((float(y)/2.0-5.0)/54.0,0.0,1.0))
      if d>-1.7:color=edge
-     elif y<13:color=color.lerp(Color.WHITE,0.20)
+     elif y<26:color=color.lerp(Color.WHITE,0.20)
     elif d<5:
      color=edge;color.a=0.26*pow(1.0-d/5.0,2)
+    if d>-.5 and d<.5:color.a=lerpf(1.0,0.26,clampf(d+.5,0.0,1.0))
     image.set_pixel(x,y,color)
   _neon_textures[key]=ImageTexture.create_from_image(image)
  var surface := StyleBoxTexture.new()
  surface.texture=_neon_textures[key]
  for side in [SIDE_LEFT,SIDE_TOP,SIDE_RIGHT,SIDE_BOTTOM]:
-  surface.set_texture_margin(side,18)
+  surface.set_texture_margin(side,36)
   surface.set_expand_margin(side,5)
  surface.content_margin_left=14;surface.content_margin_right=14
  surface.content_margin_top=10;surface.content_margin_bottom=10
@@ -390,7 +391,7 @@ static func decorate_switch(control: CheckButton, title: String, enabled: bool) 
 static var _game_covers: Dictionary={}
 static func game_cover(index: int) -> Texture2D:
  if _game_covers.has(index):return _game_covers[index]
- var premium: Dictionary={0:"picture_icon_v1.png",1:"cinema_icon_v1.png",6:"sound_icon_v1.png",3:"brain_icon_v1.png",8:"memory_icon_v1.png",9:"ordering_icon_v1.png"}
+ var premium: Dictionary={0:"picture_icon_v1.png",1:"cinema_icon_v1.png",6:"sound_icon_v1.png",3:"brain_icon_v1.png",8:"memory_icon_v1.png",9:"ordering_icon_v1.png",2:"writing_icon_v1.png",4:"adventure_icon_v1.png",5:"knowledge_icon_v1.png",7:"identity_icon_v1.png"}
  if premium.has(index):
   var resource: String="res://assets/ui/premium/"+str(premium[index])
   if ResourceLoader.exists(resource):

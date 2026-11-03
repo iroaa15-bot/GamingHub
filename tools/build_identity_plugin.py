@@ -1,9 +1,8 @@
-"""Build the dependency-free Java identity plugin with the installed JDK/Android SDK.
+"""Compile reviewed native sources using the installed JDK/SDK and pinned Gradle.
 
-Gradle remains available; this path also works when Maven is unavailable. No SDK,
-compiler or dependency is downloaded and no verification is disabled.
+Provider libraries resolve through official repositories with normal TLS checks.
 """
-import argparse,hashlib,json,os,subprocess,tempfile,zipfile
+import argparse,hashlib,json,os,subprocess,zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -15,26 +14,22 @@ def archive(path,entries):
             output.writestr(info,data)
 
 def build(jdk,sdk,godot):
-    source=ROOT/'native/android-identity/src/main'
-    java=list(source.rglob('*.java'))
+    project=ROOT/'native/android-identity'
+    env={**os.environ,'JAVA_HOME':str(jdk),'ANDROID_HOME':str(sdk)}
+    java=jdk/'bin'/('java.exe' if os.name=='nt' else 'java')
+    subprocess.run([str(java),'-classpath',str(project/'gradle/wrapper/gradle-wrapper.jar'),
+        'org.gradle.wrapper.GradleWrapperMain','assembleDebug','assembleRelease','--console=plain',
+        '-PgodotAar='+str(godot.resolve())],cwd=project,env=env,check=True)
+    sources=sorted([*project.glob('*.kts'),*project.glob('*.properties'),*(project/'src/main').rglob('*.java'),
+        project/'src/main/AndroidManifest.xml'])
+    evidence={'schema':2,'sources':{p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes().replace(b'\r\n',b'\n')).hexdigest()
+        for p in sources},'godot_aar_sha256':hashlib.sha256(godot.read_bytes()).hexdigest()}
     output=ROOT/'addons/gaminghub_identity/bin';output.mkdir(parents=True,exist_ok=True)
-    with tempfile.TemporaryDirectory() as directory:
-        scratch=Path(directory);engine=scratch/'godot.jar'
-        with zipfile.ZipFile(godot) as aar:engine.write_bytes(aar.read('classes.jar'))
-        classes=scratch/'classes';classes.mkdir()
-        compiler=jdk/'bin'/('javac.exe' if os.name=='nt' else 'javac')
-        subprocess.run([str(compiler),'--release','17','-encoding','UTF-8','-classpath',
-            os.pathsep.join((str(sdk/'platforms/android-36/android.jar'),str(engine))),
-            '-d',str(classes),*[str(p) for p in java]],check=True)
-        jar=scratch/'classes.jar'
-        archive(jar,{p.relative_to(classes).as_posix():p.read_bytes() for p in classes.rglob('*.class')})
-        evidence={'schema':1,'sources':{p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes().replace(b'\r\n',b'\n')).hexdigest()
-            for p in [*java,source/'AndroidManifest.xml']},'godot_aar_sha256':hashlib.sha256(godot.read_bytes()).hexdigest()}
-        manifest=(source/'AndroidManifest.xml').read_bytes().replace(b'<manifest ',b'<manifest package="com.gaminghub.identity" ',1)
-        entries={'AndroidManifest.xml':manifest,'classes.jar':jar.read_bytes(),
-            'assets/gaminghub_identity_build.json':json.dumps(evidence,sort_keys=True).encode()}
-        for variant in ('debug','release'):
-            archive(output/f'gaminghub-identity-{variant}.aar',entries)
+    for variant in ('debug','release'):
+        built=project/f'build/outputs/aar/gaminghub-identity-{variant}.aar'
+        with zipfile.ZipFile(built) as aar:entries={name:aar.read(name) for name in aar.namelist() if not name.endswith('/')}
+        entries['assets/gaminghub_identity_build.json']=json.dumps(evidence,sort_keys=True).encode()
+        archive(output/f'gaminghub-identity-{variant}.aar',entries)
     print('IDENTITY_PLUGIN_BUILD_PASS')
 
 if __name__=='__main__':

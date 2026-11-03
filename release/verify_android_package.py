@@ -5,7 +5,12 @@ import argparse, pathlib, zipfile, sys
 UNNEEDED_PERMISSIONS = ('android.permission.READ_CONTACTS','android.permission.WRITE_CONTACTS',
     'android.permission.READ_PHONE_STATE','android.permission.READ_BASIC_PHONE_STATE',
     'android.permission.READ_EXTERNAL_STORAGE','android.permission.WRITE_EXTERNAL_STORAGE',
-    'android.permission.AD_ID','com.google.android.gms.permission.AD_ID')
+    'android.permission.AD_ID','com.google.android.gms.permission.AD_ID',
+    'android.permission.USE_BIOMETRIC','android.permission.USE_FINGERPRINT',
+    'android.permission.ACCESS_ADSERVICES_ATTRIBUTION','android.permission.ACCESS_ADSERVICES_AD_ID',
+    'android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE','android.permission.ACCESS_ADSERVICES_TOPICS',
+    'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE',
+    'android.permission.FOREGROUND_SERVICE','android.permission.WAKE_LOCK')
 
 def check(path: pathlib.Path, release: bool=False):
     errors=[]

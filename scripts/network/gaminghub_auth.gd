@@ -2,6 +2,7 @@ extends Node
 ## Optional Gaming Hub account client. Configure an HTTPS API URL before enabling.
 ## Does not change existing guest/offline gameplay or scene navigation.
 signal auth_changed(authenticated: bool)
+signal native_provider_result(provider: String, token: String, error: String)
 var api_base: String = ""
 ## Access tokens stay in memory. Android Keystore protects the refresh credential.
 static var session_token: String = ""
@@ -11,10 +12,14 @@ var refresh_token: String = ""
 var secure_store: Object
 var restoring := false
 var refresh_after := 0
+var active_provider := ""
+var requested_provider := ""
 
 func _ready() -> void:
     if Engine.has_singleton("GamingHubIdentity"):
         secure_store = Engine.get_singleton("GamingHubIdentity")
+        if secure_store.has_signal("social_result"):
+            secure_store.connect("social_result", _on_native_provider_result)
         # Explicit local debug-only acceptance request, with no real credentials.
         if OS.is_debug_build() and FileAccess.file_exists("user://identity_storage_probe.txt"):
             var mode := FileAccess.get_file_as_string("user://identity_storage_probe.txt").strip_edges()
@@ -56,6 +61,37 @@ func _forget_session() -> void:
     refresh_token = ""
     if secure_store != null: secure_store.clearSession()
     _remember_token("")
+
+func _on_native_provider_result(provider: String, token: String, error: String) -> void:
+    if provider == active_provider: native_provider_result.emit(provider, token, error)
+
+func sign_in_provider(provider: String) -> Dictionary:
+    if provider not in ["google", "facebook"] or not active_provider.is_empty():
+        return {"ok": false, "status": 0, "error": "Sign-in already in progress"}
+    if secure_store == null or not secure_store.has_method("requestGoogleLogin"):
+        return {"ok": false, "status": 0, "error": "Native Android sign-in unavailable"}
+    var availability := await _call("/auth/providers", HTTPClient.METHOD_GET)
+    if not availability.get("ok", false) or not availability.get("data", {}).get(provider, false):
+        return {"ok": false, "status": 503, "error": "Provider setup incomplete"}
+    var facebook: Dictionary = {}
+    if provider == "facebook":
+        var config: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/identity_provider_config.json"))
+        if config is Dictionary: facebook = config
+        if str(facebook.get("facebook_app_id", "")).is_empty() or str(facebook.get("facebook_client_token", "")).is_empty() or str(facebook.get("facebook_app_id")) != str(availability.get("data", {}).get("facebook_app_id")):
+            return {"ok": false, "status": 503, "error": "Facebook Android setup incomplete"}
+    var challenge := await _call("/auth/challenge", HTTPClient.METHOD_POST, {"provider": provider})
+    if not challenge.get("ok", false): return challenge
+    var nonce: String = str(challenge.get("data", {}).get("nonce", ""))
+    active_provider = provider
+    if provider == "google": secure_store.call_deferred("requestGoogleLogin", str(challenge.get("data", {}).get("google_web_client_id", "")), nonce)
+    else: secure_store.call_deferred("requestFacebookLogin", str(facebook.get("facebook_app_id")), str(facebook.get("facebook_client_token")))
+    var result: Array = await native_provider_result
+    active_provider = ""
+    if not str(result[2]).is_empty(): return {"ok": false, "status": 0, "error": "Sign-in cancelled or provider unavailable"}
+    var response := await _call("/auth/social", HTTPClient.METHOD_POST, {"provider": provider, "nonce": nonce, "token": str(result[1])})
+    result.clear()
+    if response.get("ok", false): _accept_session(response.get("data", {}))
+    return response
 
 func _remember_token(token: String) -> void:
     access_token = token
@@ -132,4 +168,5 @@ func logout() -> Dictionary:
     var response := await _call("/auth/logout", HTTPClient.METHOD_POST)
     # Local logout always removes the credential, including when the server is offline.
     _forget_session()
+    if secure_store != null and secure_store.has_method("providerSignOut"): secure_store.providerSignOut()
     return response

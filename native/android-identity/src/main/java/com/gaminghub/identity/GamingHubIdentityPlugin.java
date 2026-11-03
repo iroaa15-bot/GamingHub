@@ -6,6 +6,7 @@ import android.util.AtomicFile;
 import org.godotengine.godot.Godot;
 import org.godotengine.godot.plugin.GodotPlugin;
 import org.godotengine.godot.plugin.UsedByGodot;
+import org.godotengine.godot.plugin.SignalInfo;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +20,22 @@ import javax.crypto.spec.GCMParameterSpec;
 /** Keystore key is non-exportable. Only encrypted refresh credentials reach disk. */
 public final class GamingHubIdentityPlugin extends GodotPlugin {
     private static final String ALIAS = "gaminghub.identity.session.v1";
+    private ProviderLogin providers;
     public GamingHubIdentityPlugin(Godot godot) { super(godot); }
     @Override public String getPluginName() { return "GamingHubIdentity"; }
+    @Override public java.util.Set<SignalInfo> getPluginSignals() {
+        return java.util.Collections.singleton(new SignalInfo("social_result",String.class,String.class,String.class));
+    }
+    private ProviderLogin providers() {
+        if (providers==null) providers=new ProviderLogin(getActivity(),(provider,token,error)->emitSignal("social_result",provider,token,error));
+        return providers;
+    }
+    @UsedByGodot public void requestGoogleLogin(String clientId,String nonce) { providers().google(clientId,nonce); }
+    @UsedByGodot public void requestFacebookLogin(String appId,String clientToken) { providers().facebook(appId,clientToken); }
+    @UsedByGodot public void providerSignOut() { if (getActivity()!=null) providers().signOut(); }
+    @Override public void onMainActivityResult(int requestCode,int resultCode,android.content.Intent data) {
+        if (providers!=null) providers.activityResult(requestCode,resultCode,data);
+    }
     private SecretKey key() throws Exception {
         KeyStore store = KeyStore.getInstance("AndroidKeyStore");
         store.load(null);

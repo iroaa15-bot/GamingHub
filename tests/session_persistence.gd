@@ -17,6 +17,7 @@ class Account:
   return reply
 func _initialize() -> void: run.call_deferred()
 func run() -> void:
+ root.get_node("PublishedContent").busy = true
  var storage := Store.new()
  var auth := Account.new()
  root.add_child(auth)
@@ -40,5 +41,6 @@ func run() -> void:
  assert(auth.configure("https://different.example.test"))
  assert(auth.access_token.is_empty() and storage.saved.is_empty())
  auth.queue_free()
+ await process_frame
  print("PASS: refresh restoration, rotation, offline retention, invalidation, origin isolation; storage mock, not Android Keystore hardware test")
  quit()

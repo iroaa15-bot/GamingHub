@@ -3726,8 +3726,7 @@ func show_welcome() -> void:
  var guest := button(tr_ui("العب كضيف","Guest Play"),_welcome_guest,GOLD)
  guest.set_meta("welcome_action","guest")
  for provider in ["Google","Facebook"]:
-  var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider+tr_ui(" • غير مهيأ"," • setup required"),func(): pass,PANEL)
-  login.disabled=true
+  var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
   login.tooltip_text=tr_ui("إعداد OAuth والخدمة الآمنة غير مكتملين؛ اللعب كضيف متاح","OAuth and secure service setup are pending; guest play is available")
   login.set_meta("welcome_action",provider.to_lower())
  var account := button(tr_ui("حساب Gaming Hub","Gaming Hub account"),show_welcome_account,PANEL)
@@ -3739,6 +3738,10 @@ func show_welcome() -> void:
 func _welcome_guest() -> void:
  if age_group=="unknown":show_age_group_selection()
  else:show_home()
+
+func _welcome_provider(provider: String) -> void:
+ get_node("/root/GamingHubAccount").requested_provider = provider
+ get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
 
 func show_welcome_account() -> void:
  clear_ui()

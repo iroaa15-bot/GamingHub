@@ -12,6 +12,7 @@ const SETTINGS_FILE := "user://gaminghub_identity_endpoint.json"
 
 func _notification(what: int) -> void:
     if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+        if submit_busy: return
         get_tree().change_scene_to_file.call_deferred("res://scenes/Main.tscn")
 
 func _ready() -> void:
@@ -53,7 +54,7 @@ func _ready() -> void:
     password_field.placeholder_text = "Password / كلمة المرور"
     password_field.secret = true
     panel.add_child(password_field)
-    for action in ["Login / دخول", "Register / تسجيل", "Guest / ضيف", "Upgrade guest / ترقية الضيف", "My profile / حسابي", "Logout / خروج", "Back / رجوع"]:
+    for action in ["Google / دخول أو ربط Google", "Facebook / دخول أو ربط Facebook", "Login / دخول", "Register / تسجيل", "Guest / ضيف", "Upgrade guest / ترقية الضيف", "My profile / حسابي", "Logout / خروج", "Back / رجوع"]:
         var button := Button.new()
         button.text = action
         button.pressed.connect(_on_action.bind(action))
@@ -69,9 +70,14 @@ func _ready() -> void:
     server_field.text = endpoint
     if not auth.configure(endpoint):
         status_label.text = "Online accounts unavailable. Guest gameplay remains available. / الحسابات غير مفعلة حاليا"
+    if not auth.requested_provider.is_empty():
+        var provider: String = auth.requested_provider
+        auth.requested_provider = ""
+        _on_action.call_deferred("Google" if provider == "google" else "Facebook")
 
 func _on_action(action: String) -> void:
     if action.begins_with("Back"):
+        if submit_busy: return
         get_tree().change_scene_to_file("res://scenes/Main.tscn")
         return
     if submit_busy:
@@ -87,7 +93,11 @@ func _on_action(action: String) -> void:
         return
     submit_busy = true
     var result: Dictionary = {}
-    if action.begins_with("Login"):
+    if action.begins_with("Google"):
+        result = await auth.sign_in_provider("google")
+    elif action.begins_with("Facebook"):
+        result = await auth.sign_in_provider("facebook")
+    elif action.begins_with("Login"):
         result = await auth.login(email_field.text.strip_edges(), password_field.text)
     elif action.begins_with("Register"):
         result = await auth.register_account(email_field.text.strip_edges(), password_field.text, name_field.text.strip_edges())

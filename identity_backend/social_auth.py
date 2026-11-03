@@ -9,6 +9,11 @@ from identity_backend import provider_tokens
 
 router = APIRouter(prefix="/api/auth")
 
+@router.get("/providers")
+def providers():
+    return {"google":configured("google"),"facebook":configured("facebook"),
+        "facebook_app_id":os.environ.get("GAMINGHUB_FACEBOOK_APP_ID","")}
+
 def initialize_social(db):
     db.execute("ALTER TABLE identity_users ADD COLUMN IF NOT EXISTS avatar_url TEXT NOT NULL DEFAULT ''")
     db.execute("""CREATE TABLE IF NOT EXISTS identity_providers (

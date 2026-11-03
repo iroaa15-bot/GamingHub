@@ -38,3 +38,22 @@ def test_award_points_idempotency(monkeypatch):
     assert second.status_code == 200, second.text
     assert second.json()["points"] == 10
     assert second.json()["awarded"] is False
+
+def test_award_persists_after_new_login(monkeypatch):
+    initialize()
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY","ci-key")
+    client=TestClient(app)
+    email="persistent@example.test"
+    password="persistent-password-123"
+    register=client.post("/api/auth/register",json={"email":email,"password":password,"display_name":"Persistent"})
+    assert register.status_code==201,register.text
+    token=register.json()["access_token"]
+    headers={"Authorization":"Bearer "+token,"X-Admin-Key":"ci-key"}
+    award=client.post("/api/admin/award-points",json={"match_id":"persistent-match-001","points":15},headers=headers)
+    assert award.status_code==200,award.text
+    assert award.json()["points"]==15
+    assert client.post("/api/auth/logout",headers=headers).status_code==200
+    login=client.post("/api/auth/login",json={"email":email,"password":password})
+    assert login.status_code==200,login.text
+    fresh={"Authorization":"Bearer "+login.json()["access_token"]}
+    assert client.get("/api/me",headers=fresh).json()["user"]["points"]==15

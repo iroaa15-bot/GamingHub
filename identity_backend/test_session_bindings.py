@@ -73,6 +73,7 @@ def test_server_authoritative_win_awards_once(monkeypatch):
     room = room_server.Room(code="CIWINROOM", players=[winner_connection, loser_connection])
     room.started_at = 123456.789
     room_server.verified_accounts[winner_connection] = identity.user_id
+    room.account_ids[0] = identity.user_id
     try:
         assert room_server.persist_verified_win(room, 0) is True
         assert room_server.persist_verified_win(room, 0) is False

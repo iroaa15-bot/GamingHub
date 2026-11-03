@@ -364,6 +364,12 @@ async def process(ws, msg):
         if correct:
             room.over = True
             room.winner = index
+            # Do not delay or break the match result if identity storage is unavailable.
+            if os.environ.get('GAMINGHUB_DATABASE_URL') and verified_accounts.get(room.players[index]):
+                try:
+                    await asyncio.wait_for(asyncio.to_thread(persist_verified_win, room, index), timeout=5)
+                except Exception:
+                    pass
             result = {'type':'finished','winner':index,'cards':[c['name'] for c in room.cards]}
             room.history.append(result)
             return await broadcast(room, result)
@@ -378,6 +384,29 @@ async def process(ws, msg):
         return await broadcast(room, result)
     room.turn = 1 - index
     await broadcast(room, {'type':'turn','player':room.turn,'moves':room.moves})
+
+def persist_verified_win(room, winner_index):
+    """Best-effort server-only award; never trusts a client-submitted score."""
+    db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
+    if not db_url or winner_index < 0 or winner_index >= len(room.players):
+        return False
+    account = verified_accounts.get(room.players[winner_index])
+    if not account:
+        return False
+    import psycopg
+    # A room code may be reused in another match; started_at distinguishes sessions.
+    match_id = f"{room.code}:{room.started_at:.9f}"
+    with psycopg.connect(db_url, connect_timeout=3) as db:
+        db.execute("""CREATE TABLE IF NOT EXISTS identity_awards (
+            match_id TEXT NOT NULL, user_id TEXT NOT NULL REFERENCES identity_users(id),
+            points INTEGER NOT NULL, PRIMARY KEY(match_id,user_id))""")
+        inserted = db.execute("""INSERT INTO identity_awards(match_id,user_id,points)
+            VALUES (%s,%s,%s) ON CONFLICT DO NOTHING RETURNING points""",
+            (match_id, account, 10)).fetchone()
+        if inserted:
+            db.execute('UPDATE identity_users SET points=points+10 WHERE id=%s', (account,))
+        db.commit()
+    return bool(inserted)
 
 async def handler(ws):
     # Simple per-connection burst limiter; production still needs authentication and proxy limits.

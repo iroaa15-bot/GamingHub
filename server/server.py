@@ -155,6 +155,8 @@ async def process(ws, msg):
 
     # Optional verified account binding; guests can continue without it.
     if action == 'auth_bind':
+        # A failed rebind must never preserve a previously authenticated identity.
+        verified_accounts.pop(ws, None)
         token = msg.get('access_token')
         db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
         if not db_url or not isinstance(token, str) or not 32 <= len(token) <= 512:

@@ -701,7 +701,7 @@
     "server/test_daily_images.py": "3485128b99cfec742bd23d4cf427af5beda034e253dd4dc934ccc182e74f9647",
     "server/test_live_match.py": "f1161a4d03c4e13a8a2164f52180907087d18ea849a32eea39bea9726e0a01bb",
     "server/test_liveops_v96.py": "5ba3be29d8565af4f47a115e6c402d48aaf9c166d1fb2d46527867b969e57326",
-    "server/test_multiplayer.py": "b719d5c22ef01a256afd24f2a81f066443bc39e21d03e16f63c50a67a2389e41",
+    "server/test_multiplayer.py": "f277bd101a36803c66ad5d5d9ca46e28a0db7d3b341ea18c88517e2368bb0e80",
     "server/test_network_sync_v88.py": "9a4395685cc081f97d5e30700e63f7b148b656da097a1aa65584ce43aad5ab6f",
     "server/test_reconnect_v87.py": "e464dd8c3d87afc2b1485830200a5352828969d47a9fd68a2db1ca1ce4d63a55",
     "server/test_recovery_v86.py": "31f3182d91db1d65e18a22aa5186aba0ef0210294658e1029ff819c7df82922f",

@@ -31,6 +31,7 @@ PoingAdsBridge="*res://scripts/poing_admob_bridge.gd"
 LiveOps="*res://scripts/live_ops.gd"
 DailyAI="*res://scripts/daily_ai.gd"
 DailyRounds="*res://scripts/daily_rounds.gd"
+RoomAudioPolicy="*res://scripts/room_audio_policy.gd"
 
 [display]
 

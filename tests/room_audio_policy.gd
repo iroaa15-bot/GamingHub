@@ -6,6 +6,7 @@ func ck(value: bool,title: String):
  if not value:failed=true
 func run():
  create_timer(10).timeout.connect(func():quit(2))
+ ck(root.get_node_or_null("RoomAudioPolicy")!=null and root.get_node("RoomAudioPolicy").is_node_ready(),"autoload ready before scene setup")
  ck(load("res://scripts/main.gd").can_instantiate(),"main parses with audio routes")
  ck(load("res://scripts/multiplayer.gd").can_instantiate(),"classic parses with membership lock")
  ck(load("res://scripts/shared_quiz_ui.gd").can_instantiate(),"shared quiz parses with game bus")

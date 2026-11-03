@@ -39,12 +39,36 @@ def ensure_table(db):
     )""")
 
 
+def validate_staged_asset(db, body: ContentDraft):
+    """Validate an optional staged binary reference before storing the draft."""
+    asset_id = body.payload.get("staged_asset_id")
+    if asset_id is None:
+        return
+    if not isinstance(asset_id, str):
+        raise HTTPException(422, "staged_asset_id must be a string")
+    try:
+        uuid.UUID(asset_id)
+    except (ValueError, AttributeError):
+        raise HTTPException(422, "Invalid staged asset ID")
+    # This table may not exist until the first upload.
+    from identity_backend.admin_assets import ensure_table as ensure_assets
+    ensure_assets(db)
+    row = db.execute(
+        "SELECT category FROM admin_staged_assets WHERE id=%s", (asset_id,)
+    ).fetchone()
+    if row is None:
+        raise HTTPException(422, "Staged asset not found")
+    if body.category in ("image", "sound") and row[0] != body.category:
+        raise HTTPException(422, "Staged asset category mismatch")
+
+
 @router.post("", status_code=201)
 def create_draft(body: ContentDraft, x_admin_key: str = Header(default="")):
     authorize(x_admin_key)
     draft_id = str(uuid.uuid4())
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
+        validate_staged_asset(db, body)
         db.execute(
             "INSERT INTO admin_content_drafts (id,category,title,payload) VALUES (%s,%s,%s,%s::jsonb)",
             (draft_id, body.category, body.title, json.dumps(body.payload)),
@@ -73,6 +97,7 @@ def update_draft(draft_id: str, body: ContentDraft, x_admin_key: str = Header(de
     authorize(x_admin_key)
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
+        validate_staged_asset(db, body)
         updated = db.execute(
             "UPDATE admin_content_drafts SET category=%s,title=%s,payload=%s::jsonb,updated_at=NOW() "
             "WHERE id=%s RETURNING id",

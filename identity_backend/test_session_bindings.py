@@ -214,6 +214,7 @@ def test_reconnect_requires_fresh_account_binding_for_winner_points():
                     assert (await recv(resumed))["type"] == "resumed"
                     assert room.account_ids[0] is None
                     assert (await recv(b))["type"] == "peer_resumed"
+                    assert (await recv(resumed))["type"] == "peer_resumed"
                     await send(resumed, type="guess", guess=answer)
                     assert (await recv(resumed))["type"] == "guess"
                     assert (await recv(b))["type"] == "guess"

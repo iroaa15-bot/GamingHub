@@ -59,6 +59,7 @@ class Room:
     winner: int = -1
     voice_enabled: list = field(default_factory=lambda: [False, False])
     voice_packet_at: list = field(default_factory=lambda: [[], []])
+    account_ids: list = field(default_factory=lambda: [None, None])
 
 rooms = {}
 connections = {}
@@ -94,6 +95,7 @@ async def start_room(room):
     room.winner = -1
     room.voice_enabled = [False, False]
     room.voice_packet_at = [[], []]
+    room.account_ids = [verified_accounts.get(player) for player in room.players]
     room.started_at = room.last_activity = time.monotonic()
     for i, ws in enumerate(room.players):
         # NEVER send the player's own card before the match ends.
@@ -157,6 +159,9 @@ async def process(ws, msg):
     if action == 'auth_bind':
         # A failed rebind must never preserve a previously authenticated identity.
         verified_accounts.pop(ws, None)
+        active_room = rooms.get(connections.get(ws))
+        if active_room is not None and ws in active_room.players:
+            active_room.account_ids[active_room.players.index(ws)] = None
         token = msg.get('access_token')
         db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
         if not db_url or not isinstance(token, str) or not 32 <= len(token) <= 512:
@@ -171,6 +176,8 @@ async def process(ws, msg):
         if row is None:
             return await send(ws, {'type':'auth_bound','ok':False})
         verified_accounts[ws] = row[0]
+        if active_room is not None and ws in active_room.players:
+            active_room.account_ids[active_room.players.index(ws)] = row[0]
         return await send(ws, {'type':'auth_bound','ok':True})
     # Lightweight application heartbeat; it never reveals room or card state.
     if action == 'ping':
@@ -211,6 +218,9 @@ async def process(ws, msg):
         # Rotate capability on successful resume: an intercepted old token cannot be replayed.
         room.resume_tokens[idx] = secrets.token_hex(32)
         room.players[idx] = ws
+        # A resume capability restores gameplay, never the previous account identity.
+        # Re-authentication on the new socket is required before awarding points.
+        room.account_ids[idx] = verified_accounts.get(ws)
         had_voice_consent = any(room.voice_enabled)
         room.voice_enabled = [False, False]
         room.detached_at[idx] = None
@@ -365,7 +375,7 @@ async def process(ws, msg):
             room.over = True
             room.winner = index
             # Do not delay or break the match result if identity storage is unavailable.
-            if os.environ.get('GAMINGHUB_DATABASE_URL') and verified_accounts.get(room.players[index]):
+            if os.environ.get('GAMINGHUB_DATABASE_URL') and room.account_ids[index] and room.account_ids[index] == verified_accounts.get(room.players[index]):
                 try:
                     await asyncio.wait_for(asyncio.to_thread(persist_verified_win, room, index), timeout=5)
                 except Exception:
@@ -390,7 +400,9 @@ def persist_verified_win(room, winner_index):
     db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
     if not db_url or winner_index < 0 or winner_index >= len(room.players):
         return False
-    account = verified_accounts.get(room.players[winner_index])
+    account = room.account_ids[winner_index] if winner_index < len(room.account_ids) else None
+    if account != verified_accounts.get(room.players[winner_index]):
+        return False
     if not account:
         return False
     import psycopg

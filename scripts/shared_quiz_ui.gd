@@ -137,7 +137,7 @@ func _quiz_state(value: Dictionary) -> void:
   for child in memory_grid.get_children():child.queue_free()
   for i in range(int(question.get("size",0))):
    var card_index: int=i
-   var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(72,78);card.expand_icon=true
+   var card=Button.new();card.text="?";card.custom_minimum_size=Vector2(72,78);card.expand_icon=true;card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER
    VisualSkin.decorate_button(card,"violet");card.add_theme_constant_override("icon_max_width",52)
    card.pressed.connect(func():client.send_action("duel_quiz_flip",{"question_id":current_question,"index":card_index}))
    memory_grid.add_child(card);memory_controls.append(card)
@@ -161,6 +161,8 @@ func _quiz_state(value: Dictionary) -> void:
    card.text=str(shown.get(language,shown.get("en","?")))
    var path: String=str(shown.get("image",""))
    card.icon=load(path) if path.begins_with("res://assets/") and ResourceLoader.exists(path) else null
+   card.tooltip_text=card.text
+   if card.icon!=null:card.text=""
    card.disabled=not can_answer or float(i) in board.get("matched",[]) or (memory_sync_at>_quiz_now()) or not shown.is_empty()
  if mechanic=="order":
   for i in range(step_controls.size()):step_controls[i].disabled=not can_answer or i in step_picks

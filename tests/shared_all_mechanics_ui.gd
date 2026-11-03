@@ -38,6 +38,8 @@ func solve_memory(ui: Node) -> void:
   ui.memory_controls[first].pressed.emit()
   if not await until(func():return ui.client.state.quiz.memory.revealed.has(str(first))):break
   remembered[first]=ui.client.state.quiz.memory.revealed[str(first)].en
+  ck(ui.memory_controls[first].icon!=null and ui.memory_controls[first].text.is_empty(),"revealed picture remains readable without inline caption shrinking it")
+  if attempts==1:await snap("8-memory-revealed")
   if second<0:
    for i in remembered:
     if int(i)!=first and int(i) not in matched and remembered[i]==remembered[first]:second=int(i);break

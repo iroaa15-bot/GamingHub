@@ -15,11 +15,12 @@ EXCLUDE = {'release/source_manifest.json'}
 
 TEXT_SUFFIXES = {'.gd', '.uid', '.godot', '.cfg', '.json', '.yml', '.yaml', '.md',
                  '.txt', '.py', '.ps1', '.sh', '.html', '.svg', '.b85', '.tres',
-                 '.tscn', '.csv', '.xml', '.gradle'}
+                 '.tscn', '.csv', '.xml', '.gradle', '.log', '.js', '.css', '.jsonl', '.sql',
+                 '.cs', '.java', '.kt', '.pro', '.properties', '.bat', '.cmd', '.template'}
 
 def source_bytes(path):
     data = path.read_bytes()
-    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile'}:
+    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE'}:
         return data.replace(b'\r\n', b'\n')
     return data
 
@@ -30,6 +31,8 @@ def included(root=ROOT):
             files.extend(p for p in (root/directory).rglob('*') if p.is_file())
     def enabled_binary(path):
         name = path.relative_to(root).as_posix()
+        if name.startswith('addons/admob/downloads/'):
+            return False
         if name.startswith('release/') and path.suffix in {'.translation', '.uid'}:
             return False
         if name.startswith('addons/admob/ios/bin/'):

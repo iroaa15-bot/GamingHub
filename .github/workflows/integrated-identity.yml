@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: test-only-password
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U gaminghub -d gaminghub_identity_ci'
+          --health-cmd "pg_isready -U gaminghub -d gaminghub_identity_ci"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       GAMINGHUB_DATABASE_URL: postgresql://gaminghub:test-only-password@localhost:5432/gaminghub_identity_ci

@@ -25,6 +25,9 @@ var _auth_expiry := 0
 var _request: HTTPRequest
 var _renewing := false
 var _renew_retry_at := 0
+var _auto_resume := true
+var _resume_until := 0
+var _resume_retry_at := 0
 
 static func service_configuration() -> Dictionary:
  var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/duel_service.json"))
@@ -71,6 +74,7 @@ func connect_endpoint(value: String) -> Error:
   code = ""
   state = {}
  endpoint = value
+ _auto_resume = true
  capabilities = {}
  if value.begins_with("wss://") or authenticate_local:
   if not terms_accepted:
@@ -127,8 +131,15 @@ func _process(_delta: float) -> void:
  elif current == WebSocketPeer.STATE_CLOSED and _previous != WebSocketPeer.STATE_CLOSED:
   capabilities = {}
   connection_changed.emit(false)
+  if _auto_resume and not code.is_empty() and not token.is_empty() and not bool(state.get("closed",false)):
+   if _resume_until==0:_resume_until=Time.get_ticks_msec()+80000
+   _resume_requested=true
+   _resume_retry_at=Time.get_ticks_msec()+1000
+ if current==WebSocketPeer.STATE_CLOSED and _auto_resume and _resume_requested and _resume_until>Time.get_ticks_msec() and Time.get_ticks_msec()>=_resume_retry_at:
+  _resume_retry_at=Time.get_ticks_msec()+4000
+  connect_endpoint(endpoint)
  if current == WebSocketPeer.STATE_CONNECTING and Time.get_ticks_msec() - _started_at > 10000:
-  close_transport()
+  socket.close()
   _error("Local connection timed out")
  _previous = current
 
@@ -151,6 +162,8 @@ func _received(message: Dictionary) -> void:
     _resume_requested = false
     send_action("duel_resume", {"code":code,"token":token})
   "duel_created", "duel_joined", "duel_resumed":
+   _resume_until=0
+   _resume_retry_at=0
    code = str(message.get("code", ""))
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
@@ -196,6 +209,9 @@ func resume_session() -> Error:
  return connect_endpoint(endpoint)
 
 func close_transport() -> void:
+ _auto_resume=false
+ _resume_until=0
+ _resume_requested=false
  socket.close()
  capabilities = {}
  connection_changed.emit(false)

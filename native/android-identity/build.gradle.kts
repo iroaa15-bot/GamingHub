@@ -5,7 +5,7 @@ android {
     namespace = "com.gaminghub.identity"
     compileSdk = 36
     buildToolsVersion = "36.0.0"
-    defaultConfig { minSdk = 24 }
+    defaultConfig { minSdk = 24; targetSdk = 36 }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

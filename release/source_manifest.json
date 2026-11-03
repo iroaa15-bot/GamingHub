@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 767,
+  "file_count": 769,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "e7aa0433cd6d052b9771a9343aa232878186587a9e248199d370ed9394e8a250",
@@ -768,6 +768,8 @@
     ".github/workflows/voice-signaling-tests.yml": "8c1c6e4fd3ac59b9ebf240633b39521fd40a985517d3012dc4ee6ed7282ea993",
     ".github/workflows/identity-postgres-smoke.yml": "ae60ef267ef9630615bc124f47176a49c54d97f0b04939baa8f1c03246959902",
     "scripts/network/gaminghub_auth.gd": "4fa9e6844cd395f698a007a3bcd6b73267fc0db895d06a76eb306d84a389c8f9",
-    "tests/auth_client_smoke.gd": "8ebefc9de773ec4ebbfa8297f486e91b2bb785905d73ca2ddca136130a370f93"
+    "tests/auth_client_smoke.gd": "8ebefc9de773ec4ebbfa8297f486e91b2bb785905d73ca2ddca136130a370f93",
+    "scripts/account_screen.gd": "1127a0edc46211f732968527be79dc2e0c3be3cb3b05395a142124c0c933f699",
+    "scenes/AccountScreen.tscn": "2f6c0ecc52174dae5501e39bce7edb10c55f35de6165777882e1b729eca6b372"
   }
 }

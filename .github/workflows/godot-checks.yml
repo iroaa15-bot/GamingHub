@@ -173,7 +173,7 @@ jobs:
       - name: Exercise account lifecycle against PostgreSQL
         env:
           GAMINGHUB_DATABASE_URL: postgresql://gaminghub:test-only-password@localhost:5432/gaminghub_identity_ci
-        run: python -m pytest -q identity_backend/test_integration.py
+        run: python -m pytest -q identity_backend/test_integration.py identity_backend/test_match_awards.py identity_backend/test_session_bindings.py
   postgres-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 8

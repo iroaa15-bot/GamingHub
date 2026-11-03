@@ -10,6 +10,8 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Gaming Hub Identity Integration")
+from identity_backend.admin_content import router as admin_content_router
+app.include_router(admin_content_router)
 DATABASE_URL = os.environ.get("GAMINGHUB_DATABASE_URL", "")
 if not DATABASE_URL:
     raise RuntimeError("GAMINGHUB_DATABASE_URL is required")

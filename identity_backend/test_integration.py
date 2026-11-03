@@ -122,3 +122,23 @@ def test_admin_binary_upload_download_and_rejections(monkeypatch):
     assert client.post("/api/admin/assets", content=png + b"x" * (8 * 1024 * 1024), headers=headers).status_code == 413
     assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 200
     assert client.get(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 404
+
+
+def test_draft_rejects_missing_or_mismatched_staged_asset(monkeypatch):
+    monkeypatch.setenv("GAMINGHUB_INTERNAL_ADMIN_KEY", "ci-asset-reference")
+    client = TestClient(app)
+    headers = {"X-Admin-Key": "ci-asset-reference"}
+    import uuid
+    missing = {"category": "image", "title": "Missing", "payload": {"staged_asset_id": str(uuid.uuid4())}}
+    assert client.post("/api/admin/content", json=missing, headers=headers).status_code == 422
+    wav = b"RIFF" + b"\\x00" * 4 + b"WAVE" + b"audio-fixture"
+    uploaded = client.post("/api/admin/assets", content=wav, headers={**headers, "Content-Type": "application/octet-stream"})
+    assert uploaded.status_code == 201, uploaded.text
+    asset_id = uploaded.json()["id"]
+    mismatch = {"category": "image", "title": "Wrong type", "payload": {"staged_asset_id": asset_id}}
+    assert client.post("/api/admin/content", json=mismatch, headers=headers).status_code == 422
+    valid = {"category": "sound", "title": "Correct type", "payload": {"staged_asset_id": asset_id}}
+    created = client.post("/api/admin/content", json=valid, headers=headers)
+    assert created.status_code == 201, created.text
+    assert client.delete(f"/api/admin/content/{created.json()['id']}", headers=headers).status_code == 200
+    assert client.delete(f"/api/admin/assets/{asset_id}", headers=headers).status_code == 200

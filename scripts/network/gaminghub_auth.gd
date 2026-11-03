@@ -55,6 +55,13 @@ func guest() -> Dictionary:
         auth_changed.emit(not access_token.is_empty())
     return response
 
+func upgrade_guest(email: String, password: String, display_name: String) -> Dictionary:
+    var response := await _call("/auth/upgrade", HTTPClient.METHOD_POST, {"email": email, "password": password, "display_name": display_name})
+    if response.get("ok", false):
+        access_token = response.get("data", {}).get("access_token", access_token)
+        auth_changed.emit(not access_token.is_empty())
+    return response
+
 func profile() -> Dictionary:
     return await _call("/me", HTTPClient.METHOD_GET)
 

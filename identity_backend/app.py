@@ -14,6 +14,8 @@ from identity_backend.admin_content import router as admin_content_router
 app.include_router(admin_content_router)
 from identity_backend.admin_assets import router as admin_assets_router
 app.include_router(admin_assets_router)
+from identity_backend.published_content import router as published_content_router
+app.include_router(published_content_router)
 DATABASE_URL = os.environ.get("GAMINGHUB_DATABASE_URL", "")
 if not DATABASE_URL:
     raise RuntimeError("GAMINGHUB_DATABASE_URL is required")

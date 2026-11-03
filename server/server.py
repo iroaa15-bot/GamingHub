@@ -62,6 +62,7 @@ class Room:
 
 rooms = {}
 connections = {}
+verified_accounts = {}  # optional websocket-to-account binding
 waiting = []  # queued websocket clients for random matchmaking
 MAX_ROOMS = int(os.getenv('MAX_ROOMS', '500'))
 WAITING_TTL = int(os.getenv('WAITING_TTL', '300'))
@@ -152,6 +153,23 @@ async def process(ws, msg):
     if action not in ('ping', 'sync') and code_for_activity in rooms:
         rooms[code_for_activity].last_activity = time.monotonic()
 
+    # Optional verified account binding; guests can continue without it.
+    if action == 'auth_bind':
+        token = msg.get('access_token')
+        db_url = os.environ.get('GAMINGHUB_DATABASE_URL', '')
+        if not db_url or not isinstance(token, str) or not 32 <= len(token) <= 512:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        try:
+            import psycopg
+            digest = hashlib.sha256(token.encode('utf-8')).hexdigest()
+            with psycopg.connect(db_url, connect_timeout=3) as db:
+                row = db.execute('SELECT user_id FROM identity_sessions WHERE token_hash=%s AND NOT revoked', (digest,)).fetchone()
+        except Exception:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        if row is None:
+            return await send(ws, {'type':'auth_bound','ok':False})
+        verified_accounts[ws] = row[0]
+        return await send(ws, {'type':'auth_bound','ok':True})
     # Lightweight application heartbeat; it never reveals room or card state.
     if action == 'ping':
         nonce = msg.get('id')
@@ -379,6 +397,7 @@ async def handler(ws):
             except (ValueError, TypeError, json.JSONDecodeError):
                 await send(ws, {'type':'error','message':'Invalid message'})
     finally:
+        verified_accounts.pop(ws, None)
         if ws in waiting:
             waiting.remove(ws)
         code = connections.pop(ws, None)

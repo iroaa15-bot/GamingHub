@@ -121,3 +121,27 @@ def upgrade(body: Credentials, authorization: str = Header(default="")):
         token=issue_session(db,identity["id"])
         db.commit()
     return {"access_token":token,"token_type":"bearer"}
+
+class AwardPoints(BaseModel):
+    match_id: str = Field(min_length=8, max_length=120)
+    points: int = Field(ge=1, le=100)
+
+@app.post("/api/admin/award-points")
+def award_points(body: AwardPoints, authorization: str = Header(default=""), x_admin_key: str = Header(default="")):
+    """Internal server-only endpoint: never embed admin key in an APK."""
+    configured = os.environ.get("GAMINGHUB_INTERNAL_ADMIN_KEY", "")
+    if not configured or not secrets.compare_digest(x_admin_key, configured):
+        raise HTTPException(403, "Forbidden")
+    identity = get_identity(authorization)
+    with database() as db:
+        db.execute("""CREATE TABLE IF NOT EXISTS identity_awards (
+            match_id TEXT NOT NULL, user_id TEXT NOT NULL REFERENCES identity_users(id),
+            points INTEGER NOT NULL, PRIMARY KEY(match_id,user_id))""")
+        inserted = db.execute("""INSERT INTO identity_awards (match_id,user_id,points)
+            VALUES (%s,%s,%s) ON CONFLICT DO NOTHING RETURNING points""",
+            (body.match_id,identity["id"],body.points)).fetchone()
+        if inserted:
+            db.execute("UPDATE identity_users SET points=points+%s WHERE id=%s",(body.points,identity["id"]))
+        total = db.execute("SELECT points FROM identity_users WHERE id=%s",(identity["id"],)).fetchone()[0]
+        db.commit()
+    return {"awarded": bool(inserted), "points": total}

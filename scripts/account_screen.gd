@@ -15,8 +15,7 @@ func _notification(what: int) -> void:
         get_tree().change_scene_to_file.call_deferred("res://scenes/Main.tscn")
 
 func _ready() -> void:
-    auth = AuthClient.new()
-    add_child(auth)
+    auth = get_node("/root/GamingHubAccount")
     var scroll := ScrollContainer.new()
     scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     scroll.offset_left = 20

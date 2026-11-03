@@ -44,6 +44,13 @@ jobs:
         run: |
           timeout 120 godot --headless --path . --script res://tests/release_runtime.gd 2>&1 | tee release-runtime.log
           grep -q RELEASE_RUNTIME_PASS release-runtime.log
+      - name: Verify account session restoration and origin isolation
+        # Storage double here; Android Keystore acceptance is recorded separately.
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/session_persistence.gd 2>&1 | tee godot-session.log
+          grep -q 'PASS: refresh restoration' godot-session.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

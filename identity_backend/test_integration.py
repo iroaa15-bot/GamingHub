@@ -3,6 +3,56 @@ from fastapi.testclient import TestClient
 from identity_backend.app import app, initialize
 import psycopg
 
+def test_refresh_rotation_expiry_logout_and_replay():
+    initialize()
+    client=TestClient(app)
+    session=client.post('/api/auth/guest').json()
+    headers={'Authorization':'Bearer '+session['access_token']}
+    uid=client.get('/api/me',headers=headers).json()['user']['id']
+    with psycopg.connect(os.environ['GAMINGHUB_DATABASE_URL']) as db:
+        db.execute("UPDATE identity_sessions SET expires_at=CURRENT_TIMESTAMP-INTERVAL '1 second' WHERE user_id=%s",(uid,))
+    assert client.get('/api/me',headers=headers).status_code==401
+    restored=client.post('/api/auth/refresh',json={'refresh_token':session['refresh_token']})
+    assert restored.status_code==200
+    fresh=restored.json()
+    assert fresh['refresh_token']!=session['refresh_token']
+    headers={'Authorization':'Bearer '+fresh['access_token']}
+    assert client.get('/api/me',headers=headers).json()['user']['id']==uid
+    assert client.post('/api/auth/refresh',json={'refresh_token':session['refresh_token']}).status_code==401
+    assert client.get('/api/me',headers=headers).status_code==401
+    assert client.post('/api/auth/refresh',json={'refresh_token':fresh['refresh_token']}).status_code==401
+    session=client.post('/api/auth/guest').json()
+    assert client.post('/api/auth/logout',headers={'Authorization':'Bearer '+session['access_token']}).status_code==200
+    assert client.post('/api/auth/refresh',json={'refresh_token':session['refresh_token']}).status_code==401
+
+def test_social_guest_link_preserves_id_points_and_requires_proof(monkeypatch):
+    import uuid
+    from identity_backend import provider_tokens
+    initialize()
+    monkeypatch.setenv('GAMINGHUB_GOOGLE_WEB_CLIENT_ID','unit-test-client')
+    subject=str(uuid.uuid4())
+    # This exercises the DB/link boundary. It is not a real Google sign-in test.
+    monkeypatch.setattr(provider_tokens,'google_identity',lambda token,nonce:
+        provider_tokens.ProviderIdentity(subject,'Linked player',subject+'@example.test'))
+    client=TestClient(app)
+    session=client.post('/api/auth/guest').json()
+    headers={'Authorization':'Bearer '+session['access_token']}
+    uid=client.get('/api/me',headers=headers).json()['user']['id']
+    with psycopg.connect(os.environ['GAMINGHUB_DATABASE_URL']) as db:
+        db.execute('UPDATE identity_users SET points=37 WHERE id=%s',(uid,))
+    nonce=client.post('/api/auth/challenge',json={'provider':'google'},headers=headers).json()['nonce']
+    payload={'provider':'google','nonce':nonce,'token':'unit-token-not-from-google'}
+    assert client.post('/api/auth/social',json=payload).status_code==401
+    linked=client.post('/api/auth/social',json=payload,headers=headers)
+    assert linked.status_code==200,linked.text
+    user=client.get('/api/me',headers={'Authorization':'Bearer '+linked.json()['access_token']}).json()['user']
+    assert user['id']==uid and user['points']==37 and not user['is_guest']
+    assert client.post('/api/auth/social',json=payload,headers=headers).status_code==401
+    nonce=client.post('/api/auth/challenge',json={'provider':'google'}).json()['nonce']
+    returned=client.post('/api/auth/social',json={**payload,'nonce':nonce})
+    assert returned.status_code==200
+    assert client.get('/api/me',headers={'Authorization':'Bearer '+returned.json()['access_token']}).json()['user']['id']==uid
+
 def test_account_lifecycle():
     initialize()
     client = TestClient(app)

@@ -188,7 +188,7 @@ async def process(ws, msg):
             import psycopg
             digest = hashlib.sha256(token.encode('utf-8')).hexdigest()
             with psycopg.connect(db_url, connect_timeout=3) as db:
-                row = db.execute('SELECT user_id FROM identity_sessions WHERE token_hash=%s AND NOT revoked', (digest,)).fetchone()
+                row = db.execute('SELECT user_id FROM identity_sessions WHERE token_hash=%s AND NOT revoked AND expires_at>CURRENT_TIMESTAMP', (digest,)).fetchone()
         except Exception:
             return await send(ws, {'type':'auth_bound','ok':False})
         if row is None:

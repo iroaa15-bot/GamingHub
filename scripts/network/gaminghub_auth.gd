@@ -3,18 +3,59 @@ extends Node
 ## Does not change existing guest/offline gameplay or scene navigation.
 signal auth_changed(authenticated: bool)
 var api_base: String = ""
-## Process-memory session only: never write bearer tokens or passwords to user:// files.
+## Access tokens stay in memory. Android Keystore protects the refresh credential.
 static var session_token: String = ""
 static var session_origin: String = ""
 var access_token: String = ""
+var refresh_token: String = ""
+var secure_store: Object
+var restoring := false
+var refresh_after := 0
 
 func _ready() -> void:
+    if Engine.has_singleton("GamingHubIdentity"):
+        secure_store = Engine.get_singleton("GamingHubIdentity")
+        # Explicit local debug-only acceptance request, with no real credentials.
+        if OS.is_debug_build() and FileAccess.file_exists("user://identity_storage_probe.txt"):
+            var mode := FileAccess.get_file_as_string("user://identity_storage_probe.txt").strip_edges()
+            if mode in ["write", "read"]:
+                print("GH_IDENTITY_STORAGE_PROBE_", mode.to_upper(), "_", "PASS" if secure_store.storageProbe(mode) else "FAIL")
     access_token = session_token
     var endpoint: String = str(ProjectSettings.get_setting("gaminghub/identity_api_url", ""))
     if FileAccess.file_exists("user://gaminghub_identity_endpoint.json"):
         var stored = JSON.parse_string(FileAccess.get_file_as_string("user://gaminghub_identity_endpoint.json"))
         if stored is Dictionary: endpoint = str(stored.get("url", endpoint))
     configure(endpoint)
+    _restore_session.call_deferred()
+
+func _restore_session() -> void:
+    if secure_store == null or api_base.is_empty(): return
+    var saved: Variant = JSON.parse_string(str(secure_store.loadSession()))
+    if not saved is Dictionary or str(saved.get("origin", "")) != session_origin: return
+    refresh_token = str(saved.get("refresh_token", ""))
+    if not refresh_token.is_empty(): await refresh_session()
+
+func _accept_session(data: Dictionary) -> void:
+    refresh_token = str(data.get("refresh_token", ""))
+    refresh_after = Time.get_ticks_msec() + 840000
+    # Persist before accepting the new token. No password or provider token is stored.
+    if secure_store != null and not refresh_token.is_empty():
+        secure_store.storeSession(JSON.stringify({"origin": session_origin, "refresh_token": refresh_token}))
+    _remember_token(str(data.get("access_token", "")))
+
+func refresh_session() -> Dictionary:
+    if restoring or refresh_token.is_empty(): return {"ok": false, "status": 0}
+    restoring = true
+    var response := await _call("/auth/refresh", HTTPClient.METHOD_POST, {"refresh_token": refresh_token})
+    restoring = false
+    if response.get("ok", false): _accept_session(response.get("data", {}))
+    elif int(response.get("status", 0)) == 401: _forget_session()
+    return response
+
+func _forget_session() -> void:
+    refresh_token = ""
+    if secure_store != null: secure_store.clearSession()
+    _remember_token("")
 
 func _remember_token(token: String) -> void:
     access_token = token
@@ -26,7 +67,7 @@ func configure(https_api_url: String) -> bool:
     if not normalized.begins_with("https://") or "@" in normalized or "?" in normalized or "#" in normalized:
         return false
     if not session_origin.is_empty() and session_origin != normalized:
-        _remember_token("")
+        _forget_session()
     session_origin = normalized
     api_base = normalized + "/api"
     return true
@@ -34,6 +75,9 @@ func configure(https_api_url: String) -> bool:
 func _call(endpoint: String, method: int, data: Dictionary = {}) -> Dictionary:
     if api_base.is_empty():
         return {"ok": false, "status": 0, "error": "Backend URL not configured"}
+    if endpoint != "/auth/refresh" and not refresh_token.is_empty() and Time.get_ticks_msec() >= refresh_after:
+        var renewed := await refresh_session()
+        if not renewed.get("ok", false): return renewed
     var request_node := HTTPRequest.new()
     request_node.timeout = 15.0
     add_child(request_node)
@@ -51,7 +95,7 @@ func _call(endpoint: String, method: int, data: Dictionary = {}) -> Dictionary:
     if result[0] != HTTPRequest.RESULT_SUCCESS:
         return {"ok": false, "status": 0, "error": "Account server unavailable; guest play is available"}
     if status_code == 401 and endpoint not in ["/auth/login", "/auth/register"]:
-        _remember_token("")
+        _forget_session()
     var parsed = JSON.parse_string((result[3] as PackedByteArray).get_string_from_utf8())
     if not parsed is Dictionary:
         parsed = {}
@@ -60,25 +104,25 @@ func _call(endpoint: String, method: int, data: Dictionary = {}) -> Dictionary:
 func register_account(email: String, password: String, display_name: String) -> Dictionary:
     var response := await _call("/auth/register", HTTPClient.METHOD_POST, {"email": email, "password": password, "display_name": display_name})
     if response.get("ok", false):
-        _remember_token(str(response.get("data", {}).get("access_token", "")))
+        _accept_session(response.get("data", {}))
     return response
 
 func login(email: String, password: String) -> Dictionary:
     var response := await _call("/auth/login", HTTPClient.METHOD_POST, {"email": email, "password": password})
     if response.get("ok", false):
-        _remember_token(str(response.get("data", {}).get("access_token", "")))
+        _accept_session(response.get("data", {}))
     return response
 
 func guest() -> Dictionary:
     var response := await _call("/auth/guest", HTTPClient.METHOD_POST)
     if response.get("ok", false):
-        _remember_token(str(response.get("data", {}).get("access_token", "")))
+        _accept_session(response.get("data", {}))
     return response
 
 func upgrade_guest(email: String, password: String, display_name: String) -> Dictionary:
     var response := await _call("/auth/upgrade", HTTPClient.METHOD_POST, {"email": email, "password": password, "display_name": display_name})
     if response.get("ok", false):
-        _remember_token(str(response.get("data", {}).get("access_token", access_token)))
+        _accept_session(response.get("data", {}))
     return response
 
 func profile() -> Dictionary:
@@ -86,6 +130,6 @@ func profile() -> Dictionary:
 
 func logout() -> Dictionary:
     var response := await _call("/auth/logout", HTTPClient.METHOD_POST)
-    if response.get("ok", false):
-        _remember_token("")
+    # Local logout always removes the credential, including when the server is offline.
+    _forget_session()
     return response

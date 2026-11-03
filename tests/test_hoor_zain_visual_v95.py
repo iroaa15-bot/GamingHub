@@ -20,9 +20,10 @@ class HoorZainVisualV95(unittest.TestCase):
     def test_home_and_online_lobby_show_approved_art(self):
         main=(ROOT/'scripts/main.gd').read_text()
         online=(ROOT/'scripts/multiplayer.gd').read_text()
-        self.assertIn('VisualSkin.add_brand_banner(',main)
+        self.assertIn('VisualSkin.compact_header(',main)
         self.assertIn('res://assets/ui/gaming_hub_brand.png',main)
-        self.assertIn('res://assets/ui/gaming_hub_brand.png',online)
+        self.assertIn('VisualSkin.compact_header(',online)
+        self.assertIn('res://assets/ui/gaming_hub_brand.png',(ROOT/'scripts/visual_skin.gd').read_text())
         self.assertIn('res://assets/ui/gaming_hub_icon.png',(ROOT/'project.godot').read_text())
 
     def test_question_and_answer_tactile_panels(self):

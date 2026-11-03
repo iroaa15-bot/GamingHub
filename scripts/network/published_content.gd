@@ -8,9 +8,6 @@ var busy := false
 var next_refresh := 0
 
 func _ready() -> void:
- var auth := Auth.new()
- add_child(auth)
- auth.queue_free()
  refresh.call_deferred()
 
 func _process(_delta: float) -> void:

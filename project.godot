@@ -32,6 +32,7 @@ LiveOps="*res://scripts/live_ops.gd"
 DailyAI="*res://scripts/daily_ai.gd"
 DailyRounds="*res://scripts/daily_rounds.gd"
 RoomAudioPolicy="*res://scripts/room_audio_policy.gd"
+GamingHubAccount="*res://scripts/network/gaminghub_auth.gd"
 PublishedContent="*res://scripts/network/published_content.gd"
 
 [display]
@@ -43,7 +44,7 @@ window/handheld/orientation=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/gaminghub_voice/plugin.cfg")
+enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/gaminghub_voice/plugin.cfg", "res://addons/gaminghub_identity/plugin.cfg")
 
 [gui]
 

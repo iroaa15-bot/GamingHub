@@ -17,7 +17,7 @@ def verify_session(database_url: str, token: str):
     digest = hashlib.sha256(token.encode()).hexdigest()
     with psycopg.connect(database_url,connect_timeout=3) as db:
         row = db.execute("""SELECT user_id FROM identity_sessions
-            WHERE token_hash=%s AND NOT revoked""",(digest,)).fetchone()
+            WHERE token_hash=%s AND NOT revoked AND expires_at>CURRENT_TIMESTAMP""",(digest,)).fetchone()
     return BoundIdentity(row[0]) if row else None
 
 class SessionBindings:

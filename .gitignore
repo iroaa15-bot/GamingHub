@@ -1,4 +1,6 @@
 .godot/
+.gradle/
+local.properties
 .env
 .env.*
 !*.example

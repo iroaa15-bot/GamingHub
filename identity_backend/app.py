@@ -10,6 +10,8 @@ from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 
 app = FastAPI(title="Gaming Hub Identity Integration")
+from identity_backend.social_auth import router as social_router, initialize_social
+app.include_router(social_router)
 from identity_backend.gameplay_content import router as gameplay_router
 app.include_router(gameplay_router)
 from identity_backend.admin_content import router as admin_content_router
@@ -36,6 +38,13 @@ def initialize():
         db.execute("""CREATE TABLE IF NOT EXISTS identity_sessions (
             token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES identity_users(id),
             revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
+        db.execute("ALTER TABLE identity_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL '15 minutes')")
+        db.execute("ALTER TABLE identity_sessions ADD COLUMN IF NOT EXISTS family_id TEXT")
+        db.execute("""CREATE TABLE IF NOT EXISTS identity_refresh_sessions (
+            token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES identity_users(id),
+            family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL,
+            consumed BOOLEAN NOT NULL DEFAULT FALSE, revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
+        initialize_social(db)
         db.commit()
 
 class Credentials(BaseModel):
@@ -46,22 +55,29 @@ class Credentials(BaseModel):
 def password_hash(password: str, salt: str) -> str:
     return hashlib.scrypt(password.encode(), salt=bytes.fromhex(salt), n=16384, r=8, p=1).hex()
 
-def issue_session(db, user_id: str):
+def issue_session(db, user_id: str, family_id: str = ""):
     token = secrets.token_urlsafe(40)
-    db.execute("INSERT INTO identity_sessions VALUES (%s,%s,FALSE)", (hashlib.sha256(token.encode()).hexdigest(),user_id))
-    return token
+    refresh = secrets.token_urlsafe(48)
+    family_id = family_id or str(uuid.uuid4())
+    db.execute("""INSERT INTO identity_sessions (token_hash,user_id,family_id,expires_at)
+        VALUES (%s,%s,%s,CURRENT_TIMESTAMP + INTERVAL '15 minutes')""",
+        (hashlib.sha256(token.encode()).hexdigest(),user_id,family_id))
+    db.execute("""INSERT INTO identity_refresh_sessions (token_hash,user_id,family_id,expires_at)
+        VALUES (%s,%s,%s,CURRENT_TIMESTAMP + INTERVAL '30 days')""",
+        (hashlib.sha256(refresh.encode()).hexdigest(),user_id,family_id))
+    return {"access_token":token,"refresh_token":refresh,"token_type":"bearer","expires_in":900}
 
 def get_identity(authorization: str):
     if not authorization.startswith("Bearer "):
         raise HTTPException(401, "Missing bearer token")
     digest = hashlib.sha256(authorization[7:].encode()).hexdigest()
     with database() as db:
-        row = db.execute("""SELECT u.id,u.email,u.display_name,u.is_guest,u.points
+        row = db.execute("""SELECT u.id,u.email,u.display_name,u.is_guest,u.points,u.avatar_url
             FROM identity_sessions s JOIN identity_users u ON u.id=s.user_id
-            WHERE s.token_hash=%s AND NOT s.revoked""", (digest,)).fetchone()
+            WHERE s.token_hash=%s AND NOT s.revoked AND s.expires_at>CURRENT_TIMESTAMP""", (digest,)).fetchone()
     if row is None:
         raise HTTPException(401, "Invalid session")
-    return dict(zip(("id","email","display_name","is_guest","points"),row))
+    return dict(zip(("id","email","display_name","is_guest","points","avatar_url"),row))
 
 @app.get("/api/ready")
 def ready():
@@ -81,17 +97,17 @@ def register(body: Credentials):
             (uid,body.email.lower(),body.display_name or body.email.split("@")[0],password_hash(body.password,salt),salt))
         token = issue_session(db,uid)
         db.commit()
-    return {"access_token":token,"token_type":"bearer"}
+    return token
 
 @app.post("/api/auth/login")
 def login(body: Credentials):
     with database() as db:
         row = db.execute("SELECT id,password_hash,salt FROM identity_users WHERE email=%s AND NOT is_guest",(body.email.lower(),)).fetchone()
-        if not row or not secrets.compare_digest(password_hash(body.password,row[2]),row[1]):
+        if not row or not row[1] or not row[2] or not secrets.compare_digest(password_hash(body.password,row[2]),row[1]):
             raise HTTPException(401,"Invalid credentials")
         token = issue_session(db,row[0])
         db.commit()
-    return {"access_token":token,"token_type":"bearer"}
+    return token
 
 @app.post("/api/auth/guest", status_code=201)
 def guest():
@@ -100,7 +116,7 @@ def guest():
         db.execute("INSERT INTO identity_users (id,display_name,is_guest) VALUES (%s,%s,TRUE)",(uid,"Guest"))
         token=issue_session(db,uid)
         db.commit()
-    return {"access_token":token,"token_type":"bearer"}
+    return token
 
 @app.get("/api/me")
 def me(authorization: str = Header(default="")):
@@ -111,6 +127,9 @@ def logout(authorization: str = Header(default="")):
     identity=get_identity(authorization)
     digest=hashlib.sha256(authorization[7:].encode()).hexdigest()
     with database() as db:
+        family=db.execute("SELECT family_id FROM identity_sessions WHERE token_hash=%s",(digest,)).fetchone()[0]
+        db.execute("UPDATE identity_refresh_sessions SET revoked=TRUE WHERE family_id=%s",(family,))
+        db.execute("UPDATE identity_sessions SET revoked=TRUE WHERE family_id=%s",(family,))
         db.execute("UPDATE identity_sessions SET revoked=TRUE WHERE token_hash=%s AND user_id=%s",(digest,identity["id"]))
         db.commit()
     return {"ok":True}
@@ -128,7 +147,30 @@ def upgrade(body: Credentials, authorization: str = Header(default="")):
             WHERE id=%s""",(body.email.lower(),body.display_name or "Player",password_hash(body.password,salt),salt,identity["id"]))
         token=issue_session(db,identity["id"])
         db.commit()
-    return {"access_token":token,"token_type":"bearer"}
+    return token
+
+class RefreshCredentials(BaseModel):
+    refresh_token: str = Field(min_length=32,max_length=512)
+
+@app.post("/api/auth/refresh")
+def refresh_session(body: RefreshCredentials):
+    digest=hashlib.sha256(body.refresh_token.encode()).hexdigest()
+    with database() as db:
+        row=db.execute("""SELECT user_id,family_id,consumed,revoked,expires_at>CURRENT_TIMESTAMP
+            FROM identity_refresh_sessions WHERE token_hash=%s FOR UPDATE""",(digest,)).fetchone()
+        if not row:
+            raise HTTPException(401,"Invalid refresh session")
+        if row[2] or row[3] or not row[4]:
+            # Reuse of a rotated token invalidates the whole session family.
+            db.execute("UPDATE identity_refresh_sessions SET revoked=TRUE WHERE family_id=%s",(row[1],))
+            db.execute("UPDATE identity_sessions SET revoked=TRUE WHERE family_id=%s",(row[1],))
+            db.commit()
+            raise HTTPException(401,"Refresh session expired or reused")
+        db.execute("UPDATE identity_refresh_sessions SET consumed=TRUE WHERE token_hash=%s",(digest,))
+        db.execute("UPDATE identity_sessions SET revoked=TRUE WHERE family_id=%s",(row[1],))
+        result=issue_session(db,row[0],row[1])
+        db.commit()
+    return result
 
 class AwardPoints(BaseModel):
     match_id: str = Field(min_length=8, max_length=120)

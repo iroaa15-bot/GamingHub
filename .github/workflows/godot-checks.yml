@@ -51,6 +51,12 @@ jobs:
           set -o pipefail
           timeout 120 godot --headless --path . --script res://tests/session_persistence.gd 2>&1 | tee godot-session.log
           grep -q 'PASS: refresh restoration' godot-session.log
+      - name: Verify unified profile and server point display
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/unified_profile.gd 2>&1 | tee godot-profile.log
+          grep -q 'PASS: verified profile survives' godot-profile.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

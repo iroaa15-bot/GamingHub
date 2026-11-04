@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "file_count": 1587,
+  "file_count": 1588,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
-    ".github/workflows/godot-checks.yml": "d4c84fdca91d12f4336090e23e87b79448c418f95497f6fa460c6e23bbf2f4e1",
+    ".github/workflows/godot-checks.yml": "594870caa404a0656c117c4b156cfea9b93ff9f01d88d54f738213a382d4d4d7",
     ".github/workflows/integrated-identity.yml": "80891396edf2fda5322717865ba7ff8469bfaecb51428f2fde8a7f948e896731",
     ".github/workflows/photo-duel-validation.yml": "4bcbe76b20d2a3e067bb8f2dd1423fc9b14ddc67ebd04bbd2c55916036103199",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
@@ -1574,6 +1574,7 @@
     "tests/test_world_map_v42.py": "780a9d44440809f57b71c0a57dfdf26ba626789e265ce7e8e53882db2904ce8f",
     "tests/unified_catalog_ui.gd": "e9ed9f235ab128dffb1e458ab9a7cf33b0c277217aa8e9145eddaf673b70c2a4",
     "tests/unified_catalog_ui.gd.uid": "7b7c830c9057439ac65649b38826516c18bb1adc355d58f729a9e35f5fc071d1",
+    "tests/unified_profile.gd": "dac01bb7199d0812c8acaa1e71c4fe7428de805767daf1011f815daa867ba024",
     "tests/visual_switch_access_regression.gd": "201b3a9569a50ad594a44da6d0e8979ed2ece722f02d499ea26f3907263766d2",
     "tests/visual_switch_access_regression.gd.uid": "4342d710c6b2dce0c1d49e6f723d2d78616257ac4cd1fcdabac23109d11ad9f4",
     "tests/voice_health_metadata.gd": "86f95889fa999965662ae9409912a668e82e6f45416afefe8679c80c332b3c4a",

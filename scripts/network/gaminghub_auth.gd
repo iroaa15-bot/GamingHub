@@ -2,6 +2,7 @@ extends Node
 ## Optional Gaming Hub account client. Configure an HTTPS API URL before enabling.
 ## Does not change existing guest/offline gameplay or scene navigation.
 signal auth_changed(authenticated: bool)
+signal profile_changed(user: Dictionary)
 signal native_provider_result(provider: String, token: String, error: String)
 var api_base: String = ""
 ## Access tokens stay in memory. Android Keystore protects the refresh credential.
@@ -14,6 +15,7 @@ var restoring := false
 var refresh_after := 0
 var active_provider := ""
 var requested_provider := ""
+var user_profile: Dictionary = {}
 
 func _ready() -> void:
     if Engine.has_singleton("GamingHubIdentity"):
@@ -49,6 +51,7 @@ func _accept_session(data: Dictionary) -> void:
     if secure_store != null and not refresh_token.is_empty():
         secure_store.storeSession(JSON.stringify({"origin": session_origin, "refresh_token": refresh_token}))
     _remember_token(str(data.get("access_token", "")))
+    profile.call_deferred()
 
 func refresh_session() -> Dictionary:
     if restoring or refresh_token.is_empty(): return {"ok": false, "status": 0}
@@ -61,6 +64,8 @@ func refresh_session() -> Dictionary:
 
 func _forget_session() -> void:
     refresh_token = ""
+    user_profile = {}
+    profile_changed.emit(user_profile)
     if secure_store != null: secure_store.clearSession()
     _remember_token("")
 
@@ -166,7 +171,13 @@ func upgrade_guest(email: String, password: String, display_name: String) -> Dic
     return response
 
 func profile() -> Dictionary:
-    return await _call("/me", HTTPClient.METHOD_GET)
+    var response := await _call("/me", HTTPClient.METHOD_GET)
+    if response.get("ok", false):
+        var user: Variant = response.get("data", {}).get("user", {})
+        if user is Dictionary and not user.is_empty():
+            user_profile = user.duplicate(true)
+            profile_changed.emit(user_profile)
+    return response
 
 func logout() -> Dictionary:
     var response := await _call("/auth/logout", HTTPClient.METHOD_POST)

@@ -19,6 +19,8 @@ var listing: Label
 var admin: Button
 var _profile_name: Label
 var _xp_bar: ProgressBar
+var online_account: Node
+var _server_points: Label
 func _ready() -> void:
  _column=self
  layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
@@ -35,17 +37,18 @@ func _ready() -> void:
  var profile_stack:=VBoxContainer.new();profile_stack.add_theme_constant_override("separation",8);profile_card.add_child(profile_stack)
  _profile_name=Label.new();_profile_name.text=str(client.user.get("name","ضيف" if language=="ar" else "Guest"));_profile_name.add_theme_font_size_override("font_size",24);profile_stack.add_child(_profile_name)
  var xp: int=maxi(0,int(local_progress.get("xp",0)))
- var level:=Label.new();level.text=("المستوى %d • %d XP" if language=="ar" else "Level %d • %d XP") % [1+floori(xp/100.0),xp];profile_stack.add_child(level)
+ var level:=Label.new();level.text=("المستوى %d • %d XP محلي" if language=="ar" else "Level %d • %d local XP") % [1+floori(xp/100.0),xp];profile_stack.add_child(level)
+ _server_points=Label.new();_server_points.visible=false;profile_stack.add_child(_server_points)
  _xp_bar=ProgressBar.new();_xp_bar.show_percentage=false;_xp_bar.value=xp%100;_xp_bar.custom_minimum_size.y=12;profile_stack.add_child(_xp_bar)
  var stats:=Label.new();stats.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  stats.text=("%d انتصارات  •  %d مباريات" if language=="ar" else "%d wins  •  %d matches") % [int(local_progress.get("wins",0)),int(local_progress.get("matches",0))];profile_stack.add_child(stats)
  status=Label.new()
  status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
- status.text="الحساب اختياري. تقدم الضيف المحلي محفوظ. لا تُحفظ كلمات المرور أو رموز الجلسة على الجهاز." if language=="ar" else "Accounts are optional. Local guest progress is preserved. Passwords and session tokens are not saved on this device."
+ status.text="الحساب اختياري. تقدم الضيف المحلي محفوظ. تُحمى جلسة Android بتشفير الجهاز؛ لا تُحفظ كلمات المرور." if language=="ar" else "Accounts are optional. Local progress is preserved. Android sessions use protected storage; passwords are never saved."
  add_child(status)
  _button("الاستمرار كضيف محلي",func(): back_requested.emit.call_deferred())
  _button("حساب Gaming Hub المتصل / Online account",func(): get_tree().change_scene_to_file("res://scenes/AccountScreen.tscn"))
- _button("الحساب وتسجيل الدخول",func(): _auth_group.visible=not _auth_group.visible)
+ _button("الحساب وتسجيل الدخول",func(): get_tree().change_scene_to_file("res://scenes/AccountScreen.tscn"))
  _auth_group=VBoxContainer.new()
  _auth_group.visible=false
  add_child(_auth_group)
@@ -87,9 +90,27 @@ func _ready() -> void:
  _column=self
  admin=_button("لوحة الإدارة • وصول مخول",func(): OS.shell_open(client.endpoint))
  admin.visible=not client.token.is_empty() and not client.endpoint.is_empty() and client.user.get("role","")=="super_admin"
- _button("تسجيل خروج الحساب",func(): client.request("/auth/logout"))
+ _button("تسجيل خروج الحساب",_logout_account)
  _button("العودة",func(): back_requested.emit.call_deferred())
  MenuSkin.compact_menu(self)
+ online_account=get_tree().root.get_node_or_null("GamingHubAccount")
+ if online_account!=null:
+  online_account.profile_changed.connect(_online_profile)
+  _online_profile(online_account.user_profile)
+  if not online_account.access_token.is_empty(): online_account.profile.call_deferred()
+
+func _online_profile(user: Dictionary) -> void:
+ if not is_inside_tree(): return
+ _server_points.visible=not user.is_empty()
+ if user.is_empty():
+  _profile_name.text="ضيف" if language=="ar" else "Guest"
+  return
+ _profile_name.text=str(user.get("display_name","Player"))
+ _server_points.text=("نقاط الحساب: %d" if language=="ar" else "Account points: %d") % int(user.get("points",0))
+
+func _logout_account() -> void:
+ if online_account!=null: await online_account.logout()
+ if not client.token.is_empty(): client.request("/auth/logout")
 func _field(hint: String) -> LineEdit:
  var input := LineEdit.new()
  input.placeholder_text=_t(hint)
@@ -126,6 +147,7 @@ func _result(route: String, data: Dictionary, ok: bool) -> void:
  admin.visible=not client.token.is_empty() and not client.endpoint.is_empty() and client.user.get("role","")=="super_admin"
  if ok and route in ["/me","/auth/link-guest"] and data.get("progress") is Dictionary: progress_received.emit(data.progress)
  _profile_name.text=str(client.user.get("name","ضيف" if language=="ar" else "Guest"))
+ if online_account!=null and not online_account.user_profile.is_empty(): _online_profile(online_account.user_profile)
  if ok and route in ["/auth/login","/auth/register"]:_auth_group.hide()
  if ok and route in ["/friends","/invites"]: listing.text=JSON.stringify(data,"  ")
 

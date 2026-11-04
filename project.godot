@@ -46,6 +46,10 @@ window/handheld/orientation=1
 
 enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/gaminghub_voice/plugin.cfg", "res://addons/gaminghub_identity/plugin.cfg")
 
+[gaminghub]
+
+identity_api_url="https://gaminghub-voice-staging.onrender.com"
+
 [gui]
 
 theme/default_font_size=21

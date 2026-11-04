@@ -1,8 +1,8 @@
 {
-  "enabled": false,
-  "endpoint": "",
-  "verified_host": "",
-  "proposed_service_name": "gaminghub-duel-wss",
-  "availability_verified": false,
+  "enabled": true,
+  "endpoint": "wss://gaminghub-voice-staging.onrender.com",
+  "verified_host": "gaminghub-voice-staging.onrender.com",
+  "proposed_service_name": "gaminghub-voice-staging",
+  "availability_verified": true,
   "terms_version": "1"
 }

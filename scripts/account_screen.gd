@@ -111,10 +111,26 @@ func _on_action(action: String) -> void:
         result = await auth.logout()
     submit_busy = false
     password_field.text = ""
-    status_label.text = "Success / تم" if result.get("ok", false) else "Account service unavailable or request rejected. Guest play remains available. / تعذر الطلب؛ اللعب كضيف متاح"
+    status_label.text = "Success / تم" if result.get("ok", false) else _account_error(result)
     if result.get("ok", false) and action.begins_with("My profile"):
         var user_data: Dictionary = result.get("data", {}).get("user", {})
         status_label.text = str(user_data.get("display_name", "Player")) + " — Points: " + str(user_data.get("points", 0))
+
+func _account_error(result: Dictionary) -> String:
+    # Only client-owned messages are shown; never display server token-bearing bodies.
+    var reason := str(result.get("error", ""))
+    if reason == "Native Android sign-in unavailable":
+        return "Android sign-in component unavailable / مكوّن تسجيل الدخول غير متاح"
+    if reason in ["Provider setup incomplete", "Facebook Android setup incomplete"]:
+        return "Provider configuration incomplete / إعداد مزود الدخول غير مكتمل"
+    if reason == "Sign-in cancelled or provider unavailable":
+        return "Sign-in cancelled or provider unavailable / أُلغي الدخول أو تعذر مزود الحساب"
+    if reason == "Sign-in already in progress":
+        return "Sign-in already in progress / تسجيل الدخول جارٍ"
+    var status := int(result.get("status", 0))
+    if status == 0:
+        return "Account server connection failed. Guest play is available. / تعذر الاتصال؛ اللعب كضيف متاح"
+    return "Account request failed (%d). Guest play is available. / تعذر الطلب؛ اللعب كضيف متاح" % status
 
 
 func _save_endpoint() -> void:

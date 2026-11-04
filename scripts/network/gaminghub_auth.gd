@@ -35,7 +35,9 @@ func _ready() -> void:
 
 func _restore_session() -> void:
     if secure_store == null or api_base.is_empty(): return
-    var saved: Variant = JSON.parse_string(str(secure_store.loadSession()))
+    var stored_session := str(secure_store.loadSession())
+    if stored_session.is_empty(): return
+    var saved: Variant = JSON.parse_string(stored_session)
     if not saved is Dictionary or str(saved.get("origin", "")) != session_origin: return
     refresh_token = str(saved.get("refresh_token", ""))
     if not refresh_token.is_empty(): await refresh_session()
@@ -68,7 +70,9 @@ func _on_native_provider_result(provider: String, token: String, error: String) 
 func sign_in_provider(provider: String) -> Dictionary:
     if provider not in ["google", "facebook"] or not active_provider.is_empty():
         return {"ok": false, "status": 0, "error": "Sign-in already in progress"}
-    if secure_store == null or not secure_store.has_method("requestGoogleLogin"):
+    # Android JNISingleton dispatches Java calls dynamically; has_method() does
+    # not expose its Java method map. The registered signal identifies this API.
+    if secure_store == null or not secure_store.has_signal("social_result"):
         return {"ok": false, "status": 0, "error": "Native Android sign-in unavailable"}
     var availability := await _call("/auth/providers", HTTPClient.METHOD_GET)
     if not availability.get("ok", false) or not availability.get("data", {}).get(provider, false):
@@ -168,5 +172,5 @@ func logout() -> Dictionary:
     var response := await _call("/auth/logout", HTTPClient.METHOD_POST)
     # Local logout always removes the credential, including when the server is offline.
     _forget_session()
-    if secure_store != null and secure_store.has_method("providerSignOut"): secure_store.providerSignOut()
+    if secure_store != null and secure_store.has_signal("social_result"): secure_store.providerSignOut()
     return response

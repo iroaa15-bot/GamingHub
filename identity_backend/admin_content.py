@@ -9,7 +9,7 @@ import secrets
 import uuid
 
 import psycopg
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/api/admin/content", tags=["admin-content"])
@@ -22,10 +22,7 @@ class ContentDraft(BaseModel):
     payload: dict = Field(default_factory=dict)
 
 
-def authorize(key: str):
-    configured = os.environ.get("GAMINGHUB_INTERNAL_ADMIN_KEY", "")
-    if not configured or not secrets.compare_digest(key, configured):
-        raise HTTPException(403, "Forbidden")
+from identity_backend.admin_auth import authorize_admin
 
 
 def ensure_table(db):
@@ -66,8 +63,8 @@ def validate_staged_asset(db, body: ContentDraft):
 
 
 @router.post("/{draft_id}/review/{decision}")
-def review_draft(draft_id: str, decision: str, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def review_draft(draft_id: str, decision: str, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     transitions = {"submit": ("draft", "in_review"), "approve": ("in_review", "approved"),
                    "reject": ("in_review", "rejected"), "resubmit": ("rejected", "in_review")}
     if decision not in transitions:
@@ -86,9 +83,31 @@ def review_draft(draft_id: str, decision: str, x_admin_key: str = Header(default
     return {"id": draft_id, "review_status": next_status}
 
 
+@router.post("/{draft_id}/validate")
+def validate_draft(draft_id: str, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
+    from identity_backend.gameplay_content import question_projection
+    with psycopg.connect(DATABASE_URL) as db:
+        ensure_table(db)
+        row = db.execute("SELECT category,title,payload FROM admin_content_drafts WHERE id=%s", (draft_id,)).fetchone()
+        if not row:
+            raise HTTPException(404, "Draft not found")
+        if question_projection(draft_id, row[0], row[2]) is None:
+            raise HTTPException(422, "Question fields are incomplete or incompatible with the game")
+        if row[0] in ("image", "sound"):
+            validate_staged_asset(db, ContentDraft(category=row[0], title=row[1], payload=row[2]))
+            from identity_backend.admin_assets import ensure_table as ensure_assets
+            ensure_assets(db)
+            asset = db.execute("SELECT mime_type FROM admin_staged_assets WHERE id=%s", (row[2].get("staged_asset_id", ""),)).fetchone()
+            allowed = ("image/png", "image/jpeg", "image/webp") if row[0] == "image" else ("audio/wav",)
+            if not asset or asset[0] not in allowed:
+                raise HTTPException(422, "Attach a supported gameplay media file")
+    return {"valid": True}
+
+
 @router.post("", status_code=201)
-def create_draft(body: ContentDraft, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def create_draft(body: ContentDraft, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     draft_id = str(uuid.uuid4())
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
@@ -102,8 +121,8 @@ def create_draft(body: ContentDraft, x_admin_key: str = Header(default="")):
 
 
 @router.get("")
-def list_drafts(category: str | None = None, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def list_drafts(request: Request, category: str | None = None, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     if category is not None and category not in ("image", "question", "sound"):
         raise HTTPException(422, "Invalid category")
     with psycopg.connect(DATABASE_URL) as db:
@@ -117,8 +136,8 @@ def list_drafts(category: str | None = None, x_admin_key: str = Header(default="
 
 
 @router.put("/{draft_id}")
-def update_draft(draft_id: str, body: ContentDraft, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def update_draft(draft_id: str, body: ContentDraft, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
         validate_staged_asset(db, body)
@@ -134,8 +153,8 @@ def update_draft(draft_id: str, body: ContentDraft, x_admin_key: str = Header(de
 
 
 @router.delete("/{draft_id}")
-def delete_draft(draft_id: str, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def delete_draft(draft_id: str, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     with psycopg.connect(DATABASE_URL) as db:
         ensure_table(db)
         removed = db.execute(

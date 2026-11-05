@@ -15,10 +15,7 @@ router = APIRouter(prefix="/api/admin/assets", tags=["admin-assets"])
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024
 
 
-def authorize(key: str):
-    configured = os.environ.get("GAMINGHUB_INTERNAL_ADMIN_KEY", "")
-    if not configured or not secrets.compare_digest(configured, key):
-        raise HTTPException(403, "Forbidden")
+from identity_backend.admin_auth import authorize_admin
 
 
 def detect_media(data: bytes):
@@ -50,7 +47,7 @@ def ensure_table(db):
 
 @router.post("", status_code=201)
 async def upload_asset(request: Request, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+    authorize_admin(request, x_admin_key)
     if request.headers.get("content-length"):
         try:
             if int(request.headers["content-length"]) > MAX_UPLOAD_BYTES:
@@ -81,8 +78,8 @@ async def upload_asset(request: Request, x_admin_key: str = Header(default="")):
 
 
 @router.get("/{asset_id}")
-def download_asset(asset_id: str, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def download_asset(asset_id: str, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
         ensure_table(db)
         row = db.execute("SELECT mime_type,data FROM admin_staged_assets WHERE id=%s", (asset_id,)).fetchone()
@@ -92,8 +89,8 @@ def download_asset(asset_id: str, x_admin_key: str = Header(default="")):
 
 
 @router.delete("/{asset_id}")
-def delete_asset(asset_id: str, x_admin_key: str = Header(default="")):
-    authorize(x_admin_key)
+def delete_asset(asset_id: str, request: Request, x_admin_key: str = Header(default="")):
+    authorize_admin(request, x_admin_key)
     with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
         ensure_table(db)
         # Do not orphan content drafts that reference this binary.

@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field
 from psycopg.types.json import Jsonb
 
 app = FastAPI(title="Gaming Hub Identity Integration")
+from identity_backend.admin_auth import router as admin_auth_router, initialize_admin
+app.include_router(admin_auth_router)
 from identity_backend.social_auth import router as social_router, initialize_social
 app.include_router(social_router)
 from identity_backend.gameplay_content import router as gameplay_router
@@ -47,6 +49,7 @@ def initialize():
             family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL,
             consumed BOOLEAN NOT NULL DEFAULT FALSE, revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
         initialize_social(db)
+        initialize_admin(db)
         db.commit()
 
 class Credentials(BaseModel):
@@ -230,4 +233,15 @@ def admin_dashboard():
     """Serve the admin UI from the API origin so authenticated requests avoid CORS."""
     from pathlib import Path
     from fastapi.responses import HTMLResponse
-    return HTMLResponse((Path(__file__).parent / "admin_dashboard.html").read_text(encoding="utf-8"))
+    return HTMLResponse((Path(__file__).parent / "owner_dashboard.html").read_text(encoding="utf-8"), headers={
+        "Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
+        "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"})
+
+
+@app.get("/admin/dashboard.js", include_in_schema=False)
+def admin_dashboard_script():
+    from pathlib import Path
+    from fastapi.responses import Response
+    return Response((Path(__file__).parent / "admin_dashboard.js").read_text(encoding="utf-8"),
+                    media_type="text/javascript", headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})

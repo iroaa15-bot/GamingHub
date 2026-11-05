@@ -15,6 +15,7 @@ var restoring := false
 var refresh_after := 0
 var active_provider := ""
 var requested_provider := ""
+var requested_action := "login"
 var user_profile: Dictionary = {}
 
 func _ready() -> void:

@@ -25,9 +25,9 @@ func run() -> void:
  DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(folder))
  root.content_scale_size=Vector2i(420,900)
  a=peer();b=peer();b.hide()
- check(not a.endpoint_field.is_visible_in_tree(),"technical endpoint absent from normal landing")
+ check(not a.get_property_list().any(func(value: Dictionary):return value.name=="endpoint_field"),"technical endpoint absent from normal landing")
  await snap("simple-room-landing")
- a.endpoint_field.text="ws://127.0.0.1:8883"
+ a.service_endpoint="ws://127.0.0.1:8883"
  a._request_room_action("create")
  check(a.client.code.is_empty() and a.client.capabilities.is_empty(),"room terms required before connection")
  a.terms.button_pressed=true
@@ -40,7 +40,7 @@ func run() -> void:
  print("SYSTEM_CLIPBOARD_COPY ",copy_ok," (false = platform verification BLOCKED, not a successful copy)")
  check(copy_ok or a._invite_code.has_selection(),"manual selectable-code fallback when clipboard unavailable")
  await snap("simple-room-created")
- b.endpoint_field.text="ws://127.0.0.1:8883";b.terms.button_pressed=true
+ b.service_endpoint="ws://127.0.0.1:8883";b.terms.button_pressed=true
  b.code_field.text="bad";b._request_room_action("join")
  check(b.client.capabilities.is_empty(),"invalid code rejected before connection")
  b.code_field.text=" "+a.client.code.to_lower()+" "

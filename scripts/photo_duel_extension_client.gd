@@ -156,7 +156,7 @@ func _process(_delta: float) -> void:
   capabilities = {}
   connection_changed.emit(false)
   if _auto_resume and not code.is_empty() and not token.is_empty() and not bool(state.get("closed",false)):
-   if _resume_until==0:_resume_until=Time.get_ticks_msec()+80000
+   if _resume_until==0:_resume_until=Time.get_ticks_msec()+90000
    _resume_requested=true
    _resume_retry_at=Time.get_ticks_msec()+1000
  if current==WebSocketPeer.STATE_CLOSED and _auto_resume and _resume_requested and _resume_until>Time.get_ticks_msec() and Time.get_ticks_msec()>=_resume_retry_at:

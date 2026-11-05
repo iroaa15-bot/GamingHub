@@ -33,6 +33,20 @@ public final class GamingHubIdentityPlugin extends GodotPlugin {
     @UsedByGodot public void requestGoogleLogin(String clientId,String nonce) { providers().google(clientId,nonce); }
     @UsedByGodot public void requestFacebookLogin(String appId,String clientToken) { providers().facebook(appId,clientToken); }
     @UsedByGodot public void providerSignOut() { if (getActivity()!=null) providers().signOut(); }
+    /** User-triggered Android share sheet; no contacts access or automatic sending. */
+    @UsedByGodot public void shareRoomCode(String code,String language) {
+        if (getActivity()==null || code==null || !code.matches("[0-9]{6}")) return;
+        getActivity().runOnUiThread(()-> {
+            android.content.Intent message=new android.content.Intent(android.content.Intent.ACTION_SEND);
+            message.setType("text/plain");
+            message.putExtra(android.content.Intent.EXTRA_TEXT,
+                ("ar".equals(language)?"انضم إلى غرفتي في Gaming Hub بالكود: ":"Join my Gaming Hub room with code: ")+code);
+            try {
+                getActivity().startActivity(android.content.Intent.createChooser(message,
+                    "ar".equals(language)?"مشاركة دعوة اللعب":"Share game invitation"));
+            } catch (android.content.ActivityNotFoundException ignored) { }
+        });
+    }
     @Override public void onMainActivityResult(int requestCode,int resultCode,android.content.Intent data) {
         if (providers!=null) providers.activityResult(requestCode,resultCode,data);
     }

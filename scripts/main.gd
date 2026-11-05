@@ -149,6 +149,7 @@ func show_accessibility() -> void:
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
 
  VisualSkin.compact_menu(root)
+ _add_bottom_navigation("settings")
 
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
@@ -1361,7 +1362,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
  skin.bg_color = Color("142447")
- skin.border_color = [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
+ skin.border_color = Color("ffcc42") if index==0 else [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
  skin.set_border_width_all(2)
  skin.set_corner_radius_all(20)
  skin.content_margin_left = 8
@@ -1377,7 +1378,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  var art := TextureRect.new()
  var premium_art: Texture2D=VisualSkin.game_cover(index)
  art.texture=premium_art if premium_art!=null else card_texture(art_id)
- art.custom_minimum_size.y = 64
+ art.custom_minimum_size.y = 76 if index==0 else 64
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -1927,6 +1928,7 @@ func show_home() -> void:
   [tr_ui("الخصوصية والإعلانات", "PRIVACY & ADS"),show_privacy_and_ads]
  ])
  VisualSkin.compact_menu(root)
+ _add_bottom_navigation("games")
 
 func _add_unique_game_catalog() -> void:
  var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
@@ -1934,6 +1936,8 @@ func _add_unique_game_catalog() -> void:
  if configured_columns>0: columns=configured_columns
  if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1
  var catalog_order: Array=PublishedContent.catalog_order()
+ if 0 in catalog_order:
+  catalog_order.erase(0);catalog_order.push_front(0)
  var primary_count: int=int(PublishedContent.settings.get("primary_count",6))
  var grid := GridContainer.new()
  grid.name="UnifiedGameCatalog";grid.columns=columns
@@ -1976,6 +1980,42 @@ func show_player_account() -> void:
  account.back_requested.connect(show_home)
  account.progress_received.connect(_merge_account_progress)
  root.add_child(account)
+ _add_bottom_navigation("account")
+
+func show_player_friends() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.show_friends_first=true
+ account.back_requested.connect(show_home)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+ _add_bottom_navigation("friends")
+
+func _add_bottom_navigation(selected: String) -> void:
+ if has_node("PlayerBottomNavigation"):return
+ for child in get_children():
+  if child is ScrollContainer:child.offset_bottom=-96
+ var panel:=PanelContainer.new()
+ panel.name="PlayerBottomNavigation"
+ panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+ panel.offset_left=16;panel.offset_right=-16;panel.offset_top=-86;panel.offset_bottom=-18
+ var style:=VisualSkin.card(Color("0b2042"),16)
+ style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=4;style.content_margin_bottom=4
+ panel.add_theme_stylebox_override("panel",style)
+ add_child(panel)
+ var bar:=HBoxContainer.new();bar.add_theme_constant_override("separation",4);panel.add_child(bar)
+ var entries: Array=[["games",tr_ui("الألعاب","Games"),"list",show_home],["friends",tr_ui("الأصدقاء","Friends"),"player",show_player_friends],["account",tr_ui("حسابي","Profile"),"player",show_player_account],["settings",tr_ui("الإعدادات","Settings"),"settings",show_accessibility]]
+ for entry in entries:
+  var control:=button(str(entry[1]),entry[3],GOLD if entry[0]==selected else PANEL)
+  control.reparent(bar)
+  control.icon=VisualSkin.menu_icon(str(entry[2]));control.expand_icon=true
+  control.add_theme_constant_override("icon_max_width",18)
+  control.add_theme_font_size_override("font_size",12)
+  control.custom_minimum_size=Vector2(0,54)
+  control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  control.set_meta("navigation_target",entry[0])
 
 func _merge_account_progress(value: Dictionary) -> void:
  for key in ["xp","wins","matches","picture_wins"]:
@@ -2030,16 +2070,17 @@ func show_modes(index: int) -> void:
   VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
  if game == 0:
   if age_group not in ["under13", "unknown"]:
-   button(tr_ui("غرف الأصدقاء • إنشاء / انضمام", "FRIEND ROOMS • CREATE / JOIN"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
+   button(tr_ui("اللعب مع صديق • إنشاء غرفة", "PLAY WITH A FRIEND • CREATE ROOM"),func():_open_picture_room("create"),ACCENT)
+   button(tr_ui("اللعب أونلاين • انضمام بكود", "PLAY ONLINE • JOIN WITH CODE"),func():_open_picture_room("join"),PANEL)
    _home_activity_section(tr_ui("الخدمة الكلاسيكية الحالية","Existing classic service"),[[tr_ui("فتح غرفة كلاسيكية • لاعبان","Open classic room • two players"),open_guess_multiplayer]])
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   if _admin_ui_authorized():
    button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
   button(tr_ui("ألغاز الصور اليومية", "DAILY PICTURE PUZZLES"),show_ai_daily,PANEL)
-  label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
+  label(tr_ui("شارك كود غرفتك مع الأصدقاء، أو العب ضد الكمبيوتر دون إنترنت.", "Share a room code with friends, or play against the computer offline."), 16)
  if game in [1,2,3,4,5,6,7,8,9] and age_group not in ["under13","unknown"]:
-  button(tr_ui("غرفة أسئلة مع الأصدقاء • معاينة محلية","Quiz room with friends • local preview"),func():
+  button(tr_ui("اللعب مع الأصدقاء • غرفة أسئلة","PLAY WITH FRIENDS • QUIZ ROOM"),func():
    var screen=load("res://scripts/shared_quiz_ui.gd")
    screen.selected_game=str(game)
    get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn"),ACCENT)
@@ -2083,7 +2124,7 @@ func show_modes(index: int) -> void:
   if game > 0 and game not in [4, 8]:
    button(tr_ui("🚀 مباراة سريعة • 10 أسئلة فقط", "🚀 QUICK MATCH • JUST 10 QUESTIONS"), start_quick_match, GREEN)
   if game==0:
-   button(tr_ui("ابدأ اللعب بدون إنترنت", "START OFFLINE GAME"),func(): quick_match_active=false;start_game(),GREEN)
+   button(tr_ui("اللعب ضد الكمبيوتر • بدون إنترنت", "PLAY AGAINST THE COMPUTER • OFFLINE"),func(): quick_match_active=false;start_game(),GREEN)
   else:
    label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
    label(match_style_name(), 19)
@@ -2094,12 +2135,18 @@ func show_modes(index: int) -> void:
  if not (game == 0 and age_group not in ["under13", "unknown"]):
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
+ _add_bottom_navigation("games")
 
 func show_unavailable(feature: String) -> void:
  clear_ui()
  label(feature, 26)
  label(tr_ui("غير متصل بعد. يحتاج هذا الوضع خادمًا واختبارًا بجهازين.", "Not connected yet. This mode needs a multiplayer backend and testing on two devices."), 19)
  button(tr_ui("العودة", "Back"), func(): show_modes(game), ACCENT)
+
+func _open_picture_room(entry: String) -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry=entry
+ get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
 
 func adaptive_level_for(game_index: int) -> int:
  var stats: Dictionary = profile.get("adaptive_stats", {})
@@ -3737,11 +3784,11 @@ func show_welcome() -> void:
  guest.set_meta("welcome_action","guest")
  for provider in ["Google","Facebook"]:
   var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
-  login.tooltip_text=tr_ui("إعداد OAuth والخدمة الآمنة غير مكتملين؛ اللعب كضيف متاح","OAuth and secure service setup are pending; guest play is available")
+  login.tooltip_text=tr_ui("تسجيل دخول اختياري؛ تقدم الضيف محفوظ","Optional sign-in; guest progress is preserved")
   login.set_meta("welcome_action",provider.to_lower())
- var account := button(tr_ui("حساب Gaming Hub","Gaming Hub account"),show_welcome_account,PANEL)
+ var account := button(tr_ui("إنشاء حساب Gaming Hub","Create Gaming Hub account"),func(): _open_account_sign_in("register"),PANEL)
  account.set_meta("welcome_action","account")
- button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),show_welcome_account,PANEL)
+ button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),func(): _open_account_sign_in("login"),PANEL)
  button("العربية / English",func(): selected_language="en" if selected_language=="ar" else "ar";save_progress();show_welcome(),PANEL)
  VisualSkin.compact_menu(root)
 
@@ -3751,6 +3798,10 @@ func _welcome_guest() -> void:
 
 func _welcome_provider(provider: String) -> void:
  get_node("/root/GamingHubAccount").requested_provider = provider
+ get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
+
+func _open_account_sign_in(action: String) -> void:
+ get_node("/root/GamingHubAccount").requested_action=action
  get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
 
 func show_welcome_account() -> void:

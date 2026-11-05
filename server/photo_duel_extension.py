@@ -18,7 +18,7 @@ from photo_duel_staging import StagingHub
 
 VERSION = 3
 TIMERS = (0, 10, 20, 30, 60)
-RESUME_SECONDS = 85
+RESUME_SECONDS = 90
 FACTS = {"living", "animal", "celebrity", "edible", "household", "natural", "place", "large"}
 
 class ProtocolError(ValueError):

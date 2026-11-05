@@ -1,4 +1,5 @@
 extends Control
+static var requested_entry := "both"
 ## Embedded local/staging screen; no standalone app and no voice-module changes.
 const Client = preload("res://scripts/photo_duel_extension_client.gd")
 const VisualSkin = preload("res://scripts/visual_skin.gd")
@@ -20,7 +21,6 @@ var timer_field: OptionButton
 var _invite_box: VBoxContainer
 var _invite_code: LineEdit
 var _copy_code_button: Button
-var _advanced_connection: VBoxContainer
 var _pending_room_action := ""
 var _pending_join_code := ""
 var _online_category: OptionButton
@@ -59,7 +59,7 @@ var captions: Array[Label] = []
 var catalog: Dictionary = {}
 var received_at := 0
 var local_remaining := -1
-var endpoint_field: LineEdit
+var service_endpoint: String = ""
 var terms: CheckBox
 var voice_adapter: Node
 var voice_button: Button
@@ -142,6 +142,9 @@ func _execute_menu_action(ref: WeakRef, action: Callable) -> void:
   action.call()
 
 func _ready() -> void:
+ var entry: String=requested_entry
+ requested_entry="both"
+ _focus_room_entry.call_deferred(entry)
  get_tree().quit_on_go_back = false
  var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://progress_v10_all.json")) if FileAccess.file_exists("user://progress_v10_all.json") else null
  if saved is Dictionary: language = str(saved.get("language","ar"))
@@ -227,22 +230,12 @@ func _ready() -> void:
  _settings_body=column
  _settings_toggle=main_column.get_child(settings_index)
  var room_settings_column := column
- var advanced_index := column.get_child_count()
- column=_section(tr_pair("إعداد اتصال الاختبار","Test connection setup"))
- _advanced_connection=column
- room_settings_column.get_child(advanced_index).visible=OS.has_feature("debug")
- endpoint_field = field(tr_pair("عنوان الخدمة المعتمد؛ لا يزال النشر معلقًا","Approved service address; deployment pending"))
- endpoint_field.text = Client.endpoint_from_args()
- endpoint_field.layout_direction = Control.LAYOUT_DIRECTION_LTR
- endpoint_field.text_changed.connect(func(_text: String):
-  if is_instance_valid(client):_state(client.state))
+ service_endpoint = Client.endpoint_from_args()
  label(tr_pair("الدردشة والصوت اختياريان. يمنع الإساءة والتهديد ونشر المعلومات الشخصية والمحتوى غير الملائم. يمكنك الإبلاغ وحظر لاعب. لا يبدأ الميكروفون دون موافقتك.","Chat and voice are optional. Abuse, threats, personal information and inappropriate content are prohibited. You can report or block players. The microphone requires your consent."),15)
  terms = CheckBox.new()
  terms.custom_minimum_size.y = 54
  terms.text = tr_pair("أوافق على قواعد الغرف واستخدام الدردشة","I accept the room and chat rules")
  column.add_child(terms)
- var test_connect := button(tr_pair("فحص اتصال الاختبار","Test connection"),_connect_service)
- test_connect.tooltip_text=tr_pair("للتطوير المحلي فقط","Local development only")
  column=room_settings_column
  label(tr_pair("عدد اللاعبين","Number of players"))
  players_field = OptionButton.new()
@@ -415,7 +408,7 @@ func _ready() -> void:
  client.event_received.connect(func(message: Dictionary):
   if message.get("type") == "duel_error":
    _pending_room_action=""
-   status.text = str(message.get("message",""))
+   status.text = _connection_message(str(message.get("message","")))
   elif message.get("type") == "duel_reported": status.text = tr_pair("حُفظ البلاغ: ","Report saved: ")+str(message.get("report_id",""))
   elif message.get("type") == "duel_blocked": status.text = tr_pair("تم حظر اللاعب","Player blocked")
  )
@@ -481,7 +474,7 @@ func _state(value: Dictionary) -> void:
  var pending: Dictionary = value.get("pending") if value.get("pending") is Dictionary else {}
  var turn: bool = active and int(value.get("current",-1)) == client.player and pending.is_empty()
  var responder: bool = active and int(pending.get("responder",-1)) == client.player
- var service_available: bool=Client.allowed_endpoint(endpoint_field.text.strip_edges())
+ var service_available: bool=Client.allowed_endpoint(service_endpoint)
  create_button.disabled = not client.code.is_empty() or (not ready and not service_available) or (ready and not bool(client.capabilities.get("room_agreement",false)))
  var agreement: bool=bool(value.get("room_agreement",false))
  var in_room: bool=not client.code.is_empty()
@@ -593,8 +586,8 @@ func _state(value: Dictionary) -> void:
  if bool(value.get("match_finished",false)): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
- elif not ready: status.text=tr_pair("خدمة غرف 2–6 لم تُفعّل بعد. الغرفة الكلاسيكية متاحة من صفحة اللعبة.","Rooms for 2–6 are not activated yet. Classic rooms remain available on the game page.") if not service_available else tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend’s code")
- elif not bool(client.capabilities.get("room_agreement",false)): status.text=tr_pair("هذه الخدمة لا تدعم اتفاق الغرفة؛ استخدم الخدمة المحلية المتوافقة أو الغرفة الكلاسيكية المنفصلة.","This service does not support room agreement; use the compatible local service or the separate classic room.")
+ elif not ready: status.text=tr_pair("الاتصال غير متاح الآن؛ اللعب دون إنترنت متاح.","Connection is unavailable; offline play remains available.") if not service_available else tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend’s code")
+ elif not bool(client.capabilities.get("room_agreement",false)): status.text=tr_pair("تعذر بدء الغرفة الآن. حاول مجددًا أو العب دون إنترنت.","The room cannot start right now. Retry or play offline.")
  elif not bool(value.get("started",false)): status.text = tr_pair("بانتظار اكتمال عدد اللاعبين","Waiting for the configured number of players")
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
  question_label.text = str(pending.get("text",""))
@@ -657,9 +650,21 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _connect_service() -> void:
  client.terms_accepted = terms.button_pressed
  # This agreement UI uses the authenticated local service; generic clients retain old opt-in behavior.
- client.authenticate_local=endpoint_field.text.strip_edges().begins_with("ws://")
- client.connect_endpoint(endpoint_field.text.strip_edges())
- if not client.last_error.is_empty(): status.text=client.last_error
+ client.authenticate_local=service_endpoint.begins_with("ws://")
+ client.connect_endpoint(service_endpoint)
+ if not client.last_error.is_empty(): status.text=_connection_message(client.last_error)
+
+func _focus_room_entry(entry: String) -> void:
+ if entry=="create":_settings_body.visible=true
+ elif entry=="join":code_field.grab_focus()
+
+func _connection_message(reason: String) -> String:
+ var value:=reason.to_lower()
+ if "full" in value:return tr_pair("الغرفة ممتلئة. جرّب غرفة أخرى.","This room is full. Try another room.")
+ if "not found" in value or "unknown room" in value:return tr_pair("الغرفة غير موجودة. راجع الكود مع صديقك.","Room not found. Check the code with your friend.")
+ if "resume" in value or "expired" in value:return tr_pair("تعذر استئناف الغرفة. حاول مجددًا أو انضم بكود الغرفة.","Could not restore the room. Retry or join with the room code.")
+ if "agreement" in value or "terms" in value:return tr_pair("وافق على قواعد الغرف أولًا.","Accept the room rules first.")
+ return tr_pair("تعذر الاتصال الآن. أعد المحاولة؛ اللعب دون إنترنت متاح.","Connection is unavailable. Retry; offline play is available.")
 
 func _voice_changed() -> void:
  if not is_instance_valid(voice_adapter): return
@@ -670,7 +675,7 @@ func _voice_changed() -> void:
  voice_mute_button.disabled=not voice_adapter.requested
  VisualSkin.icon_action(voice_button,"phone_off" if voice_adapter.requested else "phone",tr_pair("إنهاء اتصال الصوت","End voice connection") if voice_adapter.requested else tr_pair("بدء اتصال الصوت","Start voice connection"))
  VisualSkin.icon_action(voice_mute_button,"mic_off" if voice_adapter.muted else "mic",tr_pair("إلغاء كتم الإرسال","Unmute transmission") if voice_adapter.muted else tr_pair("كتم إرسال الميكروفون","Mute microphone transmission"))
- if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت يحتاج Android وإذن الميكروفون؛ التحقق السمعي على هاتفين لم يكتمل.","Voice requires Android and microphone permission; two-device acoustic verification is pending.")
+ if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت غير متاح الآن؛ يمكنك متابعة اللعب والكتابة.","Voice is unavailable; you can keep playing and use text.")
  elif voice_adapter.requested and not voice_adapter.bridge.active:voice_status.text=tr_pair("بانتظار موافقة الطرف الآخر أو استعادة الصوت","Waiting for peer consent or audio recovery")
  elif voice_adapter.requested:voice_status.text=tr_pair("إرسال الميكروفون مكتوم • الاستقبال متاح","Microphone transmission muted • receiving remains available") if voice_adapter.muted else tr_pair("جلسة الصوت مفعلة طوال عضوية الغرفة","Voice enabled throughout room membership")
  elif not voice_adapter.last_failure.is_empty():voice_status.text=tr_pair("توقف الاتصال الصوتي • اضغط زر الاتصال للمحاولة مجددًا","Voice connection stopped • tap the call button to try again")

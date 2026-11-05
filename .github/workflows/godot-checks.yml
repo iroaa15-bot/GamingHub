@@ -63,6 +63,12 @@ jobs:
           set -o pipefail
           timeout 120 godot --headless --path . --script res://tests/remote_appearance.gd 2>&1 | tee godot-appearance.log
           grep -q REMOTE_APPEARANCE_PASS godot-appearance.log
+      - name: Verify player account UI has no developer or admin controls
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/player_safe_account.gd 2>&1 | tee godot-safe-account.log
+          grep -q PLAYER_SAFE_ACCOUNT_PASS godot-safe-account.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

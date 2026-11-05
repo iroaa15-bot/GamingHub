@@ -52,5 +52,30 @@ func run() -> void:
  var before=main.order_picks.duplicate();main._move_local_order(source,target)
  assert(main.order_picks==before)
  main.queue_free();await process_frame
+ var scroll:=ScrollContainer.new();scroll.size=Vector2(400,220);root.add_child(scroll)
+ var list:=VBoxContainer.new();scroll.add_child(list)
+ var moves: Array=[]
+ for index in range(3):
+  var row=load("res://scripts/order_drag_item.gd").new()
+  row.text=str(index);row.item_index=index;row.group_key="touch-test";row.ordering_enabled=true
+  row.custom_minimum_size=Vector2(350,100);list.add_child(row)
+  row.move_requested.connect(func(source,target):moves.append([source,target]))
+ await process_frame;await process_frame
+ scroll.scroll_vertical=50
+ await process_frame
+ var press:=InputEventScreenTouch.new();press.index=0;press.pressed=true;press.position=Vector2(100,110)
+ root.push_input(press,true)
+ var drag:=InputEventScreenDrag.new();drag.index=0;drag.position=Vector2(100,25);drag.relative=Vector2(0,-85)
+ root.push_input(drag,true)
+ var release:=InputEventScreenTouch.new();release.index=0;release.position=drag.position
+ root.push_input(release,true)
+ await process_frame
+ assert(moves==[[1,0]] and scroll.scroll_vertical==50)
+ root.push_input(press,true);root.push_input(drag,true)
+ release.canceled=true;root.push_input(release,true)
+ assert(moves.size()==1)
+ # A row clipped by the scroll viewport cannot capture an unrelated touch.
+ assert(not list.get_child(2)._contains_touch(Vector2(100,260)))
+ scroll.queue_free();await process_frame
  print("SIMPLIFIED_NAVIGATION_PASS — UI role fixtures and local drag logic; not a phone test")
  quit(0)

@@ -3,6 +3,27 @@ from fastapi.testclient import TestClient
 from identity_backend.app import app, initialize
 import psycopg
 
+def test_local_progress_backup_merges_without_modifying_ranked_points():
+    initialize()
+    client=TestClient(app)
+    session=client.post('/api/auth/guest').json()
+    headers={'Authorization':'Bearer '+session['access_token']}
+    uid=client.get('/api/me',headers=headers).json()['user']['id']
+    with psycopg.connect(os.environ['GAMINGHUB_DATABASE_URL']) as db:
+        db.execute('UPDATE identity_users SET points=37 WHERE id=%s',(uid,))
+    assert client.post('/api/me/progress',json={'progress':{'xp':25,'wins':1}},headers=headers).status_code==200
+    result=client.post('/api/me/progress',json={'progress':{'xp':20,'matches':2}},headers=headers)
+    user=result.json()['user']
+    assert user['local_progress']=={'xp':25,'wins':1,'matches':2,'picture_wins':0}
+    assert user['points']==37 and user['id']==uid
+    for body in ({'progress':{'points':999}}, {'progress':{'xp':True}},
+                 {'progress':{'xp':-1}}, {'progress':{'xp':1},'user_id':'other'}):
+        assert client.post('/api/me/progress',json=body,headers=headers).status_code==422
+    assert client.post('/api/me/progress',json={'progress':{'xp':1}}).status_code==401
+    other=client.post('/api/auth/guest').json()
+    other_user=client.get('/api/me',headers={'Authorization':'Bearer '+other['access_token']}).json()['user']
+    assert other_user['local_progress']=={} and other_user['points']==0
+
 def test_refresh_rotation_expiry_logout_and_replay():
     initialize()
     client=TestClient(app)

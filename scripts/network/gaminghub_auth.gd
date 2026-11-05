@@ -172,12 +172,23 @@ func upgrade_guest(email: String, password: String, display_name: String) -> Dic
 
 func profile() -> Dictionary:
     var response := await _call("/me", HTTPClient.METHOD_GET)
+    _cache_profile(response)
+    return response
+
+func sync_progress(local_progress: Dictionary) -> Dictionary:
+    var snapshot: Dictionary = {}
+    for key in ["xp", "wins", "matches", "picture_wins"]:
+        snapshot[key] = clampi(int(local_progress.get(key, 0)), 0, 1000000000)
+    var response := await _call("/me/progress", HTTPClient.METHOD_POST, {"progress": snapshot})
+    _cache_profile(response)
+    return response
+
+func _cache_profile(response: Dictionary) -> void:
     if response.get("ok", false):
         var user: Variant = response.get("data", {}).get("user", {})
         if user is Dictionary and not user.is_empty():
             user_profile = user.duplicate(true)
             profile_changed.emit(user_profile)
-    return response
 
 func logout() -> Dictionary:
     var response := await _call("/auth/logout", HTTPClient.METHOD_POST)

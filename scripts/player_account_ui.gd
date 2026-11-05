@@ -21,6 +21,7 @@ var _profile_name: Label
 var _xp_bar: ProgressBar
 var online_account: Node
 var _server_points: Label
+var _snapshot_sent := false
 func _ready() -> void:
  _column=self
  layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
@@ -69,9 +70,9 @@ func _ready() -> void:
  _column=self
  _profile_group=_section(_t("تقدم الحساب وربطه"))
  _column=_profile_group
- _button("حفظ تقدمي في الحساب",func(): client.sync_progress(local_progress))
- _button("استعادة تقدم الحساب",func(): client.request("/me",{},false))
- _button("ربط جلسة الضيف السابقة بالحساب الحالي",func(): client.request("/auth/link-guest",{"guest_token":client.guest_token}))
+ _button("حفظ تقدمي في الحساب",_save_online_progress)
+ _button("استعادة تقدم الحساب",_restore_online_progress)
+ _button("ربط جلسة الضيف السابقة بالحساب الحالي",func(): get_tree().change_scene_to_file("res://scenes/AccountScreen.tscn"))
  _column=self
  _friends_group=_section(_t("الأصدقاء والدعوات"))
  _column=_friends_group
@@ -107,6 +108,27 @@ func _online_profile(user: Dictionary) -> void:
   return
  _profile_name.text=str(user.get("display_name","Player"))
  _server_points.text=("نقاط الحساب: %d" if language=="ar" else "Account points: %d") % int(user.get("points",0))
+ var providers: Array=user.get("providers",[])
+ if not providers.is_empty(): _server_points.text+="\n"+" + ".join(PackedStringArray(providers))
+ if not _snapshot_sent and not online_account.access_token.is_empty():
+  _snapshot_sent=true
+  _save_online_progress.call_deferred()
+
+func _save_online_progress() -> void:
+ if online_account==null or online_account.access_token.is_empty():
+  status.text="سجل الدخول أولًا" if language=="ar" else "Sign in first"
+  return
+ var response: Dictionary=await online_account.sync_progress(local_progress)
+ if is_inside_tree(): status.text=("حُفظ التقدم المحلي في الحساب" if language=="ar" else "Local progress backed up to your account") if response.get("ok",false) else ("تعذر الحفظ؛ تقدم الجهاز محفوظ" if language=="ar" else "Backup unavailable; device progress is preserved")
+
+func _restore_online_progress() -> void:
+ if online_account==null or online_account.access_token.is_empty(): return
+ var response: Dictionary=await online_account.profile()
+ if not is_inside_tree() or not response.get("ok",false): return
+ var saved: Variant=response.get("data",{}).get("user",{}).get("local_progress",{})
+ if saved is Dictionary:
+  progress_received.emit(saved)
+  status.text="استُعيد تقدم الحساب دون خفض تقدم الجهاز" if language=="ar" else "Account progress restored without reducing device progress"
 
 func _logout_account() -> void:
  if online_account!=null: await online_account.logout()

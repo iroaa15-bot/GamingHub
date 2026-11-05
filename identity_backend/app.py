@@ -8,6 +8,7 @@ from contextlib import contextmanager
 import psycopg
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
+from psycopg.types.json import Jsonb
 
 app = FastAPI(title="Gaming Hub Identity Integration")
 from identity_backend.social_auth import router as social_router, initialize_social
@@ -40,6 +41,7 @@ def initialize():
             revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
         db.execute("ALTER TABLE identity_sessions ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP + INTERVAL '15 minutes')")
         db.execute("ALTER TABLE identity_sessions ADD COLUMN IF NOT EXISTS family_id TEXT")
+        db.execute("ALTER TABLE identity_users ADD COLUMN IF NOT EXISTS local_progress JSONB NOT NULL DEFAULT '{}'::jsonb")
         db.execute("""CREATE TABLE IF NOT EXISTS identity_refresh_sessions (
             token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES identity_users(id),
             family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL,
@@ -72,12 +74,12 @@ def get_identity(authorization: str):
         raise HTTPException(401, "Missing bearer token")
     digest = hashlib.sha256(authorization[7:].encode()).hexdigest()
     with database() as db:
-        row = db.execute("""SELECT u.id,u.email,u.display_name,u.is_guest,u.points,u.avatar_url
+        row = db.execute("""SELECT u.id,u.email,u.display_name,u.is_guest,u.points,u.avatar_url,u.local_progress
             FROM identity_sessions s JOIN identity_users u ON u.id=s.user_id
             WHERE s.token_hash=%s AND NOT s.revoked AND s.expires_at>CURRENT_TIMESTAMP""", (digest,)).fetchone()
     if row is None:
         raise HTTPException(401, "Invalid session")
-    return dict(zip(("id","email","display_name","is_guest","points","avatar_url"),row))
+    return dict(zip(("id","email","display_name","is_guest","points","avatar_url","local_progress"),row))
 
 @app.get("/api/ready")
 def ready():
@@ -120,7 +122,33 @@ def guest():
 
 @app.get("/api/me")
 def me(authorization: str = Header(default="")):
-    return {"user":get_identity(authorization)}
+    user=get_identity(authorization)
+    with database() as db:
+        user["providers"]=[row[0] for row in db.execute(
+            "SELECT provider FROM identity_providers WHERE user_id=%s ORDER BY provider",(user["id"],)).fetchall()]
+    return {"user":user}
+
+class LocalProgress(BaseModel):
+    model_config={"extra":"forbid"}
+    xp: int = Field(default=0,strict=True,ge=0,le=1_000_000_000)
+    wins: int = Field(default=0,strict=True,ge=0,le=1_000_000_000)
+    matches: int = Field(default=0,strict=True,ge=0,le=1_000_000_000)
+    picture_wins: int = Field(default=0,strict=True,ge=0,le=1_000_000_000)
+
+class ProgressUpdate(BaseModel):
+    model_config={"extra":"forbid"}
+    progress: LocalProgress
+
+@app.post("/api/me/progress")
+def save_local_progress(body: ProgressUpdate,authorization: str = Header(default="")):
+    # Local play statistics are an untrusted backup, never ranked points or awards.
+    identity=get_identity(authorization)
+    with database() as db:
+        saved=db.execute("SELECT local_progress FROM identity_users WHERE id=%s FOR UPDATE",(identity["id"],)).fetchone()[0]
+        merged={key:max(int(saved.get(key,0)),value) for key,value in body.progress.model_dump().items()}
+        db.execute("UPDATE identity_users SET local_progress=%s WHERE id=%s",(Jsonb(merged),identity["id"]))
+        db.commit()
+    return me(authorization)
 
 @app.post("/api/auth/logout")
 def logout(authorization: str = Header(default="")):

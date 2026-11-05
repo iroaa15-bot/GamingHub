@@ -115,6 +115,8 @@ func _on_action(action: String) -> void:
     if result.get("ok", false) and action.begins_with("My profile"):
         var user_data: Dictionary = result.get("data", {}).get("user", {})
         status_label.text = str(user_data.get("display_name", "Player")) + " — Points: " + str(user_data.get("points", 0))
+        var providers: Array = user_data.get("providers", [])
+        if not providers.is_empty(): status_label.text += "\n" + " + ".join(PackedStringArray(providers))
 
 func _account_error(result: Dictionary) -> String:
     # Only client-owned messages are shown; never display server token-bearing bodies.

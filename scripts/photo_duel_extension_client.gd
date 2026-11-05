@@ -31,6 +31,7 @@ var _resume_retry_at := 0
 var _binding_account := false
 var _next_sync_at := 0
 var _last_snapshot_at := 0
+var _pending_admission_at := 0
 
 func _ready() -> void:
  var account=get_tree().root.get_node_or_null("GamingHubAccount")
@@ -121,7 +122,6 @@ func connect_endpoint(value: String) -> Error:
 func _authenticated(result: int, code_status: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
  if result != HTTPRequest.RESULT_SUCCESS or code_status != 200:
   _error("Authentication service unavailable: " + str(code_status))
-  event_received.emit({"type":"duel_error","message":last_error})
   return
  var value: Variant = JSON.parse_string(body.get_string_from_utf8())
  if not value is Dictionary or str(value.get("token","")).is_empty():
@@ -134,6 +134,7 @@ func _authenticated(result: int, code_status: int, _headers: PackedStringArray, 
 func _open_socket() -> Error:
  socket = WebSocketPeer.new()
  socket.inbound_buffer_size = 262144
+ socket.heartbeat_interval = 5.0
  if not _auth_token.is_empty(): socket.handshake_headers = PackedStringArray(["Authorization: Bearer "+_auth_token])
  _previous = WebSocketPeer.STATE_CLOSED
  _started_at = Time.get_ticks_msec()
@@ -171,6 +172,11 @@ func _process(_delta: float) -> void:
  _previous = current
 
 func _maintain_room(now: int) -> void:
+ if _pending_admission_at>0 and code.is_empty() and now-_pending_admission_at>15000:
+  _pending_admission_at=0
+  socket.close(-1)
+  _error("Room request timed out")
+  return
  if code.is_empty() or token.is_empty() or capabilities.is_empty() or bool(state.get("closed",false)):return
  if now>=_next_sync_at:
   _next_sync_at=now+5000
@@ -182,6 +188,8 @@ func _maintain_room(now: int) -> void:
   resume_session.call_deferred()
 
 func _received(message: Dictionary) -> void:
+ if OS.is_debug_build() and message.get("type") in ["duel_capabilities","duel_created","duel_joined","duel_resumed","duel_state","duel_error"]:
+  print("GH_ROOM_EVENT ",message.get("type")," revision=",message.get("revision",-1))
  match str(message.get("type", "")):
   "duel_capabilities":
    if int(message.get("protocol", 0)) != PROTOCOL:
@@ -202,6 +210,7 @@ func _received(message: Dictionary) -> void:
    code = str(message.get("code", ""))
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
+   _pending_admission_at=0
    _last_snapshot_at=Time.get_ticks_msec()
    _next_sync_at=_last_snapshot_at+5000
    if message.get("type")!="duel_resumed":load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("room_create" if message.get("type")=="duel_created" else "player_join")
@@ -216,7 +225,8 @@ func _received(message: Dictionary) -> void:
      load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
     state_changed.emit(state)
   "duel_error":
-   _error(str(message.get("message", "Protocol error")))
+   _pending_admission_at=0
+   _error(str(message.get("message", "Protocol error")),false)
  event_received.emit(message)
 
 func send_action(kind: String, fields: Dictionary = {}) -> Error:
@@ -226,7 +236,10 @@ func send_action(kind: String, fields: Dictionary = {}) -> Error:
  var message := fields.duplicate(true)
  message["type"] = kind
  message["protocol"] = PROTOCOL
- return socket.send_text(JSON.stringify(message))
+ var result: Error=socket.send_text(JSON.stringify(message))
+ if result!=OK:_error("Room request could not be sent")
+ elif kind in ["duel_create","duel_quiz_create","duel_join"]:_pending_admission_at=maxi(1,Time.get_ticks_msec())
+ return result
 
 func create_room(players: int, timer: int, target: int = 10, picture_filters: Dictionary = {}) -> Error:
  var fields := {"players":players,"timer":timer,"target":target}
@@ -254,9 +267,11 @@ func close_transport() -> void:
  capabilities = {}
  connection_changed.emit(false)
 
-func _error(value: String) -> void:
+func _error(value: String, notify: bool=true) -> void:
  last_error = value
  error_count += 1
+ if OS.is_debug_build():print("GH_ROOM_ERROR ",value.left(160))
+ if notify:event_received.emit({"type":"duel_error","message":value})
 
 func _exit_tree() -> void:
  var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")

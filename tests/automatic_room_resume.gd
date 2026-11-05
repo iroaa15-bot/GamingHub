@@ -16,6 +16,11 @@ func run() -> void:
   client.terms_accepted=true;client.authenticate_local=true;client.requested_game="6"
   root.add_child(client);client.connect_endpoint("ws://127.0.0.1:8942")
  assert(await until(func():return not a.capabilities.is_empty() and not b.capabilities.is_empty()))
+ b._pending_admission_at=maxi(1,Time.get_ticks_msec())
+ b._maintain_room(b._pending_admission_at+15001)
+ assert(b.last_error=="Room request timed out")
+ b.connect_endpoint("ws://127.0.0.1:8942")
+ assert(await until(func():return not b.capabilities.is_empty() and b.socket.get_ready_state()==WebSocketPeer.STATE_OPEN))
  a.send_action("duel_quiz_create",{"game_id":"6","players":2,"timer":0,"rounds":1,"difficulty":"easy"})
  assert(await until(func():return not a.code.is_empty()))
  b.join_room(a.code)

@@ -21,7 +21,7 @@ var rng := RandomNumberGenerator.new()
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
 		return false
-	if player_ids.duplicate().size() != _unique_count(player_ids):
+	if player_ids.size() != _unique_count(player_ids):
 		return false
 	players = player_ids.duplicate()
 	scores.clear()
@@ -29,11 +29,13 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	for id in players:
 		scores[id] = 0
 	deck.clear()
+	var seen_card_ids := {}
 	for card in cards:
 		if not card.has("id") or not card.has("category") or not CATEGORIES.has(str(card["category"])):
 			continue
-		if str(card["id"]).is_empty():
+		if str(card["id"]).is_empty() or seen_card_ids.has(str(card["id"])):
 			continue
+		seen_card_ids[str(card["id"])] = true
 		deck.append(card.duplicate(true))
 	round_limit = rounds
 	round_index = 0

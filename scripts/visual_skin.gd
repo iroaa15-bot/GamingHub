@@ -1,4 +1,12 @@
 extends Control
+static func dismiss_text_input(viewport: Viewport) -> bool:
+ if viewport.get_meta("text_back_frame",-1)==Engine.get_process_frames():return true
+ var focus:=viewport.gui_get_focus_owner()
+ if not (focus is LineEdit or focus is TextEdit):return false
+ viewport.set_meta("text_back_frame",Engine.get_process_frames())
+ focus.release_focus()
+ DisplayServer.virtual_keyboard_hide()
+ return true
 # Gaming Hub visual identity: lightweight native drawing, no shaders or external assets.
 # One coherent skin for the home screen and the online lobby.
 const INK := Color("030a28")

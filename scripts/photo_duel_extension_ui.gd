@@ -654,11 +654,12 @@ func _home() -> void:
  if result != OK: _leaving_scene = false
 
 func _notification(what: int) -> void:
- if what == NOTIFICATION_WM_GO_BACK_REQUEST: _home.call_deferred()
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST and not VisualSkin.dismiss_text_input(get_viewport()): _home.call_deferred()
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE,KEY_BACK]:
   get_viewport().set_input_as_handled()
+  if VisualSkin.dismiss_text_input(get_viewport()):return
   _home.call_deferred()
 
 func _connect_service() -> void:

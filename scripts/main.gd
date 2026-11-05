@@ -1198,6 +1198,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 var _back_navigation_pending := false
 func _queue_back_navigation() -> void:
+ if VisualSkin.dismiss_text_input(get_viewport()):return
  if _back_navigation_pending or not is_inside_tree() or is_queued_for_deletion(): return
  _back_navigation_pending = true
  _perform_back_navigation.call_deferred(ui_action_generation)

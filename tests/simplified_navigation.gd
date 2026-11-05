@@ -25,6 +25,14 @@ func run() -> void:
  assert(not room.yes_button.visible and room.correct_button.visible)
  room.queue_free();await process_frame
  var main=load("res://scripts/main.gd").new();root.add_child(main)
+ var edit:=LineEdit.new();main.add_child(edit);edit.grab_focus()
+ assert(main.get_viewport().gui_get_focus_owner()==edit)
+ var generation: int=main.ui_action_generation
+ main._queue_back_navigation()
+ assert(main.get_viewport().gui_get_focus_owner()!=edit and main.ui_action_generation==generation)
+ assert(load("res://scripts/visual_skin.gd").dismiss_text_input(main.get_viewport()))
+ await process_frame
+ assert(not load("res://scripts/visual_skin.gd").dismiss_text_input(main.get_viewport()))
  main.sound_enabled=false;main.round_finished=false;main.question_index=0
  main.clear_ui();main.show_order_choices({"steps_"+main.selected_language:["First","Second","Third"]})
  assert(main.order_picks.size()==3)

@@ -17,7 +17,7 @@ func _t(ar: String,en: String) -> String:
  return ar if language=="ar" else en
 
 func _notification(what: int) -> void:
- if what==NOTIFICATION_WM_GO_BACK_REQUEST and not submit_busy: _back()
+ if what==NOTIFICATION_WM_GO_BACK_REQUEST and not submit_busy and not AccountSkin.dismiss_text_input(get_viewport()): _back()
 
 func _ready() -> void:
  auth=get_node("/root/GamingHubAccount")

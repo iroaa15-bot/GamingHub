@@ -3,6 +3,9 @@ static var requested_entry := "landing"
 var _entry_mode := "landing"
 var _entry_choices: VBoxContainer
 var _entry_back: Button
+var _configuration_changed := false
+var _displayed_config_revision := -2
+var _displayed_config_room := ""
 ## Embedded local/staging screen; no standalone app and no voice-module changes.
 const Client = preload("res://scripts/photo_duel_extension_client.gd")
 const VisualSkin = preload("res://scripts/visual_skin.gd")
@@ -503,10 +506,14 @@ func _state(value: Dictionary) -> void:
  _online_category.visible=_agreement_box.visible
  var host: bool=client.player==int(value.get("host",0))
  var mode: String=str(value.get("primary_mode","tap"))
+ _configuration_changed=agreement and (client.code!=_displayed_config_room or int(value.get("config_revision",-1))!=_displayed_config_revision)
  if agreement:
-  var category_index: int=_online_category_keys.find(value.get("picture_category","all"))
-  if category_index>=0: _online_category.select(category_index)
-  _mode_field.select(["voice","text","mixed","tap"].find(mode))
+  if _configuration_changed:
+   _displayed_config_room=client.code
+   _displayed_config_revision=int(value.get("config_revision",-1))
+   var category_index: int=_online_category_keys.find(value.get("picture_category","all"))
+   if category_index>=0 and category_index<_online_category.item_count: _online_category.select(category_index)
+   _mode_field.select(["voice","text","mixed","tap"].find(mode))
   _mode_field.set_item_disabled(0,not bool(client.capabilities.get("voice",false)))
   _mode_field.set_item_disabled(2,"mixed" not in client.capabilities.get("primary_modes",[]))
   _online_category.disabled=not host

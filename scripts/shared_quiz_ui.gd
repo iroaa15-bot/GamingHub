@@ -82,7 +82,7 @@ func _state(value: Dictionary) -> void:
   _online_category.add_item(tr_pair("كل الموضوعات","All topics"))
   for key in client.capabilities.quiz_categories:
    _online_category_keys.append(key);_online_category.add_item(str(client.capabilities.quiz_categories[key].get(language,key)))
- if not client.code.is_empty():
+ if not client.code.is_empty() and _configuration_changed:
   var index: int=_online_category_keys.find(value.get("picture_category","all"))
   if index>=0:_online_category.select(index)
  if is_instance_valid(quiz_panel):

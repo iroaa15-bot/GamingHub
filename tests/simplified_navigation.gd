@@ -16,8 +16,15 @@ func run() -> void:
  assert(room.create_button.visible and not room.code_field.visible and not room.join_button.visible)
  room.client.code="123456";room.client.player=0
  room.client.capabilities={"room_agreement":true,"primary_modes":["voice","text","mixed","tap"]}
- var state={"capacity":2,"joined":2,"connected":[true,true],"started":true,"current":0,"responder":1,"scores":[0,0],"primary_mode":"mixed","opponents":[]}
+ var state={"capacity":2,"joined":2,"connected":[true,true],"started":true,"current":0,"responder":1,"scores":[0,0],"primary_mode":"mixed","opponents":[],"room_agreement":true,"config_revision":1}
  room._state(state)
+ assert(room._mode_field.selected==2)
+ room._mode_field.select(1)
+ room._state(state)
+ assert(room._mode_field.selected==1)
+ state.config_revision=2
+ room._state(state)
+ assert(room._mode_field.selected==2)
  assert(room.question_field.visible and not room.yes_button.visible and not room.correct_button.visible)
  state.pending={"kind":"question","mode":"text","text":"A question","responder":1}
  room.client.player=1;room._state(state)

@@ -8,18 +8,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DIRS = ('docs', 'addons', '.github/workflows', 'assets', 'scenes', 'scripts', 'data', 'tests',
-        'server', 'ai_daily', 'liveops', 'monetization', 'release')
+        'server', 'ai_daily', 'liveops', 'monetization', 'release', 'identity_backend', 'services', 'deployment', 'tools', 'native')
 TOP = ('project.godot', 'export_presets.cfg', 'render.yaml', '.gitignore',
        'README_START_HERE_AR.md', 'RELEASE_v11.5_AR.md', 'RELEASE_v11.4_AR.md', 'RELEASE_v11.3_AR.md', 'RELEASE_v11.2_AR.md', 'RELEASE_v11.1_AR.md', 'RELEASE_v10.7_AR.md', 'RELEASE_v10.6_AR.md', 'RELEASE_v10.5_AR.md', 'RELEASE_v10.4_AR.md', 'RELEASE_v10.3_AR.md', 'RELEASE_v10.2_AR.md', 'RELEASE_v10.1_AR.md', 'RELEASE_v10.0_AR.md', 'RELEASE_v9.9_AR.md', 'RELEASE_v9.8_AR.md', 'RELEASE_v9.2_AR.md', 'RELEASE_v9.3_AR.md', 'RELEASE_v9.4_AR.md', 'RELEASE_v9.5_AR.md', 'RELEASE_v9.6_AR.md', 'RELEASE_v9.7_AR.md')
 EXCLUDE = {'release/source_manifest.json'}
 
 TEXT_SUFFIXES = {'.gd', '.uid', '.godot', '.cfg', '.json', '.yml', '.yaml', '.md',
                  '.txt', '.py', '.ps1', '.sh', '.html', '.svg', '.b85', '.tres',
-                 '.tscn', '.csv', '.xml', '.gradle'}
+                 '.tscn', '.csv', '.xml', '.gradle', '.log', '.js', '.css', '.jsonl', '.sql',
+                 '.cs', '.java', '.kt', '.kts', '.pro', '.properties', '.bat', '.cmd', '.template'}
 
 def source_bytes(path):
     data = path.read_bytes()
-    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile'}:
+    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE'}:
         return data.replace(b'\r\n', b'\n')
     return data
 
@@ -30,6 +31,10 @@ def included(root=ROOT):
             files.extend(p for p in (root/directory).rglob('*') if p.is_file())
     def enabled_binary(path):
         name = path.relative_to(root).as_posix()
+        if name.startswith('addons/admob/downloads/'):
+            return False
+        if name.startswith('release/') and path.suffix in {'.translation', '.uid'}:
+            return False
         if name.startswith('addons/admob/ios/bin/'):
             return False
         if name.startswith('addons/admob/android/bin/'):
@@ -37,8 +42,8 @@ def included(root=ROOT):
                 'addons/admob/android/bin/package.gd', 'addons/admob/android/bin/package.gd.uid'}
         return True
     return sorted((p for p in files if enabled_binary(p) and p.relative_to(root).as_posix() not in EXCLUDE
-                   and '__pycache__' not in p.parts and p.suffix != '.pyc'
-                   and '.godot' not in p.parts and 'build' not in p.parts),
+                   and '__pycache__' not in p.parts and p.suffix not in {'.pyc', '.import'}
+                   and '.godot' not in p.parts and '.gradle' not in p.parts and 'build' not in p.parts),
                   key=lambda p: p.relative_to(root).as_posix())
 
 def inventory(root=ROOT):

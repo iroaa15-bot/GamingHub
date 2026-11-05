@@ -1,0 +1,13 @@
+{
+  "source_commit": "0c5d1b8bdd56b6cc4b8a79ed3b6e6a0c88b2ca40",
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-122-original-audio-0c5d1b8-debug.apk",
+  "bytes": 187994684,
+  "sha256": "e0fa96651822b2e3293b0b2c433272af9234f528a0722829a1f1572940fa5cb7",
+  "premium_audio_files": 14,
+  "missing_exported_audio": [],
+  "package": "com.iroaa15.gaminghub",
+  "version_code": 122,
+  "version_name": "12.2",
+  "min_sdk": 24,
+  "target_sdk": 36
+}

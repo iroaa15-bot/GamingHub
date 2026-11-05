@@ -1,0 +1,30 @@
+{
+  "tool": "built-in image_gen via imagegen skill; no CLI or external API credentials",
+  "purpose": "Decorative UI assets only; not playable catalog photos",
+  "prompts": [
+    {
+      "key": "sound",
+      "prompt": "Use case: stylized-concept. Production game UI asset for the existing Gaming Hub Android app. Generate ONE standalone high quality 3D rendered icon for 'Guess the Sound'. A bold audio waveform made of 7 thick rounded extruded translucent cyan glass bars, with a few violet and electric-blue material accents, on a small polished deep-indigo rounded-square enamel base. Front three-quarter view with very subtle perspective, substantial real depth, beveled edges, soft studio lighting, sharp glossy highlights, cyan rim light, soft compact contact shadow. Friendly premium mobile party-game aesthetic matching a navy/cyan/purple neon Gaming Hub UI. Clear large recognizable silhouette when displayed at 80 pixels. Centered, square composition, generous transparent margin, truly transparent background outside the icon. No words, letters, labels, logo, numbers, people, headphones, musical notes, watermark, UI mockup, collage or extra icons. This is an actual reusable in-game icon asset, not a screenshot of an interface."
+    },
+    {
+      "key": "cinema",
+      "prompt": "ONE standalone production 3D rendered icon for Cinema Challenge in Gaming Hub. A charming substantial glossy clapperboard with a violet-blue body and a thick tilted top clapper with alternating ivory, gold and electric-purple stripes. A small golden film reel nested at the lower corner. Front three-quarter view, on a compact polished deep-indigo rounded-square enamel base. Beveled edges, real extrusion depth, soft studio lighting, sharp candy-gloss highlights, cyan and purple rim lighting, compact contact shadow. Colorful premium mobile party game asset, recognizable at 80px. Centered square composition and transparent margins. Truly transparent outside the icon. No words, letters, movie stills, people, logo, text, watermark, interface mockup, collage, or extra separate icons."
+    },
+    {
+      "key": "picture",
+      "prompt": "ONE standalone production 3D rendered icon for Guess Your Picture in Gaming Hub. A friendly cute ginger kitten head and upper paws emerging from a small rounded purple picture-frame tile, with a small glossy cyan question-mark sculpture at one corner. Warm orange and cream fur, bright attentive eyes, tasteful playful expression. Front three-quarter view on a compact polished deep-indigo rounded-square enamel base, with gold and cyan bevel accents. Substantial real depth, soft studio lighting, sharp polished highlights, cyan and purple rim lighting, compact contact shadow. Colorful premium mobile party-game asset, recognizable at 80px. Centered square composition and transparent margins. Truly transparent outside the icon. No words, letters, numbers, logo, watermark, interface screenshot, collage, or extra separate icons. This is decorative UI art, not a playable photo card."
+    },
+    {
+      "key": "brain",
+      "prompt": "Use case: stylized-concept. ONE standalone production 3D rendered game icon for the existing Gaming Hub Android UI: a friendly sculpted pink candy-gloss brain with real rounded folds, a small cyan question-mark sculpture and violet accents, representing Brain Battle. Front three-quarter view on a compact polished deep-indigo rounded-square enamel base. Match a cohesive family with a glossy violet/gold cinema clapper, a cute framed ginger kitten and cyan glass sound bars: substantial real extrusion depth, bevels, multiple coordinated candy colors, soft studio lighting, sharp highlights, cyan and purple rim light, compact contact shadow. Recognizable at 80 pixels. Centered square composition with transparent margin; truly transparent outside the icon. No words, letters, labels, logo, watermark, mockup, interface screenshot, collage or extra separate icons."
+    },
+    {
+      "key": "memory",
+      "prompt": "Use case: stylized-concept. ONE standalone production 3D rendered game icon for the existing Gaming Hub Android UI: three overlapping substantial rounded picture cards, their front faces showing a gold star, a small orange fruit and a cyan geometric gem, representing a picture memory game; no card ranks, letters or numbers. Front three-quarter view on a compact polished deep-indigo rounded-square enamel base. Match a cohesive family with a glossy violet/gold cinema clapper, a cute framed ginger kitten and cyan glass sound bars: substantial real extrusion depth, bevels, multiple coordinated candy colors, soft studio lighting, sharp highlights, cyan and purple rim light, compact contact shadow. Recognizable at 80 pixels. Centered square composition with transparent margin; truly transparent outside the icon. No words, letters, labels, logo, watermark, mockup, interface screenshot, collage or extra separate icons."
+    },
+    {
+      "key": "ordering",
+      "prompt": "Use case: stylized-concept. ONE standalone production 3D rendered game icon for the existing Gaming Hub Android UI: three small colorful rounded picture tiles in a clear ascending overlapping sequence, with a glossy curved cyan arrow linking the first to the last, representing ordering steps/pictures; no numbers or writing. Front three-quarter view on a compact polished deep-indigo rounded-square enamel base. Match a cohesive family with a glossy violet/gold cinema clapper, a cute framed ginger kitten and cyan glass sound bars: substantial real extrusion depth, bevels, multiple coordinated candy colors, soft studio lighting, sharp highlights, cyan and purple rim light, compact contact shadow. Recognizable at 80 pixels. Centered square composition with transparent margin; truly transparent outside the icon. No words, letters, labels, logo, watermark, mockup, interface screenshot, collage or extra separate icons."
+    }
+  ]
+}

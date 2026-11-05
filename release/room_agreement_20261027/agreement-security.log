@@ -1,0 +1,36 @@
+E
+======================================================================
+ERROR: test_configuration_security (__main__.Security.test_configuration_security)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 127, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\tests\room_agreement_security.py", line 32, in test_configuration_security
+    await action(other,'duel_confirm',correct=True)
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\tests\room_agreement_security.py", line 11, in action
+    async def action(peer,kind,**fields):return await h.handle(peer,dict(type=kind,protocol=3,**fields))
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\server\photo_duel_agreement_local.py", line 70, in handle
+    return await super().handle(ws,msg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\server\photo_duel_filters_local.py", line 24, in handle
+    if msg.get('type')!='duel_create' or not any(k in msg for k in ('picture_category','picture_difficulty')):return await super().handle(ws,msg)
+                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\server\photo_duel_extension.py", line 254, in handle
+    await self.publish(room)
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\server\photo_duel_extension.py", line 122, in publish
+    await self.send(peer, room.view(i))
+                          ~~~~~~~~~^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\server\photo_duel_extension.py", line 101, in view
+    "preset_questions":sorted(k for k,v in self.catalog[self.images[player]]["facts"].items() if k in FACTS and type(v) is bool)}
+                                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'wolf'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.334s
+
+FAILED (errors=1)

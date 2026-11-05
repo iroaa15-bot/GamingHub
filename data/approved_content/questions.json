@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "questions": {
+    "1": [
+      {
+        "id": "GH-CINEMA-0004",
+        "mode": "choice",
+        "topic": "cinema",
+        "level": 1,
+        "ar": "ما اسم رجل الثلج في فيلم Frozen؟",
+        "en": "What is the name of the snowman in Frozen?",
+        "tr": "Frozen filmindeki kardan adamın adı nedir?",
+        "choices_ar": [
+          "سيمبا",
+          "أولاف",
+          "بامبي",
+          "شريك"
+        ],
+        "choices_en": [
+          "Simba",
+          "Olaf",
+          "Bambi",
+          "Shrek"
+        ],
+        "choices_tr": [
+          "Simba",
+          "Olaf",
+          "Bambi",
+          "Shrek"
+        ],
+        "correct": 1,
+        "explain_ar": "الإجابة: أولاف",
+        "explain_en": "Answer: Olaf",
+        "explain_tr": "Yanıt: Olaf",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://disneyanimation.com/films/frozen/",
+          "reviewed_at": "2026-11-02",
+          "note": "Official Disney character page identifies Olaf; no copyrighted media copied."
+        }
+      }
+    ],
+    "5": [
+      {
+        "id": "GH-SCIENCE-NEW-0002",
+        "mode": "choice",
+        "topic": "space",
+        "level": 2,
+        "ar": "أي كوكب تستغرق دورته حول محوره وقتًا أطول من دورته حول الشمس؟",
+        "en": "Which planet takes longer to rotate once on its axis than to orbit the Sun?",
+        "tr": "Hangi gezegenin kendi ekseninde dönüşü, Güneş çevresindeki dolanımından daha uzun sürer?",
+        "choices_ar": [
+          "الزهرة",
+          "الأرض",
+          "المريخ",
+          "المشتري"
+        ],
+        "choices_en": [
+          "Venus",
+          "Earth",
+          "Mars",
+          "Jupiter"
+        ],
+        "choices_tr": [
+          "Venüs",
+          "Dünya",
+          "Mars",
+          "Jüpiter"
+        ],
+        "correct": 0,
+        "explain_ar": "الإجابة: الزهرة",
+        "explain_en": "Answer: Venus",
+        "explain_tr": "Yanıt: Venüs",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://science.nasa.gov/venus/venus-facts/",
+          "reviewed_at": "2026-11-02",
+          "note": "Clarified sidereal rotation versus solar day; qualitative astronomy, not arithmetic."
+        }
+      },
+      {
+        "id": "GH-SCIENCE-NEW-0005",
+        "mode": "choice",
+        "topic": "science",
+        "level": 2,
+        "ar": "أي جسيم في الذرة يحمل شحنة كهربائية سالبة؟",
+        "en": "Which particle in an atom carries a negative electric charge?",
+        "tr": "Atomdaki hangi parçacık negatif elektrik yükü taşır?",
+        "choices_ar": [
+          "البروتون",
+          "النيوترون",
+          "النواة",
+          "الإلكترون"
+        ],
+        "choices_en": [
+          "Proton",
+          "Neutron",
+          "Nucleus",
+          "Electron"
+        ],
+        "choices_tr": [
+          "Proton",
+          "Nötron",
+          "Çekirdek",
+          "Elektron"
+        ],
+        "correct": 3,
+        "explain_ar": "الإجابة: الإلكترون",
+        "explain_en": "Answer: Electron",
+        "explain_tr": "Yanıt: Elektron",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://www.energy.gov/science/doe-explainselectrons",
+          "reviewed_at": "2026-11-02",
+          "note": "Negative electron charge verified against DOE; one valid option."
+        }
+      },
+      {
+        "id": "GH-GEOGRAPHY-NEW-0004",
+        "mode": "choice",
+        "topic": "geography",
+        "level": 1,
+        "ar": "أي دولة يتوسط علمها ورقة قيقب حمراء؟",
+        "en": "Which country has a red maple leaf at the centre of its flag?",
+        "tr": "Hangi ülkenin bayrağının ortasında kırmızı akçaağaç yaprağı bulunur?",
+        "choices_ar": [
+          "كندا",
+          "النرويج",
+          "أستراليا",
+          "اليابان"
+        ],
+        "choices_en": [
+          "Canada",
+          "Norway",
+          "Australia",
+          "Japan"
+        ],
+        "choices_tr": [
+          "Kanada",
+          "Norveç",
+          "Avustralya",
+          "Japonya"
+        ],
+        "correct": 0,
+        "explain_ar": "الإجابة: كندا",
+        "explain_en": "Answer: Canada",
+        "explain_tr": "Yanıt: Kanada",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html",
+          "reviewed_at": "2026-11-02",
+          "note": "Flag description verified; no flag artwork copied."
+        }
+      },
+      {
+        "id": "GH-GEOGRAPHY-B03-0003",
+        "mode": "choice",
+        "topic": "geography",
+        "level": 2,
+        "ar": "في أي دولة تقع مدينة البتراء الأثرية؟",
+        "en": "In which country is the archaeological city of Petra?",
+        "tr": "Petra antik kenti hangi ülkededir?",
+        "choices_ar": [
+          "لبنان",
+          "الأردن",
+          "العراق",
+          "المغرب"
+        ],
+        "choices_en": [
+          "Lebanon",
+          "Jordan",
+          "Iraq",
+          "Morocco"
+        ],
+        "choices_tr": [
+          "Lübnan",
+          "Ürdün",
+          "Irak",
+          "Fas"
+        ],
+        "correct": 1,
+        "explain_ar": "الإجابة: الأردن",
+        "explain_en": "Answer: Jordan",
+        "explain_tr": "Yanıt: Ürdün",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://whc.unesco.org/en/list/326/",
+          "reviewed_at": "2026-11-02",
+          "note": "UNESCO country Jordan verified."
+        }
+      },
+      {
+        "id": "GH-ANIMALS-0003",
+        "mode": "choice",
+        "topic": "nature",
+        "level": 2,
+        "ar": "أي من هذه الحيوانات ثديي يضع البيض؟",
+        "en": "Which of these animals is an egg-laying mammal?",
+        "tr": "Bu hayvanlardan hangisi yumurtlayan bir memelidir?",
+        "choices_ar": [
+          "القط",
+          "خلد الماء",
+          "الحصان",
+          "الكلب"
+        ],
+        "choices_en": [
+          "Cat",
+          "Platypus",
+          "Horse",
+          "Dog"
+        ],
+        "choices_tr": [
+          "Kedi",
+          "Ornitorenk",
+          "At",
+          "Köpek"
+        ],
+        "correct": 1,
+        "explain_ar": "الإجابة: خلد الماء",
+        "explain_en": "Answer: Platypus",
+        "explain_tr": "Yanıt: Ornitorenk",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://animals.sandiegozoo.org/animals/platypus",
+          "reviewed_at": "2026-11-02",
+          "note": "Restricted to listed options; does not imply platypus is the only egg-laying mammal."
+        }
+      },
+      {
+        "id": "GH-ANIMALS-NEW-0014",
+        "mode": "choice",
+        "topic": "nature",
+        "level": 1,
+        "ar": "أي من هذه الحيوانات قادر على الطيران النشط؟",
+        "en": "Which of these animals is capable of powered flight?",
+        "tr": "Bu hayvanlardan hangisi aktif uçuş yapabilir?",
+        "choices_ar": [
+          "الخفاش",
+          "النعامة",
+          "السنجاب",
+          "السلحفاة"
+        ],
+        "choices_en": [
+          "Bat",
+          "Ostrich",
+          "Squirrel",
+          "Tortoise"
+        ],
+        "choices_tr": [
+          "Yarasa",
+          "Devekuşu",
+          "Sincap",
+          "Kara kaplumbağası"
+        ],
+        "correct": 0,
+        "explain_ar": "الإجابة: الخفاش",
+        "explain_en": "Answer: Bat",
+        "explain_tr": "Yanıt: Yarasa",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://home.nps.gov/subjects/bats/how-bats-fly.htm",
+          "reviewed_at": "2026-11-02",
+          "note": "Powered flight distinguishes bats from gliding mammals; corrected question below to animals."
+        }
+      },
+      {
+        "id": "GH-GEOGRAPHY-B03-0002",
+        "mode": "choice",
+        "topic": "geography",
+        "level": 1,
+        "ar": "في أي دولة يقع السور العظيم المعروف بسور الصين؟",
+        "en": "In which country is the Great Wall of China?",
+        "tr": "Çin Seddi hangi ülkededir?",
+        "choices_ar": [
+          "كوريا الجنوبية",
+          "الهند",
+          "منغوليا",
+          "الصين"
+        ],
+        "choices_en": [
+          "South Korea",
+          "India",
+          "Mongolia",
+          "China"
+        ],
+        "choices_tr": [
+          "Güney Kore",
+          "Hindistan",
+          "Moğolistan",
+          "Çin"
+        ],
+        "correct": 3,
+        "explain_ar": "الإجابة: الصين",
+        "explain_en": "Answer: China",
+        "explain_tr": "Yanıt: Çin",
+        "audiences": [
+          "children",
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://whc.unesco.org/en/list/438/",
+          "reviewed_at": "2026-11-02",
+          "note": "UNESCO country China verified."
+        }
+      }
+    ]
+  }
+}

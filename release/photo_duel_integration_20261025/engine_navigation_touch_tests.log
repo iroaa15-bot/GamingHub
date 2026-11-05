@@ -1,0 +1,34 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+PASS original main UI exposes Photo Duel
+PASS touch navigation 0
+PASS touch navigation 1
+PASS touch navigation 2
+PASS touch navigation 3
+PASS touch navigation 4
+PASS touch navigation 5
+PASS touch navigation 6
+PASS touch navigation 7
+PASS touch navigation 8
+PASS touch navigation 9
+PASS touch navigation 10
+PASS touch navigation 11
+PASS touch navigation 12
+PASS touch navigation 13
+PASS touch navigation 14
+PASS touch navigation 15
+PASS touch navigation 16
+PASS touch navigation 17
+PASS touch navigation 18
+PASS touch navigation 19
+PASS 20 real ScreenTouch main button navigations
+PASS navigation uses embedded Photo Duel
+PASS same existing room endpoint
+PASS English lobby
+PASS Arabic lobby
+PASS exact original 200 catalog selection
+PASS tap question displays its answer
+PASS opponent reply displays No
+PASS stale button cannot create room
+PASS return to original main application
+INTEGRATION_RUNTIME_PASS

@@ -1,0 +1,57 @@
+{
+  "status": "BLOCKED",
+  "run": "Single focused matrix; no device scenarios executed",
+  "device_inspection": "adb devices -l executed once at task start; no devices attached",
+  "scenarios": [
+    {
+      "feature": "room_create_join_2_to_6",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "200_images_visible_on_android",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "voice_without_headset_speakerphone",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "microphone_permission_audiofocus_aec_ns_agc",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "text_questions_yes_no_confirmation_timer_score",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "smooth_touch_navigation",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "wifi_mobile_reconnect_mute",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "crash_stability_logcat_tombstone",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "16kb_runtime",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    },
+    {
+      "feature": "admob_and_daily_content",
+      "status": "BLOCKED",
+      "reason": "No actual Android devices; online cases also require approved WSS deployment"
+    }
+  ]
+}

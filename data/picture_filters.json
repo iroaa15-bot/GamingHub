@@ -1,0 +1,895 @@
+{
+  "schema": 1,
+  "difficulty_basis": "Editorial familiarity and visual ambiguity; not measured player performance. Culinary grouping for fruit/vegetables. No original facts or aliases changed.",
+  "categories": {
+    "animals": {
+      "ar": "حيوانات",
+      "en": "Animals",
+      "tr": "Hayvanlar"
+    },
+    "fruits": {
+      "ar": "فواكه",
+      "en": "Fruit",
+      "tr": "Meyveler"
+    },
+    "vegetables": {
+      "ar": "خضروات ومكونات طهي",
+      "en": "Vegetables & cooking ingredients",
+      "tr": "Sebzeler ve malzemeler"
+    },
+    "dishes": {
+      "ar": "أطعمة وأطباق",
+      "en": "Food & dishes",
+      "tr": "Yemekler"
+    },
+    "household": {
+      "ar": "أثاث وأغراض منزلية",
+      "en": "Furniture & household",
+      "tr": "Mobilya ve ev eşyaları"
+    },
+    "appliances": {
+      "ar": "أجهزة منزلية",
+      "en": "Home appliances",
+      "tr": "Ev aletleri"
+    },
+    "technology": {
+      "ar": "تقنية وإلكترونيات",
+      "en": "Technology & electronics",
+      "tr": "Teknoloji ve elektronik"
+    },
+    "science": {
+      "ar": "أدوات علمية وبصرية",
+      "en": "Science & optics",
+      "tr": "Bilim ve optik"
+    },
+    "tools": {
+      "ar": "أدوات يدوية",
+      "en": "Hand tools",
+      "tr": "El aletleri"
+    },
+    "kitchen": {
+      "ar": "أدوات المطبخ",
+      "en": "Kitchen utensils",
+      "tr": "Mutfak gereçleri"
+    },
+    "personal": {
+      "ar": "أغراض شخصية",
+      "en": "Personal items",
+      "tr": "Kişisel eşyalar"
+    },
+    "hobbies": {
+      "ar": "رياضة وهوايات",
+      "en": "Sports & hobbies",
+      "tr": "Spor ve hobiler"
+    },
+    "landmarks": {
+      "ar": "أماكن ومعالم",
+      "en": "Places & landmarks",
+      "tr": "Yerler ve simgeler"
+    }
+  },
+  "difficulties": {
+    "all": {
+      "ar": "كل الصعوبات",
+      "en": "All difficulties",
+      "tr": "Tüm zorluklar"
+    },
+    "easy": {
+      "ar": "سهل",
+      "en": "Easy",
+      "tr": "Kolay"
+    },
+    "medium": {
+      "ar": "متوسط",
+      "en": "Medium",
+      "tr": "Orta"
+    },
+    "hard": {
+      "ar": "صعب",
+      "en": "Hard",
+      "tr": "Zor"
+    }
+  },
+  "items": {
+    "Lion": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Pizza": {
+      "category": "dishes",
+      "difficulty": "easy"
+    },
+    "Elephant": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Apple": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Football": {
+      "category": "hobbies",
+      "difficulty": "easy"
+    },
+    "Guitar": {
+      "category": "hobbies",
+      "difficulty": "easy"
+    },
+    "Panda": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Burger": {
+      "category": "dishes",
+      "difficulty": "easy"
+    },
+    "Dolphin": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Giraffe": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Tiger": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Penguin": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Banana": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Strawberry": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Cake": {
+      "category": "dishes",
+      "difficulty": "easy"
+    },
+    "Sushi": {
+      "category": "dishes",
+      "difficulty": "medium"
+    },
+    "Bicycle": {
+      "category": "hobbies",
+      "difficulty": "easy"
+    },
+    "Camera": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Laptop": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Violin": {
+      "category": "hobbies",
+      "difficulty": "medium"
+    },
+    "Pyramids": {
+      "category": "landmarks",
+      "difficulty": "easy"
+    },
+    "Eiffel": {
+      "category": "landmarks",
+      "difficulty": "easy"
+    },
+    "Taj_Mahal": {
+      "category": "landmarks",
+      "difficulty": "hard"
+    },
+    "Lighthouse": {
+      "category": "landmarks",
+      "difficulty": "medium"
+    },
+    "Cat": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Dog": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Rabbit": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Horse": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Cow": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Sheep": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Goat": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Donkey": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Camel": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Zebra": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Rhinoceros": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Hippopotamus": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Gorilla": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Chimpanzee": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Orangutan": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Kangaroo": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Koala": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Sloth": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Hedgehog": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Squirrel": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Beaver": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Otter": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Raccoon": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Fox": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Wolf": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Brown_bear": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Polar_bear": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Deer": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Moose": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Bison": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Meerkat": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Lemur": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Red_panda": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Cheetah": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Leopard": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Crocodile": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Tortoise": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Sea_turtle": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Frog": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Chameleon": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Iguana": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Cobra": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Python": {
+      "category": "animals",
+      "difficulty": "hard"
+    },
+    "Owl": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Eagle": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Parrot": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Flamingo": {
+      "category": "animals",
+      "difficulty": "medium"
+    },
+    "Peacock": {
+      "category": "animals",
+      "difficulty": "easy"
+    },
+    "Orange": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Lemon": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Lime": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Pear": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Peach": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Apricot": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Plum": {
+      "category": "fruits",
+      "difficulty": "medium"
+    },
+    "Cherries": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Grapes": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Watermelon": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Pineapple": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Mango": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Kiwi": {
+      "category": "fruits",
+      "difficulty": "medium"
+    },
+    "Coconut": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Pomegranate": {
+      "category": "fruits",
+      "difficulty": "medium"
+    },
+    "Avocado": {
+      "category": "fruits",
+      "difficulty": "medium"
+    },
+    "Blueberries": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Raspberries": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Blackberries": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Figs": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Dates": {
+      "category": "fruits",
+      "difficulty": "easy"
+    },
+    "Papaya": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Guava": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Passion_fruit": {
+      "category": "fruits",
+      "difficulty": "hard"
+    },
+    "Carrot": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Potato": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Tomato": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Cucumber": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Eggplant": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Broccoli": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Cauliflower": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Cabbage": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Lettuce": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Spinach": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Onion": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Garlic": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Bell_pepper": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Chili_pepper": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Pumpkin": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Zucchini": {
+      "category": "vegetables",
+      "difficulty": "hard"
+    },
+    "Corn": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Peas": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Green_beans": {
+      "category": "vegetables",
+      "difficulty": "medium"
+    },
+    "Radish": {
+      "category": "vegetables",
+      "difficulty": "hard"
+    },
+    "Beetroot": {
+      "category": "vegetables",
+      "difficulty": "hard"
+    },
+    "Asparagus": {
+      "category": "vegetables",
+      "difficulty": "hard"
+    },
+    "Artichoke": {
+      "category": "vegetables",
+      "difficulty": "hard"
+    },
+    "Mushroom": {
+      "category": "vegetables",
+      "difficulty": "easy"
+    },
+    "Chair": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Table": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Sofa": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Bed": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Wardrobe": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Bookshelf": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Desk": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Stool": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Armchair": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Bathtub": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Sink": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Toilet": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Refrigerator": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Washing_machine": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Microwave_oven": {
+      "category": "appliances",
+      "difficulty": "medium"
+    },
+    "Toaster": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Electric_kettle": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Blender": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Vacuum_cleaner": {
+      "category": "appliances",
+      "difficulty": "medium"
+    },
+    "Iron": {
+      "category": "appliances",
+      "difficulty": "medium"
+    },
+    "Sewing_machine": {
+      "category": "appliances",
+      "difficulty": "hard"
+    },
+    "Fan": {
+      "category": "appliances",
+      "difficulty": "easy"
+    },
+    "Air_conditioner": {
+      "category": "appliances",
+      "difficulty": "medium"
+    },
+    "Television": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Radio": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Telephone": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Smartphone": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Tablet_computer": {
+      "category": "technology",
+      "difficulty": "medium"
+    },
+    "Keyboard": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Computer_mouse": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Printer": {
+      "category": "technology",
+      "difficulty": "medium"
+    },
+    "Headphones": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Microphone": {
+      "category": "technology",
+      "difficulty": "easy"
+    },
+    "Loudspeaker": {
+      "category": "technology",
+      "difficulty": "medium"
+    },
+    "Telescope": {
+      "category": "science",
+      "difficulty": "medium"
+    },
+    "Microscope": {
+      "category": "science",
+      "difficulty": "hard"
+    },
+    "Binoculars": {
+      "category": "science",
+      "difficulty": "hard"
+    },
+    "Flashlight": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Lantern": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Candle": {
+      "category": "household",
+      "difficulty": "easy"
+    },
+    "Umbrella": {
+      "category": "personal",
+      "difficulty": "easy"
+    },
+    "Backpack": {
+      "category": "personal",
+      "difficulty": "easy"
+    },
+    "Suitcase": {
+      "category": "personal",
+      "difficulty": "easy"
+    },
+    "Wallet": {
+      "category": "personal",
+      "difficulty": "medium"
+    },
+    "Wristwatch": {
+      "category": "personal",
+      "difficulty": "easy"
+    },
+    "Alarm_clock": {
+      "category": "household",
+      "difficulty": "medium"
+    },
+    "Compass": {
+      "category": "personal",
+      "difficulty": "hard"
+    },
+    "Key": {
+      "category": "personal",
+      "difficulty": "easy"
+    },
+    "Padlock": {
+      "category": "personal",
+      "difficulty": "medium"
+    },
+    "Scissors": {
+      "category": "tools",
+      "difficulty": "easy"
+    },
+    "Hammer": {
+      "category": "tools",
+      "difficulty": "easy"
+    },
+    "Screwdriver": {
+      "category": "tools",
+      "difficulty": "medium"
+    },
+    "Wrench": {
+      "category": "tools",
+      "difficulty": "hard"
+    },
+    "Pliers": {
+      "category": "tools",
+      "difficulty": "hard"
+    },
+    "Saw": {
+      "category": "tools",
+      "difficulty": "medium"
+    },
+    "Shovel": {
+      "category": "tools",
+      "difficulty": "medium"
+    },
+    "Spoon": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Fork": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Knife": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Plate": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Bowl": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Cup": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Mug": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Bottle": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Teapot": {
+      "category": "kitchen",
+      "difficulty": "easy"
+    },
+    "Frying_pan": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Saucepan": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Colander": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Grater": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Rolling_pin": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Corkscrew": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Whisk": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Ladle": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Spatula": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Chopsticks": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Mortar_and_pestle": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Measuring_jug": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    },
+    "Cutting_board": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Oven_glove": {
+      "category": "kitchen",
+      "difficulty": "medium"
+    },
+    "Potato_peeler": {
+      "category": "kitchen",
+      "difficulty": "hard"
+    }
+  }
+}

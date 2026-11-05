@@ -1,0 +1,8 @@
+{
+  "schema_url": "https://render.com/schema/render.yaml.json",
+  "schema_valid": true,
+  "errors": [],
+  "platform_validation": "BLOCKED: no Render CLI; no confirmed workspace selected",
+  "service_name_availability": "UNVERIFIED: no resource creation or reservation",
+  "public_wss": "BLOCKED: not deployed"
+}

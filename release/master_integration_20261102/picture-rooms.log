@@ -1,0 +1,99 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+APPROVED_ROOM six actual Godot transports true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+APPROVED_ROOM created 2 true
+APPROVED_ROOM numeric code 2 true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+APPROVED_ROOM joined and synchronized 2 true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM created 3 true
+APPROVED_ROOM numeric code 3 true
+APPROVED_ROOM joined and synchronized 3 true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM created 4 true
+APPROVED_ROOM numeric code 4 true
+APPROVED_ROOM joined and synchronized 4 true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM created 5 true
+APPROVED_ROOM numeric code 5 true
+APPROVED_ROOM joined and synchronized 5 true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+APPROVED_ROOM created 6 true
+APPROVED_ROOM numeric code 6 true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+APPROVED_ROOM joined and synchronized 6 true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOM actual approved image exported and synchronized true
+APPROVED_ROOMS_REAL_GODOT_WS true []
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2514)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

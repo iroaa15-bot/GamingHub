@@ -21,8 +21,7 @@ func _notification(what: int) -> void:
 
 func _ready() -> void:
  auth=get_node("/root/GamingHubAccount")
- var saved: Dictionary=_local_progress()
- language=str(saved.get("language","ar"))
+ language=load("res://scripts/player_preferences.gd").language()
  layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
  register_mode=auth.requested_action=="register"
  var background=AccountSkin.new()
@@ -61,7 +60,7 @@ func _ready() -> void:
   control.disabled=true;provider_buttons[provider]=control
  status_label=_text("")
  _button(_t("استعادة الحساب والتقدم","Restore account and progress"),_restore)
- _button(_t("العودة للعبة","Back to game"),_back,"teal")
+ _button(_t("المتابعة كضيف","Continue as guest"),_back,"teal")
  AccountSkin.compact_menu(panel)
  AccountSkin.enable_menu_swipe(panel)
  _check_providers.call_deferred()
@@ -132,10 +131,10 @@ func _provider_action(provider: String) -> void:
 func _finish(result: Dictionary) -> void:
  if not is_inside_tree(): return
  if result.get("ok",false):
-  var saved: Dictionary=await auth.sync_progress(_local_progress())
-  var restored: Dictionary=await _restore_progress()
-  if not is_inside_tree(): return
-  status_label.text=_t("تم تسجيل الدخول وحفظ تقدمك.","Signed in. Your progress is saved.") if saved.get("ok",false) and restored.get("ok",false) else _t("تم تسجيل الدخول. تقدمك محفوظ على الجهاز؛ أعد المزامنة عند تحسن الاتصال.","Signed in. Device progress is safe; sync again when your connection improves.")
+  auth.complete_player_sign_in.call_deferred(_local_progress())
+  auth.enter_home_once=true
+  get_tree().change_scene_to_file("res://scenes/Main.tscn")
+  return
  else: status_label.text=_safe_error(result)
  _busy(false)
 
@@ -168,4 +167,6 @@ func _safe_error(result: Dictionary) -> String:
  return _t("تعذر تسجيل الدخول الآن. يمكنك المحاولة مجددًا أو اللعب كضيف.","Sign-in is unavailable right now. Try again or continue as a guest.")
 
 func _back() -> void:
- if not submit_busy: get_tree().change_scene_to_file("res://scenes/Main.tscn")
+ if not submit_busy:
+  auth.enter_home_once=true
+  get_tree().change_scene_to_file("res://scenes/Main.tscn")

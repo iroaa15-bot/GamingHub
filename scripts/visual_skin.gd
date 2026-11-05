@@ -287,6 +287,8 @@ static var _menu_icons: Dictionary = {}
 static func menu_icon(kind: String) -> Texture2D:
  if _menu_icons.has(kind): return _menu_icons[kind]
  var paths := {
+  "globe":"<circle cx='12' cy='12' r='10'/><ellipse cx='12' cy='12' rx='4' ry='10'/><path d='M2 12h20M4 6h16M4 18h16'/>",
+  "share":"<circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><path d='m8 10 7-4M8 14l7 4'/>",
   "player":"<circle cx='12' cy='7' r='4'/><path d='M4 22v-3a8 8 0 0 1 16 0v3'/>",
   "phone":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3Z'/>",
   "phone_off":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3ZM3 3l18 18'/>",

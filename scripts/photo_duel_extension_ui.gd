@@ -1,5 +1,8 @@
 extends Control
-static var requested_entry := "both"
+static var requested_entry := "landing"
+var _entry_mode := "landing"
+var _entry_choices: VBoxContainer
+var _entry_back: Button
 ## Embedded local/staging screen; no standalone app and no voice-module changes.
 const Client = preload("res://scripts/photo_duel_extension_client.gd")
 const VisualSkin = preload("res://scripts/visual_skin.gd")
@@ -36,8 +39,6 @@ var _accept_button: Button
 var _start_button: Button
 var _preset_body: VBoxContainer
 var _preset_toggle: Button
-var _text_reply_field: LineEdit
-var _text_reply_button: Button
 var _chat_body: VBoxContainer
 var _chat_toggle: Button
 var _displayed_mode := ""
@@ -143,11 +144,10 @@ func _execute_menu_action(ref: WeakRef, action: Callable) -> void:
 
 func _ready() -> void:
  var entry: String=requested_entry
- requested_entry="both"
+ requested_entry="landing"
  _focus_room_entry.call_deferred(entry)
  get_tree().quit_on_go_back = false
- var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string("user://progress_v10_all.json")) if FileAccess.file_exists("user://progress_v10_all.json") else null
- if saved is Dictionary: language = str(saved.get("language","ar"))
+ language=load("res://scripts/player_preferences.gd").language()
  layout_direction = Control.LAYOUT_DIRECTION_RTL if language == "ar" else Control.LAYOUT_DIRECTION_LTR
  var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/guess_picture_302/catalog.json"))
  for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
@@ -295,7 +295,12 @@ func _ready() -> void:
  column.add_child(_invite_code)
  _invite_code.layout_direction=Control.LAYOUT_DIRECTION_LTR
  _invite_code.alignment=HORIZONTAL_ALIGNMENT_CENTER
- _copy_code_button=button(tr_pair("نسخ الكود للمشاركة","Copy code to share"),_copy_room_code)
+ _copy_code_button=button(tr_pair("نسخ الكود","Copy code"),_copy_room_code)
+ var invite_actions:=HBoxContainer.new();invite_actions.alignment=BoxContainer.ALIGNMENT_CENTER;column.add_child(invite_actions)
+ _copy_code_button.reparent(invite_actions)
+ VisualSkin.icon_action(_copy_code_button,"list",tr_pair("نسخ كود الغرفة","Copy room code"))
+ var share:=button(tr_pair("مشاركة الدعوة","Share invitation"),_share_room_code)
+ share.reparent(invite_actions);VisualSkin.icon_action(share,"share",tr_pair("مشاركة دعوة الغرفة","Share room invitation"))
  column=main_column
  _agreement_box=VBoxContainer.new()
  _agreement_box.add_theme_constant_override("separation",8)
@@ -305,8 +310,8 @@ func _ready() -> void:
  _online_category.reparent(_agreement_box)
  _mode_field=OptionButton.new()
  _mode_field.custom_minimum_size.y=54
- for title in ["صوت • أسئلة شفهية","نص • سؤال وجواب مكتوب","نقر • أسئلة جاهزة"] if language=="ar" else ["Voice • spoken questions","Text • written questions and answers","Tap • preset questions"]: _mode_field.add_item(title)
- _mode_field.select(2)
+ for title in ["صوت • أسئلة شفهية","نص • أسئلة مكتوبة","صوت وكتابة معًا","نقر • أسئلة جاهزة"] if language=="ar" else ["Voice • spoken questions","Text • written questions","Voice and text together","Tap • preset questions"]: _mode_field.add_item(title)
+ _mode_field.select(3)
  column.add_child(_mode_field)
  _propose_button=button(tr_pair("اقتراح الصنف وطريقة اللعب","Propose category & mode"),_propose_configuration)
  _accept_button=button(tr_pair("أوافق على الصعوبة والصنف وطريقة اللعب","Accept difficulty, category & mode"),_accept_configuration)
@@ -338,9 +343,6 @@ func _ready() -> void:
   var fact: String = key
   presets[fact] = button(str(FACTS[fact][0 if language == "ar" else 1]),func(): client.send_action("duel_preset",{"question_id":fact}))
  column = match_column
- _text_reply_field=field(tr_pair("اكتب إجابتك للسائل","Write your answer to the asker"))
- _text_reply_button=button(tr_pair("إرسال الإجابة","Send answer"),func():
-  if client.send_action("duel_text_reply",{"text":_text_reply_field.text})==OK: _text_reply_field.clear())
  _reply_row = HBoxContainer.new()
  var reply_row := _reply_row
  reply_row.add_theme_constant_override("separation",8)
@@ -431,6 +433,14 @@ func _ready() -> void:
   VisualSkin.decorate_selector(option)
   option.add_theme_font_size_override("font_size",16)
  VisualSkin.enable_menu_swipe(column)
+ _entry_choices=VBoxContainer.new();_entry_choices.name="RoomEntryChoices"
+ _main_column.add_child(_entry_choices);column=_entry_choices
+ button(tr_pair("إنشاء غرفة","Create room"),func():_focus_room_entry("create"))
+ button(tr_pair("الانضمام بكود","Join with code"),func():_focus_room_entry("join"))
+ column=_main_column
+ _entry_back=button(tr_pair("العودة لاختيار إنشاء أو انضمام","Back to create or join"),func():_focus_room_entry("landing"))
+ _main_column.move_child(_entry_choices,_main_column.get_children().find(status)+1)
+ _apply_entry_visibility()
 
 func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
@@ -493,8 +503,9 @@ func _state(value: Dictionary) -> void:
  if agreement:
   var category_index: int=_online_category_keys.find(value.get("picture_category","all"))
   if category_index>=0: _online_category.select(category_index)
-  _mode_field.select(["voice","text","tap"].find(mode))
+  _mode_field.select(["voice","text","mixed","tap"].find(mode))
   _mode_field.set_item_disabled(0,not bool(client.capabilities.get("voice",false)))
+  _mode_field.set_item_disabled(2,"mixed" not in client.capabilities.get("primary_modes",[]))
   _online_category.disabled=not host
   _mode_field.disabled=not host
   _propose_button.visible=host
@@ -509,26 +520,23 @@ func _state(value: Dictionary) -> void:
  join_button.disabled = create_button.disabled
  resume_button.disabled = client.token.is_empty() or ready
  resume_button.visible=not client.token.is_empty() and not ready
- var mode_text: bool=not agreement or mode=="text"
+ var mode_text: bool=not agreement or mode in ["text","mixed"]
  var mode_tap: bool=not agreement or mode=="tap"
  question_field.visible=mode_text and turn
  question_button.visible=mode_text and turn
- _preset_toggle.visible=mode_tap
+ _preset_toggle.visible=mode_tap and turn
  _preset_toggle.icon=VisualSkin.menu_icon("list")
  _preset_toggle.expand_icon=true
  _preset_toggle.add_theme_constant_override("icon_max_width",22)
- if not mode_tap or not active or _displayed_mode!=mode: _preset_body.hide()
+ if not mode_tap or not turn or _displayed_mode!=mode: _preset_body.hide()
  _displayed_mode=mode
- _text_reply_field.visible=agreement and mode=="text" and responder and pending.get("kind")=="question"
- _text_reply_button.visible=_text_reply_field.visible
- _text_reply_button.disabled=not responder
- yes_button.visible=(not agreement or mode!="text") and responder and pending.get("kind")=="question"
+ yes_button.visible=responder and pending.get("kind")=="question"
  no_button.visible=yes_button.visible
- _chat_toggle.visible=not agreement or mode=="text"
- _chat_body.visible=agreement and mode=="text" and active
- _voice_controls.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and (not agreement or mode=="voice")
- _voice_question.visible=active and mode=="voice" and turn
- if mode=="voice" and pending.get("kind")=="question": question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
+ _chat_toggle.visible=active
+ if not active:_chat_body.hide()
+ _voice_controls.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and bool(client.capabilities.get("voice",false))
+ _voice_question.visible=active and mode in ["voice","mixed"] and turn
+ if pending.get("mode")=="voice" and pending.get("kind")=="question": question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  question_button.disabled = not turn
  guess_button.disabled = not turn
  guess_button.visible=turn
@@ -592,7 +600,7 @@ func _state(value: Dictionary) -> void:
  else: status.text = tr_pair("المباراة متصلة • المجيب المحدد: ","Match connected • designated respondent: ") + str(int(value.get("responder",0))+1)
  question_label.text = str(pending.get("text",""))
  question_label.visible=not pending.is_empty()
- if mode=="voice" and pending.get("kind")=="question":question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
+ if pending.get("mode")=="voice" and pending.get("kind")=="question":question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  var key: String = str(pending.get("question_id",""))
  if FACTS.has(key): question_label.text = str(FACTS[key][0 if language == "ar" else 1])
  for i in range(6): images[i].hide(); captions[i].hide()
@@ -616,6 +624,8 @@ func _state(value: Dictionary) -> void:
  local_remaining = int(value.get("remaining_ms",-1)) if value.get("remaining_ms") != null else -1
  received_at = Time.get_ticks_msec()
 
+ _apply_entry_visibility()
+
 func _process(_delta: float) -> void:
  if not is_instance_valid(client): return
  var left := local_remaining
@@ -636,6 +646,7 @@ func _home() -> void:
  var scene_tree := get_tree()
  if is_instance_valid(voice_adapter):voice_adapter.enable(false)
  if is_instance_valid(client) and not client.capabilities.is_empty() and not client.code.is_empty(): client.send_action("duel_leave")
+ get_node("/root/GamingHubAccount").enter_home_once=true
  var result := scene_tree.change_scene_to_file("res://scenes/Main.tscn")
  if result != OK: _leaving_scene = false
 
@@ -655,8 +666,23 @@ func _connect_service() -> void:
  if not client.last_error.is_empty(): status.text=_connection_message(client.last_error)
 
 func _focus_room_entry(entry: String) -> void:
- if entry=="create":_settings_body.visible=true
- elif entry=="join":code_field.grab_focus()
+ _entry_mode=entry if entry in ["create","join"] else "landing"
+ _apply_entry_visibility()
+ if _entry_mode=="join":code_field.grab_focus()
+
+func _apply_entry_visibility() -> void:
+ if not is_instance_valid(_entry_choices) or not is_instance_valid(client):return
+ var in_room: bool=not client.code.is_empty()
+ _entry_choices.visible=not in_room and _entry_mode=="landing"
+ _entry_back.visible=not in_room and _entry_mode!="landing"
+ _lobby_controls.visible=not in_room and _entry_mode!="landing"
+ create_button.visible=not in_room and _entry_mode=="create"
+ code_field.visible=not in_room and _entry_mode=="join"
+ join_button.visible=code_field.visible
+ _settings_toggle.visible=in_room or _entry_mode=="create"
+ if not in_room:_settings_body.visible=_entry_mode=="create"
+ _online_filter_box.visible=not in_room and _entry_mode=="create"
+
 
 func _connection_message(reason: String) -> String:
  var value:=reason.to_lower()
@@ -687,7 +713,7 @@ func _create_filtered_room() -> void:
 
 func _propose_configuration() -> void:
  var category: String=_online_category_keys[_online_category.selected] if _online_category.selected>=0 else "all"
- client.send_action("duel_propose",{"picture_category":category,"primary_mode":["voice","text","tap"][_mode_field.selected]})
+ client.send_action("duel_propose",{"picture_category":category,"primary_mode":["voice","text","mixed","tap"][_mode_field.selected]})
 
 func _accept_configuration() -> void:
  client.send_action("duel_accept",{"config_revision":int(client.state.get("config_revision",-1)),"picture_difficulty":client.state.get("picture_difficulty","")})
@@ -733,3 +759,9 @@ func _room_protocol_ready(capabilities: Dictionary) -> void:
  _pending_room_action=""
  if action=="create":_create_filtered_room()
  elif action=="join":client.join_room(_pending_join_code)
+
+func _share_room_code() -> void:
+ var account=get_node_or_null("/root/GamingHubAccount")
+ if account!=null and account.secure_store!=null and account.secure_store.has_signal("social_result"):
+  account.secure_store.call_deferred("shareRoomCode",client.code,language)
+ else:_copy_room_code()

@@ -69,6 +69,14 @@ jobs:
           set -o pipefail
           timeout 120 godot --headless --path . --script res://tests/player_safe_account.gd 2>&1 | tee godot-safe-account.log
           grep -q PLAYER_SAFE_ACCOUNT_PASS godot-safe-account.log
+      - name: Verify simplified navigation and role controls
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/unified_catalog_ui.gd 2>&1 | tee godot-catalog.log
+          grep -q 'UNIFIED_CATALOG_UI true' godot-catalog.log
+          timeout 120 godot --headless --path . --script res://tests/simplified_navigation.gd 2>&1 | tee godot-navigation.log
+          grep -q SIMPLIFIED_NAVIGATION_PASS godot-navigation.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

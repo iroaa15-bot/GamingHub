@@ -56,9 +56,7 @@ func _ready() -> void:
  mechanic_info=label("")
  clue_control=button(tr_pair("دليل إضافي • يخفض النقاط","Another clue • reduces points"),func():client.send_action("duel_quiz_clue",{"question_id":current_question}))
  steps_box=VBoxContainer.new();quiz_panel.add_child(steps_box)
- order_undo=button(tr_pair("تراجع خطوة","Undo step"),func():
-  if not step_picks.is_empty():step_controls[step_picks.pop_back()].disabled=false
-  _show_step_picks())
+ order_undo=button(tr_pair("إعادة ترتيب البداية","Reset arrangement"),_reset_step_order)
  order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"sequence":step_picks}))
  quiz_results=label("")
  next_button=button(tr_pair("السؤال التالي","Next question"),func():client.send_action("duel_quiz_next"))
@@ -70,10 +68,12 @@ func _ready() -> void:
 func _create_filtered_room() -> void:
  client.send_action("duel_quiz_create",{"game_id":selected_game,"players":players_field.get_selected_id(),"timer":timer_field.get_selected_id(),"rounds":int(target_field.value),"difficulty":_online_rank_keys[_online_rank.selected]})
 func _propose_configuration() -> void:
- client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":["voice","text","tap"][_mode_field.selected]})
+ client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":"tap"})
 func _state(value: Dictionary) -> void:
  super._state(value)
  _match_controls.hide()
+ _mode_field.hide()
+ _voice_question.hide()
  clock.visible=value.get("quiz",{}).get("phase")=="question"
  if not is_instance_valid(client):return
  create_button.disabled=create_button.disabled or (not client.capabilities.is_empty() and not bool(client.capabilities.get("shared_quiz",false)))
@@ -145,12 +145,12 @@ func _quiz_state(value: Dictionary) -> void:
   var steps: Array=question.get("steps_"+language,question.get("steps_en",[]))
   for i in range(steps.size()):
    var index: int=i
-   var control=Button.new();control.text=str(steps[i]);control.custom_minimum_size.y=56
+   var control=load("res://scripts/order_drag_item.gd").new();control.text=str(steps[i]);control.custom_minimum_size.y=56
    VisualSkin.decorate_button(control,"teal");control.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-   control.pressed.connect(func():
-    if index not in step_picks:step_picks.append(index)
-    _show_step_picks())
+   control.item_index=index;control.group_key=current_question
+   control.move_requested.connect(_move_step_order,CONNECT_DEFERRED)
    steps_box.add_child(control);step_controls.append(control)
+  step_picks.assign(range(steps.size()))
  if mechanic=="memory":
   var board: Dictionary=quiz.get("memory",{})
   mechanic_info.visible=true;mechanic_info.text=tr_pair("المحاولات: %d","Moves: %d") % int(board.get("moves",0))
@@ -165,7 +165,7 @@ func _quiz_state(value: Dictionary) -> void:
    if card.icon!=null:card.text=""
    card.disabled=not can_answer or float(i) in board.get("matched",[]) or (memory_sync_at>_quiz_now()) or not shown.is_empty()
  if mechanic=="order":
-  for i in range(step_controls.size()):step_controls[i].disabled=not can_answer or i in step_picks
+  for i in range(step_controls.size()):step_controls[i].disabled=not can_answer
   order_submit.disabled=not can_answer or step_picks.size()!=step_controls.size();order_undo.disabled=not can_answer or step_picks.is_empty()
   _show_step_picks()
  quiz_title.text=tr_pair("سؤال %d من %d • ","Question %d of %d • ") % [int(quiz.get("round",1)),int(quiz.get("rounds",1))]+str(question.get(language,question.get("en","")))
@@ -202,15 +202,32 @@ func _quiz_state(value: Dictionary) -> void:
   audio_player.stream_paused=false
   _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
 func _show_step_picks() -> void:
- var picked: Array=[]
- for index in step_picks:picked.append(step_controls[index].text)
- mechanic_info.text=" → ".join(picked)
- var quiz: Dictionary=client.state.get("quiz",{})
- var enabled: bool=quiz.get("phase")=="question" and quiz.get("your_answer")==null and not bool(client.state.get("paused",false)) and _quiz_now()>=int(quiz.get("start_unix_ms",0))
+ mechanic_info.text=tr_pair("اسحب العناصر لترتيبها ثم اضغط تأكيد.","Drag the items into order, then confirm.")
+ var enabled: bool=_can_order_now()
  order_submit.disabled=not enabled or step_picks.size()!=step_controls.size()
- order_undo.disabled=not enabled or step_picks.is_empty()
- for i in range(step_controls.size()):
-  if i in step_picks:step_controls[i].disabled=true
+ order_undo.disabled=not enabled
+ for control in step_controls:
+  control.disabled=not enabled;control.ordering_enabled=enabled
+
+func _can_order_now() -> bool:
+ var quiz: Dictionary=client.state.get("quiz",{})
+ return quiz.get("phase")=="question" and quiz.get("your_answer")==null and not bool(client.state.get("paused",false)) and _quiz_now()>=int(quiz.get("start_unix_ms",0))
+
+func _move_step_order(source: int,target: int) -> void:
+ if not _can_order_now() or source not in step_picks or target not in step_picks:return
+ var destination: int=step_picks.find(target)
+ step_picks.erase(source);step_picks.insert(destination,source)
+ _sync_order_nodes()
+
+func _reset_step_order() -> void:
+ if not _can_order_now():return
+ step_picks.assign(range(step_controls.size()))
+ _sync_order_nodes()
+
+func _sync_order_nodes() -> void:
+ for position in range(step_picks.size()):steps_box.move_child(step_controls[step_picks[position]],position)
+ _show_step_picks()
+
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
 func _process(delta: float) -> void:
  super._process(delta)
@@ -227,7 +244,7 @@ func _process(delta: float) -> void:
     for i in range(memory_controls.size()):memory_controls[i].disabled=float(i) in board.get("matched",[]) or board.get("revealed",{}).has(str(i)) or memory_sync_at>_quiz_now()
    written_field.editable=true;written_submit.disabled=false
    clue_control.disabled=not bool(quiz.get("more_clues",false))
-   for i in range(step_controls.size()):step_controls[i].disabled=i in step_picks
+   for control in step_controls:control.disabled=false;control.ordering_enabled=true
    order_submit.disabled=step_picks.size()!=step_controls.size();order_undo.disabled=step_picks.is_empty()
   if _audio_pending and _quiz_now()>=_audio_start:
    _audio_pending=false

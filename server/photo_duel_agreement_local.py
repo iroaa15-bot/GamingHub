@@ -8,7 +8,7 @@ class AgreementHub(FilterHub):
  async def send(self,ws,message):
   message=message.copy()
   if message.get('type')=='duel_capabilities':
-   message.update(room_agreement=True,primary_modes=['voice','text','tap'] if getattr(self,'membership_voice',False) else ['text','tap'],voice=bool(getattr(self,'membership_voice',False)),voice_room_lifetime=bool(getattr(self,'membership_voice',False)))
+   message.update(room_agreement=True,primary_modes=['voice','text','mixed','tap'] if getattr(self,'membership_voice',False) else ['text','tap'],voice=bool(getattr(self,'membership_voice',False)),voice_room_lifetime=bool(getattr(self,'membership_voice',False)))
   if message.get('type')=='duel_state' and ws in self.bindings:
    room=self.rooms.get(self.bindings[ws][0])
    if getattr(room,'agreement',False):
@@ -43,7 +43,7 @@ class AgreementHub(FilterHub):
   if action=='duel_propose':
    if room.started or player!=0:raise ProtocolError('Only the host may propose before start')
    category=msg.get('picture_category');mode=msg.get('primary_mode')
-   if not isinstance(category,str) or not isinstance(mode,str) or mode not in (('voice','text','tap') if getattr(self,'membership_voice',False) else ('text','tap')):raise ProtocolError('Mode unavailable; voice requires a voice-capable service')
+   if not isinstance(category,str) or not isinstance(mode,str) or mode not in (('voice','text','mixed','tap') if getattr(self,'membership_voice',False) else ('text','tap')):raise ProtocolError('Mode unavailable; voice requires a voice-capable service')
    pool=self.pool(category,room.picture_difficulty)
    if len(pool)<=room.capacity:raise ProtocolError('Need one spare distinct picture for score and reveal rounds')
    if category!=room.picture_category or mode!=room.primary_mode:
@@ -82,12 +82,11 @@ class AgreementHub(FilterHub):
      for peer in room.peers:self.bindings.pop(peer,None)
     return
    if action=='duel_voice_question':
-    if room.primary_mode!='voice' or room.paused or player!=room.current or room.pending is not None:raise ProtocolError('Only active asker may request a voice answer')
+    if room.primary_mode not in ('voice','mixed') or room.paused or player!=room.current or room.pending is not None:raise ProtocolError('Only active asker may request a voice answer')
     room.pending={'kind':'question','mode':'voice','question_id':None,'text':'','asker':player,'responder':room.responder}
     return await self.publish(room)
-   if action=='duel_question' and room.primary_mode!='text':raise ProtocolError('Text questions are not the agreed mode')
+   if action=='duel_question' and room.primary_mode not in ('text','mixed'):raise ProtocolError('Text questions are not the agreed mode')
    if action=='duel_preset' and room.primary_mode!='tap':raise ProtocolError('Preset questions are not the agreed mode')
-   if action=='duel_reply' and room.primary_mode=='text':raise ProtocolError('Use the agreed text answer control')
    if action=='duel_text_reply':
     pending=room.pending
     if room.paused or not pending or pending['kind']!='question' or pending['responder']!=player or room.primary_mode!='text':raise ProtocolError('Only the designated respondent may answer')

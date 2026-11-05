@@ -1,4 +1,6 @@
 extends Control
+const PlayerPrefs=preload("res://scripts/player_preferences.gd")
+var current_screen := ""
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 
@@ -121,6 +123,7 @@ func show_audiences() -> void:
 func show_accessibility() -> void:
  clear_ui()
  VisualSkin.compact_header(root,tr_ui("الإعدادات", "SETTINGS"))
+ _add_language_control(show_accessibility)
  label(tr_ui("حجم النص", "TEXT SIZE"), 22)
  var text_sizes := HBoxContainer.new()
  text_sizes.add_theme_constant_override("separation",8)
@@ -145,7 +148,6 @@ func show_accessibility() -> void:
  setting_switch(tr_ui("مؤثرات وأصوات الألعاب", "GAME SOUNDS & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_game_effects_enabled(value); save_progress())
  setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
- button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
 
  VisualSkin.compact_menu(root)
@@ -424,7 +426,7 @@ func load_upgrade() -> void:
  session_length = clampi(session_length, 10, 150)
  difficulty = clampi(int(profile.get("difficulty", 2)), 1, 3)
  family_all_ages = bool(profile.get("family_all_ages", true))
- selected_language = str(profile.get("language", "ar"))
+ selected_language = PlayerPrefs.language()
  art_style = str(profile.get("art_style", "realistic"))
  _apply_audio_preferences(profile)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
@@ -946,11 +948,14 @@ func game_title(index: int) -> String:
 
 func toggle_language() -> void:
  selected_language = ["ar", "en"][(["ar", "en"].find(selected_language) + 1) % 2]
+ PlayerPrefs.save_language(selected_language)
  save_progress()
  show_home()
 
 func _ready() -> void:
  get_tree().quit_on_go_back = false
+ var account=get_node("/root/GamingHubAccount")
+ account.progress_restored.connect(_secure_progress_restored)
  PublishedContent.changed.connect(_apply_published_content)
  if not DailyRounds.changed.is_connected(_on_daily_rounds_changed):
   DailyRounds.changed.connect(_on_daily_rounds_changed)
@@ -960,7 +965,10 @@ func _ready() -> void:
  load_upgrade()
  _load_age_group()
  AdManager.set_audience("adults" if age_group == "18plus" else "children")
- show_welcome()
+ if account.enter_home_once:
+  account.enter_home_once=false
+  _welcome_guest()
+ else:show_welcome()
 
 func _load_age_group() -> void:
  age_group = "unknown"
@@ -1023,6 +1031,7 @@ var ui_action_generation := 0
 var _menu_touch_guard: Node
 
 func clear_ui() -> void:
+ current_screen=""
  layout_direction = Control.LAYOUT_DIRECTION_RTL if selected_language == "ar" else Control.LAYOUT_DIRECTION_LTR
  ui_action_generation += 1
  active_play_screen = false
@@ -1903,6 +1912,7 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
+ current_screen="home"
  var presentation: Dictionary = PublishedContent.settings
  VisualSkin.compact_header(root,str(presentation.get("title_"+selected_language,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))))
  var notice: String = str(presentation.get("notice_"+selected_language,""))
@@ -2022,6 +2032,10 @@ func _merge_account_progress(value: Dictionary) -> void:
   if value.get(key) is int or value.get(key) is float: profile[key]=maxi(int(profile.get(key,0)),int(value[key]))
  save_progress()
 
+func _secure_progress_restored(value: Dictionary) -> void:
+ _merge_account_progress(value)
+ if current_screen=="home":show_home()
+
 
 func start_championship() -> void:
  # No network, matchmaking, ads, or paid rewards. A deterministic 15-question local run.
@@ -2056,6 +2070,38 @@ func show_more_games() -> void:
  show_home()
 
 func show_modes(index: int) -> void:
+ if index<0 or index>=GAMES.size():return
+ if index!=game:selected_topic="all"
+ game=index;daily_match=false;family_active=false;campaign_active=false
+ clear_ui()
+ current_screen="mode"
+ VisualSkin.compact_header(root,game_title(index))
+ var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,ACCENT)
+ friends.set_meta("mode_action","friends")
+ friends.disabled=age_group in ["under13","unknown"]
+ if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
+ var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
+ local.set_meta("mode_action","offline")
+ var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_home,PANEL)
+ back.set_meta("mode_action","games")
+ VisualSkin.compact_menu(root)
+
+func _open_friend_rooms() -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry="landing"
+ if game==0:get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
+ else:
+  var quiz_ui=load("res://scripts/shared_quiz_ui.gd")
+  quiz_ui.selected_game=str(game)
+  get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn")
+
+func _start_offline_mode() -> void:
+ quick_match_active=false
+ match_style="classic"
+ selected_topic="all"
+ start_game()
+
+func _show_legacy_game_options(index: int) -> void:
  if index != game:
   selected_topic = "all"
   quick_match_active = false
@@ -3316,7 +3362,7 @@ func show_languages() -> void:
  var names: Dictionary = {"ar": "العربية", "en": "English"}
  for key in ["ar", "en"]:
   var chosen: String = str(key)
-  button(str(names[key]), func(): selected_language = chosen; save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
+  button(str(names[key]), func(): selected_language = chosen; PlayerPrefs.save_language(chosen); save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
  button(tr_ui("العودة", "BACK"), show_home)
 
 var deck: String = "all"
@@ -3375,19 +3421,34 @@ func show_decks() -> void:
 func show_order_choices(item: Dictionary) -> void:
  order_picks.clear()
  order_buttons.clear()
- order_label = label(tr_ui("اضغط الخطوات حسب ترتيبها الصحيح", "TAP STEPS IN THE CORRECT ORDER"), 18)
+ order_label = label(tr_ui("اسحب الخطوات لترتيبها ثم اضغط تأكيد", "Drag the steps into order, then confirm"), 18)
  var steps: Array = item["steps_" + selected_language]
  var order: Array = range(steps.size())
  shuffle_items(order)
  # Avoid presenting an already solved ordering.
  if order == range(steps.size()):
   order.reverse()
+ order_picks.assign(order)
  order_buttons.resize(steps.size())
  for value in order:
   var index: int = int(value)
-  order_buttons[index] = button(str(steps[index]), func(): pick_order_step(index))
- button(tr_ui("تراجع خطوة", "UNDO STEP"), undo_order_step)
- button(tr_ui("تحقق من الترتيب", "CHECK ORDER"), submit_order, GREEN)
+  var item_button=load("res://scripts/order_drag_item.gd").new()
+  item_button.text=str(steps[index]);item_button.item_index=index
+  item_button.group_key=str(question_index);item_button.ordering_enabled=true
+  item_button.custom_minimum_size.y=60
+  item_button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  VisualSkin.decorate_button(item_button,"teal")
+  item_button.move_requested.connect(_move_local_order,CONNECT_DEFERRED)
+  root.add_child(item_button);order_buttons[index]=item_button
+ button(tr_ui("تأكيد الترتيب", "CONFIRM ORDER"), submit_order, GREEN)
+
+func _move_local_order(source: int,target: int) -> void:
+ if round_finished or source not in order_picks or target not in order_picks:return
+ var destination: int=order_picks.find(target)
+ order_picks.erase(source);order_picks.insert(destination,source)
+ var first: int=order_label.get_index()+1
+ for position in range(order_picks.size()):
+  root.move_child(order_buttons[order_picks[position]],first+position)
 
 func pick_order_step(index: int) -> void:
  if round_finished or index in order_picks or index < 0 or index >= order_buttons.size():
@@ -3424,7 +3485,9 @@ func submit_order() -> void:
  var answer: Array[String] = []
  for step in steps:
   answer.append(str(step))
- answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + order_label.text
+ var chosen: Array[String]=[]
+ for index in order_picks:chosen.append(str(steps[index]))
+ answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + " → ".join(chosen)
  finish_round(correct, " → ".join(answer))
 
 func build_memory_board() -> void:
@@ -3773,6 +3836,8 @@ func show_picture_filters() -> void:
 # First-run navigation reuses the existing account and age-group systems.
 func show_welcome() -> void:
  clear_ui()
+ current_screen="welcome"
+ _add_language_control(show_welcome)
  var artwork := TextureRect.new()
  artwork.texture=load("res://assets/ui/gaming_hub_brand.png")
  artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
@@ -3789,8 +3854,27 @@ func show_welcome() -> void:
  var account := button(tr_ui("إنشاء حساب Gaming Hub","Create Gaming Hub account"),func(): _open_account_sign_in("register"),PANEL)
  account.set_meta("welcome_action","account")
  button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),func(): _open_account_sign_in("login"),PANEL)
- button("العربية / English",func(): selected_language="en" if selected_language=="ar" else "ar";save_progress();show_welcome(),PANEL)
  VisualSkin.compact_menu(root)
+
+func _add_language_control(redraw: Callable) -> void:
+ var row:=HBoxContainer.new();row.alignment=BoxContainer.ALIGNMENT_END;root.add_child(row)
+ var globe:=MenuButton.new();globe.name="LanguageGlobe"
+ globe.icon=VisualSkin.menu_icon("globe");globe.expand_icon=true
+ globe.add_theme_constant_override("icon_max_width",24)
+ globe.custom_minimum_size=Vector2(48,48)
+ globe.tooltip_text="اللغة / Language"
+ VisualSkin.decorate_button(globe,"secondary")
+ row.add_child(globe)
+ var popup:=globe.get_popup()
+ popup.add_radio_check_item("العربية",0);popup.add_radio_check_item("English",1)
+ popup.set_item_checked(0,selected_language=="ar");popup.set_item_checked(1,selected_language=="en")
+ popup.id_pressed.connect(func(id: int):_set_player_language.call_deferred("ar" if id==0 else "en",redraw))
+
+func _set_player_language(value: String,redraw: Callable) -> void:
+ selected_language=value
+ PlayerPrefs.save_language(value)
+ save_progress()
+ redraw.call()
 
 func _welcome_guest() -> void:
  if age_group=="unknown":show_age_group_selection()

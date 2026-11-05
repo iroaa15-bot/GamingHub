@@ -3,6 +3,7 @@ extends Node
 ## Does not change existing guest/offline gameplay or scene navigation.
 signal auth_changed(authenticated: bool)
 signal profile_changed(user: Dictionary)
+signal progress_restored(progress: Dictionary)
 signal native_provider_result(provider: String, token: String, error: String)
 var api_base: String = ""
 ## Access tokens stay in memory. Android Keystore protects the refresh credential.
@@ -16,6 +17,22 @@ var refresh_after := 0
 var active_provider := ""
 var requested_provider := ""
 var requested_action := "login"
+var enter_home_once := false
+
+func complete_player_sign_in(local_progress: Dictionary) -> void:
+ # Runs on the persistent account node after the sign-in screen has closed.
+ await sync_progress(local_progress)
+ var result: Dictionary=await profile()
+ if not result.get("ok",false):return
+ var path: String="user://progress_v10_all.json"
+ var latest: Variant=JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else {}
+ if not latest is Dictionary:latest={}
+ var saved: Dictionary=result.get("data",{}).get("user",{}).get("local_progress",{})
+ for key in ["xp","wins","matches","picture_wins"]:
+  latest[key]=maxi(int(latest.get(key,0)),maxi(int(local_progress.get(key,0)),int(saved.get(key,0))))
+ var file:=FileAccess.open(path,FileAccess.WRITE)
+ if file!=null:file.store_string(JSON.stringify(latest));file.close()
+ progress_restored.emit(latest)
 var user_profile: Dictionary = {}
 
 func _ready() -> void:

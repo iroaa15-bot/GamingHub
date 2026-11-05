@@ -927,7 +927,7 @@
     "native/android-identity/src/main/AndroidManifest.xml": "8a3e5f311dc3b9eb5f1cfa23f4580762f0874167447f92896c07b2b0be1314b1",
     "native/android-identity/src/main/java/com/gaminghub/identity/GamingHubIdentityPlugin.java": "32593b4444ff5a89c1644e48f588a30dfd9cbb4f18a02c79bb27e897e15365e9",
     "native/android-identity/src/main/java/com/gaminghub/identity/ProviderLogin.java": "c74f39ec019340942c3b24625eb1343d7a80e81afb13ac681ff799efff7cd3b3",
-    "project.godot": "ae3b4ef02b45fdd5af76c2ed7ae3a229c88ab5c6398cecf499b1db54f8c1f5fd",
+    "project.godot": "a497263d72650d9818dc56de942fd393999199b77d320dea283d6770934eb09f",
     "release/ADMOB_SETUP_AR.md": "28a28d1cf86cfcea780ed904220a898acd838674a33f89e89b3cc72c92c83f73",
     "release/ANDROID_QA_STEPS_AR.md": "59a55db8357a71b91bf90d2fdc634f92c182b4deb2ed31f6ba877fdc8ac66a44",
     "release/ARCADE_QA_v10.7_AR.md": "eefba2a2325024b13eed113c600d6c8de9ebfae8427dfa2d7954b4d2f5140495",

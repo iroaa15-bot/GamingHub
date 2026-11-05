@@ -29,9 +29,9 @@ func _initialize() -> void:
 	assert(e.submit_vote("b", "c"))
 	assert(e.resolve_round()["awards"]["c"] == 10)
 	assert(e.draw_next("truth_or_fiction")["id"] == "d")
-	assert(e.submit_vote("a", false))
 	assert(e.submit_vote("b", false))
+	assert(e.submit_vote("c", false))
 	var result: Dictionary = e.resolve_round(true)
-	assert(result["awards"]["c"] == 10) # Storyteller fooled majority
+	assert(result["awards"]["a"] == 10) # Storyteller fooled majority
 	print("QAADET_EL_SOHAB_RULES_SMOKE_PASS")
 	quit()

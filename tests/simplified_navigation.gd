@@ -76,6 +76,15 @@ func run() -> void:
  assert(moves.size()==1)
  # A row clipped by the scroll viewport cannot capture an unrelated touch.
  assert(not list.get_child(2)._contains_touch(Vector2(100,260)))
+ var mouse:=InputEventMouseButton.new();mouse.device=InputEvent.DEVICE_ID_EMULATION
+ mouse.button_index=MOUSE_BUTTON_LEFT;mouse.pressed=true;mouse.position=press.position
+ root.push_input(mouse,true);root.push_input(press,true)
+ var motion:=InputEventMouseMotion.new();motion.device=InputEvent.DEVICE_ID_EMULATION
+ motion.position=drag.position;motion.relative=drag.relative
+ root.push_input(motion,true);root.push_input(drag,true)
+ mouse.pressed=false;mouse.position=drag.position;root.push_input(mouse,true)
+ release.canceled=false;root.push_input(release,true)
+ assert(moves==[[1,0],[1,0]] and scroll.scroll_vertical==50)
  scroll.queue_free();await process_frame
  print("SIMPLIFIED_NAVIGATION_PASS — UI role fixtures and local drag logic; not a phone test")
  quit(0)

@@ -8,9 +8,24 @@ var _touch_origin := Vector2.ZERO
 var _touch_moved := false
 var _rest_modulate := Color.WHITE
 
+func _ready() -> void:
+ # Focusing an item near the viewport edge makes follow_focus move the list
+ # before Android delivers the paired touch event.
+ focus_mode=Control.FOCUS_NONE
+
 # Consume an item gesture before ScrollContainer can turn it into page scrolling.
 # Desktop keeps Godot's normal drag-and-drop path below.
 func _input(event: InputEvent) -> void:
+ if event is InputEventMouseButton and event.device==InputEvent.DEVICE_ID_EMULATION and event.button_index==MOUSE_BUTTON_LEFT:
+  var touch:=InputEventScreenTouch.new()
+  touch.index=1000000;touch.position=event.position;touch.pressed=event.pressed
+  _input(touch)
+  return
+ if event is InputEventMouseMotion and event.device==InputEvent.DEVICE_ID_EMULATION:
+  var drag:=InputEventScreenDrag.new()
+  drag.index=1000000;drag.position=event.position
+  _input(drag)
+  return
  if event is InputEventScreenTouch:
   if event.pressed:
    if _touch_index!=-1 or disabled or not ordering_enabled or not _contains_touch(event.position):return

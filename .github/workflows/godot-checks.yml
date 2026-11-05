@@ -77,6 +77,20 @@ jobs:
           grep -q 'UNIFIED_CATALOG_UI true' godot-catalog.log
           timeout 120 godot --headless --path . --script res://tests/simplified_navigation.gd 2>&1 | tee godot-navigation.log
           grep -q SIMPLIFIED_NAVIGATION_PASS godot-navigation.log
+      - name: Verify real WebSocket recovery and delayed resume acknowledgement
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -u tests/room_recovery_fixture.py > room-recovery-fixture.log 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q ROOM_RECOVERY_FIXTURE_READY room-recovery-fixture.log; then break; fi
+            sleep 0.2
+          done
+          grep -q ROOM_RECOVERY_FIXTURE_READY room-recovery-fixture.log
+          timeout 90 godot --headless --path . --script res://tests/automatic_room_resume.gd 2>&1 | tee godot-room-recovery.log
+          grep -q AUTOMATIC_ROOM_RESUME_PASS godot-room-recovery.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

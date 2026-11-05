@@ -32,6 +32,9 @@ var _binding_account := false
 var _next_sync_at := 0
 var _last_snapshot_at := 0
 var _pending_admission_at := 0
+var _awaiting_resume := false
+var _resume_ack_deadline := 0
+var _resume_rejected := false
 
 func _ready() -> void:
  var account=get_tree().root.get_node_or_null("GamingHubAccount")
@@ -172,6 +175,13 @@ func _process(_delta: float) -> void:
  _previous = current
 
 func _maintain_room(now: int) -> void:
+ if _resume_rejected:return
+ if _awaiting_resume:
+  if now>_resume_ack_deadline:
+   _awaiting_resume=false
+   socket.close(-1)
+   _error("Resume request timed out")
+  return
  if _pending_admission_at>0 and code.is_empty() and now-_pending_admission_at>15000:
   _pending_admission_at=0
   socket.close(-1)
@@ -197,12 +207,17 @@ func _received(message: Dictionary) -> void:
     close_transport()
     return
    capabilities = message
+   var should_resume: bool=_resume_requested
+   if should_resume:
+    _resume_requested=false
+    _awaiting_resume=true
+    _last_snapshot_at=Time.get_ticks_msec()
+    _resume_ack_deadline=_last_snapshot_at+15000
    if bool(capabilities.get("identity_accounts",false)):
     _bind_current_account.call_deferred()
    connection_changed.emit(true)
    protocol_ready.emit(message)
-   if _resume_requested:
-    _resume_requested = false
+   if should_resume:
     send_action("duel_resume", {"code":code,"token":token})
   "duel_created", "duel_joined", "duel_resumed":
    _resume_until=0
@@ -211,6 +226,8 @@ func _received(message: Dictionary) -> void:
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
    _pending_admission_at=0
+   _awaiting_resume=false
+   _resume_rejected=false
    _last_snapshot_at=Time.get_ticks_msec()
    _next_sync_at=_last_snapshot_at+5000
    if message.get("type")!="duel_resumed":load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("room_create" if message.get("type")=="duel_created" else "player_join")
@@ -226,6 +243,13 @@ func _received(message: Dictionary) -> void:
     state_changed.emit(state)
   "duel_error":
    _pending_admission_at=0
+   if _awaiting_resume and "resume" in str(message.get("message","")).to_lower():
+    _awaiting_resume=false
+    _resume_rejected=true
+    _auto_resume=false
+    _resume_until=0
+    capabilities={}
+    connection_changed.emit(false)
    _error(str(message.get("message", "Protocol error")),false)
  event_received.emit(message)
 
@@ -256,6 +280,8 @@ func join_room(room_code: String) -> Error:
 
 func resume_session() -> Error:
  if code.is_empty() or token.is_empty(): return ERR_UNAVAILABLE
+ if _awaiting_resume:return ERR_BUSY
+ _resume_rejected=false
  _resume_requested = true
  return connect_endpoint(endpoint)
 

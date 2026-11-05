@@ -33,10 +33,20 @@ func run() -> void:
  b._maintain_room(b._last_snapshot_at+21001)
  assert(await until(func():return b.token!=old_token and b.code==room and not b.state.get("paused",true) and not a.state.get("paused",true)))
  assert(a.state.scores==b.state.scores)
+ # A slow mobile handshake must not race a second resume before its acknowledgement.
+ await create_timer(21).timeout
+ old_token=b.token
+ b._last_snapshot_at=1
+ b.resume_session()
+ assert(await until(func():return b.token!=old_token and not b._awaiting_resume and not b.state.get("paused",true)))
+ assert(not b._resume_rejected)
  old_token=b.token
  b.socket.close()
  assert(await until(func():return b.token!=old_token and b.code==room and not b.state.get("paused",true) and not a.state.get("paused",true)))
- print("AUTOMATIC_ROOM_RESUME_PASS: same room, rotated capability, unchanged scores, two real Godot WebSocket clients")
+ b._awaiting_resume=true
+ b._received({"type":"duel_error","message":"Resume identity mismatch"})
+ assert(b._resume_rejected and not b._auto_resume and b.capabilities.is_empty())
+ print("AUTOMATIC_ROOM_RESUME_PASS: same room, delayed acknowledgement, rotated capability, unchanged scores; rejected resume stops retries")
  a.send_action("duel_leave")
  a.queue_free();b.queue_free();await process_frame
  quit(0)

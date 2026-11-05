@@ -691,6 +691,7 @@ func _apply_entry_visibility() -> void:
 func _connection_message(reason: String) -> String:
  var value:=reason.to_lower()
  if "full" in value:return tr_pair("الغرفة ممتلئة. جرّب غرفة أخرى.","This room is full. Try another room.")
+ if "room unavailable" in value:return tr_pair("الغرفة غير متاحة. راجع الكود مع صديقك أو أنشئ غرفة جديدة.","Room unavailable. Check the code with your friend or create a new room.")
  if "not found" in value or "unknown room" in value:return tr_pair("الغرفة غير موجودة. راجع الكود مع صديقك.","Room not found. Check the code with your friend.")
  if "resume" in value or "expired" in value:return tr_pair("تعذر استئناف الغرفة. حاول مجددًا أو انضم بكود الغرفة.","Could not restore the room. Retry or join with the room code.")
  if "agreement" in value or "terms" in value:return tr_pair("وافق على قواعد الغرف أولًا.","Accept the room rules first.")

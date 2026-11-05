@@ -7,6 +7,7 @@ func run() -> void:
  root.add_child(room)
  await process_frame
  assert(room._entry_choices.visible and room._entry_choices.get_child_count()==2)
+ assert(room._connection_message("Room unavailable").contains("الغرفة غير متاحة") if room.language=="ar" else room._connection_message("Room unavailable").begins_with("Room unavailable"))
  assert(not room._lobby_controls.visible and not room._settings_toggle.visible)
  room._focus_room_entry("join")
  assert(room.code_field.visible and room.join_button.visible and not room.create_button.visible)

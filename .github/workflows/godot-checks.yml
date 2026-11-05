@@ -57,6 +57,12 @@ jobs:
           set -o pipefail
           timeout 120 godot --headless --path . --script res://tests/unified_profile.gd 2>&1 | tee godot-profile.log
           grep -q 'PASS: verified profile survives' godot-profile.log
+      - name: Verify published presentation and offline fallback
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/remote_appearance.gd 2>&1 | tee godot-appearance.log
+          grep -q REMOTE_APPEARANCE_PASS godot-appearance.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

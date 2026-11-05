@@ -6,6 +6,54 @@ var questions: Dictionary = {}
 var media: Dictionary = {}
 var busy := false
 var next_refresh := 0
+var settings: Dictionary = {}
+var settings_version := 0
+
+func _accept_settings(document: Variant) -> bool:
+ # Unknown or malformed remote data always restores the bundled presentation.
+ settings = {}
+ settings_version = 0
+ if not document is Dictionary or document.get("schema") != 1: return false
+ if typeof(document.get("version")) not in [TYPE_INT,TYPE_FLOAT] or float(document.version)!=int(document.version) or int(document.version)<0: return false
+ var value: Variant = document.get("settings")
+ if not value is Dictionary: return false
+ for key in ["background", "background_end", "primary"]:
+  if not value.get(key) is String: return false
+  var pattern := RegEx.new()
+  pattern.compile("^#[0-9a-fA-F]{6}$")
+  if pattern.search(value[key]) == null: return false
+  var luminance: float = Color(value[key]).srgb_to_linear().get_luminance()
+  if 1.05 / (luminance + 0.05) < 4.5: return false
+ for key in ["font_scale", "home_columns", "primary_count"]:
+  if typeof(value.get(key)) not in [TYPE_INT, TYPE_FLOAT]: return false
+ if float(value.font_scale) < 0.9 or float(value.font_scale) > 1.25: return false
+ if float(value.home_columns) != int(value.home_columns) or int(value.home_columns) not in range(4): return false
+ if float(value.primary_count) != int(value.primary_count) or int(value.primary_count) not in range(1,11): return false
+ for key in ["game_order", "enabled_games"]:
+  var entries: Variant = value.get(key)
+  if not entries is Array or entries.is_empty() or entries.size() > 10: return false
+  if key == "game_order" and entries.size() != 10: return false
+  var seen: Dictionary = {}
+  for entry in entries:
+   if typeof(entry) not in [TYPE_INT, TYPE_FLOAT] or float(entry) != int(entry) or int(entry) not in range(10): return false
+   if seen.has(int(entry)): return false
+   seen[int(entry)] = true
+ for key in ["title_ar", "title_en", "notice_ar", "notice_en"]:
+  if not value.get(key) is String: return false
+  if str(value[key]).length() > (80 if key.begins_with("title") else 160): return false
+  if key.begins_with("title") and str(value[key]).strip_edges().is_empty(): return false
+ if not value.get("show_activities") is bool or not value.get("custom_primary") is bool: return false
+ settings = value.duplicate(true)
+ settings_version = int(document.get("version",0))
+ return true
+
+func catalog_order() -> Array:
+ var order: Array = settings.get("game_order",[0,1,6,3,8,9,2,4,5,7])
+ var enabled: Array = settings.get("enabled_games",range(10))
+ var result: Array = []
+ for index in order:
+  if index in enabled: result.append(int(index))
+ return result
 
 func _ready() -> void:
  refresh.call_deferred()
@@ -31,6 +79,14 @@ func refresh() -> void:
  if Auth.session_origin.is_empty(): return
  busy = true
  var origin: String = Auth.session_origin
+ var config_response: Array = await _fetch_public(origin+"/api/config",32768)
+ if origin != Auth.session_origin:
+  busy=false
+  return
+ if config_response.size()==4 and config_response[0]==HTTPRequest.RESULT_SUCCESS and config_response[1]==200:
+  _accept_settings(JSON.parse_string((config_response[3] as PackedByteArray).get_string_from_utf8()))
+ else:
+  _accept_settings(null)
  var response: Array = await _fetch_public(origin+"/api/content/gameplay",2097152)
  var updated: Dictionary = {}
  var resources: Dictionary = {}

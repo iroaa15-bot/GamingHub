@@ -120,6 +120,8 @@ def backup_content(request: Request, x_admin_key: str = Header(default="")):
         drafts = records("admin_content_drafts", ("id", "category", "title", "payload", "review_status"))
         published = records("published_content", ("id", "draft_id", "category", "title", "payload", "active", "asset_mime", "asset_sha256", "asset_data"))
         assets = records("admin_staged_assets", ("id", "category", "mime_type", "sha256", "data"))
+        appearance = records("game_appearance_draft", ("revision", "settings"))
+        appearance_history = records("game_appearance_versions", ("version", "settings"))
         total = 0
         for rows, key in ((published, "asset_data"), (assets, "data")):
             for row in rows:
@@ -128,7 +130,7 @@ def backup_content(request: Request, x_admin_key: str = Header(default="")):
                 if total > 64 * 1024 * 1024:
                     raise HTTPException(413, "Backup exceeds browser export limit; use a database export")
                 row[key+"_base64"] = base64.b64encode(raw).decode()
-    return JSONResponse({"schema": 1, "drafts": drafts, "published": published, "assets": assets}, headers={"Cache-Control": "no-store"})
+    return JSONResponse({"schema": 1, "drafts": drafts, "published": published, "assets": assets, "appearance": appearance, "appearance_history": appearance_history}, headers={"Cache-Control": "no-store"})
 
 
 @router.post("/api/admin/published/{published_id}/revoke")

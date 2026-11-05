@@ -1902,7 +1902,10 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
- VisualSkin.compact_header(root,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))
+ var presentation: Dictionary = PublishedContent.settings
+ VisualSkin.compact_header(root,str(presentation.get("title_"+selected_language,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))))
+ var notice: String = str(presentation.get("notice_"+selected_language,""))
+ if not notice.is_empty(): label(notice,16)
  var xp: int=maxi(0,int(profile.get("xp",0)))
  label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
  _add_unique_game_catalog()
@@ -1927,25 +1930,32 @@ func show_home() -> void:
 
 func _add_unique_game_catalog() -> void:
  var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
+ var configured_columns: int=int(PublishedContent.settings.get("home_columns",0))
+ if configured_columns>0: columns=configured_columns
+ if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1
+ var catalog_order: Array=PublishedContent.catalog_order()
+ var primary_count: int=int(PublishedContent.settings.get("primary_count",6))
  var grid := GridContainer.new()
  grid.name="UnifiedGameCatalog";grid.columns=columns
  root.add_child(grid)
  var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
  var favorites: Array=profile.get("favorites",[])
  # Six primary games mirror the approved board; every other original game remains reachable once.
- for index in [0,1,6,3,8,9]:
+ for index in catalog_order.slice(0,primary_count):
   var tile := make_game_tile(index,previews[index],index in favorites)
   tile.set_meta("game_id",index);grid.add_child(tile)
  var more := GridContainer.new()
  more.name="MoreOriginalGames";more.columns=columns;more.visible=false
- var toggle := button(tr_ui("المزيد من الألعاب • 4", "MORE GAMES • 4"),func():more.visible=not more.visible,PANEL)
- toggle.set_meta("more_original_games",true)
+ if catalog_order.size()>primary_count:
+  var toggle := button(tr_ui("المزيد من الألعاب • %d", "MORE GAMES • %d") % (catalog_order.size()-primary_count),func():more.visible=not more.visible,PANEL)
+  toggle.set_meta("more_original_games",true)
  root.add_child(more)
- for index in [2,4,5,7]:
+ for index in catalog_order.slice(primary_count):
   var tile := make_game_tile(index,previews[index],index in favorites)
   tile.set_meta("game_id",index);more.add_child(tile)
 
 func _home_activity_section(title: String, entries: Array) -> void:
+ if title==tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES") and not PublishedContent.settings.get("show_activities",true): return
  var body := VBoxContainer.new()
  body.visible=false
  body.add_theme_constant_override("separation",8)

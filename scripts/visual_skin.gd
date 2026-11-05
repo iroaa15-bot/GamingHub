@@ -12,7 +12,15 @@ const MUTED := Color("b4c4df")
 func _ready() -> void:
  mouse_filter = Control.MOUSE_FILTER_IGNORE
  resized.connect(queue_redraw)
+ var catalog := get_node_or_null("/root/PublishedContent")
+ if catalog != null: catalog.changed.connect(queue_redraw)
  queue_redraw()
+
+static func remote_settings() -> Dictionary:
+ var tree := Engine.get_main_loop() as SceneTree
+ if tree == null: return {}
+ var catalog := tree.root.get_node_or_null("PublishedContent")
+ return catalog.settings if catalog != null else {}
 
 func _draw() -> void:
  var size_value: Vector2 = size
@@ -21,7 +29,8 @@ func _draw() -> void:
  # A painted midnight-to-indigo gradient; the backdrop never animates.
  for step in range(28):
   var fraction: float = float(step) / 28.0
-  var color_value: Color = INK.lerp(MIDNIGHT, fraction * 0.85)
+  var presentation: Dictionary = remote_settings()
+  var color_value: Color = Color(presentation.get("background",INK)).lerp(Color(presentation.get("background_end",MIDNIGHT)), fraction * 0.85)
   draw_rect(Rect2(0.0, size_value.y * fraction, size_value.x, size_value.y / 28.0 + 2.0), color_value)
  # Soft nebula rings and an arch motif make the experience recognizable.
  var scale_value: float = size_value.x / 420.0
@@ -87,6 +96,8 @@ static func decorate_button(target: Button, tone: String = "secondary") -> void:
  var palette: Dictionary={"secondary":["0c1d51","247aca"],"gold":["008cff","26f4ff"],"blue":["008cff","26f4ff"],"teal":["00b94c","56ffbd"],"violet":["6c20df","f459ff"],"danger":["ed264f","ff939e"],"amber":["ec8a05","ffe67a"]}
  var colors: Array=palette.get(tone,palette.secondary)
  var fill:=Color(colors[0]);var edge:=Color(colors[1])
+ if tone in ["secondary", "gold", "blue"] and remote_settings().get("custom_primary",false):
+  fill=Color(remote_settings().primary)
  target.set_meta("menu_primary",tone in ["gold","blue"])
  target.set_meta("menu_tone",tone)
  var normal:=neon_surface(fill,edge)
@@ -356,6 +367,11 @@ static func compact_menu(parent: Node) -> void:
     for state in ["normal","hover","pressed","disabled"]:
      var style: StyleBox=node.get_theme_stylebox(state)
      style.content_margin_left=4;style.content_margin_right=4
+  if node is Label or node is Button:
+   if not node.has_meta("admin_base_font_size"):
+    node.set_meta("admin_base_font_size",node.get_theme_font_size("font_size"))
+   var scale_value: float=float(remote_settings().get("font_scale",1.0))
+   node.add_theme_font_size_override("font_size",roundi(int(node.get_meta("admin_base_font_size"))*scale_value))
   compact_menu(node)
 
 static func icon_action(control: Button, kind: String, accessible_label: String) -> void:

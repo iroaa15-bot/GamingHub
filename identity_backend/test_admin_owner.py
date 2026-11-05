@@ -66,6 +66,31 @@ def test_owner_setup_secure_login_and_real_content_lifecycle(monkeypatch):
     credentials = {k: setup[k] for k in ("email", "password")}
     assert client.post("/api/admin/auth/login", json={**credentials, "password": "wrong-password-12"}, headers=headers).status_code == 401
     assert client.post("/api/admin/auth/login", json=credentials, headers=headers).status_code == 200
+    appearance = client.get("/api/admin/appearance").json()
+    original = client.get("/api/config").json()
+    settings = {**appearance["draft"], "title_ar": "اختبار التصميم", "enabled_games": [3, 6], "home_columns": 1}
+    change = {"expected_revision": appearance["revision"], "settings": settings}
+    assert outsider.put("/api/admin/appearance", json=change, headers=headers).status_code == 403
+    assert client.put("/api/admin/appearance", json=change).status_code == 403
+    for invalid in ({"enabled_games": []}, {"primary": "#ffffff"}, {"game_order": [0]*10}, {"home_columns": True}, {"admin_key": "no"}):
+        response = client.put("/api/admin/appearance", json={**change, "settings": {**settings, **invalid}}, headers=headers)
+        assert response.status_code == 422, response.text
+    saved = client.put("/api/admin/appearance", json=change, headers=headers)
+    assert saved.status_code == 200, saved.text
+    assert client.get("/api/config").json() == original  # Drafts never leak live.
+    assert client.put("/api/admin/appearance", json=change, headers=headers).status_code == 409
+    revision = saved.json()["revision"]
+    live = client.post("/api/admin/appearance/publish", json={"expected_revision": revision}, headers=headers)
+    assert live.status_code == 200, live.text
+    version = live.json()["version"]
+    assert client.get("/api/config").json()["settings"] == settings
+    changed = {**settings, "title_ar": "نسخة أخرى"}
+    revision = client.put("/api/admin/appearance", json={"expected_revision": revision, "settings": changed}, headers=headers).json()["revision"]
+    assert client.post("/api/admin/appearance/publish", json={"expected_revision": revision}, headers=headers).status_code == 200
+    assert client.post("/api/admin/appearance/rollback/"+str(version), headers=headers).status_code == 200
+    assert client.get("/api/config").json()["settings"] == settings
+    assert outsider.get("/api/admin/appearance").status_code == 403
+    assert outsider.get("/api/me", headers={"Authorization": "Bearer "+guest["access_token"]}).json()["user"]["points"] == 0
     with psycopg.connect(os.environ["GAMINGHUB_DATABASE_URL"]) as db:
         stored = db.execute("SELECT password_hash FROM admin_owners WHERE email=%s", (setup["email"],)).fetchone()[0]
         assert stored != setup["password"]

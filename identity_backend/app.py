@@ -13,6 +13,8 @@ from psycopg.types.json import Jsonb
 app = FastAPI(title="Gaming Hub Identity Integration")
 from identity_backend.admin_auth import router as admin_auth_router, initialize_admin
 app.include_router(admin_auth_router)
+from identity_backend.appearance import router as appearance_router, initialize_appearance
+app.include_router(appearance_router)
 from identity_backend.social_auth import router as social_router, initialize_social
 app.include_router(social_router)
 from identity_backend.gameplay_content import router as gameplay_router
@@ -50,6 +52,7 @@ def initialize():
             consumed BOOLEAN NOT NULL DEFAULT FALSE, revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
         initialize_social(db)
         initialize_admin(db)
+        initialize_appearance(db)
         db.commit()
 
 class Credentials(BaseModel):
@@ -244,4 +247,12 @@ def admin_dashboard_script():
     from pathlib import Path
     from fastapi.responses import Response
     return Response((Path(__file__).parent / "admin_dashboard.js").read_text(encoding="utf-8"),
+                    media_type="text/javascript", headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
+
+
+@app.get("/admin/appearance.js", include_in_schema=False)
+def admin_appearance_script():
+    from pathlib import Path
+    from fastapi.responses import Response
+    return Response((Path(__file__).parent / "appearance_dashboard.js").read_text(encoding="utf-8"),
                     media_type="text/javascript", headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})

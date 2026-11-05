@@ -40,6 +40,8 @@ class Accounts(unittest.IsolatedAsyncioTestCase):
   for ws in (self.a,self.b):
    await self.hub.handle(ws,{'type':'duel_accept','protocol':3,'config_revision':room.config_revision,'picture_difficulty':'easy'})
   await self.hub.handle(self.a,{'type':'duel_start','protocol':3})
+  await self.hub.handle(self.a,{'type':'duel_voice_state','protocol':3,'enabled':True})
+  self.assertTrue(self.hub.voice[code]['enabled'][0])
   async def act(ws,kind,**data):await self.hub.handle(ws,{'type':kind,'protocol':3,**data})
   with self.assertRaises(ProtocolError):await act(self.b,'duel_question',text='Unauthorized turn')
   await act(self.a,'duel_question',text='Is this an animal?')

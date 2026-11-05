@@ -10,6 +10,7 @@ func until(predicate: Callable) -> bool:
   await create_timer(.05).timeout
  return false
 func run() -> void:
+ create_timer(45).timeout.connect(func():push_error("Room recovery timed out");quit(1))
  a=Client.new();b=Client.new()
  for client in [a,b]:
   client.terms_accepted=true;client.authenticate_local=true;client.requested_game="6"
@@ -21,9 +22,15 @@ func run() -> void:
  assert(await until(func():return a.state.get("joined")==2 and b.state.get("joined")==2))
  var room: String=b.code
  var old_token: String=b.token
- b.socket.close()
+ # Simulate stale room snapshots while the underlying socket still reports open.
+ assert(b.socket.get_ready_state()==WebSocketPeer.STATE_OPEN)
+ b._last_snapshot_at=maxi(1,Time.get_ticks_msec())
+ b._maintain_room(b._last_snapshot_at+21001)
  assert(await until(func():return b.token!=old_token and b.code==room and not b.state.get("paused",true) and not a.state.get("paused",true)))
  assert(a.state.scores==b.state.scores)
+ old_token=b.token
+ b.socket.close()
+ assert(await until(func():return b.token!=old_token and b.code==room and not b.state.get("paused",true) and not a.state.get("paused",true)))
  print("AUTOMATIC_ROOM_RESUME_PASS: same room, rotated capability, unchanged scores, two real Godot WebSocket clients")
  a.send_action("duel_leave")
  a.queue_free();b.queue_free();await process_frame

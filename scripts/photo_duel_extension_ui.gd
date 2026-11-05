@@ -488,6 +488,9 @@ func _state(value: Dictionary) -> void:
  create_button.disabled = not client.code.is_empty() or (not ready and not service_available) or (ready and not bool(client.capabilities.get("room_agreement",false)))
  var agreement: bool=bool(value.get("room_agreement",false))
  var in_room: bool=not client.code.is_empty()
+ if in_room and _entry_mode!="landing":
+  _entry_mode="landing"
+  _settings_body.hide()
  _online_filter_box.visible=not in_room
  if _online_category.item_count==0 and client.capabilities.get("picture_categories") is Dictionary:
   _online_category.add_item(tr_pair("كل الصور","All pictures"))

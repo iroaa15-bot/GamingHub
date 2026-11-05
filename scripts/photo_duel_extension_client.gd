@@ -29,6 +29,8 @@ var _auto_resume := true
 var _resume_until := 0
 var _resume_retry_at := 0
 var _binding_account := false
+var _next_sync_at := 0
+var _last_snapshot_at := 0
 
 func _ready() -> void:
  var account=get_tree().root.get_node_or_null("GamingHubAccount")
@@ -152,6 +154,7 @@ func _process(_delta: float) -> void:
   while socket.get_available_packet_count() > 0:
    var value: Variant = JSON.parse_string(socket.get_packet().get_string_from_utf8())
    if value is Dictionary: _received(value)
+  _maintain_room(Time.get_ticks_msec())
  elif current == WebSocketPeer.STATE_CLOSED and _previous != WebSocketPeer.STATE_CLOSED:
   capabilities = {}
   connection_changed.emit(false)
@@ -166,6 +169,17 @@ func _process(_delta: float) -> void:
   socket.close()
   _error("Local connection timed out")
  _previous = current
+
+func _maintain_room(now: int) -> void:
+ if code.is_empty() or token.is_empty() or capabilities.is_empty() or bool(state.get("closed",false)):return
+ if now>=_next_sync_at:
+  _next_sync_at=now+5000
+  send_action("duel_sync")
+ if _last_snapshot_at>0 and now-_last_snapshot_at>20000:
+  _last_snapshot_at=now
+  # An open TCP socket does not prove the mobile route is still carrying data.
+  # Reuse the verified transport identity and private room capability.
+  resume_session.call_deferred()
 
 func _received(message: Dictionary) -> void:
  match str(message.get("type", "")):
@@ -188,10 +202,13 @@ func _received(message: Dictionary) -> void:
    code = str(message.get("code", ""))
    token = str(message.get("token", ""))
    player = int(message.get("player", -1))
+   _last_snapshot_at=Time.get_ticks_msec()
+   _next_sync_at=_last_snapshot_at+5000
    if message.get("type")!="duel_resumed":load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("room_create" if message.get("type")=="duel_created" else "player_join")
    if bool(capabilities.get("voice",false)):load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
   "duel_state":
    if str(message.get("code", "")) == code:
+    _last_snapshot_at=Time.get_ticks_msec()
     state = message
     if bool(state.get("closed",false)):
      token = ""

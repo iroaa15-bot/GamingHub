@@ -72,6 +72,16 @@ class SecureDuelHub(AccountRooms,DuelHub):
                 room=self.rooms.get(msg.get("code"));token=msg.get("token")
                 index=next((i for i,t in enumerate(room.tokens) if isinstance(token,str) and __import__('hmac').compare_digest(t,token)),None) if room else None
                 if index is None or owners.get(index)!=subject:raise ProtocolError("Resume identity mismatch")
+                old_peer=room.peers[index]
+                if old_peer is not None and old_peer is not ws and ws not in self.bindings:
+                    # A mobile network can reconnect before the old TCP socket times
+                    # out. Both the private room capability and transport identity
+                    # were verified above; retire the old binding before takeover.
+                    await self.disconnect(old_peer)
+                    close=getattr(old_peer,'close',None)
+                    if close:
+                        try:await asyncio.wait_for(close(code=1012,reason='Session resumed on a new connection'),1)
+                        except Exception:pass
         if action in ("duel_voice_state","duel_voice_audio","duel_block","duel_report"):
             if msg.get("protocol")!=VERSION:raise ProtocolError("Unsupported protocol")
             room,player=self.binding(ws)

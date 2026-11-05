@@ -30,6 +30,28 @@ class Accounts(unittest.IsolatedAsyncioTestCase):
   self.hub.account_connections[self.a]='different-account'
   await self.hub.publish(room);await asyncio.sleep(.05)
   self.assertEqual(len(self.awards),1)
+ async def test_authenticated_resume_replaces_half_open_socket_and_rejects_replay(self):
+  from photo_duel_extension import ProtocolError
+  for ws in (self.a,self.b):await self.hub.handle(ws,{'type':'duel_hello','protocol':3,'game_id':'3'})
+  await self.hub.handle(self.a,{'type':'duel_quiz_create','protocol':3,'game_id':'3','players':2,'timer':0,'rounds':1,'difficulty':'easy'})
+  code=self.hub.bindings[self.a][0];room=self.hub.rooms[code]
+  await self.hub.handle(self.b,{'type':'duel_join','protocol':3,'code':code})
+  old_token=room.tokens[0]
+  replacement=object()
+  self.hub.identities[replacement]={'sub':'wrong-identity','exp':time.time()+500}
+  resume={'type':'duel_resume','protocol':3,'code':code,'token':old_token}
+  with self.assertRaises(ProtocolError):await self.hub.handle(replacement,resume)
+  self.assertIs(room.peers[0],self.a)
+  self.hub.identities[replacement]={'sub':self.hub.identities[self.a]['sub'],'exp':time.time()+500}
+  await self.hub.handle(replacement,resume)
+  self.assertNotIn(self.a,self.hub.bindings)
+  self.assertIs(room.peers[0],replacement)
+  self.assertNotEqual(room.tokens[0],old_token)
+  await self.hub.disconnect(self.a)
+  self.assertIs(room.peers[0],replacement)
+  replay=object();self.hub.identities[replay]=self.hub.identities[replacement].copy()
+  with self.assertRaises(ProtocolError):await self.hub.handle(replay,resume)
+  self.assertIs(room.peers[0],replacement)
  async def test_guests_ties_and_disconnected_winner_never_receive_account_awards(self):
   for tied,disconnected in ((False,False),(True,False),(False,True)):
    room=QuizRoom('123457',2,0,1,self.hub.catalog,self.hub.adapters['3'],'easy')

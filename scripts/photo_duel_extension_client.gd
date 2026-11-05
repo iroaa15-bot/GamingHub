@@ -28,6 +28,30 @@ var _renew_retry_at := 0
 var _auto_resume := true
 var _resume_until := 0
 var _resume_retry_at := 0
+var _binding_account := false
+
+func _ready() -> void:
+ var account=get_tree().root.get_node_or_null("GamingHubAccount")
+ if account!=null:account.auth_changed.connect(_account_changed)
+
+func _account_changed(_authenticated: bool) -> void:
+ if bool(capabilities.get("identity_accounts",false)):_bind_current_account.call_deferred()
+
+func _bind_current_account() -> void:
+ if _binding_account:return
+ var account=get_tree().root.get_node_or_null("GamingHubAccount")
+ var origin: String=endpoint.replace("wss://","https://").trim_suffix("/")
+ if account==null or origin!=str(account.session_origin):return
+ _binding_account=true
+ var transport=socket
+ var deadline:=Time.get_ticks_msec()+16000
+ while account.restoring and Time.get_ticks_msec()<deadline:
+  await get_tree().process_frame
+ if not account.restoring and not account.refresh_token.is_empty() and Time.get_ticks_msec()>=account.refresh_after:
+  await account.refresh_session()
+ if socket==transport and socket.get_ready_state()==WebSocketPeer.STATE_OPEN and bool(capabilities.get("identity_accounts",false)):
+  send_action("duel_auth_bind",{"access_token":str(account.access_token)})
+ _binding_account=false
 
 static func service_configuration() -> Dictionary:
  var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/duel_service.json"))
@@ -152,10 +176,7 @@ func _received(message: Dictionary) -> void:
     return
    capabilities = message
    if bool(capabilities.get("identity_accounts",false)):
-    var account = preload("res://scripts/network/gaminghub_auth.gd")
-    var origin: String = endpoint.replace("wss://","https://").trim_suffix("/")
-    if origin == account.session_origin and not account.session_token.is_empty():
-     send_action("duel_auth_bind", {"access_token":account.session_token})
+    _bind_current_account.call_deferred()
    connection_changed.emit(true)
    protocol_ready.emit(message)
    if _resume_requested:

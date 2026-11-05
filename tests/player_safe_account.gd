@@ -8,6 +8,7 @@ class RestoreAccount:
 
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
+ root.content_scale_size=Vector2i(360,800)
  root.get_node("PublishedContent").busy=true
  var real=root.get_node("GamingHubAccount")
  real.requested_provider=""
@@ -39,6 +40,10 @@ func run() -> void:
  main.show_home()
  var navigation=main.get_node("PlayerBottomNavigation")
  assert(navigation.get_child(0).get_child_count()==4)
+ await process_frame
+ await process_frame
+ for control in navigation.get_child(0).get_children():
+  assert(control.size.x>=48 and control.get_global_rect().end.x<=main.get_viewport_rect().size.x)
  assert(main.root.get_node("UnifiedGameCatalog").get_child(0).get_meta("game_id")==0)
  main.show_player_friends()
  assert(main.get_node("PlayerBottomNavigation").get_child(0).get_child_count()==4)

@@ -1910,12 +1910,6 @@ func show_home() -> void:
  var xp: int=maxi(0,int(profile.get("xp",0)))
  label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
  _add_unique_game_catalog()
- var navigation := HBoxContainer.new()
- navigation.add_theme_constant_override("separation",8)
- root.add_child(navigation)
- for entry in [[tr_ui("حسابي والأصدقاء", "ACCOUNT & FRIENDS"),show_player_account],[tr_ui("الإعدادات", "SETTINGS"),show_accessibility]]:
-  var item := button(entry[0],entry[1],PANEL)
-  item.reparent(navigation)
  _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
   [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
   [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
@@ -2013,6 +2007,12 @@ func _add_bottom_navigation(selected: String) -> void:
   control.icon=VisualSkin.menu_icon(str(entry[2]));control.expand_icon=true
   control.add_theme_constant_override("icon_max_width",18)
   control.add_theme_font_size_override("font_size",12)
+  control.add_theme_constant_override("h_separation",4)
+  control.autowrap_mode=TextServer.AUTOWRAP_OFF
+  for state in ["normal","hover","pressed","disabled"]:
+   var button_style: StyleBox=control.get_theme_stylebox(state).duplicate()
+   button_style.content_margin_left=4;button_style.content_margin_right=4
+   control.add_theme_stylebox_override(state,button_style)
   control.custom_minimum_size=Vector2(0,54)
   control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
   control.set_meta("navigation_target",entry[0])

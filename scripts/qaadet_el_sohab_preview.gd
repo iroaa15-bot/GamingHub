@@ -22,6 +22,8 @@ var heading: Label
 var card_text: Label
 var status_text: Label
 var category_button: OptionButton
+var voter_selector: OptionButton
+var story_truth_selector: OptionButton
 var vote_buttons: HBoxContainer
 var action_buttons: HBoxContainer
 var cards: Array[Dictionary] = []
@@ -82,6 +84,14 @@ func _build_ui() -> void:
 	status_text = Label.new()
 	status_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	layout.add_child(status_text)
+	voter_selector = OptionButton.new()
+	for player in ["لاعب 1", "لاعب 2", "لاعب 3"]:
+		voter_selector.add_item(player)
+	layout.add_child(voter_selector)
+	story_truth_selector = OptionButton.new()
+	story_truth_selector.add_item("القصة حقيقية")
+	story_truth_selector.add_item("القصة تأليف")
+	layout.add_child(story_truth_selector)
 	vote_buttons = HBoxContainer.new()
 	layout.add_child(vote_buttons)
 	action_buttons = HBoxContainer.new()
@@ -108,6 +118,8 @@ func _draw() -> void:
 		status_text.text = "لا توجد كروت متاحة لهذه الفئة، أو الجولة لم تنتهِ."
 		return
 	card_text.text = str(card.get("text_ar", ""))
+	story_truth_selector.visible = str(card.get("category", "")) == "truth_or_fiction"
+	voter_selector.visible = ["act_it", "show_skill", "truth_or_fiction", "who_among_us"].has(str(card.get("category", "")))
 	status_text.text = "الجولة %d / %d | دور %s | %s" % [
 		engine.round_index + 1, engine.round_limit,
 		engine.players[engine.active_player_index],
@@ -130,19 +142,19 @@ func _add_vote(label_text: String, value: Variant) -> void:
 	var button := Button.new()
 	button.text = label_text
 	button.pressed.connect(func() -> void:
-		# Local preview simulates votes from eligible non-active players only.
-		for player in engine.players:
-			if player != engine.players[engine.active_player_index] and not engine.votes.has(player):
-				if engine.submit_vote(player, value):
-					status_text.text = "تم تسجيل تصويت تجريبي من %s" % player
-					break
+		var voter := str(voter_selector.get_item_text(voter_selector.selected))
+		if engine.submit_vote(voter, value):
+			status_text.text = "تم تسجيل تصويت %s. اختر اللاعب التالي." % voter
+		else:
+			status_text.text = "التصويت مرفوض: راجع الدور أو التصويت السابق أو اختيار النفس."
 	)
 	vote_buttons.add_child(button)
 
 func _finish() -> void:
 	if engine.current_card.is_empty():
 		return
-	var result: Dictionary = engine.resolve_round()
+	var truth := story_truth_selector.selected == 0
+	var result: Dictionary = engine.resolve_round(truth)
 	status_text.text = "النقاط: %s" % str(result.get("scores", {}))
 	card_text.text = "انتهت الجولة. اضغط كارت جديد."
 	for child in vote_buttons.get_children():

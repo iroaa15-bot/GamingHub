@@ -209,7 +209,7 @@ func _ready() -> void:
   var seat_content := VBoxContainer.new()
   seat_content.add_theme_constant_override("separation",4)
   panel.add_child(seat_content)
-  var avatar := TextureRect.new()
+  var avatar: TextureRect=load("res://scripts/player_avatar_image.gd").new()
   avatar.texture=VisualSkin.menu_icon("player")
   avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
   avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -582,6 +582,12 @@ func _state(value: Dictionary) -> void:
   var occupied: bool = i < joined
   var online: bool = i < connected.size() and bool(connected[i])
   var name_value: String = tr_pair("اللاعب %d","Player %d") % (i+1)
+  var profiles: Array=value.get("profiles",[])
+  var public_profile: Dictionary=profiles[i] if i<profiles.size() and profiles[i] is Dictionary else {}
+  if not str(public_profile.get("display_name","")).strip_edges().is_empty():name_value=str(public_profile.display_name).left(80)
+  var account=get_tree().root.get_node_or_null("GamingHubAccount")
+  var origin: String=str(account.session_origin) if account!=null else ""
+  _seat_avatars[i].show_avatar(str(public_profile.get("avatar_url","")),origin)
   var score_value: int = int(value.get("scores",[])[i]) if i < value.get("scores",[]).size() else 0
   _seat_labels[i].text = name_value+ (tr_pair(" • أنت"," • You") if i==client.player and occupied else "")+"\n"+(str(score_value) if bool(value.get("started",false)) and occupied else (tr_pair("متصل","Connected") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))))
   if not bool(value.get("started",false)) and occupied and agreement:

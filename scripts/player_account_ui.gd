@@ -45,6 +45,7 @@ func _ready() -> void:
  _refresh_stats()
  status=_label(_t("تقدمك محفوظ على هذا الجهاز. ربط الحساب اختياري.","Your progress is saved on this device. Linking an account is optional."))
  _button(_t("إعدادات الحساب وربطه","Account settings and linking"),_open_account,"gold").visible=not show_friends_first
+ _button(_t("تغيير الصورة الشخصية من المعرض","Change profile photo from gallery"),_choose_avatar).visible=not show_friends_first
  _button(_t("حفظ تقدمي في الحساب","Back up progress"),_save_online_progress).visible=not show_friends_first
  _button(_t("استعادة تقدم الحساب","Restore account progress"),_restore_online_progress).visible=not show_friends_first
  var friends:=VBoxContainer.new();friends.visible=show_friends_first
@@ -65,6 +66,7 @@ func _ready() -> void:
  if show_friends_first:status.text=_t("شارك كود الغرفة مع صديقك للعب معًا.","Share your room code with a friend to play together.")
  if online_account!=null:
   online_account.profile_changed.connect(_online_profile)
+  online_account.avatar_finished.connect(_avatar_finished)
   _online_profile(online_account.user_profile)
   if not online_account.access_token.is_empty(): online_account.profile.call_deferred()
 
@@ -100,7 +102,17 @@ func _online_profile(user: Dictionary) -> void:
  if not _snapshot_sent and not online_account.access_token.is_empty():
   _snapshot_sent=true;_save_online_progress.call_deferred()
 
+func _choose_avatar() -> void:
+ if online_account==null or not online_account.choose_avatar():
+  status.text=_t("سجّل الدخول لاختيار صورة لحسابك، أو انتظر اكتمال الطلب الحالي.","Sign in to choose an account photo, or wait for the current request.");return
+ status.text=_t("اختر صورة ستظهر في ملفك وغرف اللعب.","Choose a photo to appear on your profile and in game rooms.")
+
+func _avatar_finished(ok: bool,error: String) -> void:
+ if error=="cancelled":status.text=_t("لم تتغير صورتك.","Your photo is unchanged.");return
+ status.text=_t("حُفظت صورة حسابك.","Your account photo was saved.") if ok else _t("تعذر حفظ الصورة؛ صورتك السابقة محفوظة.","Photo could not be saved; your previous photo is safe.")
+
 func _load_avatar(url: String) -> void:
+ if url.begins_with("/api/avatars/") and online_account!=null:url=online_account.session_origin+url
  if url==_avatar_url or not url.begins_with("https://") or "@" in url: return
  _avatar_url=url
  var request:=HTTPRequest.new();request.timeout=8;request.body_size_limit=1048576;add_child(request)

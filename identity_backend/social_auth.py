@@ -84,7 +84,7 @@ def social(body: SocialCredentials, authorization: str = Header(default="")):
             else:
                 if db.execute("SELECT 1 FROM identity_providers WHERE provider=%s AND user_id=%s",(body.provider,uid)).fetchone():
                     raise HTTPException(409,"A different provider identity is already linked")
-                db.execute("""UPDATE identity_users SET is_guest=FALSE,display_name=%s,avatar_url=%s,
+                db.execute("""UPDATE identity_users SET is_guest=FALSE,display_name=%s,avatar_url=CASE WHEN avatar_url LIKE '/api/avatars/%%' THEN avatar_url ELSE %s END,
                     email=COALESCE(email,%s) WHERE id=%s""",(verified.name,verified.avatar,verified.email,uid))
             db.execute("INSERT INTO identity_providers(provider,subject,user_id) VALUES(%s,%s,%s)",(body.provider,verified.subject,uid))
         db.execute("UPDATE identity_challenges SET consumed=TRUE WHERE digest=%s",(digest,))

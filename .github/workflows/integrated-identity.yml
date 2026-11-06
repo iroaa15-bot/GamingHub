@@ -28,4 +28,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r identity_backend/requirements.txt httpx pytest
-      - run: python -m pytest -q identity_backend/test_integration.py identity_backend/test_match_awards.py identity_backend/test_session_bindings.py identity_backend/test_composed_gameplay.py identity_backend/test_admin_owner.py tests/account_rooms_integration.py
+      - run: python -m pytest -q identity_backend/test_integration.py identity_backend/test_match_awards.py identity_backend/test_session_bindings.py identity_backend/test_composed_gameplay.py identity_backend/test_admin_owner.py identity_backend/test_player_avatar.py tests/account_rooms_integration.py

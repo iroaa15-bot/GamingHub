@@ -5,6 +5,8 @@ signal auth_changed(authenticated: bool)
 signal profile_changed(user: Dictionary)
 signal progress_restored(progress: Dictionary)
 signal native_provider_result(provider: String, token: String, error: String)
+signal avatar_finished(ok: bool, error: String)
+var avatar_busy := false
 var api_base: String = ""
 ## Access tokens stay in memory. Android Keystore protects the refresh credential.
 static var session_token: String = ""
@@ -38,6 +40,8 @@ var user_profile: Dictionary = {}
 func _ready() -> void:
     if Engine.has_singleton("GamingHubIdentity"):
         secure_store = Engine.get_singleton("GamingHubIdentity")
+        if secure_store.has_signal("avatar_result"):
+            secure_store.connect("avatar_result",_on_avatar_result)
         if secure_store.has_signal("social_result"):
             secure_store.connect("social_result", _on_native_provider_result)
         # Explicit local debug-only acceptance request, with no real credentials.
@@ -192,6 +196,22 @@ func profile() -> Dictionary:
     var response := await _call("/me", HTTPClient.METHOD_GET)
     _cache_profile(response)
     return response
+
+func choose_avatar() -> bool:
+    if avatar_busy or access_token.is_empty() or secure_store==null or not secure_store.has_method("pickAvatar"):return false
+    avatar_busy=true
+    secure_store.call_deferred("pickAvatar")
+    return true
+
+func _on_avatar_result(image: String,error: String) -> void:
+    if not avatar_busy:return
+    if not error.is_empty():
+        avatar_busy=false;avatar_finished.emit(false,error);return
+    var response: Dictionary=await _call("/me/avatar",HTTPClient.METHOD_POST,{"image_base64":image})
+    image=""
+    _cache_profile(response)
+    avatar_busy=false
+    avatar_finished.emit(bool(response.get("ok",false)),"" if response.get("ok",false) else "upload_failed")
 
 func sync_progress(local_progress: Dictionary) -> Dictionary:
     var snapshot: Dictionary = {}

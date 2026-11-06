@@ -146,12 +146,21 @@ func show_accessibility() -> void:
  setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
  setting_switch(tr_ui("أصوات الأزرار", "BUTTON SOUNDS"),ui_sound_enabled,func(value: bool): ui_sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_ui_effects_enabled(value); save_progress())
  setting_switch(tr_ui("مؤثرات وأصوات الألعاب", "GAME SOUNDS & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_game_effects_enabled(value); save_progress())
- setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
+ setting_switch(tr_ui("موسيقى الخلفية", "BACKGROUND MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ _audio_volume_control(tr_ui("مستوى الموسيقى","MUSIC VOLUME"),audio_policy.music_volume,func(value: float):audio_policy.set_music_volume(value);save_progress())
+ _audio_volume_control(tr_ui("مستوى المؤثرات","EFFECTS VOLUME"),audio_policy.effects_volume,func(value: float):audio_policy.set_effects_volume(value);save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
 
  VisualSkin.compact_menu(root)
  _add_bottom_navigation("settings")
+
+func _audio_volume_control(title: String,value: float,action: Callable) -> void:
+ var caption:=label(title+" • %d%%"%roundi(value*100),18)
+ var slider:=HSlider.new();slider.min_value=0;slider.max_value=1;slider.step=.05;slider.value=value
+ slider.custom_minimum_size=Vector2(0,48);root.add_child(slider)
+ slider.value_changed.connect(func(next: float):caption.text=title+" • %d%%"%roundi(next*100);action.call(next))
 
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
@@ -480,6 +489,8 @@ func _apply_audio_preferences(saved: Dictionary) -> void:
  ui_sound_enabled=bool(saved.get("ui_sound_enabled",sound_enabled))
  music_enabled=bool(saved.get("music_enabled",true))
  var policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ policy.set_music_volume(float(saved.get("music_volume",0.7)))
+ policy.set_effects_volume(float(saved.get("effects_volume",0.8)))
  policy.set_ui_effects_enabled(ui_sound_enabled)
  policy.set_game_effects_enabled(sound_enabled)
  policy.set_music_enabled(music_enabled)
@@ -492,6 +503,9 @@ func save_progress() -> void:
  profile["sound_enabled"] = sound_enabled
  profile["ui_sound_enabled"] = ui_sound_enabled
  profile["music_enabled"] = music_enabled
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ profile["music_volume"]=audio_policy.music_volume
+ profile["effects_volume"]=audio_policy.effects_volume
  profile["haptics_enabled"] = haptics_enabled
  profile["reduced_motion"] = reduced_motion
  profile["reading_scale"] = reading_scale

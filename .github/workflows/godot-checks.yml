@@ -77,6 +77,14 @@ jobs:
           grep -q 'UNIFIED_CATALOG_UI true' godot-catalog.log
           timeout 120 godot --headless --path . --script res://tests/simplified_navigation.gd 2>&1 | tee godot-navigation.log
           grep -q SIMPLIFIED_NAVIGATION_PASS godot-navigation.log
+      - name: Verify challenge audio controls and Android touch ordering
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/challenge_audio.gd 2>&1 | tee godot-challenge-audio.log
+          grep -q CHALLENGE_AUDIO_PASS godot-challenge-audio.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/room_audio_policy.gd 2>&1 | tee godot-audio-policy.log
+          ! grep -q 'AUDIO_POLICY.*false' godot-audio-policy.log
       - name: Verify real WebSocket recovery and delayed resume acknowledgement
         shell: bash
         run: |

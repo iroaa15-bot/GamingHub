@@ -23,13 +23,13 @@ class PartyGateway:
         self.sessions: dict[str, Session] = {}
 
     def create(self, player_names: list[str], rounds: int = 10) -> dict[str, Any]:
-        if not isinstance(player_names, list) or not all(type(p) is str and 0 < len(p) <= MAX_NAME_LENGTH for p in player_names):
+        if not isinstance(player_names, list) or not all(type(p) is str and 0 < len(p) <= MAX_NAME_LENGTH and p.strip() == p for p in player_names):
             raise ValueError("Invalid players")
         room = PartyRoom(tuple(player_names), self.cards, rounds)
         session = Session(room, room.players[0])
         session.tokens = {player: secrets.token_urlsafe(32) for player in room.players}
         self.sessions[room.room_id] = session
-        return {"room": room.room_id, "credentials": session.tokens.copy()}
+        return {"room": room.room_id, "credentials": session.tokens.copy()}  # TRUSTED SERVER ONLY: never serialize this to a client
 
     def authenticate(self, room_id: str, player: str, token: str) -> Session:
         session = self.sessions.get(room_id)
@@ -42,7 +42,7 @@ class PartyGateway:
 
     async def dispatch(self, room_id: str, player: str, token: str, message: dict[str, Any]) -> dict[str, Any]:
         session = self.authenticate(room_id, player, token)
-        if not isinstance(message, dict) or len(message) > MAX_MESSAGE_FIELDS:
+        if not isinstance(message, dict) or len(message) > MAX_MESSAGE_FIELDS or any(type(k) is not str for k in message):
             raise ValueError("Invalid message")
         action = message.get("type")
         if action not in ("party_sync", "party_draw", "party_vote", "party_story_commit", "party_finish"):

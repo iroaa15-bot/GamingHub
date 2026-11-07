@@ -7,6 +7,21 @@ from photo_duel_extension import Room, ProtocolError
 from photo_duel_agreement_local import AgreementHub
 
 class Context(unittest.TestCase):
+    def test_single_remaining_candidate_keeps_unasked_followups(self):
+        catalog = {name: {'name':name, 'image':name,
+                   'facts':{'edible':name != 'Lion'}} for name in ['Orange','Lion']}
+        questions.enrich(catalog, {name:{'category':'fruits' if name=='Orange' else 'animals'} for name in catalog})
+        room = Room('123456',2,0,3,catalog)
+        room.images = ['Orange','Lion']
+        questions.remember(room,0,{'question_id':'category_fruits'},True)
+        for key in ['fruit_citrus','fruit_bunch','fruit_hard_shell','fruit_stone','edible']:
+            self.assertIn(key, questions.available(room,0))
+            questions.remember(room,0,{'question_id':key},catalog['Orange']['facts'][key])
+            self.assertNotIn(key, questions.available(room,0))
+        self.assertIsNone(room.pending)
+        self.assertFalse(room.closed)
+        self.assertEqual(room.scores,[0,0])
+
     def test_evidence_filters_questions_without_reading_hidden_answer(self):
         catalog = {name: {'name':name, 'image':name, 'facts':{}} for name in ['Apple','Banana','Orange','Lion']}
         filters = {name:{'category':'animals' if name=='Lion' else 'fruits'} for name in catalog}

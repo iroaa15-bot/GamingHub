@@ -491,7 +491,8 @@ func _state(value: Dictionary) -> void:
   _settings_toggle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  _main_column.get_node("CompactHeader").visible=not active
  _scores.visible=not active and bool(value.get("started",false))
- _seats.columns=6 if active else 3
+ var seat_count: int=int(value.get("capacity",2))
+ _seats.columns=2 if seat_count in [2,4] else 3
  _seats.visible=not client.code.is_empty()
  heading.visible=not client.code.is_empty()
  if active:
@@ -597,9 +598,15 @@ func _state(value: Dictionary) -> void:
  var joined: int = int(value.get("joined",0))
  for i in range(6):
   _seat_panels[i].visible = i < seats
-  _seat_labels[i].add_theme_font_size_override("font_size",11 if active else 14)
-  _seat_avatars[i].custom_minimum_size=Vector2(24,24) if active else Vector2(36,36)
+  _seat_labels[i].add_theme_font_size_override("font_size",16 if seats<=4 else 14)
+  var avatar_size: float=80 if seats<=2 else (72 if not active else 56)
+  _seat_avatars[i].custom_minimum_size=Vector2(avatar_size,avatar_size)
+  var is_turn: bool=active and int(value.get("current",-1))==i
   var seat_skin=VisualSkin.card(Color("082033"),12)
+  seat_skin.border_color=Color("5cf6ff") if is_turn else Color("266795")
+  seat_skin.set_border_width_all(2 if is_turn else 1)
+  seat_skin.shadow_color=Color(0.05,0.65,0.95,0.28 if is_turn else 0.1)
+  seat_skin.shadow_size=5 if is_turn else 2
   seat_skin.content_margin_left=4 if active else 18
   seat_skin.content_margin_right=4 if active else 18
   seat_skin.content_margin_top=8
@@ -615,10 +622,26 @@ func _state(value: Dictionary) -> void:
   var origin: String=str(account.session_origin) if account!=null else ""
   _seat_avatars[i].show_avatar(str(public_profile.get("avatar_url","")),origin)
   var score_value: int = int(value.get("scores",[])[i]) if i < value.get("scores",[]).size() else 0
-  _seat_labels[i].text = name_value+ (tr_pair(" • أنت"," • You") if i==client.player and occupied else "")+"\n"+(str(score_value) if bool(value.get("started",false)) and occupied else (tr_pair("متصل","Connected") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))))
+  var previous_score: int=int(_seat_panels[i].get_meta("display_score",score_value))
+  var previous_turn: bool=bool(_seat_panels[i].get_meta("display_turn",false))
+  _seat_panels[i].set_meta("display_score",score_value)
+  _seat_panels[i].set_meta("display_turn",is_turn)
+  if (score_value>previous_score or (is_turn and not previous_turn)) and not bool(get_tree().root.get_meta("reduced_motion",false)):
+   var avatar: TextureRect=_seat_avatars[i]
+   avatar.pivot_offset=avatar.size/2
+   var pulse: Tween=avatar.create_tween()
+   pulse.tween_property(avatar,"scale",Vector2(1.06,1.06),0.12)
+   pulse.tween_property(avatar,"scale",Vector2.ONE,0.18)
+  var identity: String=name_value+(tr_pair(" • أنت"," • You") if i==client.player and occupied else "")
+  if i==0 and occupied:identity="♛ "+identity
+  var room_scores: Array=value.get("scores",[])
+  if occupied and score_value>0 and not room_scores.is_empty() and score_value==room_scores.max() and room_scores.count(score_value)==1:identity+=" ★"
+  var connection_text: String=tr_pair("متصل","Online") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))
+  _seat_labels[i].text=identity+"\n"+(str(score_value)+" • " if bool(value.get("started",false)) and occupied else "")+connection_text
+  if is_turn:_seat_labels[i].text+="\n"+tr_pair("دورك" if i==client.player else "الدور الحالي","Your turn" if i==client.player else "Current turn")
   if not bool(value.get("started",false)) and occupied and agreement:
    var confirmations: Array=value.get("confirmed",[])
-   _seat_labels[i].text=name_value+(tr_pair(" • أنت"," • You") if i==client.player else "")+"\n"+(tr_pair("جاهز","Ready") if i<confirmations.size() and confirmations[i] else tr_pair("بانتظار الموافقة","Awaiting agreement"))
+   _seat_labels[i].text=identity+"\n"+(tr_pair("جاهز","Ready") if i<confirmations.size() and confirmations[i] else tr_pair("بانتظار الموافقة","Awaiting agreement"))
   _seat_labels[i].add_theme_color_override("font_color",Color("59ed9b") if online else Color("b4c4df"))
  var score_parts := PackedStringArray()
  var score_values: Array = value.get("scores",[])

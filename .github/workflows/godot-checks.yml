@@ -93,6 +93,8 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
+          timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/player_cards_layout.gd 2>&1 | tee godot-player-cards.log
+          grep -q 'PLAYER_CARDS_LAYOUT true' godot-player-cards.log
           timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/challenge_audio.gd 2>&1 | tee godot-challenge-audio.log
           grep -q CHALLENGE_AUDIO_PASS godot-challenge-audio.log
           timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/room_audio_policy.gd 2>&1 | tee godot-audio-policy.log

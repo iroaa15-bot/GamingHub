@@ -1,11 +1,13 @@
 """Question knowledge is derived from public catalog metadata, never the hidden card.
 
-Keep each player's evidence until that player's card changes. Suggestions must
-partition the remaining candidates, so already implied or contradicted questions
-disappear without disclosing which candidate is actually assigned.
+Keep each player's evidence until that player's card changes. Suggestions use
+the remaining public candidates, never the assigned hidden card. Descriptive
+follow-ups stay available even when they no longer split the candidate set.
 """
 import re
 import unicodedata
+import json
+from pathlib import Path
 
 CATEGORIES = {
  'animals': ('هل هو حيوان؟', 'Is it an animal?'),
@@ -31,7 +33,25 @@ FRUIT_TRAITS = {
 }
 for key, (ar, en, _) in FRUIT_TRAITS.items(): LABELS['fruit_'+key] = {'ar': ar, 'en': en}
 
+# Reuse reviewed boolean metadata from the original cards, without inventing
+# facts for missing fields or allowing unrelated domain questions.
+TRAITS = {
+ 'round': ('هل شكله دائري؟', 'Is it round?', {'fruits','vegetables','dishes','household','kitchen','hobbies'}),
+ 'seeds': ('هل له بذور؟', 'Does it have seeds?', {'fruits','vegetables'}),
+ 'peel': ('هل له قشرة؟', 'Does it have a peel?', {'fruits','vegetables'}),
+ 'wild': ('هل يعيش في البرية؟', 'Does it live in the wild?', {'animals'}),
+ 'fur': ('هل يغطي جسمه الفراء؟', 'Does it have fur?', {'animals'}),
+ 'bird': ('هل هو من الطيور؟', 'Is it a bird?', {'animals'}),
+ 'water': ('هل يعيش في الماء؟', 'Does it live in water?', {'animals'}),
+ 'trunk': ('هل له خرطوم؟', 'Does it have a trunk?', {'animals'}),
+ 'screen': ('هل له شاشة؟', 'Does it have a screen?', {'technology','appliances'}),
+ 'lens': ('هل له عدسة؟', 'Does it have a lens?', {'technology','science'}),
+}
+for key, (ar,en,_) in TRAITS.items(): LABELS['detail_'+key]={'ar':ar,'en':en}
+
 def enrich(catalog, filters):
+    original = json.loads((Path(__file__).resolve().parents[1]/'data/cards.json').read_text(encoding='utf-8'))
+    reviewed = {item['name']:item for item in original['cards']}
     for key, item in catalog.items():
         category = filters[key]['category']
         # An additive copy: preserve reviewed original facts and source catalogs.
@@ -40,6 +60,10 @@ def enrich(catalog, filters):
         if category == 'fruits':
             for name, (_, _, positive) in FRUIT_TRAITS.items():
                 item['facts']['fruit_'+name] = item['name'] in positive
+        source = reviewed.get(item['name'], {})
+        for name, (_,_,domains) in TRAITS.items():
+            if category in domains and type(source.get(name)) is bool:
+                item['facts']['detail_'+name] = source[name]
 
 def normalize(value):
     value = unicodedata.normalize('NFKC', value).casefold()
@@ -64,7 +88,12 @@ def available(room, player):
         if key in evidence['answers']: continue
         values = [item['facts'].get(key) for item in candidates]
         # Unknown metadata must not become a false answer, or reveal the card.
-        if all(type(value) is bool for value in values) and set(values) == {False, True}:
+        # Category elimination is useful before identifying a category. Once
+        # implied/ruled out, hide it; keep unasked descriptive questions instead
+        # of forcing a guess just because only one candidate remains.
+        known = all(type(value) is bool for value in values)
+        relevant = not key.startswith('category_') or set(values) == {False, True}
+        if known and relevant:
             result.append(key)
     return result
 

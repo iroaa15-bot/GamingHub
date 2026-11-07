@@ -3094,7 +3094,7 @@ func show_picture_game() -> void:
   var recommended: int = suggestion
   button(tr_ui("💡 سؤال ذكي: ", "💡 SMART QUESTION: ") + picture_question_text(recommended), func(): ask_picture_question(recommended), GREEN)
  elif player_candidates.size() == 1:
-  label(tr_ui("وصلت لبطاقة واحدة! جرب تخمينها.", "One card left! Try guessing it."), 18)
+  label(tr_ui("يمكنك إكمال الأسئلة أو اختيار التخمين وقتما تريد.", "Keep asking, or choose to guess whenever you want."), 18)
  var available: Array[int] = available_picture_questions()
  if not available.is_empty():
   var page_count_questions: int = ceili(float(available.size()) / 6.0)
@@ -3872,16 +3872,26 @@ func show_welcome() -> void:
  VisualSkin.compact_menu(root)
 
 func _add_language_control(redraw: Callable) -> void:
- var row:=HBoxContainer.new();row.alignment=BoxContainer.ALIGNMENT_END;root.add_child(row)
+ var row:=HBoxContainer.new();row.alignment=BoxContainer.ALIGNMENT_END
+ row.layout_direction=Control.LAYOUT_DIRECTION_LTR
+ root.add_child(row)
  var globe:=MenuButton.new();globe.name="LanguageGlobe"
- globe.icon=VisualSkin.menu_icon("globe");globe.expand_icon=true
- globe.add_theme_constant_override("icon_max_width",24)
- globe.custom_minimum_size=Vector2(48,48)
+ globe.icon=VisualSkin.language_globe();globe.expand_icon=true
+ globe.add_theme_constant_override("icon_max_width",64)
+ globe.custom_minimum_size=Vector2(72,72)
  globe.tooltip_text="اللغة / Language"
  VisualSkin.decorate_button(globe,"secondary")
+ globe.set_meta("language_switcher",true)
+ for state_name in ["normal","hover","pressed","disabled"]:
+  var surface: StyleBox=globe.get_theme_stylebox(state_name).duplicate()
+  surface.content_margin_left=4;surface.content_margin_right=4
+  surface.content_margin_top=4;surface.content_margin_bottom=4
+  globe.add_theme_stylebox_override(state_name,surface)
  row.add_child(globe)
+ globe.button_down.connect(func():globe.self_modulate=Color(1.2,1.35,1.4);globe.pivot_offset=globe.size/2;globe.create_tween().tween_property(globe,"scale",Vector2(0.94,0.94),0.08))
+ globe.button_up.connect(func():globe.self_modulate=Color.WHITE;globe.create_tween().tween_property(globe,"scale",Vector2.ONE,0.12))
  var popup:=globe.get_popup()
- popup.add_radio_check_item("العربية",0);popup.add_radio_check_item("English",1)
+ popup.add_radio_check_item("🇪🇬 العربية",0);popup.add_radio_check_item("🇬🇧 English",1)
  popup.set_item_checked(0,selected_language=="ar");popup.set_item_checked(1,selected_language=="en")
  popup.id_pressed.connect(func(id: int):_set_player_language.call_deferred("ar" if id==0 else "en",redraw))
 

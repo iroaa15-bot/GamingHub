@@ -13,7 +13,7 @@ TOP = ('project.godot', 'export_presets.cfg', 'render.yaml', '.gitignore',
        'README_START_HERE_AR.md', 'RELEASE_v11.5_AR.md', 'RELEASE_v11.4_AR.md', 'RELEASE_v11.3_AR.md', 'RELEASE_v11.2_AR.md', 'RELEASE_v11.1_AR.md', 'RELEASE_v10.7_AR.md', 'RELEASE_v10.6_AR.md', 'RELEASE_v10.5_AR.md', 'RELEASE_v10.4_AR.md', 'RELEASE_v10.3_AR.md', 'RELEASE_v10.2_AR.md', 'RELEASE_v10.1_AR.md', 'RELEASE_v10.0_AR.md', 'RELEASE_v9.9_AR.md', 'RELEASE_v9.8_AR.md', 'RELEASE_v9.2_AR.md', 'RELEASE_v9.3_AR.md', 'RELEASE_v9.4_AR.md', 'RELEASE_v9.5_AR.md', 'RELEASE_v9.6_AR.md', 'RELEASE_v9.7_AR.md')
 EXCLUDE = {'release/source_manifest.json'}
 
-TEXT_SUFFIXES = {'.gd', '.uid', '.godot', '.cfg', '.json', '.yml', '.yaml', '.md',
+TEXT_SUFFIXES = {'.gd', '.gdshader', '.uid', '.godot', '.cfg', '.json', '.yml', '.yaml', '.md',
                  '.txt', '.py', '.ps1', '.sh', '.html', '.svg', '.b85', '.tres',
                  '.tscn', '.csv', '.xml', '.gradle', '.log', '.js', '.css', '.jsonl', '.sql',
                  '.cs', '.java', '.kt', '.kts', '.pro', '.properties', '.bat', '.cmd', '.template'}

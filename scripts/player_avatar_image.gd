@@ -1,5 +1,13 @@
 extends TextureRect
 var _url := ""
+static var _circle_material: ShaderMaterial
+
+func _ready() -> void:
+ if _circle_material==null:
+  _circle_material=ShaderMaterial.new()
+  _circle_material.shader=preload("res://scripts/avatar_circle.gdshader")
+ material=_circle_material
+ size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 
 func show_avatar(value: String,origin: String) -> void:
  if value.begins_with("/api/avatars/") and origin.begins_with("https://"):value=origin+value
@@ -19,4 +27,8 @@ func show_avatar(value: String,origin: String) -> void:
   if data[0]==0xff:result=image.load_jpg_from_buffer(data)
   elif data[0]==0x89:result=image.load_png_from_buffer(data)
   elif data.slice(0,4).get_string_from_ascii()=="RIFF":result=image.load_webp_from_buffer(data)
- if result==OK and image.get_width()<=2048 and image.get_height()<=2048:texture=ImageTexture.create_from_image(image)
+ if result==OK and image.get_width()<=2048 and image.get_height()<=2048:
+  var side: int=mini(image.get_width(),image.get_height())
+  image=image.get_region(Rect2i((image.get_width()-side)/2,(image.get_height()-side)/2,side,side))
+  image.resize(256,256,Image.INTERPOLATE_LANCZOS)
+  texture=ImageTexture.create_from_image(image)

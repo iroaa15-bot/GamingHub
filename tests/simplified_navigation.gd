@@ -1,8 +1,22 @@
 extends SceneTree
+class CreationClient:
+ extends "res://scripts/photo_duel_extension_client.gd"
+ var sent: Dictionary={}
+ func send_action(_kind: String,fields: Dictionary={}) -> Error:
+  sent=fields
+  return OK
 func _initialize() -> void:call_deferred("run")
 func run() -> void:
  create_timer(25).timeout.connect(func():push_error("Navigation test timeout");quit(1))
  root.get_node("PublishedContent").busy=true
+ var creation:=CreationClient.new()
+ creation.capabilities={"room_agreement":true,"simple_rounds":true,"picture_filters":true}
+ creation.create_room(2,0,3,{"manual_rounds":true,"picture_difficulty":"easy"})
+ assert(creation.sent.manual_rounds and creation.sent.room_agreement and creation.sent.picture_difficulty=="easy")
+ creation.capabilities.erase("simple_rounds")
+ creation.create_room(2,0,3,{"manual_rounds":true})
+ assert(not creation.sent.has("manual_rounds"))
+ creation.free()
  var room=load("res://scripts/photo_duel_extension_ui.gd").new()
  root.add_child(room)
  await process_frame

@@ -271,6 +271,7 @@ func create_room(players: int, timer: int, target: int = 10, picture_filters: Di
   for key in ["picture_category","picture_difficulty"]:
    if picture_filters.has(key): fields[key]=picture_filters[key]
  if bool(capabilities.get("room_agreement",false)): fields["room_agreement"]=true
+ if bool(capabilities.get("simple_rounds",false)):fields["manual_rounds"]=picture_filters.get("manual_rounds",false)==true
  return send_action("duel_create",fields)
 
 func join_room(room_code: String) -> Error:

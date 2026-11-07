@@ -12,6 +12,8 @@ var submit_busy := false
 var register_mode := false
 var action_buttons: Array[Button]=[]
 var provider_buttons: Dictionary={}
+var provider_retry: Button
+var provider_checking := false
 
 func _t(ar: String,en: String) -> String:
  return ar if language=="ar" else en
@@ -59,6 +61,8 @@ func _ready() -> void:
   var control: Button=_button(title_value,_provider_action.bind(provider))
   control.disabled=true;provider_buttons[provider]=control
  status_label=_text("")
+ provider_retry=_button(_t("إعادة محاولة الاتصال","Retry connection"),_check_providers)
+ provider_retry.visible=false
  _button(_t("استعادة الحساب والتقدم","Restore account and progress"),_restore)
  _button(_t("المتابعة كضيف","Continue as guest"),_back,"teal")
  AccountSkin.compact_menu(panel)
@@ -88,9 +92,18 @@ func _local_progress() -> Dictionary:
  return value if value is Dictionary else {}
 
 func _check_providers() -> void:
+ if provider_checking:return
+ provider_checking=true;provider_retry.disabled=true
+ if OS.is_debug_build():print("GH_PROVIDER_CHECK started")
  var result: Dictionary=await auth._call("/auth/providers",HTTPClient.METHOD_GET)
  if not is_inside_tree(): return
+ provider_checking=false;provider_retry.disabled=false
  var native: bool=auth.secure_store!=null and auth.secure_store.has_signal("social_result")
+ provider_retry.visible=not result.get("ok",false)
+ if not result.get("ok",false):status_label.text=_t("تعذر الاتصال بخدمة الحسابات. أعد المحاولة؛ اللعب كضيف متاح.","Account service is unavailable. Retry, or continue as a guest.")
+ elif not native:status_label.text=_t("تسجيل Google وFacebook غير متاح في هذه النسخة.","Google and Facebook sign-in are unavailable in this build.")
+ else:status_label.text=""
+ if OS.is_debug_build():print("GH_PROVIDER_CHECK native=",native," status=",int(result.get("status",0)))
  for provider in provider_buttons:
   provider_buttons[provider].set_meta("provider_available",native and result.get("ok",false) and result.get("data",{}).get(provider,false))
   provider_buttons[provider].disabled=not provider_buttons[provider].get_meta("provider_available") or provider in auth.user_profile.get("providers",[])

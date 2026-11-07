@@ -142,7 +142,7 @@ func configure(https_api_url: String) -> bool:
 func _call(endpoint: String, method: int, data: Dictionary = {}) -> Dictionary:
     if api_base.is_empty():
         return {"ok": false, "status": 0, "error": "Backend URL not configured"}
-    if endpoint != "/auth/refresh" and not refresh_token.is_empty() and Time.get_ticks_msec() >= refresh_after:
+    if endpoint not in ["/auth/refresh","/auth/login","/auth/register","/auth/guest","/auth/providers"] and not refresh_token.is_empty() and Time.get_ticks_msec() >= refresh_after:
         var renewed := await refresh_session()
         if not renewed.get("ok", false): return renewed
     var request_node := HTTPRequest.new()

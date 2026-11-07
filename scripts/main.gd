@@ -1,4 +1,6 @@
 extends Control
+const PlayerPrefs=preload("res://scripts/player_preferences.gd")
+var current_screen := ""
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 
@@ -121,6 +123,7 @@ func show_audiences() -> void:
 func show_accessibility() -> void:
  clear_ui()
  VisualSkin.compact_header(root,tr_ui("الإعدادات", "SETTINGS"))
+ _add_language_control(show_accessibility)
  label(tr_ui("حجم النص", "TEXT SIZE"), 22)
  var text_sizes := HBoxContainer.new()
  text_sizes.add_theme_constant_override("separation",8)
@@ -143,12 +146,21 @@ func show_accessibility() -> void:
  setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
  setting_switch(tr_ui("أصوات الأزرار", "BUTTON SOUNDS"),ui_sound_enabled,func(value: bool): ui_sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_ui_effects_enabled(value); save_progress())
  setting_switch(tr_ui("مؤثرات وأصوات الألعاب", "GAME SOUNDS & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_game_effects_enabled(value); save_progress())
- setting_switch(tr_ui("موسيقى القوائم", "MENU MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
+ setting_switch(tr_ui("موسيقى الخلفية", "BACKGROUND MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ _audio_volume_control(tr_ui("مستوى الموسيقى","MUSIC VOLUME"),audio_policy.music_volume,func(value: float):audio_policy.set_music_volume(value);save_progress())
+ _audio_volume_control(tr_ui("مستوى المؤثرات","EFFECTS VOLUME"),audio_policy.effects_volume,func(value: float):audio_policy.set_effects_volume(value);save_progress())
  setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
- button(tr_ui("اللغة: العربية", "LANGUAGE: ENGLISH"),show_languages,PANEL)
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
 
  VisualSkin.compact_menu(root)
+ _add_bottom_navigation("settings")
+
+func _audio_volume_control(title: String,value: float,action: Callable) -> void:
+ var caption:=label(title+" • %d%%"%roundi(value*100),18)
+ var slider:=HSlider.new();slider.min_value=0;slider.max_value=1;slider.step=.05;slider.value=value
+ slider.custom_minimum_size=Vector2(0,48);root.add_child(slider)
+ slider.value_changed.connect(func(next: float):caption.text=title+" • %d%%"%roundi(next*100);action.call(next))
 
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
@@ -423,7 +435,7 @@ func load_upgrade() -> void:
  session_length = clampi(session_length, 10, 150)
  difficulty = clampi(int(profile.get("difficulty", 2)), 1, 3)
  family_all_ages = bool(profile.get("family_all_ages", true))
- selected_language = str(profile.get("language", "ar"))
+ selected_language = PlayerPrefs.language()
  art_style = str(profile.get("art_style", "realistic"))
  _apply_audio_preferences(profile)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
@@ -477,6 +489,8 @@ func _apply_audio_preferences(saved: Dictionary) -> void:
  ui_sound_enabled=bool(saved.get("ui_sound_enabled",sound_enabled))
  music_enabled=bool(saved.get("music_enabled",true))
  var policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ policy.set_music_volume(float(saved.get("music_volume",0.7)))
+ policy.set_effects_volume(float(saved.get("effects_volume",0.8)))
  policy.set_ui_effects_enabled(ui_sound_enabled)
  policy.set_game_effects_enabled(sound_enabled)
  policy.set_music_enabled(music_enabled)
@@ -489,6 +503,9 @@ func save_progress() -> void:
  profile["sound_enabled"] = sound_enabled
  profile["ui_sound_enabled"] = ui_sound_enabled
  profile["music_enabled"] = music_enabled
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ profile["music_volume"]=audio_policy.music_volume
+ profile["effects_volume"]=audio_policy.effects_volume
  profile["haptics_enabled"] = haptics_enabled
  profile["reduced_motion"] = reduced_motion
  profile["reading_scale"] = reading_scale
@@ -945,11 +962,14 @@ func game_title(index: int) -> String:
 
 func toggle_language() -> void:
  selected_language = ["ar", "en"][(["ar", "en"].find(selected_language) + 1) % 2]
+ PlayerPrefs.save_language(selected_language)
  save_progress()
  show_home()
 
 func _ready() -> void:
  get_tree().quit_on_go_back = false
+ var account=get_node("/root/GamingHubAccount")
+ account.progress_restored.connect(_secure_progress_restored)
  PublishedContent.changed.connect(_apply_published_content)
  if not DailyRounds.changed.is_connected(_on_daily_rounds_changed):
   DailyRounds.changed.connect(_on_daily_rounds_changed)
@@ -959,7 +979,10 @@ func _ready() -> void:
  load_upgrade()
  _load_age_group()
  AdManager.set_audience("adults" if age_group == "18plus" else "children")
- show_welcome()
+ if account.enter_home_once:
+  account.enter_home_once=false
+  _welcome_guest()
+ else:show_welcome()
 
 func _load_age_group() -> void:
  age_group = "unknown"
@@ -1022,6 +1045,7 @@ var ui_action_generation := 0
 var _menu_touch_guard: Node
 
 func clear_ui() -> void:
+ current_screen=""
  layout_direction = Control.LAYOUT_DIRECTION_RTL if selected_language == "ar" else Control.LAYOUT_DIRECTION_LTR
  ui_action_generation += 1
  active_play_screen = false
@@ -1188,6 +1212,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 var _back_navigation_pending := false
 func _queue_back_navigation() -> void:
+ if VisualSkin.dismiss_text_input(get_viewport()):return
  if _back_navigation_pending or not is_inside_tree() or is_queued_for_deletion(): return
  _back_navigation_pending = true
  _perform_back_navigation.call_deferred(ui_action_generation)
@@ -1361,7 +1386,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
  skin.bg_color = Color("142447")
- skin.border_color = [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
+ skin.border_color = Color("ffcc42") if index==0 else [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
  skin.set_border_width_all(2)
  skin.set_corner_radius_all(20)
  skin.content_margin_left = 8
@@ -1377,7 +1402,7 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  var art := TextureRect.new()
  var premium_art: Texture2D=VisualSkin.game_cover(index)
  art.texture=premium_art if premium_art!=null else card_texture(art_id)
- art.custom_minimum_size.y = 64
+ art.custom_minimum_size.y = 76 if index==0 else 64
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -1902,6 +1927,7 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
+ current_screen="home"
  var presentation: Dictionary = PublishedContent.settings
  VisualSkin.compact_header(root,str(presentation.get("title_"+selected_language,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))))
  var notice: String = str(presentation.get("notice_"+selected_language,""))
@@ -1909,12 +1935,6 @@ func show_home() -> void:
  var xp: int=maxi(0,int(profile.get("xp",0)))
  label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
  _add_unique_game_catalog()
- var navigation := HBoxContainer.new()
- navigation.add_theme_constant_override("separation",8)
- root.add_child(navigation)
- for entry in [[tr_ui("حسابي والأصدقاء", "ACCOUNT & FRIENDS"),show_player_account],[tr_ui("الإعدادات", "SETTINGS"),show_accessibility]]:
-  var item := button(entry[0],entry[1],PANEL)
-  item.reparent(navigation)
  _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
   [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
   [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
@@ -1927,6 +1947,7 @@ func show_home() -> void:
   [tr_ui("الخصوصية والإعلانات", "PRIVACY & ADS"),show_privacy_and_ads]
  ])
  VisualSkin.compact_menu(root)
+ _add_bottom_navigation("games")
 
 func _add_unique_game_catalog() -> void:
  var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
@@ -1934,6 +1955,8 @@ func _add_unique_game_catalog() -> void:
  if configured_columns>0: columns=configured_columns
  if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1
  var catalog_order: Array=PublishedContent.catalog_order()
+ if 0 in catalog_order:
+  catalog_order.erase(0);catalog_order.push_front(0)
  var primary_count: int=int(PublishedContent.settings.get("primary_count",6))
  var grid := GridContainer.new()
  grid.name="UnifiedGameCatalog";grid.columns=columns
@@ -1976,11 +1999,57 @@ func show_player_account() -> void:
  account.back_requested.connect(show_home)
  account.progress_received.connect(_merge_account_progress)
  root.add_child(account)
+ _add_bottom_navigation("account")
+
+func show_player_friends() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.show_friends_first=true
+ account.back_requested.connect(show_home)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+ _add_bottom_navigation("friends")
+
+func _add_bottom_navigation(selected: String) -> void:
+ if has_node("PlayerBottomNavigation"):return
+ for child in get_children():
+  if child is ScrollContainer:child.offset_bottom=-96
+ var panel:=PanelContainer.new()
+ panel.name="PlayerBottomNavigation"
+ panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+ panel.offset_left=16;panel.offset_right=-16;panel.offset_top=-86;panel.offset_bottom=-18
+ var style:=VisualSkin.card(Color("0b2042"),16)
+ style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=4;style.content_margin_bottom=4
+ panel.add_theme_stylebox_override("panel",style)
+ add_child(panel)
+ var bar:=HBoxContainer.new();bar.add_theme_constant_override("separation",4);panel.add_child(bar)
+ var entries: Array=[["games",tr_ui("الألعاب","Games"),"list",show_home],["friends",tr_ui("الأصدقاء","Friends"),"player",show_player_friends],["account",tr_ui("حسابي","Profile"),"player",show_player_account],["settings",tr_ui("الإعدادات","Settings"),"settings",show_accessibility]]
+ for entry in entries:
+  var control:=button(str(entry[1]),entry[3],GOLD if entry[0]==selected else PANEL)
+  control.reparent(bar)
+  control.icon=VisualSkin.menu_icon(str(entry[2]));control.expand_icon=true
+  control.add_theme_constant_override("icon_max_width",18)
+  control.add_theme_font_size_override("font_size",12)
+  control.add_theme_constant_override("h_separation",4)
+  control.autowrap_mode=TextServer.AUTOWRAP_OFF
+  for state in ["normal","hover","pressed","disabled"]:
+   var button_style: StyleBox=control.get_theme_stylebox(state).duplicate()
+   button_style.content_margin_left=4;button_style.content_margin_right=4
+   control.add_theme_stylebox_override(state,button_style)
+  control.custom_minimum_size=Vector2(0,54)
+  control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  control.set_meta("navigation_target",entry[0])
 
 func _merge_account_progress(value: Dictionary) -> void:
  for key in ["xp","wins","matches","picture_wins"]:
   if value.get(key) is int or value.get(key) is float: profile[key]=maxi(int(profile.get(key,0)),int(value[key]))
  save_progress()
+
+func _secure_progress_restored(value: Dictionary) -> void:
+ _merge_account_progress(value)
+ if current_screen=="home":show_home()
 
 
 func start_championship() -> void:
@@ -2016,6 +2085,38 @@ func show_more_games() -> void:
  show_home()
 
 func show_modes(index: int) -> void:
+ if index<0 or index>=GAMES.size():return
+ if index!=game:selected_topic="all"
+ game=index;daily_match=false;family_active=false;campaign_active=false
+ clear_ui()
+ current_screen="mode"
+ VisualSkin.compact_header(root,game_title(index))
+ var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,ACCENT)
+ friends.set_meta("mode_action","friends")
+ friends.disabled=age_group in ["under13","unknown"]
+ if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
+ var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
+ local.set_meta("mode_action","offline")
+ var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_home,PANEL)
+ back.set_meta("mode_action","games")
+ VisualSkin.compact_menu(root)
+
+func _open_friend_rooms() -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry="landing"
+ if game==0:get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
+ else:
+  var quiz_ui=load("res://scripts/shared_quiz_ui.gd")
+  quiz_ui.selected_game=str(game)
+  get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn")
+
+func _start_offline_mode() -> void:
+ quick_match_active=false
+ match_style="classic"
+ selected_topic="all"
+ start_game()
+
+func _show_legacy_game_options(index: int) -> void:
  if index != game:
   selected_topic = "all"
   quick_match_active = false
@@ -2030,16 +2131,17 @@ func show_modes(index: int) -> void:
   VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
  if game == 0:
   if age_group not in ["under13", "unknown"]:
-   button(tr_ui("غرف الأصدقاء • إنشاء / انضمام", "FRIEND ROOMS • CREATE / JOIN"), func(): get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn"), ACCENT)
+   button(tr_ui("اللعب مع صديق • إنشاء غرفة", "PLAY WITH A FRIEND • CREATE ROOM"),func():_open_picture_room("create"),ACCENT)
+   button(tr_ui("اللعب أونلاين • انضمام بكود", "PLAY ONLINE • JOIN WITH CODE"),func():_open_picture_room("join"),PANEL)
    _home_activity_section(tr_ui("الخدمة الكلاسيكية الحالية","Existing classic service"),[[tr_ui("فتح غرفة كلاسيكية • لاعبان","Open classic room • two players"),open_guess_multiplayer]])
   else:
    label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
   if _admin_ui_authorized():
    button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
   button(tr_ui("ألغاز الصور اليومية", "DAILY PICTURE PUZZLES"),show_ai_daily,PANEL)
-  label(tr_ui("غرف 2–6 تستخدم خدمة جديدة بانتظار التفعيل. الغرفة الكلاسيكية واللعب بدون إنترنت ما زالا متاحين.", "Rooms for 2–6 use a new service awaiting activation. Classic rooms and offline play remain available."), 16)
+  label(tr_ui("شارك كود غرفتك مع الأصدقاء، أو العب ضد الكمبيوتر دون إنترنت.", "Share a room code with friends, or play against the computer offline."), 16)
  if game in [1,2,3,4,5,6,7,8,9] and age_group not in ["under13","unknown"]:
-  button(tr_ui("غرفة أسئلة مع الأصدقاء • معاينة محلية","Quiz room with friends • local preview"),func():
+  button(tr_ui("اللعب مع الأصدقاء • غرفة أسئلة","PLAY WITH FRIENDS • QUIZ ROOM"),func():
    var screen=load("res://scripts/shared_quiz_ui.gd")
    screen.selected_game=str(game)
    get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn"),ACCENT)
@@ -2083,7 +2185,7 @@ func show_modes(index: int) -> void:
   if game > 0 and game not in [4, 8]:
    button(tr_ui("🚀 مباراة سريعة • 10 أسئلة فقط", "🚀 QUICK MATCH • JUST 10 QUESTIONS"), start_quick_match, GREEN)
   if game==0:
-   button(tr_ui("ابدأ اللعب بدون إنترنت", "START OFFLINE GAME"),func(): quick_match_active=false;start_game(),GREEN)
+   button(tr_ui("اللعب ضد الكمبيوتر • بدون إنترنت", "PLAY AGAINST THE COMPUTER • OFFLINE"),func(): quick_match_active=false;start_game(),GREEN)
   else:
    label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
    label(match_style_name(), 19)
@@ -2094,12 +2196,18 @@ func show_modes(index: int) -> void:
  if not (game == 0 and age_group not in ["under13", "unknown"]):
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
+ _add_bottom_navigation("games")
 
 func show_unavailable(feature: String) -> void:
  clear_ui()
  label(feature, 26)
  label(tr_ui("غير متصل بعد. يحتاج هذا الوضع خادمًا واختبارًا بجهازين.", "Not connected yet. This mode needs a multiplayer backend and testing on two devices."), 19)
  button(tr_ui("العودة", "Back"), func(): show_modes(game), ACCENT)
+
+func _open_picture_room(entry: String) -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry=entry
+ get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
 
 func adaptive_level_for(game_index: int) -> int:
  var stats: Dictionary = profile.get("adaptive_stats", {})
@@ -2986,7 +3094,7 @@ func show_picture_game() -> void:
   var recommended: int = suggestion
   button(tr_ui("💡 سؤال ذكي: ", "💡 SMART QUESTION: ") + picture_question_text(recommended), func(): ask_picture_question(recommended), GREEN)
  elif player_candidates.size() == 1:
-  label(tr_ui("وصلت لبطاقة واحدة! جرب تخمينها.", "One card left! Try guessing it."), 18)
+  label(tr_ui("يمكنك إكمال الأسئلة أو اختيار التخمين وقتما تريد.", "Keep asking, or choose to guess whenever you want."), 18)
  var available: Array[int] = available_picture_questions()
  if not available.is_empty():
   var page_count_questions: int = ceili(float(available.size()) / 6.0)
@@ -3269,7 +3377,7 @@ func show_languages() -> void:
  var names: Dictionary = {"ar": "العربية", "en": "English"}
  for key in ["ar", "en"]:
   var chosen: String = str(key)
-  button(str(names[key]), func(): selected_language = chosen; save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
+  button(str(names[key]), func(): selected_language = chosen; PlayerPrefs.save_language(chosen); save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
  button(tr_ui("العودة", "BACK"), show_home)
 
 var deck: String = "all"
@@ -3328,19 +3436,34 @@ func show_decks() -> void:
 func show_order_choices(item: Dictionary) -> void:
  order_picks.clear()
  order_buttons.clear()
- order_label = label(tr_ui("اضغط الخطوات حسب ترتيبها الصحيح", "TAP STEPS IN THE CORRECT ORDER"), 18)
+ order_label = label(tr_ui("اسحب الخطوات لترتيبها ثم اضغط تأكيد", "Drag the steps into order, then confirm"), 18)
  var steps: Array = item["steps_" + selected_language]
  var order: Array = range(steps.size())
  shuffle_items(order)
  # Avoid presenting an already solved ordering.
  if order == range(steps.size()):
   order.reverse()
+ order_picks.assign(order)
  order_buttons.resize(steps.size())
  for value in order:
   var index: int = int(value)
-  order_buttons[index] = button(str(steps[index]), func(): pick_order_step(index))
- button(tr_ui("تراجع خطوة", "UNDO STEP"), undo_order_step)
- button(tr_ui("تحقق من الترتيب", "CHECK ORDER"), submit_order, GREEN)
+  var item_button=load("res://scripts/order_drag_item.gd").new()
+  item_button.text=str(steps[index]);item_button.item_index=index
+  item_button.group_key=str(question_index);item_button.ordering_enabled=true
+  item_button.custom_minimum_size.y=60
+  item_button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  VisualSkin.decorate_button(item_button,"teal")
+  item_button.move_requested.connect(_move_local_order,CONNECT_DEFERRED)
+  root.add_child(item_button);order_buttons[index]=item_button
+ button(tr_ui("تأكيد الترتيب", "CONFIRM ORDER"), submit_order, GREEN)
+
+func _move_local_order(source: int,target: int) -> void:
+ if round_finished or source not in order_picks or target not in order_picks:return
+ var destination: int=order_picks.find(target)
+ order_picks.erase(source);order_picks.insert(destination,source)
+ var first: int=order_label.get_index()+1
+ for position in range(order_picks.size()):
+  root.move_child(order_buttons[order_picks[position]],first+position)
 
 func pick_order_step(index: int) -> void:
  if round_finished or index in order_picks or index < 0 or index >= order_buttons.size():
@@ -3377,7 +3500,9 @@ func submit_order() -> void:
  var answer: Array[String] = []
  for step in steps:
   answer.append(str(step))
- answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + order_label.text
+ var chosen: Array[String]=[]
+ for index in order_picks:chosen.append(str(steps[index]))
+ answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + " → ".join(chosen)
  finish_round(correct, " → ".join(answer))
 
 func build_memory_board() -> void:
@@ -3726,6 +3851,8 @@ func show_picture_filters() -> void:
 # First-run navigation reuses the existing account and age-group systems.
 func show_welcome() -> void:
  clear_ui()
+ current_screen="welcome"
+ _add_language_control(show_welcome)
  var artwork := TextureRect.new()
  artwork.texture=load("res://assets/ui/gaming_hub_brand.png")
  artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
@@ -3737,13 +3864,42 @@ func show_welcome() -> void:
  guest.set_meta("welcome_action","guest")
  for provider in ["Google","Facebook"]:
   var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
-  login.tooltip_text=tr_ui("إعداد OAuth والخدمة الآمنة غير مكتملين؛ اللعب كضيف متاح","OAuth and secure service setup are pending; guest play is available")
+  login.tooltip_text=tr_ui("تسجيل دخول اختياري؛ تقدم الضيف محفوظ","Optional sign-in; guest progress is preserved")
   login.set_meta("welcome_action",provider.to_lower())
- var account := button(tr_ui("حساب Gaming Hub","Gaming Hub account"),show_welcome_account,PANEL)
+ var account := button(tr_ui("إنشاء حساب Gaming Hub","Create Gaming Hub account"),func(): _open_account_sign_in("register"),PANEL)
  account.set_meta("welcome_action","account")
- button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),show_welcome_account,PANEL)
- button("العربية / English",func(): selected_language="en" if selected_language=="ar" else "ar";save_progress();show_welcome(),PANEL)
+ button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),func(): _open_account_sign_in("login"),PANEL)
  VisualSkin.compact_menu(root)
+
+func _add_language_control(redraw: Callable) -> void:
+ var row:=HBoxContainer.new();row.alignment=BoxContainer.ALIGNMENT_END
+ row.layout_direction=Control.LAYOUT_DIRECTION_LTR
+ root.add_child(row)
+ var globe:=MenuButton.new();globe.name="LanguageGlobe"
+ globe.icon=VisualSkin.language_globe();globe.expand_icon=true
+ globe.add_theme_constant_override("icon_max_width",64)
+ globe.custom_minimum_size=Vector2(72,72)
+ globe.tooltip_text="اللغة / Language"
+ VisualSkin.decorate_button(globe,"secondary")
+ globe.set_meta("language_switcher",true)
+ for state_name in ["normal","hover","pressed","disabled"]:
+  var surface: StyleBox=globe.get_theme_stylebox(state_name).duplicate()
+  surface.content_margin_left=4;surface.content_margin_right=4
+  surface.content_margin_top=4;surface.content_margin_bottom=4
+  globe.add_theme_stylebox_override(state_name,surface)
+ row.add_child(globe)
+ globe.button_down.connect(func():globe.self_modulate=Color(1.2,1.35,1.4);globe.pivot_offset=globe.size/2;globe.create_tween().tween_property(globe,"scale",Vector2(0.94,0.94),0.08))
+ globe.button_up.connect(func():globe.self_modulate=Color.WHITE;globe.create_tween().tween_property(globe,"scale",Vector2.ONE,0.12))
+ var popup:=globe.get_popup()
+ popup.add_radio_check_item("🇪🇬 العربية",0);popup.add_radio_check_item("🇬🇧 English",1)
+ popup.set_item_checked(0,selected_language=="ar");popup.set_item_checked(1,selected_language=="en")
+ popup.id_pressed.connect(func(id: int):_set_player_language.call_deferred("ar" if id==0 else "en",redraw))
+
+func _set_player_language(value: String,redraw: Callable) -> void:
+ selected_language=value
+ PlayerPrefs.save_language(value)
+ save_progress()
+ redraw.call()
 
 func _welcome_guest() -> void:
  if age_group=="unknown":show_age_group_selection()
@@ -3751,6 +3907,10 @@ func _welcome_guest() -> void:
 
 func _welcome_provider(provider: String) -> void:
  get_node("/root/GamingHubAccount").requested_provider = provider
+ get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
+
+func _open_account_sign_in(action: String) -> void:
+ get_node("/root/GamingHubAccount").requested_action=action
  get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
 
 func show_welcome_account() -> void:

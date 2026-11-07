@@ -68,24 +68,22 @@ def social(body: SocialCredentials, authorization: str = Header(default="")):
         db.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",(body.provider+":"+verified.subject,))
         linked = db.execute("SELECT user_id FROM identity_providers WHERE provider=%s AND subject=%s",
             (body.provider,verified.subject)).fetchone()
-        if linked and current and linked[0] != current["id"]:
-            raise HTTPException(409,"Provider belongs to another account; progress was preserved")
         if linked:
             uid = linked[0]
         else:
-            # A matching email is not sufficient proof to link an existing account.
-            if verified.email and db.execute("SELECT id FROM identity_users WHERE email=%s AND id<>%s",
-                (verified.email,current["id"] if current else "")).fetchone():
-                raise HTTPException(409,"Sign in to the existing account before linking this provider")
-            uid = current["id"] if current else str(uuid.uuid4())
-            if not current:
+            # Providers identify independent accounts, even when their email is
+            # identical. Only a guest may be upgraded; never attach a provider
+            # to an existing registered account merely because it is signed in.
+            upgrade = current is not None and current['is_guest']
+            uid = current["id"] if upgrade else str(uuid.uuid4())
+            if not upgrade:
                 db.execute("INSERT INTO identity_users(id,email,display_name,avatar_url) VALUES(%s,%s,%s,%s)",
-                    (uid,verified.email,verified.name,verified.avatar))
+                    (uid,None,verified.name,verified.avatar))
             else:
                 if db.execute("SELECT 1 FROM identity_providers WHERE provider=%s AND user_id=%s",(body.provider,uid)).fetchone():
                     raise HTTPException(409,"A different provider identity is already linked")
-                db.execute("""UPDATE identity_users SET is_guest=FALSE,display_name=%s,avatar_url=%s,
-                    email=COALESCE(email,%s) WHERE id=%s""",(verified.name,verified.avatar,verified.email,uid))
+                db.execute("""UPDATE identity_users SET is_guest=FALSE,display_name=%s,avatar_url=CASE WHEN avatar_url LIKE '/api/avatars/%%' THEN avatar_url ELSE %s END,
+                    email=email WHERE id=%s""",(verified.name,verified.avatar,uid))
             db.execute("INSERT INTO identity_providers(provider,subject,user_id) VALUES(%s,%s,%s)",(body.provider,verified.subject,uid))
         db.execute("UPDATE identity_challenges SET consumed=TRUE WHERE digest=%s",(digest,))
         result = issue_session(db,uid)

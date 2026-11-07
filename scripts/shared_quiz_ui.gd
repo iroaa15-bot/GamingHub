@@ -84,7 +84,7 @@ func _state(value: Dictionary) -> void:
    _online_category_keys.append(key);_online_category.add_item(str(client.capabilities.quiz_categories[key].get(language,key)))
  if not client.code.is_empty() and _configuration_changed:
   var index: int=_online_category_keys.find(value.get("picture_category","all"))
-  if index>=0:_online_category.select(index)
+  if index>=0 and index<_online_category.item_count:_online_category.select(index)
  if is_instance_valid(quiz_panel):
   if value.get("quiz",{}).get("phase") in ["question","results","finished"]:
    _seats.reparent(quiz_panel)

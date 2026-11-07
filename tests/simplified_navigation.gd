@@ -18,6 +18,10 @@ func run() -> void:
  room.client.capabilities={"room_agreement":true,"primary_modes":["voice","text","mixed","tap"]}
  var state={"capacity":2,"joined":2,"connected":[true,true],"started":true,"current":0,"responder":1,"scores":[0,0],"primary_mode":"mixed","opponents":[],"room_agreement":true,"config_revision":1}
  room._state(state)
+ assert(not room._settings_toggle.visible and not room._settings_body.visible)
+ state.paused=true;room._state(state)
+ assert(not room._settings_toggle.visible and not room._settings_body.visible)
+ state.paused=false;room._state(state)
  assert(room._mode_field.selected==2)
  room._mode_field.select(1)
  room._state(state)

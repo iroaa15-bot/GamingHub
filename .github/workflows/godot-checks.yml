@@ -79,6 +79,8 @@ jobs:
           grep -q 'UNIFIED_CATALOG_UI true' godot-catalog.log
           timeout 120 godot --headless --path . --script res://tests/simplified_navigation.gd 2>&1 | tee godot-navigation.log
           grep -q SIMPLIFIED_NAVIGATION_PASS godot-navigation.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/button_inventory.gd 2>&1 | tee godot-button-inventory.log
+          grep -q 'enabled_unwired=0' godot-button-inventory.log
       - name: Verify challenge audio controls and Android touch ordering
         shell: bash
         run: |

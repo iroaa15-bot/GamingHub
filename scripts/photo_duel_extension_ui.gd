@@ -85,6 +85,7 @@ var _settings_body: VBoxContainer
 var _settings_toggle: Button
 var _reply_row: HBoxContainer
 var _was_active := false
+var _room_started := false
 var _seat_labels: Array[Label] = []
 var _seat_panels: Array[PanelContainer] = []
 var _seat_avatars: Array[TextureRect] = []
@@ -449,6 +450,7 @@ func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
 
 func _state(value: Dictionary) -> void:
+ _room_started=bool(value.get("started",false))
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).room_snapshot(self,value)
  var ready: bool = not client.capabilities.is_empty()
  var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false)) and not bool(value.get("match_finished",false))
@@ -544,7 +546,7 @@ func _state(value: Dictionary) -> void:
  no_button.visible=yes_button.visible
  _chat_toggle.visible=active
  if not active:_chat_body.hide()
- _voice_controls.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and bool(client.capabilities.get("voice",false))
+ _voice_controls.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and bool(client.capabilities.get("voice",false)) and (not agreement or mode in ["voice","mixed"])
  _voice_question.visible=active and mode in ["voice","mixed"] and turn
  if pending.get("mode")=="voice" and pending.get("kind")=="question": question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  question_button.disabled = not turn
@@ -696,7 +698,9 @@ func _apply_entry_visibility() -> void:
  create_button.visible=not in_room and _entry_mode=="create"
  code_field.visible=not in_room and _entry_mode=="join"
  join_button.visible=code_field.visible
- _settings_toggle.visible=in_room or _entry_mode=="create"
+ var preparation: bool=not _room_started
+ _settings_toggle.visible=(in_room and preparation) or (not in_room and _entry_mode=="create")
+ if in_room and not preparation:_settings_body.hide()
  if not in_room:_settings_body.visible=_entry_mode=="create"
  _online_filter_box.visible=not in_room and _entry_mode=="create"
 

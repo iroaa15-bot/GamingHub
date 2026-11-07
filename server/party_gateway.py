@@ -15,6 +15,7 @@ class Session:
     owner: str
     tokens: dict[str, str] = field(default_factory=dict)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+    invitations: dict[str, str] = field(default_factory=dict)
 
 class PartyGateway:
     """In-memory authenticated dispatcher; transport must bind token to each socket."""
@@ -28,8 +29,25 @@ class PartyGateway:
         room = PartyRoom(tuple(player_names), self.cards, rounds)
         session = Session(room, room.players[0])
         session.tokens = {player: secrets.token_urlsafe(32) for player in room.players}
+        session.invitations = {player: secrets.token_urlsafe(32) for player in room.players}
         self.sessions[room.room_id] = session
-        return {"room": room.room_id, "credentials": session.tokens.copy()}  # TRUSTED SERVER ONLY: never serialize this to a client
+        return {"room": room.room_id, "invitations": session.invitations.copy()}  # INTERNAL ONLY: distribute invitations individually
+
+    def claim_player(self, room_id: str, player: str, invitation: str) -> dict[str, str]:
+        """Redeem a one-use invitation, returning ONLY that player's session token.
+
+        Invitations must be delivered through a trusted channel to the intended
+        player; room code alone does not grant access.
+        """
+        session = self.sessions.get(room_id)
+        if session is None or not isinstance(player, str) or not isinstance(invitation, str):
+            raise ValueError("Invalid invitation")
+        pending = getattr(session, "invitations", {})
+        expected = pending.get(player)
+        if expected is None or not secrets.compare_digest(expected, invitation):
+            raise ValueError("Invalid invitation")
+        del pending[player]
+        return {"room": room_id, "player": player, "token": session.tokens[player]}
 
     def authenticate(self, room_id: str, player: str, token: str) -> Session:
         session = self.sessions.get(room_id)

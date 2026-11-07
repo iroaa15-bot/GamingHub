@@ -365,9 +365,9 @@ func _ready() -> void:
  column.move_child(reply_row,column.get_children().find(question_label)+1)
  VisualSkin.decorate_button(yes_button,"teal")
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
- guess_button = button(tr_pair("هذا تخميني","This is my guess"),func(): client.send_action("duel_guess",{"guess":question_field.text if str(client.state.get("primary_mode","tap"))=="text" else guess_field.text}))
+ guess_button = button(tr_pair("هذا تخميني","This is my guess"),_submit_guess)
  guess_button.reparent(_reply_row)
- guess_button.text=tr_pair("تأكيد التخمين","Confirm guess")
+ guess_button.text=tr_pair("أرسل تخميني للمنافس","Send my guess to opponent")
  guess_button.tooltip_text=tr_pair("أدخل تخمينك ثم اطلب تأكيد المنافس","Enter your guess, then request opponent confirmation")
  for primary in [yes_button,no_button,guess_button]:
   primary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -554,7 +554,8 @@ func _state(value: Dictionary) -> void:
  var mode_text: bool=not agreement or mode in ["text","mixed"]
  var mode_tap: bool=not agreement or mode=="tap"
  question_field.visible=mode_text and turn
- question_field.placeholder_text=tr_pair("اكتب سؤالك أو تخمينك","Type your question or guess") if mode=="text" else tr_pair("اكتب سؤالك","Type your question")
+ question_field.placeholder_text=tr_pair("اكتب سؤالك أو تخمينك","Type your question or guess") if mode in ["text","mixed"] else tr_pair("اكتب سؤالك","Type your question")
+ guess_button.text=tr_pair("اطلب تأكيد التخمين الشفهي","Confirm my spoken guess") if mode=="voice" else tr_pair("أرسل تخميني للمنافس","Send my guess to opponent")
  question_button.visible=mode_text and turn
  _preset_toggle.hide()
  _preset_body.visible=mode_tap and turn
@@ -572,7 +573,7 @@ func _state(value: Dictionary) -> void:
  question_button.disabled = not turn
  guess_button.disabled = not turn
  guess_button.visible=turn
- guess_field.visible=turn and mode!="text"
+ guess_field.visible=turn and mode not in ["text","mixed","voice"]
  pass_button.visible=turn
  pass_button.disabled = not turn
  yes_button.disabled = not responder or pending.get("kind") != "question"
@@ -728,8 +729,27 @@ func _apply_entry_visibility() -> void:
  _online_filter_box.visible=not in_room and _entry_mode=="create"
 
 
+func _submit_guess() -> void:
+ var mode: String=str(client.state.get("primary_mode","tap"))
+ var value: String=(question_field.text if mode in ["text","mixed"] else guess_field.text).strip_edges()
+ if mode=="voice" or (mode=="mixed" and value.is_empty()):
+  if not is_instance_valid(voice_adapter) or not voice_adapter.requested or not voice_adapter.bridge.active:
+   status.text=tr_pair("ابدأ المكالمة واذكر تخمينك، أو اكتبه في الوضع النصي.","Start the call and say your guess, or type it in text mode.")
+   return
+  value=tr_pair("تخمين شفهي • أكّد ما سمعته","Spoken guess • confirm what you heard")
+ if value.is_empty():
+  status.text=tr_pair("اكتب تخمينك أولًا ثم أرسله للمنافس.","Type your guess first, then send it to your opponent.")
+  return
+ client.send_action("duel_guess",{"guess":value})
+
 func _connection_message(reason: String) -> String:
  var value:=reason.to_lower()
+ if "invalid text" in value:return tr_pair("اكتب السؤال أو التخمين أولًا.","Type a question or guess first.")
+ if "not your turn" in value or "waiting for response" in value:return tr_pair("انتظر دورك أو إجابة المنافس.","Wait for your turn or the opponent's reply.")
+ if "designated opponent" in value:return tr_pair("تأكيد الإجابة عند المنافس المحدد فقط.","Only the designated opponent can confirm the answer.")
+ if "not in a room" in value:return tr_pair("انقطع ارتباط الغرفة؛ جار استعادة الاتصال.","Room membership was interrupted; restoring the connection.")
+ if "already answered" in value:return tr_pair("هذا السؤال أُجيب عنه؛ اختر سؤالًا آخر.","That question was already answered; choose another.")
+ if "next round" in value:return tr_pair("انتظر انتقال الفائز إلى المرحلة التالية.","Wait for the winner to continue to the next round.")
  if "full" in value:return tr_pair("الغرفة ممتلئة. جرّب غرفة أخرى.","This room is full. Try another room.")
  if "room unavailable" in value:return tr_pair("الغرفة غير متاحة. راجع الكود مع صديقك أو أنشئ غرفة جديدة.","Room unavailable. Check the code with your friend or create a new room.")
  if "not found" in value or "unknown room" in value:return tr_pair("الغرفة غير موجودة. راجع الكود مع صديقك.","Room not found. Check the code with your friend.")

@@ -35,6 +35,7 @@ var _pending_admission_at := 0
 var _awaiting_resume := false
 var _resume_ack_deadline := 0
 var _resume_rejected := false
+var _membership_recovery_scheduled := false
 
 func _ready() -> void:
  var account=get_tree().root.get_node_or_null("GamingHubAccount")
@@ -220,6 +221,7 @@ func _received(message: Dictionary) -> void:
    if should_resume:
     send_action("duel_resume", {"code":code,"token":token})
   "duel_created", "duel_joined", "duel_resumed":
+   _membership_recovery_scheduled=false
    _resume_until=0
    _resume_retry_at=0
    code = str(message.get("code", ""))
@@ -243,7 +245,16 @@ func _received(message: Dictionary) -> void:
     state_changed.emit(state)
   "duel_error":
    _pending_admission_at=0
+   if str(message.get("message","")).to_lower()=="not in a room" and not code.is_empty() and not token.is_empty() and not _membership_recovery_scheduled and not _awaiting_resume:
+    # Stop stale gameplay/audio immediately, then reuse the existing room and
+    # transport identities once. A batch of rejected PCM frames must not open
+    # several concurrent resume attempts.
+    _membership_recovery_scheduled=true
+    capabilities={}
+    connection_changed.emit(false)
+    _recover_lost_membership.call_deferred()
    if _awaiting_resume and "resume" in str(message.get("message","")).to_lower():
+    _membership_recovery_scheduled=false
     _awaiting_resume=false
     _resume_rejected=true
     _auto_resume=false
@@ -278,6 +289,12 @@ func join_room(room_code: String) -> Error:
  var invites=preload("res://scripts/room_invite_code.gd")
  if not invites.valid(room_code):return ERR_INVALID_PARAMETER
  return send_action("duel_join", {"code":invites.normalize(room_code)})
+
+func _recover_lost_membership() -> void:
+ if not is_inside_tree() or code.is_empty() or token.is_empty():
+  _membership_recovery_scheduled=false
+  return
+ resume_session()
 
 func resume_session() -> Error:
  if code.is_empty() or token.is_empty(): return ERR_UNAVAILABLE

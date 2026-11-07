@@ -62,7 +62,7 @@ func _state(snapshot: Dictionary) -> void:
  if not same_room and requested:
   _stop()
   return
- if bool(snapshot.get("closed",false)) or (snapshot.get("room_agreement",false) and snapshot.get("primary_mode","")!="voice"):
+ if bool(snapshot.get("closed",false)) or (snapshot.get("room_agreement",false) and snapshot.get("primary_mode","") not in ["voice","mixed"]):
   _stop()
   return
  var ready: bool=bool(voice.get("available",false)) and not client.capabilities.is_empty() and not bool(snapshot.get("paused",false))
@@ -97,6 +97,10 @@ func _outgoing(pcm: String) -> void:
  client.send_action("duel_voice_audio",{"pcm":payload,"seq":sequence,"epoch":epoch})
 func _event(message: Dictionary) -> void:
  if message.get("type")=="duel_error" and message.get("scope")=="voice":
+  # The room client already suspends audio and serializes membership recovery.
+  # Keep the user's existing call intent; do not send more frames/opt-outs into
+  # a socket the server has just declared unbound.
+  if str(message.get("message","")).to_lower()=="not in a room":return
   _failure(str(message.get("message","Voice transport failed")))
   return
  if message.get("type")=="duel_voice_audio" and requested and int(message.get("epoch",-2))==epoch:

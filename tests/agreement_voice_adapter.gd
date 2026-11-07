@@ -14,10 +14,11 @@ class Bridge extends Node:
  var granted=true
  var active=false
  var received=0
+ var stops=0
  func is_available() -> bool:return true
  func request_permission() -> void:permission_ready.emit(granted)
  func set_consent(local: bool,peer: bool) -> void:active=local and peer
- func stop_voice() -> void:active=false
+ func stop_voice() -> void:stops+=1;active=false
  func receive_pcm(_pcm: String,_seq: int) -> void:received+=1
 var errors=[]
 func ck(ok: bool,name: String) -> void:

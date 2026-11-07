@@ -86,6 +86,8 @@ var _settings_toggle: Button
 var _reply_row: HBoxContainer
 var _was_active := false
 var _room_started := false
+var _start_when_ready := false
+var _duel_next: Button
 var _seat_labels: Array[Label] = []
 var _seat_panels: Array[PanelContainer] = []
 var _seat_avatars: Array[TextureRect] = []
@@ -256,7 +258,7 @@ func _ready() -> void:
  target_field = SpinBox.new()
  target_field.min_value = 1
  target_field.max_value = 50
- target_field.value = 10
+ target_field.value = 3
  column.add_child(target_field)
  _online_filter_box=VBoxContainer.new()
  column.add_child(_online_filter_box)
@@ -317,6 +319,8 @@ func _ready() -> void:
  for title in ["صوت • أسئلة شفهية","نص • أسئلة مكتوبة","صوت وكتابة معًا","نقر • أسئلة جاهزة"] if language=="ar" else ["Voice • spoken questions","Text • written questions","Voice and text together","Tap • preset questions"]: _mode_field.add_item(title)
  _mode_field.select(3)
  column.add_child(_mode_field)
+ _mode_field.item_selected.connect(func(_index): _start_when_ready=false;_propose_configuration())
+ _online_category.item_selected.connect(func(_index): _start_when_ready=false;_propose_configuration())
  _propose_button=button(tr_pair("اقتراح الصنف وطريقة اللعب","Propose category & mode"),_propose_configuration)
  _accept_button=button(tr_pair("أوافق على الصعوبة والصنف وطريقة اللعب","Accept difficulty, category & mode"),_accept_configuration)
  _start_button=button(tr_pair("ابدأ اللعبة","Start game"),func(): client.send_action("duel_start"))
@@ -335,6 +339,7 @@ func _ready() -> void:
   column.add_child(picture)
   images.append(picture)
  question_label = label("")
+ _duel_next=button(tr_pair("إجابة صحيحة • المرحلة التالية","Correct answer • next round"),func():client.send_action("duel_next_round",{"round":int(client.state.get("round",0))}))
  _voice_question=button(tr_pair("طلب إجابة نعم / لا","Request Yes / No answer"),func(): client.send_action("duel_voice_question"))
  question_field = field(tr_pair("سؤال نصي للمجيب المحدد","Text question for the designated opponent"))
  question_button = button(tr_pair("إرسال السؤال","Send question"),func(): client.send_action("duel_question",{"text":question_field.text}))
@@ -360,7 +365,7 @@ func _ready() -> void:
  column.move_child(reply_row,column.get_children().find(question_label)+1)
  VisualSkin.decorate_button(yes_button,"teal")
  guess_field = field(tr_pair("تخمينك؛ يؤكده المنافس المحدد","Your guess; confirmed by designated opponent"))
- guess_button = button(tr_pair("طلب تأكيد التخمين","Request guess confirmation"),func(): client.send_action("duel_guess",{"guess":guess_field.text}))
+ guess_button = button(tr_pair("هذا تخميني","This is my guess"),func(): client.send_action("duel_guess",{"guess":question_field.text if str(client.state.get("primary_mode","tap"))=="text" else guess_field.text}))
  guess_button.reparent(_reply_row)
  guess_button.text=tr_pair("تأكيد التخمين","Confirm guess")
  guess_button.tooltip_text=tr_pair("أدخل تخمينك ثم اطلب تأكيد المنافس","Enter your guess, then request opponent confirmation")
@@ -453,7 +458,17 @@ func _state(value: Dictionary) -> void:
  _room_started=bool(value.get("started",false))
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).room_snapshot(self,value)
  var ready: bool = not client.capabilities.is_empty()
- var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false)) and not bool(value.get("match_finished",false))
+ var remote_labels: Dictionary=client.capabilities.get("question_labels",{})
+ var saved_column := column
+ column=_preset_body
+ for key in remote_labels:
+  if presets.has(key):continue
+  var fact: String=str(key)
+  presets[fact]=button(str(remote_labels[key].get(language,remote_labels[key].get("en",key))),func():client.send_action("duel_preset",{"question_id":fact}))
+ column=saved_column
+ var active: bool = ready and bool(value.get("started",false)) and not bool(value.get("paused",false)) and not bool(value.get("closed",false)) and not bool(value.get("match_finished",false)) and not bool(value.get("awaiting_next_round",false))
+ _duel_next.visible=bool(value.get("awaiting_next_round",false)) and client.player==int(value.get("current",-1))
+ _duel_next.disabled=bool(value.get("paused",false))
  _match_header.visible=active
  if active:
   if heading.get_parent()!=_match_header: heading.reparent(_match_header)
@@ -520,14 +535,18 @@ func _state(value: Dictionary) -> void:
   _mode_field.set_item_disabled(2,"mixed" not in client.capabilities.get("primary_modes",[]))
   _online_category.disabled=not host
   _mode_field.disabled=not host
-  _propose_button.visible=host
+  _propose_button.hide()
   var confirmations: Array=value.get("confirmed",[])
   var confirmed_count: int=confirmations.count(true)
   var names: Dictionary=client.capabilities.get("picture_difficulties",{}).get(value.get("picture_difficulty","all"),{})
   _agreement_info.text=tr_pair("٢ • اتفاق الغرفة\nالصعوبة: %s • التأكيدات %d/%d","2 • Room agreement\nDifficulty: %s • confirmations %d/%d") % [str(names.get(language,names.get("en",value.get("picture_difficulty","")))),confirmed_count,int(value.get("capacity",2))]
   _accept_button.disabled=client.player<0 or client.player>=confirmations.size() or bool(confirmations[client.player])
-  _start_button.visible=host
+  _accept_button.text=tr_pair("ابدأ عندما يكون الجميع جاهزًا","Start when everyone is ready") if host else tr_pair("جاهز للعب","Ready to play")
+  _start_button.hide()
   _start_button.disabled=confirmed_count!=int(value.get("capacity",2)) or bool(value.get("paused",false)) or int(value.get("joined",0))!=int(value.get("capacity",2))
+  if host and _start_when_ready and not _start_button.disabled and not bool(value.get("started",false)):
+   _start_when_ready=false
+   client.send_action("duel_start")
  _online_rank.disabled=in_room
  join_button.disabled = create_button.disabled
  resume_button.disabled = client.token.is_empty() or ready
@@ -535,12 +554,13 @@ func _state(value: Dictionary) -> void:
  var mode_text: bool=not agreement or mode in ["text","mixed"]
  var mode_tap: bool=not agreement or mode=="tap"
  question_field.visible=mode_text and turn
+ question_field.placeholder_text=tr_pair("اكتب سؤالك أو تخمينك","Type your question or guess") if mode=="text" else tr_pair("اكتب سؤالك","Type your question")
  question_button.visible=mode_text and turn
- _preset_toggle.visible=mode_tap and turn
+ _preset_toggle.hide()
+ _preset_body.visible=mode_tap and turn
  _preset_toggle.icon=VisualSkin.menu_icon("list")
  _preset_toggle.expand_icon=true
  _preset_toggle.add_theme_constant_override("icon_max_width",22)
- if not mode_tap or not turn or _displayed_mode!=mode: _preset_body.hide()
  _displayed_mode=mode
  yes_button.visible=responder and pending.get("kind")=="question"
  no_button.visible=yes_button.visible
@@ -552,7 +572,7 @@ func _state(value: Dictionary) -> void:
  question_button.disabled = not turn
  guess_button.disabled = not turn
  guess_button.visible=turn
- guess_field.visible=turn
+ guess_field.visible=turn and mode!="text"
  pass_button.visible=turn
  pass_button.disabled = not turn
  yes_button.disabled = not responder or pending.get("kind") != "question"
@@ -561,7 +581,9 @@ func _state(value: Dictionary) -> void:
  wrong_button.disabled = correct_button.disabled
  correct_button.visible=not correct_button.disabled
  wrong_button.visible=not wrong_button.disabled
- for key in presets: presets[key].disabled = not turn or key not in value.get("preset_questions",[])
+ for key in presets:
+  presets[key].visible=key in value.get("preset_questions",[])
+  presets[key].disabled=not turn
  chat_button.disabled = not ready or client.code.is_empty() or bool(value.get("closed",false))
  report_button.disabled = chat_button.disabled or not bool(client.capabilities.get("moderation",false))
  block_button.disabled = report_button.disabled
@@ -603,7 +625,7 @@ func _state(value: Dictionary) -> void:
  clock.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _match_controls.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _lobby_controls.visible = client.code.is_empty()
- _invite_box.visible=not client.code.is_empty() and not active and not bool(value.get("closed",false))
+ _invite_box.visible=not client.code.is_empty() and not bool(value.get("started",false)) and not bool(value.get("closed",false))
  _invite_code.text=client.code
  _copy_code_button.disabled=client.code.is_empty()
  if _invite_box.visible:
@@ -621,6 +643,7 @@ func _state(value: Dictionary) -> void:
  if pending.get("mode")=="voice" and pending.get("kind")=="question":question_label.text=tr_pair("سؤال صوتي • أجب بنعم أو لا","Voice question • answer Yes or No")
  var key: String = str(pending.get("question_id",""))
  if FACTS.has(key): question_label.text = str(FACTS[key][0 if language == "ar" else 1])
+ elif remote_labels.has(key):question_label.text=str(remote_labels[key].get(language,remote_labels[key].get("en",key)))
  for i in range(6): images[i].hide(); captions[i].hide()
  for opponent in value.get("opponents",[]):
   var index: int = int(opponent.player)
@@ -701,7 +724,7 @@ func _apply_entry_visibility() -> void:
  var preparation: bool=not _room_started
  _settings_toggle.visible=(in_room and preparation) or (not in_room and _entry_mode=="create")
  if in_room and not preparation:_settings_body.hide()
- if not in_room:_settings_body.visible=_entry_mode=="create"
+ if not in_room and _entry_mode!="create":_settings_body.hide()
  _online_filter_box.visible=not in_room and _entry_mode=="create"
 
 
@@ -731,13 +754,14 @@ func _voice_changed() -> void:
 
 func _create_filtered_room() -> void:
  var rank: String=_online_rank_keys[_online_rank.selected] if _online_rank.selected>=0 else "medium"
- client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value),{"picture_category":"all","picture_difficulty":rank})
+ client.create_room(players_field.get_selected_id(),timer_field.get_selected_id(),int(target_field.value),{"picture_category":"all","picture_difficulty":rank,"manual_rounds":bool(client.capabilities.get("simple_rounds",false))})
 
 func _propose_configuration() -> void:
  var category: String=_online_category_keys[_online_category.selected] if _online_category.selected>=0 else "all"
  client.send_action("duel_propose",{"picture_category":category,"primary_mode":["voice","text","mixed","tap"][_mode_field.selected]})
 
 func _accept_configuration() -> void:
+ _start_when_ready=client.player==int(client.state.get("host",0))
  client.send_action("duel_accept",{"config_revision":int(client.state.get("config_revision",-1)),"picture_difficulty":client.state.get("picture_difficulty","")})
 
 func _copy_room_code() -> void:

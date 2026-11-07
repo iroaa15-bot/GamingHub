@@ -57,7 +57,7 @@ func _ready() -> void:
  for provider in ["google","facebook"]:
   var name_value: String="Google" if provider=="google" else "Facebook"
   var connected: bool=provider in auth.user_profile.get("providers",[])
-  var title_value: String=name_value+_t(" مرتبط"," linked") if connected else (_t("ربط ","Link ") if not auth.user_profile.is_empty() else _t("المتابعة باستخدام ","Continue with "))+name_value
+  var title_value: String=_t("تسجيل الدخول باستخدام ","Sign in with ")+name_value
   var control: Button=_button(title_value,_provider_action.bind(provider))
   control.disabled=true;provider_buttons[provider]=control
  status_label=_text("")
@@ -153,7 +153,7 @@ func _finish(result: Dictionary) -> void:
 
 func _restore() -> void:
  if auth.access_token.is_empty() and auth.refresh_token.is_empty():
-  status_label.text=_t("سجّل الدخول بالطريقة التي ربطت بها حسابك لاستعادة تقدمك.","Sign in with the method linked to your account to restore progress.")
+  status_label.text=_t("سجّل الدخول إلى حسابك لاستعادة تقدمه الخاص.","Sign in to your account to restore its own progress.")
   return
  _busy(true)
  var result: Dictionary=await _restore_progress()

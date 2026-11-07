@@ -43,8 +43,8 @@ func _ready() -> void:
  _xp_bar=ProgressBar.new();_xp_bar.show_percentage=false;_xp_bar.custom_minimum_size.y=12;content.add_child(_xp_bar)
  _stats=Label.new();content.add_child(_stats)
  _refresh_stats()
- status=_label(_t("تقدمك محفوظ على هذا الجهاز. ربط الحساب اختياري.","Your progress is saved on this device. Linking an account is optional."))
- _button(_t("إعدادات الحساب وربطه","Account settings and linking"),_open_account,"gold").visible=not show_friends_first
+ status=_label(_t("كل حساب له تقدمه وصورته ونقاطه المستقلة.","Each account has its own progress, photo and points."))
+ _button(_t("إعدادات الحساب وتسجيل الدخول","Account settings and sign-in"),_open_account,"gold").visible=not show_friends_first
  _button(_t("تغيير الصورة الشخصية من المعرض","Change profile photo from gallery"),_choose_avatar).visible=not show_friends_first
  _button(_t("حفظ تقدمي في الحساب","Back up progress"),_save_online_progress).visible=not show_friends_first
  _button(_t("استعادة تقدم الحساب","Restore account progress"),_restore_online_progress).visible=not show_friends_first

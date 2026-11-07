@@ -53,6 +53,10 @@ jobs:
           grep -q 'PASS: refresh restoration' godot-session.log
           timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/public_account_requests.gd 2>&1 | tee godot-public-account.log
           grep -q PUBLIC_ACCOUNT_REQUESTS_PASS godot-public-account.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/avatar_picker_dispatch.gd 2>&1 | tee godot-avatar-picker.log
+            grep -q AVATAR_PICKER_DISPATCH_PASS godot-avatar-picker.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/account_progress_isolation.gd 2>&1 | tee godot-account-isolation.log
+            grep -q ACCOUNT_PROGRESS_ISOLATION_PASS godot-account-isolation.log
       - name: Verify unified profile and server point display
         shell: bash
         run: |

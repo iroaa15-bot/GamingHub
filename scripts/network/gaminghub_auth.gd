@@ -20,20 +20,43 @@ var active_provider := ""
 var requested_provider := ""
 var requested_action := "login"
 var enter_home_once := false
+var _previous_profile_id := ""
+
+func _progress_file(name: String) -> String:
+ return "user://"+name
 
 func complete_player_sign_in(local_progress: Dictionary) -> void:
  # Runs on the persistent account node after the sign-in screen has closed.
- await sync_progress(local_progress)
  var result: Dictionary=await profile()
  if not result.get("ok",false):return
- var path: String="user://progress_v10_all.json"
+ var account_id: String=str(result.get("data",{}).get("user",{}).get("id",""))
+ if account_id.is_empty():return
+ var owner_path: String=_progress_file("progress_account_owner.txt")
+ var previous_id: String=FileAccess.get_file_as_string(owner_path).strip_edges() if FileAccess.file_exists(owner_path) else _previous_profile_id
+ var same_progress: bool=previous_id.is_empty() or previous_id==account_id
+ if same_progress:
+  await sync_progress(local_progress)
+  result=await profile()
+  if not result.get("ok",false):return
+ var path: String=_progress_file("progress_v10_all.json")
  var latest: Variant=JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else {}
  if not latest is Dictionary:latest={}
+ if not same_progress:
+  # Retain the former account's offline snapshot without copying it into the
+  # new account. Settings stay on the device; progress is restored per identity.
+  var backup_path: String=_progress_file("account_progress_backups.json")
+  var backups: Variant=JSON.parse_string(FileAccess.get_file_as_string(backup_path)) if FileAccess.file_exists(backup_path) else {}
+  if not backups is Dictionary:backups={}
+  backups[previous_id]=local_progress.duplicate(true)
+  var backup_file:=FileAccess.open(backup_path,FileAccess.WRITE)
+  if backup_file!=null:backup_file.store_string(JSON.stringify(backups));backup_file.close()
  var saved: Dictionary=result.get("data",{}).get("user",{}).get("local_progress",{})
  for key in ["xp","wins","matches","picture_wins"]:
-  latest[key]=maxi(int(latest.get(key,0)),maxi(int(local_progress.get(key,0)),int(saved.get(key,0))))
+  latest[key]=maxi(int(latest.get(key,0)),maxi(int(local_progress.get(key,0)),int(saved.get(key,0)))) if same_progress else int(saved.get(key,0))
  var file:=FileAccess.open(path,FileAccess.WRITE)
  if file!=null:file.store_string(JSON.stringify(latest));file.close()
+ var owner_file:=FileAccess.open(owner_path,FileAccess.WRITE)
+ if owner_file!=null:owner_file.store_string(account_id);owner_file.close()
  progress_restored.emit(latest)
 var user_profile: Dictionary = {}
 
@@ -67,6 +90,7 @@ func _restore_session() -> void:
     if not refresh_token.is_empty(): await refresh_session()
 
 func _accept_session(data: Dictionary) -> void:
+    _previous_profile_id=str(user_profile.get("id",""))
     refresh_token = str(data.get("refresh_token", ""))
     refresh_after = Time.get_ticks_msec() + 840000
     # Persist before accepting the new token. No password or provider token is stored.
@@ -198,7 +222,9 @@ func profile() -> Dictionary:
     return response
 
 func choose_avatar() -> bool:
-    if avatar_busy or access_token.is_empty() or secure_store==null or not secure_store.has_method("pickAvatar"):return false
+    # Android JNISingleton does not expose its Java method map through has_method.
+    # The declared result signal identifies the packaged picker implementation.
+    if avatar_busy or access_token.is_empty() or secure_store==null or not secure_store.has_signal("avatar_result"):return false
     avatar_busy=true
     secure_store.call_deferred("pickAvatar")
     return true
@@ -214,6 +240,9 @@ func _on_avatar_result(image: String,error: String) -> void:
     avatar_finished.emit(bool(response.get("ok",false)),"" if response.get("ok",false) else "upload_failed")
 
 func sync_progress(local_progress: Dictionary) -> Dictionary:
+    var owner_path: String=_progress_file("progress_account_owner.txt")
+    if FileAccess.file_exists(owner_path) and FileAccess.get_file_as_string(owner_path).strip_edges()!=str(user_profile.get("id","")):
+        return {"ok":false,"status":409,"error":"Progress belongs to another account"}
     var snapshot: Dictionary = {}
     for key in ["xp", "wins", "matches", "picture_wins"]:
         snapshot[key] = clampi(int(local_progress.get(key, 0)), 0, 1000000000)

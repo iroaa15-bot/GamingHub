@@ -15,11 +15,12 @@ from websockets.asyncio.server import serve
 from websockets.exceptions import ConnectionClosed
 import server as legacy
 from photo_duel_staging import StagingHub
+import duel_questions
 
 VERSION = 3
 TIMERS = (0, 10, 20, 30, 60)
 RESUME_SECONDS = 90
-FACTS = {"living", "animal", "celebrity", "edible", "household", "natural", "place", "large"}
+FACTS = {"living", "animal", "celebrity", "edible", "household", "natural", "place", "large"} | set(duel_questions.LABELS)
 
 class ProtocolError(ValueError):
     pass
@@ -99,7 +100,7 @@ class Room:
             "revision":self.revision, "pending":self.pending,
             "opponents":[{"player":i,"image":self.catalog[self.images[i]]["image"]} for i in range(self.capacity) if i != player and i < self.joined],
             "chat":list(self.chat), "history":list(self.history),
-            "preset_questions":sorted(k for k,v in self.catalog[self.images[player]]["facts"].items() if k in FACTS and type(v) is bool)}
+            "preset_questions":duel_questions.available(self, player)}
 
 class DuelHub:
     def __init__(self):
@@ -222,10 +223,15 @@ class DuelHub:
                 room.pending={"kind":"guess","text":text(msg.get("guess")),"asker":player,"responder":room.responder}
             else:
                 mode="preset" if action=="duel_preset" else "text"
-                key=msg.get("question_id") if mode=="preset" else None
-                if mode=="preset" and (not isinstance(key,str) or key not in FACTS or type(self.catalog[room.images[player]]["facts"].get(key)) is not bool):
+                question_text = text(msg.get('text')) if mode=='text' else ''
+                key=msg.get("question_id") if mode=="preset" else next((key for key, labels in duel_questions.LABELS.items() if duel_questions.normalize(question_text) in [duel_questions.normalize(label) for label in labels.values()]), None)
+                if mode=='text' and duel_questions.normalize(question_text) in duel_questions.state(room, player)['texts']:
+                    raise ProtocolError('This question was already answered for this picture')
+                if key and key in duel_questions.state(room, player)['answers']:
+                    raise ProtocolError('This question was already answered for this picture')
+                if mode=="preset" and (not isinstance(key,str) or key not in FACTS or key not in duel_questions.available(room, player)):
                     raise ProtocolError("Unknown preset question")
-                room.pending={"kind":"question","mode":mode,"question_id":key,"text":text(msg.get("text")) if mode=="text" else "","asker":player,"responder":room.responder}
+                room.pending={"kind":"question","mode":mode,"question_id":key,"text":question_text,"asker":player,"responder":room.responder}
         elif action in ("duel_reply","duel_confirm"):
             pending=room.pending
             field="answer" if action=="duel_reply" else "correct"
@@ -238,6 +244,7 @@ class DuelHub:
                 if answer != actual:
                     raise ProtocolError("Preset reply contradicts the photo fact")
             room.history.append({"kind":"reply" if expected=="question" else "confirmation","player":player,"asker":room.current,"text":pending["text"],"question_id":pending.get("question_id"),"answer":answer})
+            if expected=='question': duel_questions.remember(room, room.current, pending, answer)
             if expected=="guess" and answer:
                 room.scores[room.current]+=1
                 if room.scores[room.current]>=room.target:

@@ -8,11 +8,12 @@ class AgreementHub(FilterHub):
  async def send(self,ws,message):
   message=message.copy()
   if message.get('type')=='duel_capabilities':
-   message.update(room_agreement=True,primary_modes=['voice','text','mixed','tap'] if getattr(self,'membership_voice',False) else ['text','tap'],voice=bool(getattr(self,'membership_voice',False)),voice_room_lifetime=bool(getattr(self,'membership_voice',False)))
+   message.update(room_agreement=True,simple_rounds=True,primary_modes=['voice','text','mixed','tap'] if getattr(self,'membership_voice',False) else ['text','tap'],voice=bool(getattr(self,'membership_voice',False)),voice_room_lifetime=bool(getattr(self,'membership_voice',False)))
   if message.get('type')=='duel_state' and ws in self.bindings:
    room=self.rooms.get(self.bindings[ws][0])
    if getattr(room,'agreement',False):
     message.update(room_agreement=True,config_revision=room.config_revision,primary_mode=room.primary_mode,confirmed=room.confirmed.copy(),host=0,match_finished=bool(getattr(room,'match_finished',False)))
+    message['awaiting_next_round']=bool(getattr(room,'awaiting_next_round',False))
     if not room.started: message.update(opponents=[],preset_questions=[])
   await super().send(ws,message)
  def pool(self,category,difficulty):
@@ -26,6 +27,9 @@ class AgreementHub(FilterHub):
    if difficulty not in ('easy','medium','hard'):raise ProtocolError('Choose one difficulty before creating a room')
    await super().handle(ws,{**msg,'picture_category':'all'})
    room,_=self.binding(ws);room.agreement=True;room.config_revision=1;room.primary_mode='tap';room.confirmed=[False]*room.capacity
+   room.manual_rounds=msg.get('manual_rounds') is True
+   room.awaiting_next_round=False
+   room.used_images=set(room.images)
    return await self.publish(room)
   if action=='duel_join' and isinstance(msg.get('code'),str):
    room=self.rooms.get(msg['code'])
@@ -57,9 +61,18 @@ class AgreementHub(FilterHub):
   if action=='duel_start':
    if player!=0 or room.started or room.paused or room.joined!=room.capacity or not all(room.confirmed) or not all(room.peers):raise ProtocolError('All configured players must confirm and be connected')
    if len(room.catalog)<room.capacity:raise ProtocolError('Not enough pictures')
+   room.used_images=set(room.images)
    room.started=True;room.arm()
    return await self.publish(room)
   if room.started:
+   if getattr(room,'awaiting_next_round',False):
+    if action!='duel_next_round' or room.paused or player!=room.current or type(msg.get('round')) is not int or msg['round']!=room.round:
+     raise ProtocolError('Wait for the winner to continue to the next round')
+    choices=[key for key in room.catalog if key not in room.used_images]
+    if not choices:raise ProtocolError('No unused pictures remain; start a new match')
+    room.images[room.current]=secrets.choice(choices);room.used_images.add(room.images[room.current])
+    room.round+=1;room.awaiting_next_round=False;room.advance('next_round')
+    return await self.publish(room)
    if room.expire():await self.publish(room)
    if action=='duel_confirm':
     pending=room.pending
@@ -73,8 +86,11 @@ class AgreementHub(FilterHub):
       if getattr(self,'membership_voice',False):room.match_finished=True;room.deadline=None;room.remaining=None
       else:room.closed=True;room.tokens=['']*room.capacity
      else:
-      room.images[room.current]=secrets.choice([key for key in room.catalog if key not in room.images]);room.round+=1
-    if not room.closed and not getattr(room,'match_finished',False):room.advance('confirmed')
+      if getattr(room,'manual_rounds',False):
+       room.awaiting_next_round=True;room.deadline=None;room.remaining=None;room.pending=None
+      else:
+       room.images[room.current]=secrets.choice([key for key in room.catalog if key not in room.images]);room.round+=1
+    if not room.closed and not getattr(room,'match_finished',False) and not getattr(room,'awaiting_next_round',False):room.advance('confirmed')
     else:room.pending=None
     await self.publish(room)
     if room.closed:

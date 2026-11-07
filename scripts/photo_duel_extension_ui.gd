@@ -418,6 +418,7 @@ func _ready() -> void:
  client.protocol_ready.connect(_room_protocol_ready)
  client.event_received.connect(func(message: Dictionary):
   if message.get("type") == "duel_error":
+   if message.get("scope")=="voice":return # Voice adapter owns media-specific status.
    _pending_room_action=""
    status.text = _connection_message(str(message.get("message","")))
   elif message.get("type") == "duel_reported": status.text = tr_pair("حُفظ البلاغ: ","Report saved: ")+str(message.get("report_id",""))

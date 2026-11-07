@@ -86,7 +86,7 @@ jobs:
           timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/button_inventory.gd 2>&1 | tee godot-button-inventory.log
           grep -q 'enabled_unwired=0' godot-button-inventory.log
             timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/voice_continuity.gd 2>&1 | tee godot-voice-continuity.log
-            grep -q 'VOICE_CONTINUITY continuous=true text_stopped=true' godot-voice-continuity.log
+            grep -q 'VOICE_CONTINUITY continuous=true text_stopped=true bounded=true' godot-voice-continuity.log
             timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/guess_and_membership.gd 2>&1 | tee godot-guess-membership.log
             grep -q GUESS_AND_MEMBERSHIP_PASS godot-guess-membership.log
       - name: Verify challenge audio controls and Android touch ordering

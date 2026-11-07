@@ -20,8 +20,15 @@ func run() -> void:
    snapshot.started=true;snapshot.round=round_index;snapshot.current=round_index%2;snapshot.scores=[round_index,0]
    adapter._state(snapshot)
    continuous=continuous and bridge.active and adapter.requested and bridge.stops==initial_stops
+ adapter._event({"type":"duel_error","scope":"voice","message":"Request rate limit"})
+ adapter._event({"type":"duel_error","scope":"voice","message":"Stale audio frame"})
+ continuous=continuous and bridge.active and adapter.requested and adapter._congestion_events==2
+ var admitted: int=0
+ for index in range(100):
+  if adapter._admit_frame(0):admitted+=1
+ var bounded: bool=admitted==55 and not adapter._admit_frame(500) and adapter._admit_frame(1001)
  snapshot.primary_mode="text";adapter._state(snapshot)
  var text_stopped: bool=not bridge.active and not adapter.requested
  adapter.queue_free();connection.queue_free();bridge.queue_free();await process_frame
- print("VOICE_CONTINUITY continuous=",continuous," text_stopped=",text_stopped)
- quit(0 if continuous and text_stopped else 1)
+ print("VOICE_CONTINUITY continuous=",continuous," text_stopped=",text_stopped," bounded=",bounded)
+ quit(0 if continuous and text_stopped and bounded else 1)

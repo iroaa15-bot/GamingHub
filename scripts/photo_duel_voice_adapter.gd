@@ -15,6 +15,9 @@ var last_status := ""
 var last_failure := ""
 var _health_elapsed := 0.0
 var _handling_failure := false
+var _sent_frame_times: Array[int] = []
+var _send_rate_drops := 0
+var _congestion_events := 0
 func attach(connection: Node) -> void:
  client = connection
  bridge = load("res://scripts/android_voice_integration_bridge.gd").new()
@@ -69,6 +72,7 @@ func _state(snapshot: Dictionary) -> void:
  var next_epoch: int=int(voice.get("epoch",-1))
  if next_epoch!=epoch:
   bridge.stop_voice()
+  _sent_frame_times.clear()
   sequence=0
   epoch=next_epoch
  if not ready:
@@ -85,9 +89,21 @@ func set_muted(value: bool) -> void:
  muted=value
  changed.emit()
 
+func _admit_frame(now: int) -> bool:
+ while not _sent_frame_times.is_empty() and now-_sent_frame_times[0]>1000:
+  _sent_frame_times.pop_front()
+ # 20ms PCM is normally 50 frames/s. Bound bursts without queueing old speech
+ # or relaxing the service's separate 80 frames/s media limit.
+ if _sent_frame_times.size()>=55:
+  _send_rate_drops+=1
+  return false
+ _sent_frame_times.append(now)
+ return true
+
 func _outgoing(pcm: String) -> void:
  if not requested or epoch<0 or not bridge.active: return
  if client.socket.get_current_outbound_buffered_amount()>32768: return
+ if not _admit_frame(Time.get_ticks_msec()):return
  sequence+=1
  var payload: String=pcm
  if muted:
@@ -101,6 +117,11 @@ func _event(message: Dictionary) -> void:
   # Keep the user's existing call intent; do not send more frames/opt-outs into
   # a socket the server has just declared unbound.
   if str(message.get("message","")).to_lower()=="not in a room":return
+  if str(message.get("message","")) in ["Request rate limit","Stale audio frame"]:
+   # These reject individual media frames, not microphone consent or the call.
+   # TCP/mobile jitter must not turn a dropped frame into a permanent hang-up.
+   _congestion_events+=1
+   return
   _failure(str(message.get("message","Voice transport failed")))
   return
  if message.get("type")=="duel_voice_audio" and requested and int(message.get("epoch",-2))==epoch:
@@ -113,6 +134,7 @@ func _stop(preserve_intent: bool=false) -> void:
  _sent_opt_in=false
  epoch=-1
  sequence=0
+ _sent_frame_times.clear()
  if is_instance_valid(bridge): bridge.set_consent(false,false)
  changed.emit()
 func _exit_tree() -> void:
@@ -141,4 +163,8 @@ func _process(delta: float) -> void:
  _health_elapsed+=delta
  if _health_elapsed<5.0:return
  _health_elapsed=0.0
- if bridge.has_method("voice_health_snapshot"):print("GH_VOICE_HEALTH ",JSON.stringify(bridge.voice_health_snapshot()))
+ if bridge.has_method("voice_health_snapshot"):
+  var health: Dictionary=bridge.voice_health_snapshot()
+  health["send_rate_drops"]=_send_rate_drops
+  health["server_congestion_events"]=_congestion_events
+  print("GH_VOICE_HEALTH ",JSON.stringify(health))

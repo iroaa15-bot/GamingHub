@@ -17,6 +17,9 @@ func run() -> void:
  root.get_node("RoomAudioPolicy").set_music_enabled(false)
  root.get_node("RoomAudioPolicy").set_effects_enabled(false)
  var ui=load("res://scripts/photo_duel_extension_ui.gd").new();root.add_child(ui)
+ var original_status: String=ui.status.text
+ ui.client._received({"type":"duel_error","scope":"voice","message":"Request rate limit"})
+ assert(ui.status.text==original_status)
  var client:=Capture.new();root.add_child(client)
  ui.client.queue_free();ui.client=client
  ui.question_field.text="   ";ui._submit_guess()

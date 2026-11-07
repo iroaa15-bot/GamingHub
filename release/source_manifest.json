@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 1636,
+  "file_count": 1638,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "776c5296b8be009dc0e5cbb771c7ee310abe745bb0f4ef9e9a550746a2bef6ac",
@@ -1312,6 +1312,7 @@
     "scripts/approved_content.gd": "4ca24aa000e1abede211ee6c50b69ae769cf8a99be468e36d75949240ca4a009",
     "scripts/approved_content.gd.uid": "aba039d96fbb529937e290790ccc3fa405f036ee30a0f95a0813edc33e8e72a6",
     "scripts/avatar_circle.gdshader": "2c3ee85ed75ea4ec9ebd66b032298e9d21dacb0117a120a7e00d29823976ce51",
+    "scripts/avatar_circle.gdshader.uid": "6270f79e07a2a2bcd1e873e518b5377e547b0ba752a32503cbcec72b1808417a",
     "scripts/celebration_fx.gd": "ee41b91f461fe95e711770f1320d6585fe5970f25361157389287984ff849a1c",
     "scripts/celebration_fx.gd.uid": "6408e2ec9e8591fc36c0df2a557480fa364d82f820e976a5fe2587383161ab88",
     "scripts/daily_ai.gd": "b680b9bbbf7ccd0bf85cb7065cfd060946b27fecefd94634d9222299518e6151",
@@ -1500,6 +1501,7 @@
     "tests/player_account_godot.gd": "37abb03a74e989311739895d4ba8285f6be239e264adddae078615cbc51dbab9",
     "tests/player_account_godot.gd.uid": "144e6640628a519232d2011b24ac942c592327725ce3410a9fcd289ee98dca9e",
     "tests/player_cards_layout.gd": "c595caf683715d1306281df48de9758a9c7fb2508ac892d0243e56b1d9a729e7",
+    "tests/player_cards_layout.gd.uid": "bedb54a22f2b84eea9b2d81fb8bc28a36b91b4d05d0723636a4af838f7fa1183",
     "tests/player_progress_godot.gd": "a9022b50a3f05d88d581c0532b562b1c97ea2cdc3d3f0e40659ddb502d18bd94",
     "tests/player_progress_godot.gd.uid": "9ac483c63238fa3d42434f4480cc51d21e96e2103b67ed7512d5740ff51a09c0",
     "tests/player_safe_account.gd": "198863ed4ad849639fea88fcf5372e8ddf995f51bdd0d650482bb260e54891e8",

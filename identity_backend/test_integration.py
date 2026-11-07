@@ -74,6 +74,35 @@ def test_social_guest_link_preserves_id_points_and_requires_proof(monkeypatch):
     assert returned.status_code==200
     assert client.get('/api/me',headers={'Authorization':'Bearer '+returned.json()['access_token']}).json()['user']['id']==uid
 
+def test_social_accounts_with_same_email_stay_independent(monkeypatch):
+    import uuid
+    from identity_backend import provider_tokens
+    initialize()
+    marker=str(uuid.uuid4())
+    monkeypatch.setenv('GAMINGHUB_GOOGLE_WEB_CLIENT_ID','test-client')
+    monkeypatch.setenv('GAMINGHUB_FACEBOOK_APP_ID','test-app')
+    monkeypatch.setenv('GAMINGHUB_FACEBOOK_APP_SECRET','test-secret')
+    monkeypatch.setenv('GAMINGHUB_META_GRAPH_VERSION','v22.0')
+    for provider in ['google','facebook']:
+        monkeypatch.setattr(provider_tokens,provider+'_identity',lambda *args:
+            provider_tokens.ProviderIdentity(marker,'Independent',marker+'@example.test'))
+    client=TestClient(app)
+    def sign_in(provider,headers):
+        nonce=client.post('/api/auth/challenge',json={'provider':provider},headers=headers).json()['nonce']
+        result=client.post('/api/auth/social',json={'provider':provider,'nonce':nonce,'token':'fake-provider-token-for-db-test'},headers=headers)
+        assert result.status_code==200,result.text
+        header={'Authorization':'Bearer '+result.json()['access_token']}
+        return header,client.get('/api/me',headers=header).json()['user']
+    first_header,first=sign_in('google',{})
+    with psycopg.connect(os.environ['GAMINGHUB_DATABASE_URL']) as db:
+        db.execute('UPDATE identity_users SET points=37 WHERE id=%s',(first['id'],))
+    second_header,second=sign_in('facebook',first_header)
+    assert second['id']!=first['id'] and second['points']==0
+    assert second['providers']==['facebook']
+    _,again=sign_in('google',second_header)
+    assert again['id']==first['id'] and again['points']==37
+    assert again['providers']==['google']
+
 def test_account_lifecycle():
     initialize()
     client = TestClient(app)

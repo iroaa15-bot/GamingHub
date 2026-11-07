@@ -21,17 +21,13 @@ func run() -> void:
  valid=valid and guess_buttons==1
  main.show_more_games()
  valid=valid and main.root.get_node("UnifiedGameCatalog").get_child_count()+main.root.get_node("MoreOriginalGames").get_child_count()==ids.size()
- main.show_modes(0)
- var daily=0
- for control in main.root.find_children("*","Button",true,false):
-  if control.text=="ألغاز الصور اليومية": daily+=1
- valid=valid and daily==1
- main.show_modes(5)
- var championship=0
- for control in main.root.find_children("*","Button",true,false):
-  if control.text.contains("بطولة الأبطال"): championship+=1
- valid=valid and championship==1
- print("UNIFIED_CATALOG_UI ",valid," — each original game once; mode routes preserved; no backend/old tests rerun")
+ for game in range(main.GAMES.size()):
+  main.show_modes(game)
+  var actions=[]
+  for control in main.root.find_children("*","Button",true,false):
+   if control.has_meta("mode_action"):actions.append(control.get_meta("mode_action"))
+  valid=valid and actions.size()==3 and actions.has("friends") and actions.has("offline") and actions.has("games")
+ print("UNIFIED_CATALOG_UI ",valid," — original catalog; exactly three game routes")
  main.queue_free()
  await process_frame
  quit(0 if valid else 1)

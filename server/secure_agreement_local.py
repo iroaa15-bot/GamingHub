@@ -33,7 +33,7 @@ class SecureAgreementHub(SecureDuelHub,AgreementHub):
    if msg.get('protocol')!=VERSION:raise ProtocolError('Unsupported protocol')
    room,player=self.binding(ws)
    if room.paused:raise ProtocolError('Voice paused until room reconnects')
-   if room.primary_mode!='voice':raise ProtocolError('Voice is not the agreed primary mode')
+   if room.primary_mode not in ('voice','mixed'):raise ProtocolError('Voice is not the agreed primary mode')
    room.activity=time.monotonic()
    self.voice_state(room,player);value=self.voice[room.code]
    if kind=='duel_voice_state':
@@ -54,7 +54,7 @@ class SecureAgreementHub(SecureDuelHub,AgreementHub):
    return
   prior_mode=getattr(room,'primary_mode',None)
   result=await super().handle(ws,msg)
-  if room and prior_mode=='voice' and room.primary_mode!='voice':
+  if room and prior_mode in ('voice','mixed') and room.primary_mode not in ('voice','mixed'):
    self.reset_voice(room);await self.publish(room)
   return result
  async def _membership_presence(self):

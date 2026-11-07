@@ -12,7 +12,7 @@ func run() -> void:
  main.ui_tr=JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"));main.load_catalog();main.age_group="18plus";main.reduced_motion=true
  main.show_player_account();await process_frame
  var account=main.root.get_children().filter(func(n):return n.get_script()==load("res://scripts/player_account_ui.gd"))[0]
- var valid: bool=not account._auth_group.visible and not account.admin.visible
+ var valid: bool=not account.get_property_list().any(func(p: Dictionary):return p.name in ["admin","_auth_group"])
  valid=valid and account._profile_name.text=="ضيف" and int(account._xp_bar.value)==int(main.profile.get("xp",0))%100
  await snap("premium-profile")
  account._friends_group.show();await snap("premium-friends-empty")

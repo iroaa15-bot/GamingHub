@@ -30,6 +30,8 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 		return false
 	players = player_ids.duplicate()
 	active_category = ""
+	turn_direction = 1
+	free_skips.clear()
 	scores.clear()
 	used_ids.clear()
 	for id in players:
@@ -122,19 +124,37 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	votes[voter] = choice
 	return true
 
-func apply_power(actor: String) -> Dictionary:
+func apply_power(actor: String, target: String = "") -> Dictionary:
 	if current_card.is_empty() or resolved or power_applied or str(current_card.get("category", "")) != "table_flip":
 		return {}
 	if actor != players[active_player_index]:
 		return {}
 	var card_id := str(current_card.get("id", ""))
-	# Only implement effects with a fully specified meaning within this standalone game.
-	# All other cards are rejected instead of silently claiming a power happened.
-	if card_id != "qs_power_001" or players.size() < 3:
-		return {}
+	var effect := {}
+	match card_id:
+		"qs_power_001":
+			if players.size() < 3:
+				return {}
+			effect = {"type": "swap_next_turns"}
+		"qs_power_012", "qs_power_014":
+			effect = {"type": "reverse_direction"}
+		"qs_power_011", "qs_power_015":
+			if not players.has(target):
+				return {}
+			effect = {"type": "grant_free_skip", "target": target}
+		_:
+			# Unsupported cross-game powers must never be silently consumed.
+			return {}
 	power_applied = true
-	power_effect = {"type": "swap_next_turns", "card_id": card_id}
+	power_effect = effect.duplicate(true)
+	power_effect["card_id"] = card_id
 	return power_effect.duplicate(true)
+
+func consume_free_skip(player: String) -> bool:
+	if not players.has(player) or int(free_skips.get(player, 0)) < 1:
+		return false
+	free_skips[player] = int(free_skips[player]) - 1
+	return true
 
 func resolve_round(participated: bool = true, timeout: bool = false) -> Dictionary:
 	if current_card.is_empty() or resolved:
@@ -189,9 +209,14 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 	var applied_power := power_effect.duplicate(true)
 	resolved = true
 	round_index += 1
-	active_player_index = (active_player_index + 1) % players.size()
+	if applied_power.get("type", "") == "reverse_direction":
+		turn_direction *= -1
+	if applied_power.get("type", "") == "grant_free_skip":
+		var target := str(applied_power.get("target", ""))
+		free_skips[target] = int(free_skips.get(target, 0)) + 1
+	active_player_index = posmod(active_player_index + turn_direction, players.size())
 	if applied_power.get("type", "") == "swap_next_turns":
-		active_player_index = (active_player_index + 1) % players.size()
+		active_player_index = posmod(active_player_index + turn_direction, players.size())
 	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit, "power": applied_power}
 	current_card.clear()
 	story_committed = false

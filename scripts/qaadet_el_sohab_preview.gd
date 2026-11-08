@@ -28,6 +28,7 @@ var story_truth_selector: OptionButton
 var vote_buttons: HBoxContainer
 var action_buttons: HBoxContainer
 var cards: Array[Dictionary] = []
+var finished_round := false
 
 func _ready() -> void:
 	selected_category = fixed_category
@@ -101,6 +102,7 @@ func _build_ui() -> void:
 	layout.add_child(action_buttons)
 	_add_action("تخطي / إنهاء الجولة", _finish)
 	_add_action("كارت جديد", _draw)
+	_add_action("رجوع لاختيار الوضع", _back_to_mode)
 
 func _category_changed(index: int) -> void:
 	selected_category = fixed_category
@@ -113,12 +115,21 @@ func _add_action(label_text: String, handler: Callable) -> void:
 	action_buttons.add_child(button)
 
 func _draw() -> void:
+	if not engine.current_card.is_empty() and not engine.resolved:
+		_show_current_card()
+		return
 	if engine.round_index >= engine.round_limit:
 		card_text.text = "انتهت المعاينة!"
 		return
 	var card: Dictionary = engine.draw_next(selected_category)
 	if card.is_empty():
 		status_text.text = "لا توجد كروت متاحة لهذه الفئة، أو الجولة لم تنتهِ."
+		return
+	_show_current_card()
+
+func _show_current_card() -> void:
+	var card: Dictionary = engine.current_card
+	if card.is_empty():
 		return
 	card_text.text = str(card.get("text_ar", ""))
 	story_truth_selector.visible = str(card.get("category", "")) == "truth_or_fiction"
@@ -152,6 +163,19 @@ func _add_vote(label_text: String, value: Variant) -> void:
 			status_text.text = "التصويت مرفوض: راجع الدور أو التصويت السابق أو اختيار النفس."
 	)
 	vote_buttons.add_child(button)
+
+func _back_to_mode() -> void:
+	var scene_by_category := {
+		"open_heart": "OpenHeartMode",
+		"act_it": "ActItMode",
+		"who_among_us": "WhoAmongUsMode",
+		"show_skill": "ShowSkillMode",
+		"truth_or_fiction": "TruthOrFictionMode",
+		"table_flip": "TableFlipMode"
+	}
+	var scene_name := str(scene_by_category.get(fixed_category, ""))
+	if not scene_name.is_empty():
+		get_tree().change_scene_to_file("res://scenes/" + scene_name + ".tscn")
 
 func _finish() -> void:
 	if engine.current_card.is_empty():

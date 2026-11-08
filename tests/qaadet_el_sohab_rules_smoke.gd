@@ -29,6 +29,11 @@ func _initialize() -> void:
 	assert(e.submit_vote("b", "c"))
 	assert(e.resolve_round()["awards"]["c"] == 10)
 	assert(e.draw_next("truth_or_fiction")["id"] == "d")
+	assert(not e.submit_vote("b", false)) # Must commit truth first
+	assert(not e.resolve_round().has("awards"))
+	assert(not e.commit_story("b", true)) # Only actor may commit
+	assert(e.commit_story("a", true))
+	assert(not e.commit_story("a", false)) # Commitment immutable
 	assert(e.submit_vote("b", false))
 	assert(e.submit_vote("c", false))
 	var result: Dictionary = e.resolve_round(true)

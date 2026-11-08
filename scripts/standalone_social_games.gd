@@ -8,10 +8,12 @@ const GAMES := [
     {"title": "صدق ولا تأليف؟", "scene": "res://scenes/TruthOrFiction.tscn"},
     {"title": "اقلب الترابيزة", "scene": "res://scenes/TableFlip.tscn"}
 ]
+@export_range(-1, 5) var initial_game := -1
 var selected_game := -1
 var layout: VBoxContainer
 
 func _ready() -> void:
+    selected_game = initial_game
     var scroll := ScrollContainer.new()
     scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(scroll)
@@ -61,5 +63,8 @@ func _offline() -> void:
     get_tree().change_scene_to_file(GAMES[selected_game]["scene"])
 
 func _back() -> void:
+    if initial_game >= 0:
+        get_tree().change_scene_to_file("res://scenes/Main.tscn")
+        return
     selected_game = -1
     _render()

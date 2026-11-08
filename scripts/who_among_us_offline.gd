@@ -80,7 +80,7 @@ func _button(value: String, callback: Callable) -> void:
 func _setup_screen() -> void:
 	match_started = false
 	_screen("مين فينا؟")
-	_label("كل لاعب يصوّت سرًا لشخص غير نفسه. صاحب الدور لا يصوّت. صاحب أعلى أصوات منفردًا يحصل على 10 نقاط، والتعادل بلا نقاط.", 19)
+	_label("كل لاعب يصوّت لشخص غير نفسه، بما فيهم صاحب الدور. صاحب أعلى أصوات منفردًا يحصل على 10 نقاط، والتعادل بلا نقاط.", 19)
 	names_input = LineEdit.new()
 	names_input.text = "لاعب 1، لاعب 2، لاعب 3"
 	panel.add_child(names_input)
@@ -149,7 +149,7 @@ func _vote_screen() -> void:
 	_label(str(engine.current_card.get("text_ar", "")), 24)
 	_label("اختار المصوّت ثم الشخص اللي هيصوّت له. التصويت السابق مش بيظهر.", 18)
 	for voter in engine.players:
-		if voter == engine.players[engine.active_player_index] or engine.votes.has(voter):
+		if engine.votes.has(voter):
 			continue
 		_label("دور التصويت: %s" % voter, 20)
 		for candidate in engine.players:
@@ -163,7 +163,7 @@ func _cast(voter: String, candidate: String) -> void:
 	if not engine.submit_vote(voter, candidate):
 		status.text = "التصويت غير صالح."
 		return
-	if engine.votes.size() == engine.players.size() - 1:
+	if engine.votes.size() == engine.players.size():
 		_resolve(false)
 	else:
 		_vote_screen()

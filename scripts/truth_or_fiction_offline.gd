@@ -167,7 +167,7 @@ func _vote() -> void:
 		_button("تأليف", _cast.bind(voter, false))
 		break
 	_button("إنهاء التخمين بالأصوات الحالية", _resolve.bind(true))
-	_button("النتائج الحالية", _results)
+	_label("النتائج هتظهر بعد انتهاء التصويت؛ علشان محدش يشوف نقاط الآخرين أثناء تمرير الجهاز.", 16)
 
 func _cast(voter: String, guess: bool) -> void:
 	if not engine.submit_vote(voter, guess):

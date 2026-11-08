@@ -191,8 +191,7 @@ func _show() -> void:
 	_screen("اقلب الترابيزة — الجولة %d/%d" % [round+1,max_rounds])
 	_label("الدور على: %s" % order[current_index])
 	_label(str(current.get("text_ar", "")), 26)
-	if not current.has("power_type"):
-		_label("تكييف أوفلاين: " + _effect_explanation(_type()), 17)
+	_label("التأثير الفعلي: " + _effect_explanation(_type()), 17)
 	var kind := _type()
 	if ["bonus","steal","skip"].has(kind):
 		target_input = OptionButton.new()
@@ -206,7 +205,7 @@ func _show() -> void:
 func _effect_explanation(kind: String) -> String:
 	match kind:
 		"reverse": return "اعكس اتجاه الأدوار"
-		"swap": return "بدّل مكانك مع اللاعب التالي في ترتيب الأدوار"
+		"swap": return "بدّل ترتيب اللاعبين التاليين من غير تكرار دورك"
 		"bonus": return "امنح لاعبًا 5 نقاط"
 		"steal": return "انقل حتى 5 نقاط من لاعب إليك"
 		"shield": return "احصل على درع ضد خصم النقاط"
@@ -234,10 +233,13 @@ func _apply() -> void:
 		"reverse":
 			direction *= -1
 		"swap":
-			var next := posmod(current_index + direction, order.size())
-			var tmp := order[current_index]
-			order[current_index] = order[next]
-			order[next] = tmp
+			# Swap the two upcoming seats; the acting player must not get an extra turn.
+			if order.size() >= 3:
+				var first := posmod(current_index + direction, order.size())
+				var second := posmod(current_index + 2 * direction, order.size())
+				var tmp := order[first]
+				order[first] = order[second]
+				order[second] = tmp
 		"bonus":
 			_grant(target, 5)
 		"steal":

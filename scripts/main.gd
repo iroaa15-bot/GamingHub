@@ -1869,6 +1869,7 @@ func show_more_games() -> void:
  var favorites: Array = profile.get("favorites", [])
  for i in range(GAMES.size()):
   grid.add_child(make_game_tile(i, previews[i], i in favorites))
+ button(tr_ui("🎴 الألعاب الاجتماعية • معانا ولا علينا", "🎴 SOCIAL GAMES • MAANA WALA ALAYNA"), func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"), GOLD)
  button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
  button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
  button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)

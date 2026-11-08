@@ -16,6 +16,8 @@ var round_limit := 10
 var active_player_index := 0
 var votes: Dictionary = {}
 var resolved := false
+var story_committed := false
+var committed_story_truth := false
 var rng := RandomNumberGenerator.new()
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
@@ -43,6 +45,7 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	current_card.clear()
 	votes.clear()
 	resolved = false
+	story_committed = false
 	if seed_value == 0:
 		rng.randomize()
 	else:
@@ -68,7 +71,17 @@ func draw_next(category: String = "") -> Dictionary:
 	used_ids[current_card["id"]] = true
 	votes.clear()
 	resolved = false
+	story_committed = false
 	return current_card.duplicate(true)
+
+func commit_story(actor: String, is_true: bool) -> bool:
+	if current_card.is_empty() or resolved or story_committed or str(current_card.get("category", "")) != "truth_or_fiction":
+		return false
+	if actor != players[active_player_index]:
+		return false
+	committed_story_truth = is_true
+	story_committed = true
+	return true
 
 func submit_vote(voter: String, choice: Variant) -> bool:
 	if current_card.is_empty() or resolved or not players.has(voter):
@@ -83,6 +96,8 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	elif category == "act_it" or category == "show_skill" or category == "truth_or_fiction":
 		if not choice is bool:
 			return false
+		if category == "truth_or_fiction" and not story_committed:
+			return false
 	else:
 		return false
 	votes[voter] = choice
@@ -92,6 +107,8 @@ func resolve_round(story_is_true: bool = false, participated: bool = true) -> Di
 	if current_card.is_empty() or resolved:
 		return {}
 	var category := str(current_card["category"])
+	if category == "truth_or_fiction" and not story_committed:
+		return {}
 	var actor := players[active_player_index]
 	var award := {}
 	if category == "open_heart":
@@ -125,7 +142,7 @@ func resolve_round(story_is_true: bool = false, participated: bool = true) -> Di
 		var correct := 0
 		var wrong := 0
 		for voter in votes:
-			if votes[voter] == story_is_true:
+			if votes[voter] == committed_story_truth:
 				_award(voter, 10, award)
 				correct += 1
 			else:
@@ -138,6 +155,7 @@ func resolve_round(story_is_true: bool = false, participated: bool = true) -> Di
 	active_player_index = (active_player_index + 1) % players.size()
 	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit}
 	current_card.clear()
+	story_committed = false
 	return result
 
 func _award(player_id: String, amount: int, awards: Dictionary) -> void:

@@ -100,6 +100,7 @@ func _build_ui() -> void:
 	layout.add_child(vote_buttons)
 	action_buttons = HBoxContainer.new()
 	layout.add_child(action_buttons)
+	_add_action("تثبيت حقيقة القصة", _commit_story)
 	_add_action("تخطي / إنهاء الجولة", _finish)
 	_add_action("كارت جديد", _draw)
 	_add_action("رجوع لاختيار الوضع", _back_to_mode)
@@ -177,11 +178,21 @@ func _back_to_mode() -> void:
 	if not scene_name.is_empty():
 		get_tree().change_scene_to_file("res://scenes/" + scene_name + ".tscn")
 
+func _commit_story() -> void:
+	if str(engine.current_card.get("category", "")) != "truth_or_fiction":
+		return
+	var actor := engine.players[engine.active_player_index]
+	if engine.commit_story(actor, story_truth_selector.selected == 0):
+		status_text.text = "تم تثبيت الحقيقة. سلّم الجهاز للمصوّتين دون كشف الاختيار."
+		story_truth_selector.visible = false
+
 func _finish() -> void:
 	if engine.current_card.is_empty():
 		return
-	var truth := story_truth_selector.selected == 0
-	var result: Dictionary = engine.resolve_round(truth)
+	var result: Dictionary = engine.resolve_round()
+	if result.is_empty():
+		status_text.text = "ثبّت حقيقة القصة قبل إنهاء الجولة."
+		return
 	status_text.text = "النقاط: %s" % str(result.get("scores", {}))
 	card_text.text = "انتهت الجولة. اضغط كارت جديد."
 	for child in vote_buttons.get_children():

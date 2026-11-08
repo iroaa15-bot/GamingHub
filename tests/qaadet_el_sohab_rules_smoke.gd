@@ -36,7 +36,7 @@ func _initialize() -> void:
 	assert(not e.commit_story("a", false)) # Commitment immutable
 	assert(e.submit_vote("b", false))
 	assert(e.submit_vote("c", false))
-	var result: Dictionary = e.resolve_round(true)
+	var result: Dictionary = e.resolve_round()
 	assert(result["awards"]["a"] == 10) # Storyteller fooled majority
 	print("QAADET_EL_SOHAB_RULES_SMOKE_PASS")
 	quit()

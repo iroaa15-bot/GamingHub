@@ -1,7 +1,7 @@
 extends Control
 ## Complete local pass-and-play flow for Open Heart; no online dependency.
 const Engine = preload("res://scripts/qaadet_el_sohab_engine.gd")
-const PATHS = ["res://content/qaadet_el_sohab/seed_ar.json", "res://content/qaadet_el_sohab/seed_ar_batch02.json"] + _batch_paths() 
+const PATHS = ["res://content/qaadet_el_sohab/seed_ar.json", "res://content/qaadet_el_sohab/seed_ar_batch02.json"] 
 
 static func _batch_paths() -> Array[String]:
 	var result: Array[String] = []
@@ -23,7 +23,7 @@ func _ready() -> void:
 func _load_cards() -> Array[Dictionary]:
 	var cards: Array[Dictionary] = []
 	var ids := {}
-	for path in PATHS:
+	for path in PATHS + _batch_paths():
 		if not FileAccess.file_exists(path):
 			continue
 		var file := FileAccess.open(path, FileAccess.READ)

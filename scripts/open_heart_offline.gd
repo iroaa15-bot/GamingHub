@@ -1,7 +1,13 @@
 extends Control
 ## Complete local pass-and-play flow for Open Heart; no online dependency.
 const Engine = preload("res://scripts/qaadet_el_sohab_engine.gd")
-const PATHS = ["res://content/qaadet_el_sohab/seed_ar.json", "res://content/qaadet_el_sohab/seed_ar_batch02.json"]
+const PATHS = ["res://content/qaadet_el_sohab/seed_ar.json", "res://content/qaadet_el_sohab/seed_ar_batch02.json"] + _batch_paths() 
+
+static func _batch_paths() -> Array[String]:
+	var result: Array[String] = []
+	for i in range(1, 11):
+		result.append("res://content/qaadet_el_sohab/open_heart_batch_%02d.json" % i)
+	return result
 var engine = Engine.new()
 var names_input: LineEdit
 var rounds_input: OptionButton

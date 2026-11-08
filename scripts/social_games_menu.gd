@@ -12,6 +12,7 @@ func _ready() -> void:
     _button("تحدي السينما (قريبًا)", func(): pass, true)
     _button("خمن الصورة (من القائمة الرئيسية)", func(): pass, true)
     _button("خمن الصوت (قريبًا)", func(): pass, true)
+    _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/Main.tscn"))
 
 func _button(title: String, callback: Callable, disabled: bool = false) -> void:
     var b := Button.new()

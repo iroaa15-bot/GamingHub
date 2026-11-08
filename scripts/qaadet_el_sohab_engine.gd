@@ -22,6 +22,8 @@ var power_applied := false
 var power_effect: Dictionary = {}
 var rng := RandomNumberGenerator.new()
 var active_category := ""
+var turn_direction := 1
+var free_skips: Dictionary = {}
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):

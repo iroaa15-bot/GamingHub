@@ -7,7 +7,7 @@ func _ready() -> void:
     container = VBoxContainer.new()
     container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(container)
-    _button("معانا ولا علينا", func(): _open_game(MAANA_SCENE))
+    _button("معانا ولا علينا", func(): _open_game("res://scenes/MaanaModeSelect.tscn"))
     _button("قعدة الصحاب (قريبًا)", func(): pass, true)
     _button("تحدي السينما (قريبًا)", func(): pass, true)
     _button("خمن الصورة (من القائمة الرئيسية)", func(): pass, true)

@@ -5,11 +5,13 @@ const OpenHeart = preload("res://scripts/open_heart_offline.gd")
 func _initialize() -> void:
 	var game = OpenHeart.new()
 	var cards: Array[Dictionary] = game._load_cards()
-	assert(cards.size() >= 20)
+	assert(cards.size() == 500)
 	var ids := {}
 	for card in cards:
 		assert(card["category"] == "open_heart")
 		assert(not ids.has(card["id"]))
+		assert(not str(card.get("text_ar", "")).strip_edges().is_empty())
+		assert(int(card.get("points", -1)) == 10)
 		ids[card["id"]] = true
 	var engine = Engine.new()
 	assert(engine.setup(["Ali", "Mona"], cards, 20, 1234))

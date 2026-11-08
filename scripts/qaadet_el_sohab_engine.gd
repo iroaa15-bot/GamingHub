@@ -117,7 +117,9 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 		return false
 	var category := str(current_card["category"])
 	var actor := players[active_player_index]
-	if category == "open_heart" or category == "table_flip" or voter == actor or votes.has(voter):
+	if category == "open_heart" or category == "table_flip" or votes.has(voter):
+		return false
+	if category != "who_among_us" and voter == actor:
 		return false
 	if category == "who_among_us":
 		if not choice is String or not players.has(choice) or choice == voter:
@@ -215,7 +217,8 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 		return {}
 	if category == "table_flip" and not power_applied:
 		return {}
-	if ["act_it", "show_skill", "who_among_us", "truth_or_fiction"].has(category) and not timeout and votes.size() < players.size() - 1:
+	var required_votes := players.size() if category == "who_among_us" else players.size() - 1
+	if ["act_it", "show_skill", "who_among_us", "truth_or_fiction"].has(category) and not timeout and votes.size() < required_votes:
 		return {}
 	var actor := players[active_player_index]
 	var award := {}

@@ -21,13 +21,15 @@ var committed_story_truth := false
 var power_applied := false
 var power_effect: Dictionary = {}
 var rng := RandomNumberGenerator.new()
+var active_category := ""
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
 		return false
-	if player_ids.size() != _unique_count(player_ids):
+	if player_ids.size() != _unique_count(player_ids) or player_ids.has(""):
 		return false
 	players = player_ids.duplicate()
+	active_category = ""
 	scores.clear()
 	used_ids.clear()
 	for id in players:
@@ -63,6 +65,10 @@ func _unique_count(items: Array[String]) -> int:
 	return seen.size()
 
 func draw_next(category: String = "") -> Dictionary:
+	if not category.is_empty() and not CATEGORIES.has(category):
+		return {}
+	if not active_category.is_empty() and category != active_category:
+		return {}
 	if round_index >= round_limit or not current_card.is_empty() and not resolved:
 		return {}
 	var available: Array[Dictionary] = []
@@ -72,6 +78,8 @@ func draw_next(category: String = "") -> Dictionary:
 	if available.is_empty():
 		return {}
 	current_card = available[rng.randi_range(0, available.size() - 1)].duplicate(true)
+	if active_category.is_empty() and not category.is_empty():
+		active_category = category
 	used_ids[current_card["id"]] = true
 	votes.clear()
 	resolved = false
@@ -97,7 +105,7 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	if category == "open_heart" or category == "table_flip" or voter == actor or votes.has(voter):
 		return false
 	if category == "who_among_us":
-		if not choice is String or not players.has(choice) or choice == voter:
+		if not choice is String or not players.has(choice) or choice == voter or choice == actor:
 			return false
 	elif category == "act_it" or category == "show_skill" or category == "truth_or_fiction":
 		if not choice is bool:
@@ -146,7 +154,7 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 				approvals += 1
 			else:
 				rejects += 1
-		if approvals > rejects and approvals > 0:
+		if approvals > float(players.size() - 1) / 2.0:
 			_award(actor, 20, award)
 	elif category == "who_among_us":
 		var counts := {}
@@ -160,7 +168,7 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 				winners = [target]
 			elif counts[target] == top:
 				winners.append(target)
-		if winners.size() == 1:
+		if winners.size() == 1 and top > 0:
 			_award(str(winners[0]), 10, award)
 	elif category == "truth_or_fiction":
 		var correct := 0

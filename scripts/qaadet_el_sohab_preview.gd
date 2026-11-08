@@ -24,6 +24,7 @@ var card_text: Label
 var status_text: Label
 var category_button: OptionButton
 var voter_selector: OptionButton
+var power_target_selector: OptionButton
 var story_truth_selector: OptionButton
 var vote_buttons: HBoxContainer
 var action_buttons: HBoxContainer

@@ -103,11 +103,13 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	votes[voter] = choice
 	return true
 
-func resolve_round(story_is_true: bool = false, participated: bool = true) -> Dictionary:
+func resolve_round(story_is_true: bool = false, participated: bool = true, timeout: bool = false) -> Dictionary:
 	if current_card.is_empty() or resolved:
 		return {}
 	var category := str(current_card["category"])
 	if category == "truth_or_fiction" and not story_committed:
+		return {}
+	if ["act_it", "show_skill", "who_among_us", "truth_or_fiction"].has(category) and not timeout and votes.size() < players.size() - 1:
 		return {}
 	var actor := players[active_player_index]
 	var award := {}

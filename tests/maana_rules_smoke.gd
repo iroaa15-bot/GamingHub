@@ -17,10 +17,12 @@ func _initialize() -> void:
     _check(Rules.resolve({"a": 1, "b": 1, "c": 2, "d": 2}, ["a", "b", "c", "d"]).get("status") == "tie", "even split")
     _check(Rules.resolve({"a": 1, "b": 3, "c": 2}, ["a", "b", "c"]).get("status") == "invalid_vote", "invalid choice")
     _check(Rules.resolve_reaction(["a", "b"], ["b", "a"]).get("player_id") == "a", "last reaction")
+    _check(Rules.resolve({"a": 1, "b": 1, "c": 2, "outsider": 1}, ["a", "b", "c"]).get("status") == "invalid_vote", "extra unauthorized vote")
+    _check(Rules.resolve_reaction(["a", "b", "c"], ["a"]).get("status") == "unresolved", "multiple missed reactions not arbitrarily penalized")
     _check(Rules.apply_penalty({}, "a").get("a") == 1, "penalty")
     _check(Rules.eliminated({"a": 7}, "a"), "elimination")
     if failures == 0:
-        print("Maana rules smoke PASS (10 checks)")
+        print("Maana rules smoke PASS (12 checks)")
         quit(0)
     else:
         print("Maana rules smoke FAIL: ", failures)

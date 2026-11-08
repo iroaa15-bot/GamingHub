@@ -100,6 +100,7 @@ func _build_ui() -> void:
 	layout.add_child(vote_buttons)
 	action_buttons = HBoxContainer.new()
 	layout.add_child(action_buttons)
+	_add_action("تفعيل كارت القوة", _apply_power)
 	_add_action("تثبيت حقيقة القصة", _commit_story)
 	_add_action("تخطي / إنهاء الجولة", _finish)
 	_add_action("كارت جديد", _draw)
@@ -178,6 +179,16 @@ func _back_to_mode() -> void:
 	if not scene_name.is_empty():
 		get_tree().change_scene_to_file("res://scenes/" + scene_name + ".tscn")
 
+func _apply_power() -> void:
+	if str(engine.current_card.get("category", "")) != "table_flip":
+		return
+	var actor := engine.players[engine.active_player_index]
+	var effect: Dictionary = engine.apply_power(actor)
+	if effect.is_empty():
+		status_text.text = "تأثير الكارت ده لسه غير منفذ. مش هيتحسب كأنه اتفعل."
+	else:
+		status_text.text = "تم تفعيل تبديل ترتيب الدور التالي مرة واحدة."
+
 func _commit_story() -> void:
 	if str(engine.current_card.get("category", "")) != "truth_or_fiction":
 		return
@@ -191,7 +202,7 @@ func _finish() -> void:
 		return
 	var result: Dictionary = engine.resolve_round(true, true)
 	if result.is_empty():
-		status_text.text = "ثبّت حقيقة القصة قبل إنهاء الجولة."
+		status_text.text = "ثبّت حقيقة القصة أو فعّل كارت القوة قبل إنهاء الجولة."
 		return
 	status_text.text = "النقاط: %s" % str(result.get("scores", {}))
 	card_text.text = "انتهت الجولة. اضغط كارت جديد."

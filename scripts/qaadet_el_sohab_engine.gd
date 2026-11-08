@@ -105,7 +105,7 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	if category == "open_heart" or category == "table_flip" or voter == actor or votes.has(voter):
 		return false
 	if category == "who_among_us":
-		if not choice is String or not players.has(choice) or choice == voter or choice == actor:
+		if not choice is String or not players.has(choice) or choice == voter:
 			return false
 	elif category == "act_it" or category == "show_skill" or category == "truth_or_fiction":
 		if not choice is bool:

@@ -1,0 +1,32 @@
+extends SceneTree
+const Engine = preload("res://scripts/qaadet_el_sohab_engine.gd")
+const Game = preload("res://scripts/who_among_us_offline.gd")
+func _initialize() -> void:
+	var game = Game.new()
+	var cards: Array[Dictionary] = game._load_cards()
+	assert(cards.size() == 550)
+	var seen := {}
+	for card in cards:
+		assert(str(card.get("category", "")) == "who_among_us")
+		assert(int(card.get("points", -1)) == 10)
+		assert(not seen.has(card["id"]))
+		seen[card["id"]] = true
+	var e = Engine.new()
+	assert(e.setup(["a", "b", "c", "d"], cards, 10, 42))
+	assert(e.lock_category("who_among_us"))
+	assert(not e.draw_next("act_it").has("id"))
+	assert(not e.draw_next("who_among_us").is_empty())
+	assert(not e.submit_vote("a", "b"))
+	assert(not e.submit_vote("b", "b"))
+	assert(e.submit_vote("b", "c"))
+	assert(e.submit_vote("c", "b"))
+	assert(e.submit_vote("d", "c"))
+	var result = e.resolve_round()
+	assert(result["awards"]["c"] == 10)
+	assert(e.draw_next("who_among_us").size() > 0)
+	assert(e.submit_vote("a", "b"))
+	assert(e.submit_vote("c", "b"))
+	assert(e.submit_vote("d", "c"))
+	assert(e.resolve_round()["awards"]["b"] == 10)
+	print("WHO_AMONG_US_SMOKE_PASS")
+	quit()

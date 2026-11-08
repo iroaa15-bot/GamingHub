@@ -152,8 +152,8 @@ func _vote_screen() -> void:
 		if player == engine.players[engine.active_player_index] or engine.votes.has(player):
 			continue
 		_label("تصويت %s" % player, 20)
-		_button("نجح", func(p = player): _cast(p, true))
-		_button("لم ينجح", func(p = player): _cast(p, false))
+		_button("نجح", _cast.bind(player, true))
+		_button("لم ينجح", _cast.bind(player, false))
 	_button("إنهاء التصويت بالنتائج المسجلة", func(): _resolve(true))
 	_button("النتائج الحالية", _results)
 
@@ -172,7 +172,6 @@ func _resolve(timeout: bool) -> void:
 		status.text = "تعذر إنهاء الجولة."
 		return
 	_screen("نتيجة الجولة")
-	var actor := engine.players[posmod(engine.active_player_index - 1, engine.players.size())]
 	_label("النقاط المكتسبة: %s" % str(result.get("awards", {})))
 	_button("الجولة التالية", _draw)
 	_button("ترتيب النقاط", _results)

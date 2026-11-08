@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_who_among_us()
 	_test_truth()
 	_test_guards()
+	_test_category_and_choice_guards()
 	print("SOCIAL_RULES_REGRESSION_PASS")
 	quit()
 func _test_open_heart() -> void:
@@ -65,6 +66,23 @@ func _test_truth() -> void:
 	var result = e.resolve_round()
 	assert(result["awards"]["a"] == 10)
 	assert(result["awards"]["d"] == 10)
+func _test_category_and_choice_guards() -> void:
+	var e = Engine.new()
+	var cards: Array[Dictionary] = []
+	for i in range(25):
+		cards.append(_card("open_heart", "guard_" + str(i)))
+	assert(e.setup(["a", "b"], cards, 10, 123))
+	assert(e.draw_next("open_heart").is_empty())
+	assert(e.lock_category("open_heart"))
+	e.next_card_choice = 2
+	assert(e.draw_next("open_heart").is_empty())
+	var offers := e.available_card_choices("open_heart")
+	assert(offers.size() == 2)
+	assert(e.available_card_choices("open_heart") == offers)
+	assert(e.draw_chosen_card("open_heart", "nonexistent").is_empty())
+	assert(not e.draw_chosen_card("open_heart", str(offers[0]["id"])).is_empty())
+	assert(e.resolve_round(true)["round"] == 1)
+
 func _test_guards() -> void:
 	var e = Engine.new()
 	var cards: Array[Dictionary] = [_card("open_heart", "x")]

@@ -93,6 +93,10 @@ func _build_ui() -> void:
 	for player in ["لاعب 1", "لاعب 2", "لاعب 3"]:
 		voter_selector.add_item(player)
 	layout.add_child(voter_selector)
+	power_target_selector = OptionButton.new()
+	for player in ["لاعب 1", "لاعب 2", "لاعب 3"]:
+		power_target_selector.add_item(player)
+	layout.add_child(power_target_selector)
 	story_truth_selector = OptionButton.new()
 	story_truth_selector.add_item("القصة حقيقية")
 	story_truth_selector.add_item("القصة تأليف")
@@ -136,6 +140,7 @@ func _show_current_card() -> void:
 		return
 	card_text.text = str(card.get("text_ar", ""))
 	story_truth_selector.visible = str(card.get("category", "")) == "truth_or_fiction"
+	power_target_selector.visible = str(card.get("category", "")) == "table_flip"
 	voter_selector.visible = ["act_it", "show_skill", "truth_or_fiction", "who_among_us"].has(str(card.get("category", "")))
 	status_text.text = "الجولة %d / %d | دور %s | %s" % [
 		engine.round_index + 1, engine.round_limit,
@@ -184,11 +189,12 @@ func _apply_power() -> void:
 	if str(engine.current_card.get("category", "")) != "table_flip":
 		return
 	var actor := engine.players[engine.active_player_index]
-	var effect: Dictionary = engine.apply_power(actor)
+	var target := power_target_selector.get_item_text(power_target_selector.selected)
+	var effect: Dictionary = engine.apply_power(actor, target)
 	if effect.is_empty():
 		status_text.text = "تأثير الكارت ده لسه غير منفذ. مش هيتحسب كأنه اتفعل."
 	else:
-		status_text.text = "تم تفعيل تبديل ترتيب الدور التالي مرة واحدة."
+		status_text.text = "تم تفعيل التأثير: %s" % str(effect.get("type", ""))
 
 func _commit_story() -> void:
 	if str(engine.current_card.get("category", "")) != "truth_or_fiction":

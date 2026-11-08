@@ -12,6 +12,7 @@ var timer: Timer
 var seconds_left := 60
 var phase := "setup"
 var match_started := false
+var revealed_truth := false
 
 func _ready() -> void:
 	cards = _load_cards()
@@ -178,13 +179,14 @@ func _cast(voter: String, guess: bool) -> void:
 		_vote()
 
 func _resolve(timeout: bool) -> void:
+	revealed_truth = engine.committed_story_truth
 	var result: Dictionary = engine.resolve_round(true, timeout)
 	if result.is_empty():
 		status.text = "تعذر إنهاء الجولة."
 		return
 	phase = "resolved"
 	_screen("انتهت الجولة")
-	_label("الحكاية كانت: %s" % ("حقيقة" if engine.committed_story_truth else "تأليف"))
+	_label("الحكاية كانت: %s" % ("حقيقة" if revealed_truth else "تأليف"))
 	_label("النقاط المكتسبة: %s" % str(result.get("awards", {})))
 	_button("الجولة التالية", _next)
 	_button("ترتيب النقاط", _results)

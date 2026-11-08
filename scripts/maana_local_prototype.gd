@@ -156,12 +156,13 @@ func _show_final_standings() -> void:
     _label("انتهت المباراة بعد %d جولة" % completed_rounds)
     var lowest := 999999
     for player in players:
-        lowest = mini(lowest, int(penalties.get(player, 0)))
+        if player in _active_players():
+            lowest = mini(lowest, int(penalties.get(player, 0)))
     var winners: Array = []
     for player in players:
         var count := int(penalties.get(player, 0))
         _label("%s — %d كروت عقوبة" % [player, count])
-        if count == lowest:
+        if count == lowest and player in _active_players():
             winners.append(player)
     var remaining := _active_players()
     if remaining.size() == 1:

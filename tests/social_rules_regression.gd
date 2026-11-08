@@ -18,6 +18,7 @@ func _initialize() -> void:
 	_test_who_among_us()
 	_test_truth()
 	_test_guards()
+	_test_swap_turn_order()
 	_test_category_and_choice_guards()
 	print("SOCIAL_RULES_REGRESSION_PASS")
 	quit()
@@ -82,6 +83,23 @@ func _test_category_and_choice_guards() -> void:
 	assert(e.draw_chosen_card("open_heart", "nonexistent").is_empty())
 	assert(not e.draw_chosen_card("open_heart", str(offers[0]["id"])).is_empty())
 	assert(e.resolve_round(true)["round"] == 1)
+
+func _test_swap_turn_order() -> void:
+	var e = Engine.new()
+	var cards: Array[Dictionary] = [_card("table_flip", "qs_power_001")]
+	for i in range(24):
+		cards.append(_card("table_flip", "qs_power_" + str(100 + i)))
+	assert(e.setup(["a", "b", "c", "d"], cards, 10, 17))
+	assert(e.lock_category("table_flip"))
+	# Use a deterministic direct card selection for this turn-order test.
+	e.current_card = cards[0].duplicate(true)
+	assert(not e.apply_power("a").is_empty())
+	assert(not e.resolve_round().is_empty())
+	assert(e.players[e.active_player_index] == "c")
+	for expected in ["b", "d"]:
+		e.current_card = _card("open_heart", "turn_" + expected)
+		assert(not e.resolve_round(true).is_empty())
+		assert(e.players[e.active_player_index] == expected)
 
 func _test_guards() -> void:
 	var e = Engine.new()

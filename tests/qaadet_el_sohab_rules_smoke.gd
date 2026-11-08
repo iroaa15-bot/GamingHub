@@ -55,5 +55,19 @@ func _initialize() -> void:
 	else:
 		assert(power_engine.apply_power("a").is_empty())
 		assert(power_engine.resolve_round().is_empty())
+	var isolated = Engine.new()
+	assert(isolated.setup(["a", "b", "c", "d"], cards, 10, 7))
+	assert(isolated.lock_category("act_it"))
+	assert(not isolated.draw_next("open_heart").has("id"))
+	assert(isolated.draw_next("act_it")["id"] == "b")
+	assert(not isolated.resolve_round().has("awards")) # Incomplete voting cannot resolve
+	assert(isolated.submit_vote("b", true)) # a is actor, b may vote
+	assert(isolated.resolve_round(true, true)["awards"].is_empty()) # 1/3 not a majority
+	var timeout_case = Engine.new()
+	assert(timeout_case.setup(["a", "b", "c", "d"], cards, 10, 8))
+	assert(timeout_case.draw_next("act_it")["id"] == "b")
+	assert(timeout_case.submit_vote("b", true))
+	assert(timeout_case.submit_vote("c", true))
+	assert(timeout_case.resolve_round(true, true)["awards"]["a"] == 20)
 	print("QAADET_EL_SOHAB_RULES_SMOKE_PASS")
 	quit()

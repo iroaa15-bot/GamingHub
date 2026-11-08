@@ -163,6 +163,12 @@ func apply_power(actor: String, target: String = "") -> Dictionary:
 func available_card_choices(category: String) -> Array[Dictionary]:
 	if not current_card.is_empty() or next_card_choice < 2:
 		return []
+	if not offered_card_ids.is_empty():
+		var cached: Array[Dictionary] = []
+		for card in deck:
+			if offered_card_ids.has(str(card.get("id", ""))) and not used_ids.has(card["id"]):
+				cached.append(card.duplicate(true))
+		return cached
 	var available: Array[Dictionary] = []
 	for card in deck:
 		if not used_ids.has(card["id"]) and (category.is_empty() or str(card["category"]) == category):

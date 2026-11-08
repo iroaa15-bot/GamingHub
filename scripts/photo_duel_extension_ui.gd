@@ -490,7 +490,7 @@ func _state(value: Dictionary) -> void:
   _settings_toggle.text=tr_pair("خيارات الغرفة","Room options")
   _settings_toggle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  _main_column.get_node("CompactHeader").visible=not active
- _scores.visible=not active and bool(value.get("started",false))
+ _scores.visible=not client.code.is_empty() and not active and bool(value.get("started",false))
  var seat_count: int=int(value.get("capacity",2))
  _seats.columns=2 if seat_count in [2,4] else 3
  _seats.visible=not client.code.is_empty()
@@ -656,7 +656,8 @@ func _state(value: Dictionary) -> void:
  if _invite_box.visible:
   _main_column.move_child(_invite_box,_main_column.get_children().find(heading)+1)
   heading.text=tr_pair("أنت اللاعب %d","You are player %d") % (client.player+1)
- if bool(value.get("match_finished",false)): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
+ if bool(value.get("match_finished",false)) and not client.code.is_empty(): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
+ elif bool(value.get("closed",false)) and client.code.is_empty(): status.text=tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend's code")
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
  elif not ready: status.text=tr_pair("الاتصال غير متاح الآن؛ اللعب دون إنترنت متاح.","Connection is unavailable; offline play remains available.") if not service_available else tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend’s code")

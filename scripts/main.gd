@@ -3866,9 +3866,8 @@ func show_welcome() -> void:
   var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
   login.tooltip_text=tr_ui("تسجيل دخول اختياري؛ تقدم الضيف محفوظ","Optional sign-in; guest progress is preserved")
   login.set_meta("welcome_action",provider.to_lower())
- var account := button(tr_ui("إنشاء حساب Gaming Hub","Create Gaming Hub account"),func(): _open_account_sign_in("register"),PANEL)
- account.set_meta("welcome_action","account")
- button(tr_ui("لديك حساب؟ تسجيل الدخول","Already have an account? Sign in"),func(): _open_account_sign_in("login"),PANEL)
+ # Email/password remains under My profile -> Account settings and sign-in.
+ # Keep the welcome screen limited to the three existing entry actions.
  VisualSkin.compact_menu(root)
 
 func _add_language_control(redraw: Callable) -> void:

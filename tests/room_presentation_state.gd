@@ -16,6 +16,9 @@ func run() -> void:
  valid=valid and visible_images==1 and room.images[1].visible and not room.images[0].visible
  room._state({"capacity":2,"joined":1,"connected":[true,false],"started":false})
  valid=valid and room._seat_panels[0].visible and not room._seat_panels[2].visible
+ room.client.code=""
+ room._state({"capacity":2,"joined":2,"connected":[false,false],"started":true,"closed":true,"match_finished":true,"winner":0,"scores":[1,0]})
+ valid=valid and not room._scores.visible and not room.status.text.contains("الفائز")
  print("ROOM_PRESENTATION_STATE ",valid," — UI fixture only; no multiplayer claim")
  room.queue_free()
  await process_frame

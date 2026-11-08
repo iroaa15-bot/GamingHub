@@ -169,7 +169,11 @@ func _choose(card_id: String) -> void:
 			current = card.duplicate(true)
 			found = true
 			break
-	if not found or (not offered.is_empty() and not offered.any(func(c): return str(c["id"]) == card_id)):
+	var offered_valid := offered.is_empty()
+	for offer in offered:
+		if str(offer.get("id", "")) == card_id:
+			offered_valid = true
+	if not found or not offered_valid:
 		return
 	used[card_id] = true
 	pending_choice = false

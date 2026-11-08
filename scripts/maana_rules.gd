@@ -2,7 +2,7 @@ extends RefCounted
 class_name MaanaRules
 
 # Deterministic, server-authoritative round rules. Do not trust client timestamps.
-const MIN_PLAYERS := 2
+const MIN_PLAYERS := 3
 const MAX_PLAYERS := 6
 const PENALTY_LIMIT := 7
 

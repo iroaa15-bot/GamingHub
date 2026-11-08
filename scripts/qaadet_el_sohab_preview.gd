@@ -17,6 +17,7 @@ const CATEGORY_NAMES := {
 	"table_flip": "اقلب الترابيزة"
 }
 var engine = Engine.new()
+@export_enum("open_heart", "act_it", "who_among_us", "show_skill", "truth_or_fiction", "table_flip") var fixed_category := "open_heart"
 var selected_category := ""
 var heading: Label
 var card_text: Label
@@ -29,6 +30,7 @@ var action_buttons: HBoxContainer
 var cards: Array[Dictionary] = []
 
 func _ready() -> void:
+	selected_category = fixed_category
 	_build_ui()
 	cards = _load_cards()
 	if cards.is_empty():
@@ -68,13 +70,14 @@ func _build_ui() -> void:
 	layout.add_theme_constant_override("separation", 18)
 	scroll.add_child(layout)
 	heading = Label.new()
-	heading.text = "قعدة الصحاب — معاينة محلية"
+	heading.text = CATEGORY_NAMES.get(fixed_category, "لعبة اجتماعية") + " — معاينة أوفلاين"
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(heading)
 	category_button = OptionButton.new()
 	for name in CATEGORY_NAMES:
 		category_button.add_item(CATEGORY_NAMES[name])
 	category_button.item_selected.connect(_category_changed)
+	category_button.visible = false
 	layout.add_child(category_button)
 	card_text = Label.new()
 	card_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -100,7 +103,7 @@ func _build_ui() -> void:
 	_add_action("كارت جديد", _draw)
 
 func _category_changed(index: int) -> void:
-	selected_category = str(CATEGORY_NAMES.keys()[index])
+	selected_category = fixed_category
 	status_text.text = "الفئة الجديدة هتطبق بعد إنهاء الجولة الحالية."
 
 func _add_action(label_text: String, handler: Callable) -> void:

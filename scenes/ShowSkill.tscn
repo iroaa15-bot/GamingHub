@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/qaadet_el_sohab_preview.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/show_skill_offline.gd" id="1"]
 
 [node name="ShowSkill" type="Control"]
 layout_mode = 3
@@ -10,4 +10,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
-fixed_category = "show_skill"

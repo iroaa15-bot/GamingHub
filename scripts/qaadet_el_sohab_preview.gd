@@ -40,6 +40,7 @@ func _ready() -> void:
 	if not engine.setup(["لاعب 1", "لاعب 2", "لاعب 3"], cards, 20):
 		status_text.text = "تعذر بدء المعاينة."
 		return
+	engine.lock_category(fixed_category)
 	_draw()
 
 func _load_cards() -> Array[Dictionary]:

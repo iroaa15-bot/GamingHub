@@ -18,6 +18,7 @@ var penalty_candidates: Array = []
 var selected_penalty: String = ""
 var completed_rounds := 0
 const MATCH_ROUNDS := 15
+const PENALTY_LIMIT := 7
 var setup_count := 3
 var setup_done := false
 
@@ -65,7 +66,7 @@ func _new_card() -> void:
 func _draw() -> void:
     _clear()
     _label("معانا ولا علينا")
-    if setup_done and completed_rounds >= MATCH_ROUNDS:
+    if setup_done and (completed_rounds >= MATCH_ROUNDS or _active_players().size() <= 1):
         _show_final_standings()
         return
     if not setup_done:
@@ -79,14 +80,15 @@ func _draw() -> void:
         _label("الكروت خلصت أو ملف الكروت غير موجود. ارجع لقائمة الألعاب.")
         _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"))
         return
-    if step < players.size():
-        var player: String = players[step]
+    var active := _active_players()
+    if step < active.size():
+        var player: String = str(active[step])
         _label("الدور على: " + player + " — خلّي باقي اللاعبين يبعدوا عن الشاشة")
         _label("1 — " + str(card.get("option_1", "")))
         _label("2 — " + str(card.get("option_2", "")))
         _button("اختيار 1", func(): _vote(player, 1))
         _button("اختيار 2", func(): _vote(player, 2))
-    elif step == players.size():
+    elif step == active.size():
         _label("كل اللاعبين صوتوا. اكشف النتيجة.")
         _button("اكشف", _show_result)
     else:
@@ -120,7 +122,7 @@ func _vote(player: String, choice: int) -> void:
     _draw()
 
 func _show_result() -> void:
-    reveal = Rules.resolve(votes, players)
+    reveal = Rules.resolve(votes, _active_players())
     if reveal.get("status") == "minority":
         var minority: Array = reveal["minority"]
         if minority.size() == 1:
@@ -145,13 +147,13 @@ func _finish_round() -> void:
     if awaiting_penalty:
         return
     completed_rounds += 1
-    if completed_rounds >= MATCH_ROUNDS:
+    if completed_rounds >= MATCH_ROUNDS or _active_players().size() <= 1:
         _draw()
     else:
         _new_card()
 
 func _show_final_standings() -> void:
-    _label("انتهت المباراة بعد %d جولة" % MATCH_ROUNDS)
+    _label("انتهت المباراة بعد %d جولة" % completed_rounds)
     var lowest := 999999
     for player in players:
         lowest = mini(lowest, int(penalties.get(player, 0)))
@@ -161,6 +163,19 @@ func _show_final_standings() -> void:
         _label("%s — %d كروت عقوبة" % [player, count])
         if count == lowest:
             winners.append(player)
-    _label("الفائز: " + ", ".join(winners) if winners.size() == 1 else "تعادل في المركز الأول: " + ", ".join(winners))
+    var remaining := _active_players()
+    if remaining.size() == 1:
+        _label("الفائز: " + str(remaining[0]))
+    elif winners.size() == 1:
+        _label("الفائز: " + str(winners[0]))
+    else:
+        _label("تعادل في المركز الأول: " + ", ".join(winners))
     _button("العب من جديد", func(): setup_done = false; _draw())
     _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"))
+
+func _active_players() -> Array:
+    var active: Array = []
+    for player in players:
+        if not Rules.eliminated(penalties, player, PENALTY_LIMIT):
+            active.append(player)
+    return active

@@ -64,6 +64,12 @@ func _unique_count(items: Array[String]) -> int:
 		seen[item] = true
 	return seen.size()
 
+func lock_category(category: String) -> bool:
+	if not CATEGORIES.has(category) or not current_card.is_empty() or round_index > 0:
+		return false
+	active_category = category
+	return true
+
 func draw_next(category: String = "") -> Dictionary:
 	if not category.is_empty() and not CATEGORIES.has(category):
 		return {}
@@ -78,8 +84,7 @@ func draw_next(category: String = "") -> Dictionary:
 	if available.is_empty():
 		return {}
 	current_card = available[rng.randi_range(0, available.size() - 1)].duplicate(true)
-	if active_category.is_empty() and not category.is_empty():
-		active_category = category
+
 	used_ids[current_card["id"]] = true
 	votes.clear()
 	resolved = false

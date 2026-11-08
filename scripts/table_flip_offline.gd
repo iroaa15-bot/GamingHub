@@ -187,6 +187,8 @@ func _show() -> void:
 	_screen("اقلب الترابيزة — الجولة %d/%d" % [round+1,max_rounds])
 	_label("الدور على: %s" % order[current_index])
 	_label(str(current.get("text_ar", "")), 26)
+	if not current.has("power_type"):
+		_label("تكييف أوفلاين: " + _effect_explanation(_type()), 17)
 	var kind := _type()
 	if ["bonus","steal","skip"].has(kind):
 		target_input = OptionButton.new()
@@ -196,6 +198,19 @@ func _show() -> void:
 		panel.add_child(target_input)
 	_button("نفّذ تأثير الكارت", _apply)
 	_button("ترتيب النقاط", _results)
+
+func _effect_explanation(kind: String) -> String:
+	match kind:
+		"reverse": return "اعكس اتجاه الأدوار"
+		"swap": return "بدّل مكانك مع اللاعب التالي في ترتيب الأدوار"
+		"bonus": return "امنح لاعبًا 5 نقاط"
+		"steal": return "انقل حتى 5 نقاط من لاعب إليك"
+		"shield": return "احصل على درع ضد خصم النقاط"
+		"skip": return "اجعل لاعبًا يتخطى دوره القادم"
+		"double": return "ضاعف أول مكافأة نقاط قادمة لك"
+		"gift": return "امنح اللاعب التالي 5 نقاط"
+		"choice": return "اختر بين كارتين في دورك القادم"
+	return "احصل على 5 نقاط"
 
 func _grant(player: String, amount: int) -> void:
 	if int(doubles[player]) > 0:

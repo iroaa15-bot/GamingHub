@@ -13,6 +13,9 @@ var step := 0
 var reveal: Dictionary = {}
 var reaction_order: Array = []
 var panel: VBoxContainer
+var awaiting_penalty := false
+var penalty_candidates: Array = []
+var selected_penalty: String = ""
 var setup_count := 3
 var setup_done := false
 
@@ -47,6 +50,9 @@ func _clear() -> void:
 func _new_card() -> void:
     votes.clear()
     reaction_order.clear()
+    awaiting_penalty = false
+    penalty_candidates.clear()
+    selected_penalty = ""
     if deck.is_empty():
         deck = cards.duplicate(true)
         deck.shuffle()
@@ -78,6 +84,13 @@ func _draw() -> void:
         _label("كل اللاعبين صوتوا. اكشف النتيجة.")
         _button("اكشف", _show_result)
     else:
+        if awaiting_penalty:
+            _label("الأقلية: " + str(penalty_candidates))
+            _label("بعد تحدي الإيد فوق، مين كان آخر واحد؟")
+            for id in penalty_candidates:
+                var chosen: String = str(id)
+                _button(chosen, func(): _assign_penalty(chosen))
+            return
         _label("نتيجة الجولة: " + str(reveal.get("status", "")))
         _label("الأقلية: " + str(reveal.get("minority", [])))
         _label("العقوبات: " + str(penalties))
@@ -105,8 +118,17 @@ func _show_result() -> void:
         if minority.size() == 1:
             penalties = Rules.apply_penalty(penalties, minority[0])
         else:
-            # Same-device prototype: pass phone to minority for ordered reactions.
-            # Real-time reaction race requires online server timestamps.
-            pass
+            # Offline physical reaction: players decide who was last.
+            # No automated timing or server race is claimed.
+            penalty_candidates = minority.duplicate()
+            awaiting_penalty = true
     step += 1
+    _draw()
+
+func _assign_penalty(player_id: String) -> void:
+    if not awaiting_penalty or player_id not in penalty_candidates:
+        return
+    penalties = Rules.apply_penalty(penalties, player_id)
+    awaiting_penalty = false
+    selected_penalty = player_id
     _draw()

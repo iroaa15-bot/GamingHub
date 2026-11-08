@@ -7,7 +7,7 @@ func _ready() -> void:
     root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(root)
     _label("معانا ولا علينا")
-    _button("العب مع أصحابك • غرف 2–6 (قيد التجهيز)", func(): pass, true)
+    _button("العب مع أصحابك • غرف 3–6 (قيد التجهيز)", func(): pass, true)
     _button("العب أوفلاين", func(): get_tree().change_scene_to_file("res://scenes/MaanaWalaAlayna.tscn"))
     _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"))
 

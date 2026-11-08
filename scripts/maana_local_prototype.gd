@@ -55,7 +55,7 @@ func _new_card() -> void:
     awaiting_penalty = false
     penalty_candidates.clear()
     selected_penalty = ""
-    if deck.is_empty():
+    if deck.is_empty() and completed_rounds == 0:
         deck = cards.duplicate(true)
         deck.shuffle()
     card = deck.pop_back() if not deck.is_empty() else {}
@@ -76,7 +76,8 @@ func _draw() -> void:
         _button("رجوع", func(): get_tree().change_scene_to_file("res://scenes/MaanaModeSelect.tscn"))
         return
     if card.is_empty():
-        _label("ملف الـ500 كارت غير موجود في data/maana_wala_alayna.json")
+        _label("الكروت خلصت أو ملف الكروت غير موجود. ارجع لقائمة الألعاب.")
+        _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"))
         return
     if step < players.size():
         var player: String = players[step]
@@ -107,6 +108,7 @@ func _start_players(count: int) -> void:
         players.append("لاعب " + str(i + 1))
     penalties.clear()
     completed_rounds = 0
+    deck.clear()
     setup_done = true
     _new_card()
 

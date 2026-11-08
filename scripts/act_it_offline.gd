@@ -151,9 +151,10 @@ func _vote_screen() -> void:
 	for player in engine.players:
 		if player == engine.players[engine.active_player_index] or engine.votes.has(player):
 			continue
-		_label("تصويت %s" % player, 20)
+		_label("تصويت %s — سلّم الجهاز له فقط" % player, 20)
 		_button("نجح", _cast.bind(player, true))
 		_button("لم ينجح", _cast.bind(player, false))
+		break
 	_button("إنهاء التصويت بالنتائج المسجلة", func(): _resolve(true))
 	_button("النتائج الحالية", _results)
 

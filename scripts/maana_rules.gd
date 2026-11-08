@@ -9,7 +9,9 @@ const PENALTY_LIMIT := 7
 static func resolve(votes: Dictionary, seated_ids: Array) -> Dictionary:
     if seated_ids.size() < MIN_PLAYERS or seated_ids.size() > MAX_PLAYERS:
         return {"status": "invalid_players"}
-    if votes.size() != seated_ids.size():
+    if votes.size() > seated_ids.size():
+        return {"status": "invalid_vote"}
+    if votes.size() < seated_ids.size():
         return {"status": "waiting"}
     var one: Array = []
     var two: Array = []
@@ -41,9 +43,14 @@ static func resolve_reaction(minority: Array, receipt_order: Array) -> Dictionar
     for id in receipt_order:
         if id in minority and not seen.has(id):
             seen[id] = true
+    var missing: Array = []
     for id in minority:
         if not seen.has(id):
-            return {"status": "penalty", "player_id": id}
+            missing.append(id)
+    if missing.size() > 1:
+        return {"status": "unresolved", "reason": "multiple_missing_reactions", "candidates": missing}
+    if missing.size() == 1:
+        return {"status": "penalty", "player_id": missing[0]}
     for i in range(receipt_order.size() - 1, -1, -1):
         if receipt_order[i] in minority:
             return {"status": "penalty", "player_id": receipt_order[i]}

@@ -21,6 +21,7 @@ const MATCH_ROUNDS := 15
 const PENALTY_LIMIT := 7
 var setup_count := 3
 var setup_done := false
+var handoff_ready := false
 
 func _ready() -> void:
     var f := FileAccess.open(DATA_PATH, FileAccess.READ)
@@ -73,6 +74,7 @@ func _new_card() -> void:
         deck.shuffle()
     card = deck.pop_back() if not deck.is_empty() else {}
     step = 0
+    handoff_ready = false
     _draw()
 
 func _draw() -> void:
@@ -97,6 +99,11 @@ func _draw() -> void:
     var active := _active_players()
     if step < active.size():
         var player: String = str(active[step])
+        if not handoff_ready:
+            _label("سلّم الموبايل إلى " + player)
+            _label("ممنوع أي لاعب تاني يشوف الاختيار.")
+            _button("أنا " + player + " — جاهز", _begin_private_vote)
+            return
         _label("الدور على: " + player + " — خلّي باقي اللاعبين يبعدوا عن الشاشة")
         _label("1 — " + str(card.get("option_1", "")))
         _label("2 — " + str(card.get("option_2", "")))
@@ -128,11 +135,16 @@ func _start_players(count: int) -> void:
     setup_done = true
     _new_card()
 
+func _begin_private_vote() -> void:
+    handoff_ready = true
+    _draw()
+
 func _vote(player: String, choice: int) -> void:
     if votes.has(player):
         return
     votes[player] = choice
     step += 1
+    handoff_ready = false
     _draw()
 
 func _show_result() -> void:

@@ -27,7 +27,19 @@ func _ready() -> void:
     if f != null:
         var parsed: Variant = JSON.parse_string(f.get_as_text())
         if parsed is Dictionary and parsed.get("rounds", []) is Array:
-            cards = parsed["rounds"]
+            var seen: Dictionary = {}
+            for entry in parsed["rounds"]:
+                if not entry is Dictionary:
+                    continue
+                var key := str(entry.get("id", ""))
+                var first := str(entry.get("option_1", "")).strip_edges()
+                var second := str(entry.get("option_2", "")).strip_edges()
+                if key.is_empty() or first.is_empty() or second.is_empty() or first == second or seen.has(key):
+                    continue
+                if not bool(entry.get("enabled", true)):
+                    continue
+                seen[key] = true
+                cards.append(entry)
     panel = VBoxContainer.new()
     panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(panel)

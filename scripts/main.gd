@@ -1869,6 +1869,12 @@ func show_more_games() -> void:
  var favorites: Array = profile.get("favorites", [])
  for i in range(GAMES.size()):
   grid.add_child(make_game_tile(i, previews[i], i in favorites))
+ button(tr_ui("افتح قلبك", "OPEN HEART"), func(): get_tree().change_scene_to_file("res://scenes/OpenHeartMode.tscn"))
+ button(tr_ui("مثّل وورّينا", "ACT IT"), func(): get_tree().change_scene_to_file("res://scenes/ActItMode.tscn"))
+ button(tr_ui("مين فينا؟", "WHO AMONG US"), func(): get_tree().change_scene_to_file("res://scenes/WhoAmongUsMode.tscn"))
+ button(tr_ui("ورّينا شطارتك", "SHOW YOUR SKILL"), func(): get_tree().change_scene_to_file("res://scenes/ShowSkillMode.tscn"))
+ button(tr_ui("صدق ولا تأليف؟", "TRUTH OR FICTION"), func(): get_tree().change_scene_to_file("res://scenes/TruthOrFictionMode.tscn"))
+ button(tr_ui("اقلب الترابيزة", "FLIP THE TABLE"), func(): get_tree().change_scene_to_file("res://scenes/TableFlipMode.tscn"))
  button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
  button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
  button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)

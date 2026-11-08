@@ -13,6 +13,8 @@ var step := 0
 var reveal: Dictionary = {}
 var reaction_order: Array = []
 var panel: VBoxContainer
+var setup_count := 3
+var setup_done := false
 
 func _ready() -> void:
     var f := FileAccess.open(DATA_PATH, FileAccess.READ)
@@ -23,7 +25,7 @@ func _ready() -> void:
     panel = VBoxContainer.new()
     panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(panel)
-    _new_card()
+    _draw()
 
 func _button(caption: String, action: Callable) -> void:
     var b := Button.new()
@@ -55,6 +57,13 @@ func _new_card() -> void:
 func _draw() -> void:
     _clear()
     _label("معانا ولا علينا")
+    if not setup_done:
+        _label("اختار عدد اللاعبين للأوفلاين")
+        for count in range(2, 7):
+            var chosen := count
+            _button(str(count) + " لاعبين", func(): _start_players(chosen))
+        _button("رجوع", func(): get_tree().change_scene_to_file("res://scenes/MaanaModeSelect.tscn"))
+        return
     if card.is_empty():
         _label("ملف الـ500 كارت غير موجود في data/maana_wala_alayna.json")
         return
@@ -73,6 +82,14 @@ func _draw() -> void:
         _label("الأقلية: " + str(reveal.get("minority", [])))
         _label("العقوبات: " + str(penalties))
         _button("الجولة التالية", _new_card)
+
+func _start_players(count: int) -> void:
+    players.clear()
+    for i in range(count):
+        players.append("لاعب " + str(i + 1))
+    penalties.clear()
+    setup_done = true
+    _new_card()
 
 func _vote(player: String, choice: int) -> void:
     if votes.has(player):

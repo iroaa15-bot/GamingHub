@@ -25,6 +25,7 @@ var active_category := ""
 var turn_direction := 1
 var free_skips: Dictionary = {}
 var next_card_choice := 1
+var offered_card_ids: Array[String] = []
 var pending_free_skip_target := ""
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
@@ -37,6 +38,7 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	turn_direction = 1
 	free_skips.clear()
 	next_card_choice = 1
+	offered_card_ids.clear()
 	pending_free_skip_target = ""
 	scores.clear()
 	used_ids.clear()
@@ -168,10 +170,14 @@ func available_card_choices(category: String) -> Array[Dictionary]:
 	if available.size() < 2:
 		return []
 	available.shuffle()
-	return available.slice(0, 2)
+	var offered := available.slice(0, 2)
+	offered_card_ids.clear()
+	for item in offered:
+		offered_card_ids.append(str(item["id"]))
+	return offered
 
 func draw_chosen_card(category: String, card_id: String) -> Dictionary:
-	if not current_card.is_empty() or next_card_choice < 2 or round_index >= round_limit:
+	if not current_card.is_empty() or next_card_choice < 2 or round_index >= round_limit or not offered_card_ids.has(card_id):
 		return {}
 	if not active_category.is_empty() and category != active_category:
 		return {}
@@ -180,6 +186,7 @@ func draw_chosen_card(category: String, card_id: String) -> Dictionary:
 			current_card = card.duplicate(true)
 			used_ids[card_id] = true
 			next_card_choice = 1
+			offered_card_ids.clear()
 			votes.clear()
 			story_committed = false
 			power_applied = false

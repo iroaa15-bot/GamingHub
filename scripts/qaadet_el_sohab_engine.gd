@@ -27,7 +27,7 @@ var free_skips: Dictionary = {}
 var next_card_choice := 1
 var offered_card_ids: Array[String] = []
 var pending_free_skip_target := ""
-var next_turn_swap_pending := false
+var swap_turns_remaining := 0
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
@@ -41,7 +41,7 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	next_card_choice = 1
 	offered_card_ids.clear()
 	pending_free_skip_target = ""
-	next_turn_swap_pending = false
+	swap_turns_remaining = 0
 	scores.clear()
 	used_ids.clear()
 	for id in players:
@@ -274,15 +274,18 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 	if applied_power.get("type", "") == "grant_free_skip":
 		var target := str(applied_power.get("target", ""))
 		free_skips[target] = int(free_skips.get(target, 0)) + 1
-	active_player_index = posmod(active_player_index + turn_direction, players.size())
-	if applied_power.get("type", "") == "swap_next_turns":
-		# A legacy power swaps the next two turn positions without repeating the actor.
-		# The second player is scheduled immediately, then the first on the following turn.
-		next_turn_swap_pending = true
+	if applied_power.get("type", "") == "swap_next_turns" and players.size() >= 3:
+		# A,B,C,D becomes A,C,B,D, then resumes normal turn order.
+		swap_turns_remaining = 2
+		active_player_index = posmod(active_player_index + 2 * turn_direction, players.size())
+	elif swap_turns_remaining == 2:
+		swap_turns_remaining = 1
+		active_player_index = posmod(active_player_index - turn_direction, players.size())
+	elif swap_turns_remaining == 1:
+		swap_turns_remaining = 0
+		active_player_index = posmod(active_player_index + 2 * turn_direction, players.size())
+	else:
 		active_player_index = posmod(active_player_index + turn_direction, players.size())
-	elif next_turn_swap_pending:
-		next_turn_swap_pending = false
-		active_player_index = posmod(active_player_index - turn_direction * 2, players.size())
 	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit, "power": applied_power}
 	current_card.clear()
 	story_committed = false

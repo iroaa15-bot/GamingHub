@@ -24,6 +24,8 @@ var rng := RandomNumberGenerator.new()
 var active_category := ""
 var turn_direction := 1
 var free_skips: Dictionary = {}
+var next_card_choice := 1
+var pending_free_skip_target := ""
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
@@ -34,6 +36,8 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	active_category = ""
 	turn_direction = 1
 	free_skips.clear()
+	next_card_choice = 1
+	pending_free_skip_target = ""
 	scores.clear()
 	used_ids.clear()
 	for id in players:
@@ -140,6 +144,8 @@ func apply_power(actor: String, target: String = "") -> Dictionary:
 			effect = {"type": "swap_next_turns"}
 		"qs_power_012", "qs_power_014":
 			effect = {"type": "reverse_direction"}
+		"qs_power_006", "qs_power_013":
+			effect = {"type": "choose_two_next"}
 		"qs_power_011", "qs_power_015":
 			if not players.has(target):
 				return {}
@@ -151,6 +157,36 @@ func apply_power(actor: String, target: String = "") -> Dictionary:
 	power_effect = effect.duplicate(true)
 	power_effect["card_id"] = card_id
 	return power_effect.duplicate(true)
+
+func available_card_choices(category: String) -> Array[Dictionary]:
+	if not current_card.is_empty() or next_card_choice < 2:
+		return []
+	var available: Array[Dictionary] = []
+	for card in deck:
+		if not used_ids.has(card["id"]) and (category.is_empty() or str(card["category"]) == category):
+			available.append(card.duplicate(true))
+	if available.size() < 2:
+		return []
+	available.shuffle()
+	return available.slice(0, 2)
+
+func draw_chosen_card(category: String, card_id: String) -> Dictionary:
+	if not current_card.is_empty() or next_card_choice < 2 or round_index >= round_limit:
+		return {}
+	if not active_category.is_empty() and category != active_category:
+		return {}
+	for card in deck:
+		if str(card.get("id", "")) == card_id and str(card.get("category", "")) == category and not used_ids.has(card_id):
+			current_card = card.duplicate(true)
+			used_ids[card_id] = true
+			next_card_choice = 1
+			votes.clear()
+			story_committed = false
+			power_applied = false
+			power_effect.clear()
+			resolved = false
+			return current_card.duplicate(true)
+	return {}
 
 func consume_free_skip(player: String) -> bool:
 	if not players.has(player) or int(free_skips.get(player, 0)) < 1:
@@ -213,6 +249,8 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 	round_index += 1
 	if applied_power.get("type", "") == "reverse_direction":
 		turn_direction *= -1
+	if applied_power.get("type", "") == "choose_two_next":
+		next_card_choice = 2
 	if applied_power.get("type", "") == "grant_free_skip":
 		var target := str(applied_power.get("target", ""))
 		free_skips[target] = int(free_skips.get(target, 0)) + 1

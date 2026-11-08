@@ -38,5 +38,22 @@ func _initialize() -> void:
 	assert(e.submit_vote("c", false))
 	var result: Dictionary = e.resolve_round()
 	assert(result["awards"]["a"] == 10) # Storyteller fooled majority
+	var power_engine = Engine.new()
+	var powers: Array[Dictionary] = [
+		{"id": "qs_power_001", "category": "table_flip"},
+		{"id": "qs_power_002", "category": "table_flip"}
+	]
+	assert(power_engine.setup(["a", "b", "c"], powers, 10, 99))
+	assert(power_engine.draw_next("table_flip").size() > 0)
+	if str(power_engine.current_card["id"]) == "qs_power_001":
+		assert(power_engine.resolve_round().is_empty())
+		assert(power_engine.apply_power("b").is_empty())
+		assert(power_engine.apply_power("a").get("type") == "swap_next_turns")
+		assert(power_engine.apply_power("a").is_empty())
+		assert(power_engine.resolve_round()["power"]["type"] == "swap_next_turns")
+		assert(power_engine.active_player_index == 2)
+	else:
+		assert(power_engine.apply_power("a").is_empty())
+		assert(power_engine.resolve_round().is_empty())
 	print("QAADET_EL_SOHAB_RULES_SMOKE_PASS")
 	quit()

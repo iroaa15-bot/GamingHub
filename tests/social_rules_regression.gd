@@ -3,7 +3,7 @@ extends SceneTree
 const Engine = preload("res://scripts/qaadet_el_sohab_engine.gd")
 func _card(category: String, id: String) -> Dictionary:
 	return {"id": id, "category": category, "text_ar": "اختبار قواعد اللعبة", "points": 10}
-func _engine(category: String, players: Array[String]) -> RefCounted:
+func _engine(category: String, players: Array[String]) -> QaadetElSohabEngine:
 	var engine = Engine.new()
 	var cards: Array[Dictionary] = []
 	for i in range(25):

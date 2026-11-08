@@ -86,8 +86,8 @@ func _draw() -> void:
         _show_final_standings()
         return
     if not setup_done:
-        _label("اختار عدد اللاعبين للأوفلاين")
-        for count in range(2, 7):
+        _label("اختار عدد اللاعبين للأوفلاين (3–6). لاعبان فقط لا ينتج عنهما أقلية.")
+        for count in range(3, 7):
             var chosen := count
             _button(str(count) + " لاعبين", func(): _start_players(chosen))
         _button("رجوع", func(): get_tree().change_scene_to_file("res://scenes/MaanaModeSelect.tscn"))

@@ -15,6 +15,7 @@ var panel: VBoxContainer
 var feedback: Label
 var all_cards: Array[Dictionary] = []
 var finished := false
+var match_started := false
 
 func _ready() -> void:
 	all_cards = _load_cards()
@@ -71,6 +72,7 @@ func _button(value: String, callback: Callable) -> void:
 	panel.add_child(button)
 
 func _render_setup() -> void:
+	match_started = false
 	_layout("افتح قلبك")
 	_text("كل لاعب يجاوب على كارت في دوره. المشاركة = 10 نقاط، والتخطي بدون خصم. تقدر تتخطى أي سؤال مش مرتاح له.", 20)
 	_text("اكتب أسماء اللاعبين مفصولة بفاصلة (من 2 إلى 6)", 19)
@@ -104,6 +106,7 @@ func _start() -> void:
 		feedback.text = "تعذر تجهيز المباراة."
 		return
 	finished = false
+	match_started = true
 	_next()
 
 func _distinct_count(values: Array[String]) -> int:
@@ -139,6 +142,9 @@ func _complete(participated: bool) -> void:
 		_next()
 
 func _render_results() -> void:
+	if not match_started:
+		_render_setup()
+		return
 	_layout("النتيجة الحالية — افتح قلبك")
 	var ranking := engine.players.duplicate()
 	ranking.sort_custom(func(a, b): return int(engine.scores[a]) > int(engine.scores[b]))
@@ -146,8 +152,24 @@ func _render_results() -> void:
 		_text("%d. %s — %d نقطة" % [i + 1, ranking[i], int(engine.scores[ranking[i]])], 23)
 	if not engine.current_card.is_empty():
 		_text("الجولة المفتوحة لم تُحسب.", 17)
+	if engine.round_index < engine.round_limit:
+		_button("استكمال المباراة", _resume)
 	_button("مباراة جديدة", _render_setup)
 	_button("رجوع لقائمة اللعبة", _back)
+
+func _resume() -> void:
+	if not engine.current_card.is_empty():
+		_show_existing()
+	else:
+		_next()
+
+func _show_existing() -> void:
+	_layout("افتح قلبك — الجولة %d من %d" % [engine.round_index + 1, engine.round_limit])
+	_text("الدور على: %s" % engine.players[engine.active_player_index])
+	_text(str(engine.current_card.get("text_ar", "")), 29)
+	_button("جاوبت — +10 نقاط", func(): _complete(true))
+	_button("تخطي السؤال — بدون نقاط", func(): _complete(false))
+	_button("النتيجة الحالية", _render_results)
 
 func _back() -> void:
 	get_tree().change_scene_to_file("res://scenes/OpenHeartMode.tscn")

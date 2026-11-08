@@ -66,6 +66,8 @@ func _new_card() -> void:
 func _draw() -> void:
     _clear()
     _label("معانا ولا علينا")
+    if setup_done:
+        _label("الجولة %d / %d" % [mini(completed_rounds + 1, MATCH_ROUNDS), MATCH_ROUNDS])
     if setup_done and (completed_rounds >= MATCH_ROUNDS or _active_players().size() <= 1):
         _show_final_standings()
         return

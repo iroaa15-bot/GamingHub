@@ -27,6 +27,7 @@ var free_skips: Dictionary = {}
 var next_card_choice := 1
 var offered_card_ids: Array[String] = []
 var pending_free_skip_target := ""
+var next_turn_swap_pending := false
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
 	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
@@ -40,6 +41,7 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	next_card_choice = 1
 	offered_card_ids.clear()
 	pending_free_skip_target = ""
+	next_turn_swap_pending = false
 	scores.clear()
 	used_ids.clear()
 	for id in players:
@@ -83,7 +85,9 @@ func lock_category(category: String) -> bool:
 func draw_next(category: String = "") -> Dictionary:
 	if not category.is_empty() and not CATEGORIES.has(category):
 		return {}
-	if not active_category.is_empty() and category != active_category:
+	if active_category.is_empty() or category != active_category:
+		return {}
+	if next_card_choice > 1:
 		return {}
 	if round_index >= round_limit or not current_card.is_empty() and not resolved:
 		return {}
@@ -163,7 +167,7 @@ func apply_power(actor: String, target: String = "") -> Dictionary:
 	return power_effect.duplicate(true)
 
 func available_card_choices(category: String) -> Array[Dictionary]:
-	if not current_card.is_empty() or next_card_choice < 2:
+	if not current_card.is_empty() or next_card_choice < 2 or active_category.is_empty() or category != active_category:
 		return []
 	if not offered_card_ids.is_empty():
 		var cached: Array[Dictionary] = []
@@ -187,7 +191,7 @@ func available_card_choices(category: String) -> Array[Dictionary]:
 func draw_chosen_card(category: String, card_id: String) -> Dictionary:
 	if not current_card.is_empty() or next_card_choice < 2 or round_index >= round_limit or not offered_card_ids.has(card_id):
 		return {}
-	if not active_category.is_empty() and category != active_category:
+	if active_category.is_empty() or category != active_category:
 		return {}
 	for card in deck:
 		if str(card.get("id", "")) == card_id and str(card.get("category", "")) == category and not used_ids.has(card_id):
@@ -272,7 +276,13 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 		free_skips[target] = int(free_skips.get(target, 0)) + 1
 	active_player_index = posmod(active_player_index + turn_direction, players.size())
 	if applied_power.get("type", "") == "swap_next_turns":
+		# A legacy power swaps the next two turn positions without repeating the actor.
+		# The second player is scheduled immediately, then the first on the following turn.
+		next_turn_swap_pending = true
 		active_player_index = posmod(active_player_index + turn_direction, players.size())
+	elif next_turn_swap_pending:
+		next_turn_swap_pending = false
+		active_player_index = posmod(active_player_index - turn_direction * 2, players.size())
 	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit, "power": applied_power}
 	current_card.clear()
 	story_committed = false

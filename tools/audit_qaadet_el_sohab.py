@@ -24,9 +24,9 @@ EXPECTED = {
     "table_flip": ("", 0),
 }
 def normalize(text):
-    text = re.sub(r"[\\u064b-\\u065f\\u0670\\u0640]", "", text)
+    text = re.sub(r"[\u064b-\u065f\u0670\u0640]", "", text)
     text = text.translate(str.maketrans("أإآىة", "ااايه"))
-    return re.sub(r"[^\\w]+", " ", text).strip().lower()
+    return re.sub(r"[^\w]+", " ", text).strip().lower()
 
 def main():
     errors = []

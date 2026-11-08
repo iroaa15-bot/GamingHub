@@ -156,7 +156,7 @@ func _vote_screen() -> void:
 		_button("لم ينجح", _cast.bind(player, false))
 		break
 	_button("إنهاء التصويت بالنتائج المسجلة", func(): _resolve(true))
-	_button("النتائج الحالية", _results)
+	_label("النتائج هتظهر بعد انتهاء التصويت؛ علشان التصويت يفضل منفصل.", 16)
 
 func _cast(player: String, passed: bool) -> void:
 	if not engine.submit_vote(player, passed):

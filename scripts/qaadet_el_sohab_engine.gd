@@ -18,6 +18,8 @@ var votes: Dictionary = {}
 var resolved := false
 var story_committed := false
 var committed_story_truth := false
+var power_applied := false
+var power_effect: Dictionary = {}
 var rng := RandomNumberGenerator.new()
 
 func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
@@ -46,6 +48,8 @@ func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10
 	votes.clear()
 	resolved = false
 	story_committed = false
+	power_applied = false
+	power_effect.clear()
 	if seed_value == 0:
 		rng.randomize()
 	else:
@@ -72,6 +76,8 @@ func draw_next(category: String = "") -> Dictionary:
 	votes.clear()
 	resolved = false
 	story_committed = false
+	power_applied = false
+	power_effect.clear()
 	return current_card.duplicate(true)
 
 func commit_story(actor: String, is_true: bool) -> bool:
@@ -103,11 +109,27 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	votes[voter] = choice
 	return true
 
+func apply_power(actor: String) -> Dictionary:
+	if current_card.is_empty() or resolved or power_applied or str(current_card.get("category", "")) != "table_flip":
+		return {}
+	if actor != players[active_player_index]:
+		return {}
+	var card_id := str(current_card.get("id", ""))
+	# Only implement effects with a fully specified meaning within this standalone game.
+	# All other cards are rejected instead of silently claiming a power happened.
+	if card_id != "qs_power_001" or players.size() < 3:
+		return {}
+	power_applied = true
+	power_effect = {"type": "swap_next_turns", "card_id": card_id}
+	return power_effect.duplicate(true)
+
 func resolve_round(participated: bool = true, timeout: bool = false) -> Dictionary:
 	if current_card.is_empty() or resolved:
 		return {}
 	var category := str(current_card["category"])
 	if category == "truth_or_fiction" and not story_committed:
+		return {}
+	if category == "table_flip" and not power_applied:
 		return {}
 	if ["act_it", "show_skill", "who_among_us", "truth_or_fiction"].has(category) and not timeout and votes.size() < players.size() - 1:
 		return {}
@@ -151,13 +173,17 @@ func resolve_round(participated: bool = true, timeout: bool = false) -> Dictiona
 				wrong += 1
 		if wrong > float(players.size() - 1) / 2.0:
 			_award(actor, 10, award)
-	# Power effects need dedicated validated server commands; no fake application.
+	var applied_power := power_effect.duplicate(true)
 	resolved = true
 	round_index += 1
 	active_player_index = (active_player_index + 1) % players.size()
-	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit}
+	if applied_power.get("type", "") == "swap_next_turns":
+		active_player_index = (active_player_index + 1) % players.size()
+	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit, "power": applied_power}
 	current_card.clear()
 	story_committed = false
+	power_applied = false
+	power_effect.clear()
 	return result
 
 func _award(player_id: String, amount: int, awards: Dictionary) -> void:

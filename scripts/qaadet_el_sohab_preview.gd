@@ -189,7 +189,7 @@ func _commit_story() -> void:
 func _finish() -> void:
 	if engine.current_card.is_empty():
 		return
-	var result: Dictionary = engine.resolve_round(false, true, true)
+	var result: Dictionary = engine.resolve_round(true, true)
 	if result.is_empty():
 		status_text.text = "ثبّت حقيقة القصة قبل إنهاء الجولة."
 		return

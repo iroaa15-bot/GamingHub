@@ -103,7 +103,7 @@ func submit_vote(voter: String, choice: Variant) -> bool:
 	votes[voter] = choice
 	return true
 
-func resolve_round(story_is_true: bool = false, participated: bool = true, timeout: bool = false) -> Dictionary:
+func resolve_round(participated: bool = true, timeout: bool = false) -> Dictionary:
 	if current_card.is_empty() or resolved:
 		return {}
 	var category := str(current_card["category"])
@@ -149,7 +149,7 @@ func resolve_round(story_is_true: bool = false, participated: bool = true, timeo
 				correct += 1
 			else:
 				wrong += 1
-		if wrong > correct:
+		if wrong > float(players.size() - 1) / 2.0:
 			_award(actor, 10, award)
 	# Power effects need dedicated validated server commands; no fake application.
 	resolved = true

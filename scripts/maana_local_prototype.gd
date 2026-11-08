@@ -196,9 +196,22 @@ func _show_final_standings() -> void:
     elif winners.size() == 1:
         _label("الفائز: " + str(winners[0]))
     else:
-        _label("تعادل في المركز الأول: " + ", ".join(winners))
-    _button("العب من جديد", func(): setup_done = false; _draw())
+        var winner_names := PackedStringArray()
+        for winner in winners:
+            winner_names.append(str(winner))
+        _label("تعادل في المركز الأول: " + ", ".join(winner_names))
+    _button("العب من جديد", _reset_match)
     _button("رجوع لقائمة الألعاب", func(): get_tree().change_scene_to_file("res://scenes/SocialGamesMenu.tscn"))
+
+func _reset_match() -> void:
+    setup_done = false
+    handoff_ready = false
+    completed_rounds = 0
+    votes.clear()
+    deck.clear()
+    penalties.clear()
+    card.clear()
+    _draw()
 
 func _active_players() -> Array:
     var active: Array = []

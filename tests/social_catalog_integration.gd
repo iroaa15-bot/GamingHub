@@ -14,12 +14,16 @@ func run() -> void:
   for name in scenes:
    var mode=load("res://scenes/"+name+"Mode.tscn").instantiate()
    root.add_child(mode);mode.language=language;mode._render()
+   await process_frame
+   valid=valid and mode.has_node("SocialGameBackdrop")
    var buttons: Array=mode.layout.get_children().filter(func(n):return n is Button)
    valid=valid and buttons.size()==3 and buttons[0].disabled and not buttons[1].disabled and not buttons[2].disabled
    mode.queue_free();await process_frame
    var offline=load("res://scenes/"+name+".tscn").instantiate()
    root.add_child(offline);await process_frame
-   valid=valid and offline.get_child_count()>0
+   valid=valid and offline.get_child_count()>0 and offline.has_node("SocialGameBackdrop")
+   for control in offline.find_children("*","Button",true,false):
+    valid=valid and control.custom_minimum_size.y>=60
    offline.queue_free();await process_frame
  main.queue_free();await process_frame
  print("SOCIAL_CATALOG_INTEGRATION ",valid," sixteen catalog entries; six real local scenes; AR/EN entry routes; online disabled honestly")

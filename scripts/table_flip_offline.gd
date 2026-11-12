@@ -61,6 +61,8 @@ func _screen(title: String) -> void:
 	for child in get_children():
 		remove_child(child)
 		child.queue_free()
+	var backdrop = load("res://scripts/social_game_backdrop.gd").new()
+	add_child(backdrop)
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(scroll)

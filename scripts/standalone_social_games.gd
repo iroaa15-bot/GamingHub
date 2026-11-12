@@ -19,6 +19,7 @@ func _ready() -> void:
     language=load("res://scripts/player_preferences.gd").language()
     layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
     selected_game = initial_game
+    add_child(load("res://scripts/social_game_backdrop.gd").new())
     var scroll := ScrollContainer.new()
     scroll.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(scroll)

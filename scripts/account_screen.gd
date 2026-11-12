@@ -56,7 +56,6 @@ func _ready() -> void:
  _button(_t("لديك حساب؟ تسجيل الدخول","Already registered? Sign in") if register_mode else _t("إنشاء حساب جديد","Create a new account"),_switch_mode)
  for provider in ["google","facebook"]:
   var name_value: String="Google" if provider=="google" else "Facebook"
-  var connected: bool=provider in auth.user_profile.get("providers",[])
   var title_value: String=_t("تسجيل الدخول باستخدام ","Sign in with ")+name_value
   var control: Button=_button(title_value,_provider_action.bind(provider))
   control.disabled=true;provider_buttons[provider]=control
@@ -64,7 +63,7 @@ func _ready() -> void:
  provider_retry=_button(_t("إعادة محاولة الاتصال","Retry connection"),_check_providers)
  provider_retry.visible=false
  _button(_t("استعادة الحساب والتقدم","Restore account and progress"),_restore)
- _button(_t("المتابعة كضيف","Continue as guest"),_back,"teal")
+ _button(_t("العودة للألعاب","Back to games") if not auth.access_token.is_empty() else _t("المتابعة كضيف","Continue as guest"),_back,"teal")
  AccountSkin.compact_menu(panel)
  AccountSkin.enable_menu_swipe(panel)
  _check_providers.call_deferred()
@@ -106,7 +105,7 @@ func _check_providers() -> void:
  if OS.is_debug_build():print("GH_PROVIDER_CHECK native=",native," status=",int(result.get("status",0)))
  for provider in provider_buttons:
   provider_buttons[provider].set_meta("provider_available",native and result.get("ok",false) and result.get("data",{}).get(provider,false))
-  provider_buttons[provider].disabled=not provider_buttons[provider].get_meta("provider_available") or provider in auth.user_profile.get("providers",[])
+  provider_buttons[provider].disabled=not provider_buttons[provider].get_meta("provider_available")
  var requested: String=auth.requested_provider
  auth.requested_provider=""
  if not requested.is_empty(): _provider_action(requested)
@@ -119,7 +118,7 @@ func _busy(value: bool) -> void:
  submit_busy=value
  for control in action_buttons: control.disabled=value
  for provider in provider_buttons:
-  provider_buttons[provider].disabled=value or not provider_buttons[provider].get_meta("provider_available",false) or provider in auth.user_profile.get("providers",[])
+  provider_buttons[provider].disabled=value or not provider_buttons[provider].get_meta("provider_available",false)
  email_field.editable=not value;password_field.editable=not value;name_field.editable=not value
  if value: status_label.text=_t("جارٍ الاتصال…","Connecting…")
 
@@ -175,7 +174,7 @@ func _restore_progress() -> Dictionary:
 func _safe_error(result: Dictionary) -> String:
  match int(result.get("status",0)):
   401: return _t("راجع البريد وكلمة المرور، ثم حاول مجددًا.","Check your email and password, then try again.")
-  409: return _t("الحساب مرتبط بالفعل. سجّل الدخول إليه أولًا؛ تقدمك محفوظ.","This account is already linked. Sign in to it first; your progress is safe.")
+  409: return _t("تعذر استخدام هذا الحساب. جرّب تسجيل الدخول إليه؛ تقدمك محفوظ.","Unable to use this account. Try signing in to it; your progress is safe.")
   429: return _t("انتظر قليلًا قبل إعادة المحاولة.","Please wait before trying again.")
  return _t("تعذر تسجيل الدخول الآن. يمكنك المحاولة مجددًا أو اللعب كضيف.","Sign-in is unavailable right now. Try again or continue as a guest.")
 

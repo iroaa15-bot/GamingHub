@@ -56,3 +56,23 @@ tests in this batch. No new APK/AAB or physical acceptance is claimed.
   directory. Android persistence and provider sign-in remain deferred.
 - Evidence: outputs/welcome-portrait-preview, outputs/profile-unified-preview,
   outputs/button-inventory-20261112.json (workspace artifacts, not shipped code).
+
+## Physical acceptance follow-up (12 November)
+
+APK860e834 built and installed as updates on OPPO Android9 and S23 Android16;
+progress hashes matched before/after. SHA256 f7dbb3a4373ca25d21b750ff2688300f0a46c8abb193487416be65294b3a2a81.
+Google on S23 and Facebook on OPPO returned from real provider UI to the
+server-backed profile after user completion. The legacy QA account still lists
+both providers; new independent-account policy does not split existing rows.
+S23 system picker/upload succeeded and displayed the selected Gaming Hub test
+image with a saved confirmation. Cross-device/restart acceptance is ongoing.
+OPPO reproduced native SIGABRT on GLThread during picker/task return at16:42;
+this is unresolved and blocks release acceptance. No crash fix is claimed.
+
+Physical review found unthemed social entry/local screens. A shared lightweight
+backdrop now supplies the existing skin, wrapping, touch targets, padding and
+Android Back handling. Catalog integration and provider-account-switch UI checks
+passed locally; these follow-up changes still require APK verification.
+Provider buttons no longer disable a provider just because it belongs to the
+current profile, allowing a different account to be chosen. Busy requests still
+lock the controls; signed-in return navigation is labelled Back to games.

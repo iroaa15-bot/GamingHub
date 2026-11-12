@@ -29,12 +29,14 @@ func run() -> void:
  if valid:
   valid=a.client.requested_game=="party:open_heart" and b.client.requested_game=="party:open_heart"
   valid=valid and not a._match_controls.visible and not b._match_controls.visible
+  valid=valid and a._seats.is_visible_in_tree() and b._seats.is_visible_in_tree()
   var controls: Array=a.party_panel.find_children("*","Button",true,false)
   valid=valid and controls.size()==2
   print("SOCIAL_UI_STAGE controls=",valid," count=",controls.size())
   if valid:controls[0].pressed.emit()
   valid=valid and await until(func():return a.client.state.party.phase=="results" and b.client.state.party.phase=="results")
   valid=valid and int(a.client.state.scores[0])==10 and int(a.client.state.scores[1])==0 and a.client.state.scores==b.client.state.scores
+  valid=valid and a._seats.is_visible_in_tree() and a.heading.text.contains("1")
   print("SOCIAL_UI_STAGE results=",valid," scores=",a.client.state.scores," peer_scores=",b.client.state.scores)
  a.client.send_action("duel_leave")
  await until(func():return a.client.code.is_empty() and b.client.code.is_empty())

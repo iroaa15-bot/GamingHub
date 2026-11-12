@@ -2,6 +2,7 @@ extends "res://scripts/photo_duel_extension_ui.gd"
 ## Reuses verified room membership, player cards, reconnect and voice components.
 static var selected_social := "open_heart"
 var party_panel: VBoxContainer
+var _social_phase_key := ""
 const SOCIAL_TITLES := {"open_heart":["افتح قلبك","Open Heart"],"act_it":["مثّل وورّينا","Act It"],"who_among_us":["مين فينا؟","Who Among Us"],"show_skill":["ورّينا شطارتك","Show Your Skill"],"truth_or_fiction":["صدق ولا تأليف؟","Truth or Fiction"],"table_flip":["اقلب الترابيزة","Flip the Table"]}
 
 static func rooms_available() -> bool:
@@ -55,15 +56,27 @@ func _state(value: Dictionary) -> void:
  super._state(value)
  _match_controls.hide();_online_filter_box.hide();_online_category.hide();timer_field.hide();pass_button.hide();_voice_question.hide()
  if not is_instance_valid(party_panel):return
- for child in party_panel.get_children():party_panel.remove_child(child);child.queue_free()
+ for child in party_panel.get_children():
+  if child==_seats:continue
+  party_panel.remove_child(child);child.queue_free()
  var party: Dictionary=value.get("party",{})
  var phase: String=str(party.get("phase","lobby"))
  party_panel.visible=phase!="lobby" and not party.is_empty() and not bool(value.get("closed",false)) and not client.code.is_empty()
  if not party_panel.visible:return
+ if _seats.get_parent()!=party_panel:_seats.reparent(party_panel)
+ party_panel.move_child(_seats,0)
+ _seats.show()
  _main_column.move_child(party_panel,_main_column.get_children().find(_match_controls))
  var saved_column=column;column=party_panel
  var round_number: int=int(party.get("round",0))
- heading.text=tr_pair("الجولة %d من %d","Round %d of %d") % [mini(round_number+1,int(party.get("rounds",10))),int(party.get("rounds",10))]
+ var display_round: int=round_number+1 if phase=="active" else round_number
+ heading.text=tr_pair("الجولة %d من %d","Round %d of %d") % [mini(display_round,int(party.get("rounds",10))),int(party.get("rounds",10))]
+ var phase_key: String=client.code+":"+phase+":"+str(round_number)
+ if phase_key!=_social_phase_key:
+  _social_phase_key=phase_key
+  var focus=get_viewport().gui_get_focus_owner()
+  if focus!=null and (party_panel.is_ancestor_of(focus) or focus==_accept_button):focus.release_focus()
+  _scroll_social_to_top.call_deferred()
  var paused: bool=bool(value.get("paused",false))
  var actor: String=str(party.get("actor",""))
  var is_actor: bool=actor==str(client.player)
@@ -115,3 +128,10 @@ func _state(value: Dictionary) -> void:
   control.custom_minimum_size.y=maxf(control.custom_minimum_size.y,60)
  column=saved_column
  VisualSkin.compact_menu(party_panel)
+
+func _scroll_social_to_top() -> void:
+ if not is_inside_tree():return
+ var focus=get_viewport().gui_get_focus_owner()
+ if focus is LineEdit or focus is TextEdit:return
+ for child in get_children():
+  if child is ScrollContainer:child.scroll_vertical=0

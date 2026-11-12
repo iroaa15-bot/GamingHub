@@ -20,6 +20,7 @@ func run() -> void:
      for i in range(count):state.connected.append(true);state.scores.append(0);state.confirmed.append(true)
      view._state(state);await process_frame
      valid=valid and not view._match_controls.visible and view.party_panel.visible
+     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==view.party_panel
      var expected: int=0
      if category=="open_heart":expected=2 if player==0 else 0
      elif category=="who_among_us":expected=count-1
@@ -29,6 +30,7 @@ func run() -> void:
      var buttons: Array=view.party_panel.find_children("*","Button",true,false)
      valid=valid and buttons.size()==expected
      state.paused=true;view._state(state)
+     valid=valid and view._seats.is_visible_in_tree()
      for control in view.party_panel.find_children("*","Button",true,false):valid=valid and control.disabled
      cases+=1
    view.queue_free();await process_frame

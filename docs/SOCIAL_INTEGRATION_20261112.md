@@ -1,3 +1,13 @@
+## Physical follow-up — 13 November
+
+Physical inspection of APK14dc7e5 found that the inherited photo-game container
+also owned player cards, so hiding its photo controls hid the cards. Social UI
+now reparents and retains the shared verified-profile card grid in its own panel,
+keeps it visible across snapshots/results, resets scroll on round transitions,
+and shows the completed round number on results. The 120-case UI suite now
+asserts actual card visibility; the real UI/network score test also verifies it.
+No server rules or scoring were changed by this layout fix.
+
 # Current social-room and voice integration status — 12 November 2026
 
 The new social room adapter is now connected to the composed server factory and

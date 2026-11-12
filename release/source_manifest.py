@@ -7,7 +7,7 @@ import argparse, hashlib, json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DIRS = ('docs', 'addons', '.github/workflows', 'assets', 'scenes', 'scripts', 'data', 'tests',
+DIRS = ('docs', 'addons', '.github/workflows', 'assets', 'scenes', 'scripts', 'data', 'content', 'tests',
         'server', 'ai_daily', 'liveops', 'monetization', 'release', 'identity_backend', 'services', 'deployment', 'tools', 'native')
 TOP = ('project.godot', 'export_presets.cfg', 'render.yaml', '.gitignore',
        'README_START_HERE_AR.md', 'RELEASE_v11.5_AR.md', 'RELEASE_v11.4_AR.md', 'RELEASE_v11.3_AR.md', 'RELEASE_v11.2_AR.md', 'RELEASE_v11.1_AR.md', 'RELEASE_v10.7_AR.md', 'RELEASE_v10.6_AR.md', 'RELEASE_v10.5_AR.md', 'RELEASE_v10.4_AR.md', 'RELEASE_v10.3_AR.md', 'RELEASE_v10.2_AR.md', 'RELEASE_v10.1_AR.md', 'RELEASE_v10.0_AR.md', 'RELEASE_v9.9_AR.md', 'RELEASE_v9.8_AR.md', 'RELEASE_v9.2_AR.md', 'RELEASE_v9.3_AR.md', 'RELEASE_v9.4_AR.md', 'RELEASE_v9.5_AR.md', 'RELEASE_v9.6_AR.md', 'RELEASE_v9.7_AR.md')

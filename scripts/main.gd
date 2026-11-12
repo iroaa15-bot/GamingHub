@@ -1935,6 +1935,7 @@ func show_home() -> void:
  var xp: int=maxi(0,int(profile.get("xp",0)))
  label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
  _add_unique_game_catalog()
+ _add_social_game_catalog()
  _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
   [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
   [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
@@ -1976,6 +1977,26 @@ func _add_unique_game_catalog() -> void:
  for index in catalog_order.slice(primary_count):
   var tile := make_game_tile(index,previews[index],index in favorites)
   tile.set_meta("game_id",index);more.add_child(tile)
+
+func _add_social_game_catalog() -> void:
+ label(tr_ui("قعدة الصحاب","Friends gathering"),22)
+ var social_grid:=GridContainer.new()
+ social_grid.name="SocialGameCatalog"
+ social_grid.columns=1 if reading_scale>=1.25 else 2
+ root.add_child(social_grid)
+ var entries: Array=[
+  ["افتح قلبك","Open Heart","OpenHeartMode"],
+  ["مثّل وورّينا","Act It","ActItMode"],
+  ["مين فينا؟","Who Among Us","WhoAmongUsMode"],
+  ["ورّينا شطارتك","Show Your Skill","ShowSkillMode"],
+  ["صدق ولا تأليف؟","Truth or Fiction","TruthOrFictionMode"],
+  ["اقلب الترابيزة","Flip the Table","TableFlipMode"]]
+ for index in range(entries.size()):
+  var entry: Array=entries[index]
+  var scene_path: String="res://scenes/"+str(entry[2])+".tscn"
+  var item:=button(tr_ui(entry[0],entry[1]),func():get_tree().change_scene_to_file.call_deferred(scene_path),PANEL)
+  item.set_meta("social_game_id",index)
+  item.reparent(social_grid)
 
 func _home_activity_section(title: String, entries: Array) -> void:
  if title==tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES") and not PublishedContent.settings.get("show_activities",true): return

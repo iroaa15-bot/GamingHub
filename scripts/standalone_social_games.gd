@@ -58,8 +58,8 @@ func _render() -> void:
         _button("رجوع لقائمة الألعاب" if language=="ar" else "Games menu", _home)
     else:
         _label(GAMES[selected_game]["title"] if language=="ar" else ENGLISH[selected_game])
-        _button("غرف الأصدقاء" if language=="ar" else "Friend rooms", func(): pass, true)
-        layout.get_child(layout.get_child_count()-1).tooltip_text="غرف هذه اللعبة غير متاحة في هذه النسخة" if language=="ar" else "Rooms for this game are unavailable in this build"
+        _button("غرف الأصدقاء" if language=="ar" else "Friend rooms", _online, not load("res://scripts/social_room_ui.gd").rooms_available())
+        layout.get_child(layout.get_child_count()-1).tooltip_text="العب مع أصدقائك عند توفر الاتصال" if language=="ar" else "Play with friends when a connection is available"
         _button("اللعب بدون إنترنت" if language=="ar" else "Play offline", _offline)
         _button("قائمة الألعاب" if language=="ar" else "Games menu", _home)
 
@@ -69,6 +69,11 @@ func _choose(index: int) -> void:
 
 func _offline() -> void:
     get_tree().change_scene_to_file(GAMES[selected_game]["scene"])
+
+func _online() -> void:
+    var categories: Array=["open_heart","act_it","who_among_us","show_skill","truth_or_fiction","table_flip"]
+    load("res://scripts/social_room_ui.gd").selected_social=categories[selected_game]
+    get_tree().change_scene_to_file("res://scenes/SocialRoom.tscn")
 
 func _back() -> void:
     if initial_game >= 0:

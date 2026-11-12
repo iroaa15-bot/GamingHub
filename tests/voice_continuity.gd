@@ -22,7 +22,12 @@ func run() -> void:
    continuous=continuous and bridge.active and adapter.requested and bridge.stops==initial_stops
  adapter._event({"type":"duel_error","scope":"voice","message":"Request rate limit"})
  adapter._event({"type":"duel_error","scope":"voice","message":"Stale audio frame"})
- continuous=continuous and bridge.active and adapter.requested and adapter._congestion_events==2
+ adapter._event({"type":"duel_error","scope":"voice","message":"Voice consent or epoch mismatch"})
+ continuous=continuous and bridge.active and adapter.requested and adapter._congestion_events==3
+ snapshot.voice.peer_enabled=false;adapter._state(snapshot)
+ adapter._event({"type":"duel_error","scope":"voice","message":"Voice consent or epoch mismatch"})
+ var withdrawn: bool=not bridge.active and adapter.requested
+ snapshot.voice.peer_enabled=true;adapter._state(snapshot)
  var admitted: int=0
  for index in range(100):
   if adapter._admit_frame(0):admitted+=1
@@ -30,5 +35,5 @@ func run() -> void:
  snapshot.primary_mode="text";adapter._state(snapshot)
  var text_stopped: bool=not bridge.active and not adapter.requested
  adapter.queue_free();connection.queue_free();bridge.queue_free();await process_frame
- print("VOICE_CONTINUITY continuous=",continuous," text_stopped=",text_stopped," bounded=",bounded)
- quit(0 if continuous and text_stopped and bounded else 1)
+ print("VOICE_CONTINUITY continuous=",continuous," text_stopped=",text_stopped," bounded=",bounded," peer_withdrawal_stops_native=",withdrawn)
+ quit(0 if continuous and text_stopped and bounded and withdrawn else 1)

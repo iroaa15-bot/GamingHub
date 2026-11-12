@@ -117,9 +117,12 @@ func _event(message: Dictionary) -> void:
   # Keep the user's existing call intent; do not send more frames/opt-outs into
   # a socket the server has just declared unbound.
   if str(message.get("message","")).to_lower()=="not in a room":return
-  if str(message.get("message","")) in ["Request rate limit","Stale audio frame"]:
+  if str(message.get("message","")) in ["Request rate limit","Stale audio frame","Voice consent or epoch mismatch"]:
    # These reject individual media frames, not microphone consent or the call.
    # TCP/mobile jitter must not turn a dropped frame into a permanent hang-up.
+   # A consent update rotates the server epoch. Frames already in flight can
+   # arrive under the former epoch; canonical snapshots still stop native audio
+   # immediately when either participant withdraws consent.
    _congestion_events+=1
    return
   _failure(str(message.get("message","Voice transport failed")))

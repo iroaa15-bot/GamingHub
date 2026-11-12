@@ -12,14 +12,14 @@ from fastapi import Request,WebSocket,WebSocketDisconnect
 from fastapi.responses import Response
 from websockets.exceptions import ConnectionClosed
 from identity_backend.app import app,initialize
-from shared_quiz_local import SharedQuizHub
+from social_rooms import SocialHub
 
 @asynccontextmanager
 async def lifespan(app):
     secret=os.environ.get('DUEL_AUTH_SECRET','')
     if len(secret)<32:raise RuntimeError('DUEL_AUTH_SECRET must be configured server-side')
     initialize()
-    hub=SharedQuizHub(secret,os.environ.get('DUEL_MODERATION_DB',':memory:'))
+    hub=SocialHub(secret,os.environ.get('DUEL_MODERATION_DB',':memory:'))
     app.state.hub=hub
     tasks=[asyncio.create_task(hub.sweep()),asyncio.create_task(hub.mixer())]
     try:yield

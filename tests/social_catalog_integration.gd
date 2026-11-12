@@ -17,7 +17,7 @@ func run() -> void:
    await process_frame
    valid=valid and mode.has_node("SocialGameBackdrop")
    var buttons: Array=mode.layout.get_children().filter(func(n):return n is Button)
-   valid=valid and buttons.size()==3 and buttons[0].disabled and not buttons[1].disabled and not buttons[2].disabled
+   valid=valid and buttons.size()==3 and buttons[0].disabled==(not load("res://scripts/social_room_ui.gd").rooms_available()) and not buttons[1].disabled and not buttons[2].disabled
    mode.queue_free();await process_frame
    var offline=load("res://scenes/"+name+".tscn").instantiate()
    root.add_child(offline);await process_frame
@@ -26,5 +26,5 @@ func run() -> void:
     valid=valid and control.custom_minimum_size.y>=60
    offline.queue_free();await process_frame
  main.queue_free();await process_frame
- print("SOCIAL_CATALOG_INTEGRATION ",valid," sixteen catalog entries; six real local scenes; AR/EN entry routes; online disabled honestly")
+ print("SOCIAL_CATALOG_INTEGRATION ",valid," sixteen catalog entries; six real local scenes; AR/EN routes; online requires server capability")
  quit(0 if valid else 1)

@@ -1,3 +1,33 @@
+# Current social-room and voice integration status — 12 November 2026
+
+The new social room adapter is now connected to the composed server factory and
+the actual game entry screens. Hosting remains unchanged. Hosted social content
+is fail-closed unless GAMINGHUB_ENABLE_DRAFT_SOCIAL=1 is explicitly configured;
+this does not approve the draft content for release. The UI negotiates common
+capabilities first, so older servers show an unavailable/offline fallback.
+
+Completed local evidence:
+- 14 server cases passed (13-case social transport suite plus the targeted legacy
+  photo/quiz compatibility case). These include actual authenticated WebSockets,
+  all six social games, private-token resume, 90-second expiry, secret votes,
+  performance timeout, power effects and duplicate-award rejection.
+- Actual Godot network clients passed 30 game/player-count configurations (2–6),
+  plus a complete 10-round Open Heart match. The harness reuses six transport
+  sessions; normal session/message rate limits were retained.
+- 120 AR/EN room UI cases passed. Actual UI create/join/readiness/button-to-score
+  integration also passed over the local authenticated endpoint.
+- Voice continuity regression reproduced a permanent hang-up on an old in-flight
+  epoch frame before the fix, and passed afterward. Peer consent withdrawal,
+  manual stop, room changes, native interruption and mute rules remain enforced.
+  No native-plugin or engine crash fix is claimed.
+
+Remaining acceptance: rebuild/install this batch, physical local/hosted matches,
+voice reconnect and hearing checks, full video, legacy linked-account separation,
+content editorial/English completion, licensed media expansion and native OPPO
+lifecycle crash. No main/production changes, deployment or Actions were made.
+
+## Earlier integration evidence and content inventory
+
 # Social game integration, 12 November 2026
 
 Source: reviewed additive files from `feature/qaadet-el-sohab-content-20261105`

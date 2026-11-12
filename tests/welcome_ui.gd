@@ -35,6 +35,7 @@ func run() -> void:
  var welcome_buttons: Array=main.root.get_children().filter(func(n):return n is Button and not n is MenuButton)
  check(welcome_buttons.size()==3,"exactly three welcome entry buttons")
  check(not find_action(main,"google").disabled and not find_action(main,"facebook").disabled,"provider actions route to guarded native account flow")
+ check(find_action(main,"google").icon!=null and find_action(main,"facebook").icon!=null,"official provider marks present")
  check(main.layout_direction==Control.LAYOUT_DIRECTION_RTL,"Arabic RTL")
  await snap("welcome-ar")
  main._welcome_guest();await process_frame

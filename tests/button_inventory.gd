@@ -29,6 +29,14 @@ func run() -> void:
    if game not in [0,4,8] and not main.round_bank.is_empty():
     main.finish_round(false,main.correct_answer_text(main.round_bank[0]));await process_frame
     capture(main,"offline_feedback_"+str(game),language)
+ for scene_name in ["OpenHeart","ActIt","WhoAmongUs","ShowSkill","TruthOrFiction","TableFlip"]:
+  var mode=load("res://scenes/"+scene_name+"Mode.tscn").instantiate();root.add_child(mode)
+  await process_frame;capture(mode,"social_mode_"+scene_name,mode.language)
+  mode.queue_free();await process_frame
+  var local_game=load("res://scenes/"+scene_name+".tscn").instantiate();root.add_child(local_game)
+  await process_frame;capture(local_game,"social_setup_"+scene_name,"ar")
+  local_game._start();await process_frame;capture(local_game,"social_play_"+scene_name,"ar")
+  local_game.queue_free();await process_frame
  var auth=root.get_node("GamingHubAccount")
  var previous_api: String=auth.api_base;auth.api_base=""
  var account=load("res://scenes/AccountScreen.tscn").instantiate();root.add_child(account)

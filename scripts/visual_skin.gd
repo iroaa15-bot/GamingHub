@@ -390,7 +390,7 @@ static func compact_menu(parent: Node) -> void:
    node.add_theme_stylebox_override("focus",neon_surface(Color("193a62"),CYAN))
    node.add_theme_color_override("font_color",TEXT)
    node.add_theme_color_override("font_placeholder_color",Color("afc7df"))
-  if node is Button and not node is CheckButton and not node is OptionButton and not node.has_meta("language_switcher"):
+  if node is Button and not node is CheckButton and not node is OptionButton and not node.has_meta("language_switcher") and not node.has_meta("provider_brand"):
    var font_size: int=node.get_theme_font_size("font_size")
    decorate_button(node,str(node.get_meta("menu_tone","secondary")))
    node.add_theme_font_size_override("font_size",font_size)

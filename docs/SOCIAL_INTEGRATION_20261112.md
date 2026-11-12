@@ -40,3 +40,19 @@ offline card content is currently Arabic. Online mode stays disabled honestly.
 
 Android verification is deferred to the end at the owner's request; no phone
 tests in this batch. No new APK/AAB or physical acceptance is claimed.
+
+## Welcome and account UI follow-up
+
+- Portrait welcome reuses the original approved artwork, with lightweight edge
+  blending and the existing three sign-in actions. Provider marks are sourced
+  from official branding pages; provenance is in assets/ui/providers/sources.json.
+- Profile uses the shared circular avatar loader at 88px. Guest-only sessions
+  cannot invoke signed-in backup, restore or photo upload controls; logout is
+  hidden until authenticated. Google and Facebook identities remain independent.
+- Desktop welcome and premium profile checks passed. Button inventory captured
+  478 visible button instances across original and social routes with zero
+  enabled buttons lacking a handler. This checks wiring, not physical clicks.
+- Desktop preference persistence was blocked by the read-only Godot user-data
+  directory. Android persistence and provider sign-in remain deferred.
+- Evidence: outputs/welcome-portrait-preview, outputs/profile-unified-preview,
+  outputs/button-inventory-20261112.json (workspace artifacts, not shipped code).

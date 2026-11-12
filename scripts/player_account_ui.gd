@@ -20,6 +20,8 @@ var _saving := false
 var _friends_list: Label
 var room_code: LineEdit
 var show_friends_first := false
+var _session_controls: Array[Button]=[]
+var _logout_button: Button
 
 func _t(ar: String,en: String) -> String:
  return ar if language=="ar" else en
@@ -36,7 +38,7 @@ func _ready() -> void:
  var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",MenuSkin.card(Color("0b1649"),18));add_child(card)
  card.visible=not show_friends_first
  var content:=VBoxContainer.new();content.add_theme_constant_override("separation",8);card.add_child(content)
- _avatar=TextureRect.new();_avatar.texture=MenuSkin.menu_icon("player");_avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;_avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;_avatar.custom_minimum_size=Vector2(64,64);content.add_child(_avatar)
+ _avatar=load("res://scripts/player_avatar_image.gd").new();_avatar.texture=MenuSkin.menu_icon("player");_avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;_avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;_avatar.custom_minimum_size=Vector2(88,88);content.add_child(_avatar)
  _profile_name=Label.new();_profile_name.text=_t("ضيف","Guest");_profile_name.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;_profile_name.add_theme_font_size_override("font_size",24);content.add_child(_profile_name)
  _level=Label.new();content.add_child(_level)
  _server_points=Label.new();_server_points.visible=false;content.add_child(_server_points)
@@ -45,9 +47,12 @@ func _ready() -> void:
  _refresh_stats()
  status=_label(_t("كل حساب له تقدمه وصورته ونقاطه المستقلة.","Each account has its own progress, photo and points."))
  _button(_t("إعدادات الحساب وتسجيل الدخول","Account settings and sign-in"),_open_account,"gold").visible=not show_friends_first
- _button(_t("تغيير الصورة الشخصية من المعرض","Change profile photo from gallery"),_choose_avatar).visible=not show_friends_first
- _button(_t("حفظ تقدمي في الحساب","Back up progress"),_save_online_progress).visible=not show_friends_first
- _button(_t("استعادة تقدم الحساب","Restore account progress"),_restore_online_progress).visible=not show_friends_first
+ for entry in [[_t("تغيير الصورة الشخصية من المعرض","Change profile photo from gallery"),_choose_avatar],[_t("حفظ تقدمي في الحساب","Back up progress"),_save_online_progress],[_t("استعادة تقدم الحساب","Restore account progress"),_restore_online_progress]]:
+  var session_button:=_button(str(entry[0]),entry[1])
+  session_button.visible=not show_friends_first
+  session_button.disabled=true
+  session_button.tooltip_text=_t("سجّل الدخول لاستخدام هذه الميزة","Sign in to use this feature")
+  _session_controls.append(session_button)
  var friends:=VBoxContainer.new();friends.visible=show_friends_first
  _button(_t("الأصدقاء ودعوات اللعب","Friends and invitations"),func():friends.visible=not friends.visible).visible=not show_friends_first
  add_child(friends)
@@ -60,7 +65,8 @@ func _ready() -> void:
   var share:=Button.new();share.text=_t("مشاركة الدعوة عبر التطبيقات","Share invitation with apps");MenuSkin.decorate_button(share);share.pressed.connect(_share_invite);friends.add_child(share)
  if available:
   var refresh:=Button.new();refresh.text=_t("عرض الأصدقاء والدعوات","Show friends and invitations");MenuSkin.decorate_button(refresh);refresh.pressed.connect(func():client.request("/friends",{},false));friends.add_child(refresh)
- _button(_t("تسجيل الخروج","Sign out"),_logout_account,"danger").visible=not show_friends_first
+ _logout_button=_button(_t("تسجيل الخروج","Sign out"),_logout_account,"danger")
+ _logout_button.visible=false
  _button(_t("العودة للعبة","Back to game"),func():back_requested.emit.call_deferred(),"teal")
  MenuSkin.compact_menu(self)
  if show_friends_first:status.text=_t("شارك كود الغرفة مع صديقك للعب معًا.","Share your room code with a friend to play together.")
@@ -91,9 +97,12 @@ func _refresh_stats() -> void:
 
 func _online_profile(user: Dictionary) -> void:
  if not is_inside_tree(): return
+ var signed_in: bool=online_account!=null and not online_account.access_token.is_empty() and not user.is_empty()
+ for control in _session_controls:control.disabled=not signed_in
+ _logout_button.visible=signed_in and not show_friends_first
  _server_points.visible=not user.is_empty()
  if user.is_empty():
-  _profile_name.text=_t("ضيف","Guest");_avatar_url="";_avatar.texture=MenuSkin.menu_icon("player");return
+  _profile_name.text=_t("ضيف","Guest");_avatar_url="";_avatar.show_avatar("","");return
  _profile_name.text=str(user.get("display_name",_t("اللاعب","Player")))
  _server_points.text=_t("نقاط الحساب: %d","Account points: %d") % int(user.get("points",0))
  var providers: Array=user.get("providers",[])
@@ -112,22 +121,9 @@ func _avatar_finished(ok: bool,error: String) -> void:
  status.text=_t("حُفظت صورة حسابك.","Your account photo was saved.") if ok else _t("تعذر حفظ الصورة؛ صورتك السابقة محفوظة.","Photo could not be saved; your previous photo is safe.")
 
 func _load_avatar(url: String) -> void:
- if url.begins_with("/api/avatars/") and online_account!=null:url=online_account.session_origin+url
- if url==_avatar_url or not url.begins_with("https://") or "@" in url: return
  _avatar_url=url
- var request:=HTTPRequest.new();request.timeout=8;request.body_size_limit=1048576;add_child(request)
- if request.request(url)!=OK:request.queue_free();return
- var response: Array=await request.request_completed
- request.queue_free()
- if not is_inside_tree() or _avatar_url!=url or response[0]!=HTTPRequest.RESULT_SUCCESS or response[1]!=200:return
- var image:=Image.new()
- var data: PackedByteArray=response[3]
- var error: Error=ERR_INVALID_DATA
- if data.size()>12:
-  if data[0]==0x89:error=image.load_png_from_buffer(data)
-  elif data[0]==0xff:error=image.load_jpg_from_buffer(data)
-  elif data.slice(0,4).get_string_from_ascii()=="RIFF":error=image.load_webp_from_buffer(data)
- if error==OK and image.get_width()<=2048 and image.get_height()<=2048:_avatar.texture=ImageTexture.create_from_image(image)
+ var origin: String=str(online_account.session_origin) if online_account!=null else ""
+ _avatar.show_avatar(url,origin)
 
 func _save_online_progress() -> void:
  if _saving: return

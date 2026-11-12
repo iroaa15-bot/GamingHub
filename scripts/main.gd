@@ -3873,20 +3873,48 @@ func show_picture_filters() -> void:
 func show_welcome() -> void:
  clear_ui()
  current_screen="welcome"
+ var poster: Control=load("res://scripts/welcome_backdrop.gd").new()
+ poster.name="WelcomeBackdrop"
+ poster.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ add_child(poster)
+ move_child(poster,1)
+ root.custom_minimum_size.y=maxf(500,get_viewport_rect().size.y-90)
+ var welcome_scroll:=root.get_parent().get_parent() as ScrollContainer
+ if welcome_scroll!=null:welcome_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_NEVER
  _add_language_control(show_welcome)
- var artwork := TextureRect.new()
- artwork.texture=load("res://assets/ui/gaming_hub_brand.png")
- artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
- artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- artwork.custom_minimum_size.y=clampf(get_viewport_rect().size.y*0.34,200,340)
- artwork.mouse_filter=Control.MOUSE_FILTER_IGNORE
- root.add_child(artwork)
+ var artwork_space:=Control.new()
+ artwork_space.name="WelcomeArtSpace"
+ artwork_space.mouse_filter=Control.MOUSE_FILTER_IGNORE
+ artwork_space.custom_minimum_size.y=clampf(get_viewport_rect().size.y*0.43,240,440)
+ artwork_space.size_flags_vertical=Control.SIZE_EXPAND_FILL
+ root.add_child(artwork_space)
  var guest := button(tr_ui("العب كضيف","Guest Play"),_welcome_guest,GOLD)
  guest.set_meta("welcome_action","guest")
  for provider in ["Google","Facebook"]:
   var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
   login.tooltip_text=tr_ui("تسجيل دخول اختياري؛ تقدم الضيف محفوظ","Optional sign-in; guest progress is preserved")
   login.set_meta("welcome_action",provider.to_lower())
+  login.set_meta("provider_brand",true)
+  login.expand_icon=true
+  login.add_theme_constant_override("icon_max_width",40)
+  login.add_theme_constant_override("h_separation",12)
+  if provider=="Google":login.icon=load("res://assets/ui/providers/google.svg")
+  else:
+   var mark:=AtlasTexture.new()
+   mark.atlas=load("res://assets/ui/providers/facebook.png")
+   mark.region=Rect2(625,98,1100,1100)
+   login.icon=mark
+  for state_name in ["normal","hover","pressed","disabled"]:
+   var brand_surface:=StyleBoxFlat.new()
+   brand_surface.bg_color=Color("e7edf5") if state_name=="pressed" else Color.WHITE
+   brand_surface.border_color=Color("747775")
+   brand_surface.set_border_width_all(1)
+   brand_surface.set_corner_radius_all(16)
+   brand_surface.content_margin_left=12;brand_surface.content_margin_right=12
+   brand_surface.content_margin_top=8;brand_surface.content_margin_bottom=8
+   login.add_theme_stylebox_override(state_name,brand_surface)
+  for state_name in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:login.add_theme_color_override(state_name,Color("1f1f1f"))
+  login.add_theme_color_override("font_shadow_color",Color.TRANSPARENT)
  # Email/password remains under My profile -> Account settings and sign-in.
  # Keep the welcome screen limited to the three existing entry actions.
  VisualSkin.compact_menu(root)

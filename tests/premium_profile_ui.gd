@@ -14,8 +14,9 @@ func run() -> void:
  var account=main.root.get_children().filter(func(n):return n.get_script()==load("res://scripts/player_account_ui.gd"))[0]
  var valid: bool=not account.get_property_list().any(func(p: Dictionary):return p.name in ["admin","_auth_group"])
  valid=valid and account._profile_name.text=="ضيف" and int(account._xp_bar.value)==int(main.profile.get("xp",0))%100
+ valid=valid and not account._logout_button.visible and account._session_controls.all(func(n):return n.disabled)
  await snap("premium-profile")
- account._friends_group.show();await snap("premium-friends-empty")
+ main.show_player_friends();await process_frame;await snap("premium-friends-empty")
  main.show_accessibility();await snap("premium-settings")
  print("PREMIUM_PROFILE_GUEST_ROLES ",valid," no fabricated friends or admin identity")
  main.queue_free();await process_frame;quit(0 if valid else 1)

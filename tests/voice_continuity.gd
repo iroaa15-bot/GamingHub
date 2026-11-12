@@ -19,7 +19,11 @@ func run() -> void:
   for round_index in range(1,21):
    snapshot.started=true;snapshot.round=round_index;snapshot.current=round_index%2;snapshot.scores=[round_index,0]
    adapter._state(snapshot)
-   continuous=continuous and bridge.active and adapter.requested and bridge.stops==initial_stops
+   continuous=continuous and bridge.active and adapter.requested and bridge.stops==initial_stops and not adapter.muted
+ adapter.set_muted(true)
+ snapshot.round=21;adapter._state(snapshot)
+ var mute_preserved: bool=adapter.muted and adapter.requested and bridge.active
+ adapter.set_muted(false)
  adapter._event({"type":"duel_error","scope":"voice","message":"Request rate limit"})
  adapter._event({"type":"duel_error","scope":"voice","message":"Stale audio frame"})
  adapter._event({"type":"duel_error","scope":"voice","message":"Voice consent or epoch mismatch"})
@@ -36,4 +40,5 @@ func run() -> void:
  var text_stopped: bool=not bridge.active and not adapter.requested
  adapter.queue_free();connection.queue_free();bridge.queue_free();await process_frame
  print("VOICE_CONTINUITY continuous=",continuous," text_stopped=",text_stopped," bounded=",bounded," peer_withdrawal_stops_native=",withdrawn)
- quit(0 if continuous and text_stopped and bounded and withdrawn else 1)
+ print("VOICE_USER_MUTE preserved=",mute_preserved," automatic_round_mute=false")
+ quit(0 if continuous and text_stopped and bounded and withdrawn and mute_preserved else 1)

@@ -3,6 +3,7 @@ extends "res://scripts/photo_duel_extension_ui.gd"
 static var selected_social := "open_heart"
 var party_panel: VBoxContainer
 var _social_phase_key := ""
+var _social_chat: VBoxContainer
 const SOCIAL_TITLES := {"open_heart":["افتح قلبك","Open Heart"],"act_it":["مثّل وورّينا","Act It"],"who_among_us":["مين فينا؟","Who Among Us"],"show_skill":["ورّينا شطارتك","Show Your Skill"],"truth_or_fiction":["صدق ولا تأليف؟","Truth or Fiction"],"table_flip":["اقلب الترابيزة","Flip the Table"]}
 
 static func rooms_available() -> bool:
@@ -21,6 +22,8 @@ func _ready() -> void:
   if child is Label:child.text=str(SOCIAL_TITLES[selected_social][0 if language=="ar" else 1])
  for i in range(4):_mode_field.set_item_text(i,(["صوت","كتابة","صوت وكتابة","نقر"] if language=="ar" else ["Voice","Text","Voice and text","Tap"])[i])
  party_panel=VBoxContainer.new();party_panel.add_theme_constant_override("separation",12);_main_column.add_child(party_panel)
+ _social_chat=VBoxContainer.new();_main_column.add_child(_social_chat)
+ _chat_toggle.reparent(_social_chat);_chat_body.reparent(_social_chat)
  _state(client.state)
 
 func _create_filtered_room() -> void:
@@ -61,8 +64,16 @@ func _state(value: Dictionary) -> void:
   party_panel.remove_child(child);child.queue_free()
  var party: Dictionary=value.get("party",{})
  var phase: String=str(party.get("phase","lobby"))
+ var mode: String=str(value.get("primary_mode","voice"))
+ _social_chat.visible=phase!="lobby" and mode in ["text","mixed"] and not bool(value.get("closed",false))
+ _chat_toggle.visible=_social_chat.visible
+ if not _social_chat.visible:_chat_body.hide()
  party_panel.visible=phase!="lobby" and not party.is_empty() and not bool(value.get("closed",false)) and not client.code.is_empty()
- if not party_panel.visible:return
+ if not party_panel.visible:
+  if _seats.get_parent()==party_panel:_seats.reparent(_main_column)
+  if not client.code.is_empty():
+   _agreement_info.text=tr_pair("اللاعبون: %d • الجولات: %d • الجاهزون: %d/%d","Players: %d • rounds: %d • ready: %d/%d") % [int(value.get("capacity",2)),int(party.get("rounds",10)),value.get("confirmed",[]).count(true),int(value.get("capacity",2))]
+  return
  if _seats.get_parent()!=party_panel:_seats.reparent(party_panel)
  party_panel.move_child(_seats,0)
  _seats.show()
@@ -81,6 +92,10 @@ func _state(value: Dictionary) -> void:
  var actor: String=str(party.get("actor",""))
  var is_actor: bool=actor==str(client.player)
  var category: String=str(party.get("category",selected_social))
+ if phase=="finished":
+  var winner: int=int(value.get("winner",-1))
+  status.text=tr_pair("انتهت المباراة بالتعادل","Match finished in a draw") if winner<0 else tr_pair("الفائز: %s","Winner: %s") % [_social_player_name(winner)]
+ elif not paused:status.text=tr_pair("المباراة متصلة","Match connected")
  if phase in ["results","finished"]:
   label(tr_pair("انتهت المباراة" if phase=="finished" else "نتيجة الجولة","Match finished" if phase=="finished" else "Round results"),26)
   var results: Array=value.get("scores",[])
@@ -128,6 +143,10 @@ func _state(value: Dictionary) -> void:
   control.custom_minimum_size.y=maxf(control.custom_minimum_size.y,60)
  column=saved_column
  VisualSkin.compact_menu(party_panel)
+
+func _apply_entry_visibility() -> void:
+ super._apply_entry_visibility()
+ if is_instance_valid(_online_filter_box):_online_filter_box.hide()
 
 func _scroll_social_to_top() -> void:
  if not is_inside_tree():return

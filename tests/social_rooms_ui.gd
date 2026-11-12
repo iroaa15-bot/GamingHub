@@ -11,6 +11,8 @@ func run() -> void:
   for category in script.SOCIAL_TITLES:
    script.selected_social=category
    var view=script.new();root.add_child(view);await process_frame
+   view._focus_room_entry("create")
+   valid=valid and not view._online_filter_box.visible
    view.language=language;view.client.code="123456"
    view.client.capabilities={"voice":true,"room_agreement":true,"party_games":script.SOCIAL_TITLES.keys(),"primary_modes":["voice","text","mixed","tap"]}
    for count in range(2,7):
@@ -32,6 +34,17 @@ func run() -> void:
      state.paused=true;view._state(state)
      valid=valid and view._seats.is_visible_in_tree()
      for control in view.party_panel.find_children("*","Button",true,false):valid=valid and control.disabled
+     for mode in ["text","mixed","tap","voice"]:
+      state.primary_mode=mode;view._state(state)
+      valid=valid and view._social_chat.visible==(mode in ["text","mixed"])
+      valid=valid and view._chat_toggle.get_parent()==view._social_chat
+     state.party.phase="finished";state.match_finished=true;state.winner=-1
+     view._state(state)
+     valid=valid and view.status.text==("انتهت المباراة بالتعادل" if language=="ar" else "Match finished in a draw")
+     state.party.phase="lobby";state.started=false;state.match_finished=false
+     view._state(state)
+     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==view._main_column
+     valid=valid and not view._agreement_info.text.contains("Difficulty") and not view._agreement_info.text.contains("الصعوبة")
      cases+=1
    view.queue_free();await process_frame
  print("SOCIAL_ROOMS_UI ",valid," cases=",cases," AR/EN, 2-6 players, actor/voter controls, pause disables actions, photo controls hidden")

@@ -108,7 +108,12 @@ func _quiz_state(value: Dictionary) -> void:
  var question: Dictionary=quiz.get("question") if quiz.get("question") is Dictionary else {}
  quiz_panel.visible=not question.is_empty() and not bool(value.get("closed",false))
  if not quiz_panel.visible:
-  audio_player.stop();return
+  audio_player.stop()
+  audio_player.stream_paused=false
+  _audio_pending=false
+  _audio_serial=-1
+  _sound_phase_key=""
+  return
  var phase: String=str(quiz.get("phase",""))
  var sound_key: String=str(question.get("id",""))+":"+phase
  if sound_key!=_sound_phase_key:
@@ -255,7 +260,7 @@ func _process(delta: float) -> void:
   sound_progress.max_value=maxf(.001,audio_player.stream.get_length())
   sound_progress.value=audio_player.get_playback_position()
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,is_instance_valid(audio_player) and audio_player.playing and not audio_player.stream_paused)
- if not is_instance_valid(client) or not is_instance_valid(quiz_panel):return
+ if not is_instance_valid(client) or not is_instance_valid(quiz_panel) or not quiz_panel.visible:return
  var quiz: Dictionary=client.state.get("quiz",{})
  if memory_sync_at>0 and _quiz_now()>=memory_sync_at:
   memory_sync_at=0;client.send_action("duel_sync")

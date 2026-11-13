@@ -1466,7 +1466,7 @@
     "scripts/room_audio_policy.gd.uid": "0d38446c2bbf1c17d021620323914d7029ea824c4b3e85ad384a7c689864e388",
     "scripts/room_invite_code.gd": "5fd883fefa0a7fa54b0b3ed6cce9bda6e67fb72498c68d8fc65625fa19141a92",
     "scripts/room_invite_code.gd.uid": "6c1273dfd4e1ea2377196a71de2d09969059269fdfa1eb3a9b9ea61ffd6b4e1a",
-    "scripts/shared_quiz_ui.gd": "e7231990f0d1cf98ea41dc8df0792dae7b89b0978a23b5345c7eadd1c8fc4171",
+    "scripts/shared_quiz_ui.gd": "4eadad90e8b4872553db9565be0a34c1666c9d433143bf9f868e14b5578b20bb",
     "scripts/shared_quiz_ui.gd.uid": "c69387e502d063d7cfca86fe08a8180835a911be3ae1e9ed64bafed2b0a0e88c",
     "scripts/show_skill_offline.gd": "641669da1c36db249e922fb7cadb7e1cefff103846ef335cbba228dc23bca1da",
     "scripts/show_skill_offline.gd.uid": "059e00ab4dd9bad48d70edabdf799db450f0d6e02f414312491784b8902c1212",

@@ -195,7 +195,7 @@ func _quiz_state(value: Dictionary) -> void:
    answer_buttons[i].text=("✓ " if correct_choice else "✕ ")+answer_buttons[i].text
  replay_button.visible=question.has("audio") and phase=="question"
  sound_progress.visible=replay_button.visible
- replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false))
+ replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false)) or _quiz_now()<int(quiz.get("start_unix_ms",0))
  next_button.visible=phase=="results" and client.player==0
  var lines := PackedStringArray()
  lines.append(tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
@@ -261,6 +261,7 @@ func _process(delta: float) -> void:
   memory_sync_at=0;client.send_action("duel_sync")
  if quiz.get("phase")=="question" and not bool(client.state.get("paused",false)):
   if quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0)):
+   replay_button.disabled=not bool(quiz.get("replay_available",false))
    for b in answer_buttons:b.disabled=false
    if str(quiz.get("question",{}).get("mode",""))=="memory":
     var board: Dictionary=quiz.get("memory",{})

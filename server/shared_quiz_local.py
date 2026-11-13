@@ -160,7 +160,7 @@ class SharedQuizHub(SecureAgreementHub):
     room.begin_question();return await self.publish(room)
    if room.phase!='question' or msg.get('question_id')!=room.question['id']:raise ProtocolError('Stale question')
    if action=='duel_quiz_replay':
-    if 'audio' not in room.question or room.replays>=1 or player in room.answers:raise ProtocolError('Replay unavailable')
+    if 'audio' not in room.question or room.replays>=1 or player in room.answers or time.monotonic()<room.start_clock:raise ProtocolError('Replay unavailable')
     room.replays+=1;room.audio_serial+=1;room.audio_at=int(time.time()*1000)+500;return await self.publish(room)
    if player in room.answers or time.monotonic()<room.start_clock:raise ProtocolError('Answer already submitted or countdown not started')
    if action=='duel_quiz_flip':

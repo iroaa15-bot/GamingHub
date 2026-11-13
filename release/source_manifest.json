@@ -1741,7 +1741,7 @@
     "tests/test_final_image_catalog.py": "07b157cad80c9bbf47b1b41775d4f17cec69a1eb5dff16dbce45e2d7868c085f",
     "tests/test_focused_release.py": "8dfd6449156677023c28573cfd43f57e886408d888692b139f474882b1b67d5b",
     "tests/test_godot_smoke_contract.py": "799cb39da373707201b70df1864f2d7709b40903b1713d7935cd8397925ef73d",
-    "tests/test_hoor_zain_visual_v95.py": "5eac1c5e23724c2454bca6e079ad84dbef0f830593e06ce2b482e3e3a45f0c89",
+    "tests/test_hoor_zain_visual_v95.py": "91e5f1160eb28950377a6ccd00b7e02b348beecc4d6cf10ba510b29be7258579",
     "tests/test_identity_native_package.py": "0281749467f20c8a959ed225d53d9050126c080e245b17ed2098050612c5d7c9",
     "tests/test_identity_permissions.py": "964d14399139cbcd31da6d2514fd58f9d5150962187965c3113c2081afa71a40",
     "tests/test_immersive_touch_v94.py": "b875175ce26c8fe2618c8315af25903fc55824db017e743e592c1c7630b30aa3",

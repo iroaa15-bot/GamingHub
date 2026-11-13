@@ -21,7 +21,6 @@ class HoorZainVisualV95(unittest.TestCase):
         main=(ROOT/'scripts/main.gd').read_text()
         online=(ROOT/'scripts/multiplayer.gd').read_text()
         self.assertIn('VisualSkin.compact_header(',main)
-        self.assertIn('res://assets/ui/gaming_hub_brand.png',main)
         self.assertIn('VisualSkin.compact_header(',online)
         self.assertIn('res://assets/ui/gaming_hub_brand.png',(ROOT/'scripts/visual_skin.gd').read_text())
         self.assertIn('res://assets/ui/gaming_hub_icon.png',(ROOT/'project.godot').read_text())

@@ -45,6 +45,90 @@
           "reviewed_at": "2026-11-02",
           "note": "Official Disney character page identifies Olaf; no copyrighted media copied."
         }
+      },
+      {
+        "id": "GH-CINEMA-EG-ROLE-1",
+        "mode": "choice",
+        "topic": "cinema",
+        "level": 1,
+        "ar": "مين قام بدور خلف الدهشوري في صعيدي في الجامعة الأمريكية؟",
+        "en": "Who played Khalaf El Dahshoury in Saeedi at the American University?",
+        "tr": "Khalaf El Dahshoury rolünü kim oynadı?",
+        "choices_ar": [
+          "محمد هنيدي",
+          "أحمد حلمي",
+          "أحمد السقا",
+          "طارق لطفي"
+        ],
+        "choices_en": [
+          "Mohamed Henedy",
+          "Ahmed Helmy",
+          "Ahmed El Sakka",
+          "Tarek Lotfy"
+        ],
+        "choices_tr": [
+          "Mohamed Henedy",
+          "Ahmed Helmy",
+          "Ahmed El Sakka",
+          "Tarek Lotfy"
+        ],
+        "correct": 0,
+        "explain_ar": "محمد هنيدي",
+        "explain_en": "Mohamed Henedy",
+        "explain_tr": "Mohamed Henedy",
+        "audiences": [
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://elcinema.com/work/1008760/content",
+          "reviewed_at": "2026-11-13"
+        }
+      },
+      {
+        "id": "GH-CINEMA-EG-ROLE-2",
+        "mode": "choice",
+        "topic": "cinema",
+        "level": 1,
+        "ar": "مين قام بدور مصري سيد العربي في عسل إسود؟",
+        "en": "Who played Masry Sayed El Araby in Asal Eswed?",
+        "tr": "Masry Sayed El Araby rolünü kim oynadı?",
+        "choices_ar": [
+          "محمد هنيدي",
+          "أحمد حلمي",
+          "أحمد السقا",
+          "طارق لطفي"
+        ],
+        "choices_en": [
+          "Mohamed Henedy",
+          "Ahmed Helmy",
+          "Ahmed El Sakka",
+          "Tarek Lotfy"
+        ],
+        "choices_tr": [
+          "Mohamed Henedy",
+          "Ahmed Helmy",
+          "Ahmed El Sakka",
+          "Tarek Lotfy"
+        ],
+        "correct": 1,
+        "explain_ar": "أحمد حلمي",
+        "explain_en": "Ahmed Helmy",
+        "explain_tr": "Ahmed Helmy",
+        "audiences": [
+          "teens",
+          "youth",
+          "adults",
+          "family"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://elcinema.com/work/1313173/content",
+          "reviewed_at": "2026-11-13"
+        }
       }
     ],
     "5": [

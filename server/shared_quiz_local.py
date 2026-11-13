@@ -35,7 +35,7 @@ class QuestionAdapter:
   order=list(range(len(item['choices_ar'])));secrets.SystemRandom().shuffle(order)
   result={'id':item['id'],'ar':item['ar'],'en':item['en'],'choices_ar':[item['choices_ar'][i] for i in order],'choices_en':[item['choices_en'][i] for i in order]}
   if len(item.get('choices_tr',[]))==len(order):result.update(tr=item.get('tr',''),choices_tr=[item['choices_tr'][i] for i in order])
-  if 'audio' in item:result['audio']='res://assets/audio/'+item['audio']+'.wav'
+  if 'audio' in item:result['audio']='res://assets/audio/'+item['audio']+'.'+item.get('audio_format','wav')
   return result,order.index(item['correct'])
 class CinemaAdapter(QuestionAdapter):
  def __init__(self):super().__init__('1')
@@ -43,7 +43,8 @@ class SoundAdapter(QuestionAdapter):
  def __init__(self):super().__init__('6')
  def validate_media(self,item):
   clip=item.get('audio','')
-  if not isinstance(clip,str) or re.fullmatch(r'[a-z0-9_]+',clip) is None or not (ROOT/'assets/audio'/f'{clip}.wav').is_file():raise ValueError('Missing original audio asset')
+  extension=item.get('audio_format','wav')
+  if extension not in ('wav','ogg') or not isinstance(clip,str) or re.fullmatch(r'[a-z0-9_]+',clip) is None or not (ROOT/'assets/audio'/f'{clip}.{extension}').is_file():raise ValueError('Missing original audio asset')
 
 class QuizRoom(Room):
  def __init__(self,code,capacity,timer,rounds,catalog,adapter,difficulty):

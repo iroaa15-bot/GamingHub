@@ -221,7 +221,7 @@ func _quiz_state(value: Dictionary) -> void:
  elif question.has("audio") and serial!=_audio_serial:
   _audio_serial=serial;_audio_start=int(quiz.get("audio_start_unix_ms",0));_audio_pending=true
   var path: String=str(question.audio)
-  if path.begins_with("res://assets/audio/") and path.ends_with(".wav") and ResourceLoader.exists(path):audio_player.stream=load(path)
+  if path.begins_with("res://assets/audio/") and path.get_extension() in ["wav","ogg"] and ResourceLoader.exists(path):audio_player.stream=load(path)
   else:_audio_pending=false
  if phase=="question" and not bool(value.get("paused",false)):
   audio_player.stream_paused=false

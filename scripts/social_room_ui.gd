@@ -105,7 +105,7 @@ func _state(value: Dictionary) -> void:
   label(tr_pair("دورك الآن","Your turn") if is_actor else tr_pair("الدور على: %s","Turn: %s") % [_social_player_name(int(actor))],24)
   var card: Dictionary=party.get("card",{}) if party.get("card") is Dictionary else {}
   if not card.is_empty():
-   label(str(card.get("text_en",card.get("text_ar",""))) if language=="en" else str(card.get("text_ar","")),26)
+   VisualSkin.add_social_prompt(party_panel,str(SOCIAL_TITLES[category][0 if language=="ar" else 1]),str(card.get("text_en",card.get("text_ar",""))) if language=="en" else str(card.get("text_ar","")))
    if language=="en" and not card.has("text_en"):label("These cards are in Arabic.",16)
   elif category in ["act_it","show_skill"]:label(tr_pair("شاهد أداء اللاعب ثم صوّت.","Watch the player's performance, then vote."))
   var voted: bool=str(client.player) in party.get("voted_players",[])

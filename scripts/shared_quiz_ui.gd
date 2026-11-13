@@ -3,6 +3,8 @@ extends "res://scripts/photo_duel_extension_ui.gd"
 static var selected_game := "1"
 var quiz_panel: VBoxContainer
 var quiz_title: Label
+var quiz_question_card: PanelContainer
+var sound_progress: ProgressBar
 var quiz_results: Label
 var answer_buttons: Array[Button]=[]
 var next_button: Button
@@ -44,6 +46,14 @@ func _ready() -> void:
  quiz_panel=VBoxContainer.new();quiz_panel.add_theme_constant_override("separation",8);_main_column.add_child(quiz_panel)
  column=quiz_panel
  quiz_title=label("",21)
+ quiz_question_card=PanelContainer.new();quiz_question_card.name="QuizQuestionCard"
+ var question_skin:=VisualSkin.card(Color("20154c"),22)
+ question_skin.border_color=VisualSkin.SUN if selected_game=="1" else VisualSkin.CYAN
+ quiz_question_card.add_theme_stylebox_override("panel",question_skin)
+ quiz_panel.add_child(quiz_question_card);quiz_panel.move_child(quiz_question_card,0)
+ quiz_title.reparent(quiz_question_card)
+ sound_progress=ProgressBar.new();sound_progress.name="SoundPlaybackProgress";sound_progress.show_percentage=false
+ VisualSkin.decorate_progress(sound_progress);quiz_panel.add_child(sound_progress);sound_progress.hide()
  story_text=label("")
  question_image=TextureRect.new();question_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;question_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;question_image.custom_minimum_size.y=180;quiz_panel.add_child(question_image)
  memory_grid=GridContainer.new();memory_grid.columns=4;memory_grid.add_theme_constant_override("h_separation",6);memory_grid.add_theme_constant_override("v_separation",6);quiz_panel.add_child(memory_grid)
@@ -74,7 +84,8 @@ func _state(value: Dictionary) -> void:
  _match_controls.hide()
  _mode_field.hide()
  _voice_question.hide()
- clock.visible=value.get("quiz",{}).get("phase")=="question"
+ clock.visible=not client.code.is_empty() and not bool(value.get("closed",false)) and value.get("quiz",{}).get("phase")=="question"
+ if not clock.visible:_clock_bar.hide()
  if not is_instance_valid(client):return
  create_button.disabled=create_button.disabled or (not client.capabilities.is_empty() and not bool(client.capabilities.get("shared_quiz",false)))
  if client.capabilities.get("quiz_categories") is Dictionary and not _quiz_categories_ready:
@@ -174,7 +185,16 @@ func _quiz_state(value: Dictionary) -> void:
   answer_buttons[i].visible=mechanic=="choice" and i<choices.size()
   if i<choices.size():answer_buttons[i].text=str(choices[i])
   answer_buttons[i].disabled=phase!="question" or bool(value.get("paused",false)) or quiz.get("your_answer")!=null or _quiz_now()<int(quiz.get("start_unix_ms",0))
+  # Correctness is revealed by the server only after the question phase.
+  var revealed: bool=phase in ["results","finished"] and quiz.has("correct_index")
+  var correct_choice: bool=revealed and i==int(quiz.get("correct_index",-1))
+  var wrong_choice: bool=revealed and not correct_choice and quiz.get("your_answer")==i
+  VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "secondary"))
+  if correct_choice or wrong_choice:
+   answer_buttons[i].add_theme_stylebox_override("disabled",answer_buttons[i].get_theme_stylebox("normal"))
+   answer_buttons[i].text=("✓ " if correct_choice else "✕ ")+answer_buttons[i].text
  replay_button.visible=question.has("audio") and phase=="question"
+ sound_progress.visible=replay_button.visible
  replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false))
  next_button.visible=phase=="results" and client.player==0
  var lines := PackedStringArray()
@@ -231,6 +251,9 @@ func _sync_order_nodes() -> void:
 func _quiz_now() -> int:return int(Time.get_unix_time_from_system()*1000)+_server_offset
 func _process(delta: float) -> void:
  super._process(delta)
+ if is_instance_valid(sound_progress) and is_instance_valid(audio_player) and audio_player.stream!=null:
+  sound_progress.max_value=maxf(.001,audio_player.stream.get_length())
+  sound_progress.value=audio_player.get_playback_position()
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,is_instance_valid(audio_player) and audio_player.playing and not audio_player.stream_paused)
  if not is_instance_valid(client) or not is_instance_valid(quiz_panel):return
  var quiz: Dictionary=client.state.get("quiz",{})

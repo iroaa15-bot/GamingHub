@@ -9,8 +9,8 @@ static func dismiss_text_input(viewport: Viewport) -> bool:
  return true
 # Gaming Hub visual identity: lightweight native drawing, no shaders or external assets.
 # One coherent skin for the home screen and the online lobby.
-const INK := Color("030a28")
-const MIDNIGHT := Color("121044")
+const INK := Color("070b32")
+const MIDNIGHT := Color("25105c")
 const INDIGO := Color("761ee8")
 const CYAN := Color("15e7ff")
 const SUN := Color("ffcc42")
@@ -54,15 +54,28 @@ func _draw() -> void:
   var dot_color: Color = CYAN if i % 4 == 0 else SUN
   dot_color.a = 0.42 if i % 3 == 0 else 0.16
   draw_circle(Vector2(x, y), (1.5 if i % 4 == 0 else 1.0) * scale_value, dot_color)
+ # Low-contrast castle silhouettes echo the supplied lobby artwork without
+ # embedding reference screenshots, labels or controls into the background.
+ for side in [0,1]:
+  var x: float=size_value.x*(0.07 if side==0 else 0.93)
+  var base: float=size_value.y*0.31
+  var width: float=25*scale_value
+  draw_rect(Rect2(x-width/2,base-105*scale_value,width,105*scale_value),Color("172669",0.52))
+  draw_colored_polygon(PackedVector2Array([Vector2(x-width*.8,base-105*scale_value),Vector2(x,base-146*scale_value),Vector2(x+width*.8,base-105*scale_value)]),Color("273c98",0.5))
+  draw_rect(Rect2(x-3*scale_value,base-87*scale_value,6*scale_value,18*scale_value),Color("47dafa",0.19))
+ var rim:=card(Color.TRANSPARENT,26)
+ rim.draw_center=false;rim.border_color=Color("887cff",0.42);rim.set_border_width_all(1)
+ rim.shadow_size=0
+ draw_style_box(rim,Rect2(Vector2(6,6),size_value-Vector2(12,12)))
 
 static func card(color_value: Color = Color("182748"), radius: int = 24) -> StyleBoxFlat:
  var box_style := StyleBoxFlat.new()
  box_style.bg_color = color_value
  box_style.set_corner_radius_all(radius)
- box_style.border_color = Color("24c6ff", 0.65)
- box_style.set_border_width_all(1)
- box_style.shadow_color = Color(0.07, 0.29, 1.0, 0.22)
- box_style.shadow_size = 6
+ box_style.border_color = Color("9b86ff", 0.78)
+ box_style.set_border_width_all(2)
+ box_style.shadow_color = Color(0.22, 0.11, 1.0, 0.24)
+ box_style.shadow_size = 8
  box_style.shadow_offset = Vector2(0, 5)
  box_style.content_margin_left = 18
  box_style.content_margin_right = 18
@@ -101,7 +114,7 @@ static func neon_surface(fill: Color, edge: Color) -> StyleBoxTexture:
  return surface
 
 static func decorate_button(target: Button, tone: String = "secondary") -> void:
- var palette: Dictionary={"secondary":["0c1d51","247aca"],"gold":["008cff","26f4ff"],"blue":["008cff","26f4ff"],"teal":["00b94c","56ffbd"],"violet":["6c20df","f459ff"],"danger":["ed264f","ff939e"],"amber":["ec8a05","ffe67a"]}
+ var palette: Dictionary={"secondary":["28166b","a28aff"],"gold":["007cde","59eeff"],"blue":["007cde","59eeff"],"teal":["06a52e","a4ff53"],"violet":["7022dd","ef91ff"],"danger":["d91b51","ff8fae"],"amber":["e9a008","fff19a"]}
  var colors: Array=palette.get(tone,palette.secondary)
  var fill:=Color(colors[0]);var edge:=Color(colors[1])
  if tone in ["secondary", "gold", "blue"] and remote_settings().get("custom_primary",false):
@@ -240,6 +253,27 @@ static func add_question_panel(parent: VBoxContainer, question_text: String, rea
  title_label.add_theme_color_override("font_color", TEXT)
  column.add_child(title_label)
 
+static func add_social_prompt(parent: VBoxContainer, category: String, text: String) -> PanelContainer:
+ var panel:=PanelContainer.new()
+ panel.name="SocialPromptCard"
+ panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ panel.custom_minimum_size.y=190
+ var skin:=card(Color("fff0d1"),22)
+ skin.border_color=Color("f9c557");skin.set_border_width_all(3)
+ skin.shadow_color=Color("7026be",0.4);skin.shadow_size=8
+ panel.add_theme_stylebox_override("panel",skin);parent.add_child(panel)
+ var content:=VBoxContainer.new();content.add_theme_constant_override("separation",14);panel.add_child(content)
+ var badge:=Label.new();badge.text=category;badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ badge.add_theme_font_size_override("font_size",18);badge.add_theme_color_override("font_color",Color("74256c"));content.add_child(badge)
+ var prompt:=Label.new();prompt.name="PromptText";prompt.text=text
+ prompt.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ prompt.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;prompt.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+ prompt.size_flags_vertical=Control.SIZE_EXPAND_FILL
+ prompt.add_theme_font_size_override("font_size",25);prompt.add_theme_color_override("font_color",Color("25163e"))
+ content.add_child(prompt)
+ enable_menu_swipe(panel)
+ return panel
+
 static func add_feedback_panel(parent: VBoxContainer, headline: String, detail: String, is_success: bool) -> void:
  var panel := PanelContainer.new()
  panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -325,6 +359,8 @@ static func menu_icon(kind: String) -> Texture2D:
   "settings":"<path d='m9 3-.5 2-2 1-2-.5-2 3L4 10v3l-1.5 1.5 2 3 2-.5 2 1 .5 3h5l.5-3 2-1 2 .5 2-3L20 13v-3l1.5-1.5-2-3-2 .5-2-1L14 3Z'/><circle cx='12' cy='12' r='3'/>",
   "chat":"<path d='M4 4h16v12H9l-5 4Z'/><path d='M8 8h8M8 12h5'/>",
   "list":"<path d='M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1'/>",
+  "copy":"<rect x='8' y='7' width='12' height='14' rx='2'/><path d='M15 7V3H4v14h4'/>",
+  "plus":"<path d='M12 5v14M5 12h14'/>",
   "mic":"<rect x='9' y='2' width='6' height='13' rx='3'/><path d='M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8'/>",
   "mic_off":"<path d='m3 3 18 18M9 9v3a3 3 0 0 0 5 2M9 5a3 3 0 0 1 6 0v6M5 10v2a7 7 0 0 0 12 5M19 10v2M12 19v3M8 22h8'/>"}
  var image := Image.new()

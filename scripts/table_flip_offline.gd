@@ -192,7 +192,7 @@ func _type() -> String:
 func _show() -> void:
 	_screen("اقلب الترابيزة — الجولة %d/%d" % [round+1,max_rounds])
 	_label("الدور على: %s" % order[current_index])
-	_label(str(current.get("text_ar", "")), 26)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"اقلب الترابيزة",str(current.get("text_ar", "")))
 	_label("التأثير الفعلي: " + _effect_explanation(_type()), 17)
 	var kind := _type()
 	if ["bonus","steal","skip"].has(kind):

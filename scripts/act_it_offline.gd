@@ -123,7 +123,7 @@ func _draw_card() -> void:
 	seconds_left = 30
 	_screen("مثّل وورّينا — الجولة %d/%d" % [engine.round_index + 1, engine.round_limit])
 	_label("دور: %s" % engine.players[engine.active_player_index])
-	_label(str(engine.current_card.get("text_ar", "")), 28)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"مثّل وورّينا",str(engine.current_card.get("text_ar", "")))
 	var countdown := _label("30 ثانية", 25)
 	countdown.name = "Countdown"
 	_button("ابدأ المؤقت", _begin_timer)

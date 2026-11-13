@@ -11,7 +11,7 @@ const Client = preload("res://scripts/photo_duel_extension_client.gd")
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 const FACTS := {"living":["هل هو كائن حي؟","Is it alive?"],"animal":["هل هو حيوان؟","Is it an animal?"],"celebrity":["هل هو شخص مشهور؟","Is it a celebrity?"],"edible":["هل يمكن أكله؟","Is it edible?"],"household":["هل يُستخدم في المنزل؟","Is it used at home?"],"natural":["هل يوجد في الطبيعة؟","Is it found in nature?"],"place":["هل هو مكان؟","Is it a place?"],"large":["هل حجمه كبير؟","Is it large?"]}
 var client: Node
-var language := "ar"
+var language := ""
 var column: VBoxContainer
 var status: Label
 var heading: Label
@@ -89,6 +89,7 @@ var _room_started := false
 var _start_when_ready := false
 var _duel_next: Button
 var _seat_labels: Array[Label] = []
+var _seat_statuses: Array[Label] = []
 var _seat_panels: Array[PanelContainer] = []
 var _seat_avatars: Array[TextureRect] = []
 var _seats: GridContainer
@@ -153,7 +154,7 @@ func _ready() -> void:
  requested_entry="landing"
  _focus_room_entry.call_deferred(entry)
  get_tree().quit_on_go_back = false
- language=load("res://scripts/player_preferences.gd").language()
+ if language not in ["ar","en"]:language=load("res://scripts/player_preferences.gd").language()
  layout_direction = Control.LAYOUT_DIRECTION_RTL if language == "ar" else Control.LAYOUT_DIRECTION_LTR
  var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/guess_picture_302/catalog.json"))
  for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
@@ -226,6 +227,11 @@ func _ready() -> void:
   name_label.add_theme_font_size_override("font_size",14)
   seat_content.add_child(name_label)
   _seat_labels.append(name_label)
+  var connection_label:=Label.new()
+  connection_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+  connection_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  connection_label.add_theme_font_size_override("font_size",14)
+  seat_content.add_child(connection_label);_seat_statuses.append(connection_label)
  var main_column := column
  _main_column=main_column
  _match_header=HBoxContainer.new()
@@ -304,9 +310,11 @@ func _ready() -> void:
  _copy_code_button=button(tr_pair("نسخ الكود","Copy code"),_copy_room_code)
  var invite_actions:=HBoxContainer.new();invite_actions.alignment=BoxContainer.ALIGNMENT_CENTER;column.add_child(invite_actions)
  _copy_code_button.reparent(invite_actions)
- VisualSkin.icon_action(_copy_code_button,"list",tr_pair("نسخ كود الغرفة","Copy room code"))
+ VisualSkin.icon_action(_copy_code_button,"copy",tr_pair("نسخ كود الغرفة","Copy room code"))
  var share:=button(tr_pair("مشاركة الدعوة","Share invitation"),_share_room_code)
  share.reparent(invite_actions);VisualSkin.icon_action(share,"share",tr_pair("مشاركة دعوة الغرفة","Share room invitation"))
+ _invite_code.reparent(invite_actions);invite_actions.move_child(_invite_code,0)
+ _invite_code.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  column=main_column
  _agreement_box=VBoxContainer.new()
  _agreement_box.add_theme_constant_override("separation",8)
@@ -409,6 +417,9 @@ func _ready() -> void:
  block_button = button(tr_pair("حظر اللاعب ومغادرة الغرفة","Block player and leave room"),func(): client.send_action("duel_block",{"target":target_player.get_selected_id()}))
  column = main_column
  var back_button := button(tr_pair("مغادرة والعودة للألعاب","Leave & return to games"),_home)
+ VisualSkin.decorate_button(back_button,"danger")
+ VisualSkin.decorate_button(_accept_button,"teal")
+ VisualSkin.decorate_button(_start_button,"teal")
  back_button.icon = VisualSkin.menu_icon("back")
  back_button.expand_icon = true
  back_button.add_theme_constant_override("icon_max_width",22)
@@ -456,6 +467,11 @@ func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
 
 func _state(value: Dictionary) -> void:
+ # Closed snapshots retain the last card, pending action and timer for protocol
+ # history. None of that belongs to the next room's entry screen.
+ if bool(value.get("closed",false)):
+  value={"closed":true}
+  _start_when_ready=false
  _room_started=bool(value.get("started",false))
  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).room_snapshot(self,value)
  var ready: bool = not client.capabilities.is_empty()
@@ -598,13 +614,14 @@ func _state(value: Dictionary) -> void:
  var joined: int = int(value.get("joined",0))
  for i in range(6):
   _seat_panels[i].visible = i < seats
-  _seat_labels[i].add_theme_font_size_override("font_size",16 if seats<=4 else 14)
-  var avatar_size: float=80 if seats<=2 else (72 if not active else 56)
+  _seat_labels[i].add_theme_font_size_override("font_size",18 if seats<=4 else 16)
+  var avatar_size: float=88 if seats<=2 else ((72 if seats<=4 else 64) if not active else 56)
   _seat_avatars[i].custom_minimum_size=Vector2(avatar_size,avatar_size)
   var is_turn: bool=active and int(value.get("current",-1))==i
   var seat_skin=VisualSkin.card(Color("082033"),12)
-  seat_skin.border_color=Color("5cf6ff") if is_turn else Color("266795")
-  seat_skin.set_border_width_all(2 if is_turn else 1)
+  seat_skin.bg_color=Color("211455")
+  seat_skin.border_color=Color("5cf6ff") if is_turn else (VisualSkin.SUN if i==0 and i<joined else Color("8b69e5"))
+  seat_skin.set_border_width_all(2)
   seat_skin.shadow_color=Color(0.05,0.65,0.95,0.28 if is_turn else 0.1)
   seat_skin.shadow_size=5 if is_turn else 2
   seat_skin.content_margin_left=4 if active else 18
@@ -621,6 +638,8 @@ func _state(value: Dictionary) -> void:
   var account=get_tree().root.get_node_or_null("GamingHubAccount")
   var origin: String=str(account.session_origin) if account!=null else ""
   _seat_avatars[i].show_avatar(str(public_profile.get("avatar_url","")),origin)
+  if not occupied:_seat_avatars[i].texture=VisualSkin.menu_icon("plus")
+  elif str(public_profile.get("avatar_url","")).is_empty():_seat_avatars[i].texture=VisualSkin.menu_icon("player")
   var score_value: int = int(value.get("scores",[])[i]) if i < value.get("scores",[]).size() else 0
   var previous_score: int=int(_seat_panels[i].get_meta("display_score",score_value))
   var previous_turn: bool=bool(_seat_panels[i].get_meta("display_turn",false))
@@ -635,19 +654,27 @@ func _state(value: Dictionary) -> void:
   var identity: String=name_value+(tr_pair(" • أنت"," • You") if i==client.player and occupied else "")
   if i==0 and occupied:identity="♛ "+identity
   var room_scores: Array=value.get("scores",[])
-  if occupied and score_value>0 and not room_scores.is_empty() and score_value==room_scores.max() and room_scores.count(score_value)==1:identity+=" ★"
+  if occupied and bool(value.get("started",false)) and score_value>0 and not room_scores.is_empty() and score_value==room_scores.max() and room_scores.count(score_value)==1:identity+=" ★"
   var connection_text: String=tr_pair("متصل","Online") if online else (tr_pair("إعادة اتصال","Reconnecting") if occupied else tr_pair("مكان متاح","Open seat"))
-  _seat_labels[i].text=identity+"\n"+(str(score_value)+" • " if bool(value.get("started",false)) and occupied else "")+connection_text
+  _seat_labels[i].text=identity+("\n"+tr_pair("%d نقطة","%d points") % score_value if bool(value.get("started",false)) and occupied else "")
   if is_turn:_seat_labels[i].text+="\n"+tr_pair("دورك" if i==client.player else "الدور الحالي","Your turn" if i==client.player else "Current turn")
   if not bool(value.get("started",false)) and occupied and agreement:
    var confirmations: Array=value.get("confirmed",[])
-   _seat_labels[i].text=identity+"\n"+(tr_pair("جاهز","Ready") if i<confirmations.size() and confirmations[i] else tr_pair("بانتظار الموافقة","Awaiting agreement"))
-  _seat_labels[i].add_theme_color_override("font_color",Color("59ed9b") if online else Color("b4c4df"))
+   if online:connection_text=tr_pair("جاهز ✓","Ready ✓") if i<confirmations.size() and confirmations[i] else tr_pair("بانتظار الموافقة","Awaiting agreement")
+  _seat_labels[i].add_theme_color_override("font_color",VisualSkin.TEXT if online else Color("b4c4df"))
+  _seat_statuses[i].text=connection_text
+  var chip:=VisualSkin.card(Color("086c31") if online else (Color("6e234c") if occupied else Color("17224c")),12)
+  chip.content_margin_left=4;chip.content_margin_right=4;chip.content_margin_top=4;chip.content_margin_bottom=4
+  chip.shadow_size=0;chip.set_border_width_all(1)
+  chip.border_color=Color("65e68c") if online else Color("af8bdf")
+  _seat_statuses[i].add_theme_stylebox_override("normal",chip)
+  _seat_statuses[i].add_theme_color_override("font_color",Color("eaffea") if online else VisualSkin.MUTED)
  var score_parts := PackedStringArray()
  var score_values: Array = value.get("scores",[])
  for index in range(score_values.size()): score_parts.append(str(index+1)+": "+str(score_values[index]))
  _scores.text = tr_pair("النقاط • ","Scores • ")+"  |  ".join(score_parts) if not score_parts.is_empty() else ""
  clock.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
+ if not clock.visible:_clock_bar.hide()
  _match_controls.visible = bool(value.get("started",false)) and not bool(value.get("match_finished",false))
  _lobby_controls.visible = client.code.is_empty()
  _invite_box.visible=not client.code.is_empty() and not bool(value.get("started",false)) and not bool(value.get("closed",false))
@@ -655,7 +682,7 @@ func _state(value: Dictionary) -> void:
  _copy_code_button.disabled=client.code.is_empty()
  if _invite_box.visible:
   _main_column.move_child(_invite_box,_main_column.get_children().find(heading)+1)
-  heading.text=tr_pair("أنت اللاعب %d","You are player %d") % (client.player+1)
+  heading.text=tr_pair("غرفة الانتظار","Waiting room")
  if bool(value.get("match_finished",false)) and not client.code.is_empty(): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
  elif bool(value.get("closed",false)) and client.code.is_empty(): status.text=tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend's code")
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")

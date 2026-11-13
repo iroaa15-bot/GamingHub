@@ -123,7 +123,7 @@ func _next() -> void:
 	phase = "commit"
 	_screen("الراوي فقط — الجولة %d/%d" % [engine.round_index + 1, engine.round_limit])
 	_label("الراوي: %s" % engine.players[engine.active_player_index])
-	_label(str(engine.current_card.get("text_ar", "")), 26)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"صدق ولا تأليف؟",str(engine.current_card.get("text_ar", "")))
 	_label("خلي الشاشة معاك وحدك واختار نوع قصتك قبل ما تحكي.", 18)
 	_button("هحكي حقيقة", _commit.bind(true))
 	_button("هألف قصة", _commit.bind(false))
@@ -140,7 +140,7 @@ func _story() -> void:
 	phase = "story"
 	seconds_left = 60
 	_screen("وقت الحكاية")
-	_label(str(engine.current_card.get("text_ar", "")), 26)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"صدق ولا تأليف؟",str(engine.current_card.get("text_ar", "")))
 	_label("الراوي: %s" % engine.players[engine.active_player_index])
 	var countdown := _label("60 ثانية", 25)
 	countdown.name = "Countdown"

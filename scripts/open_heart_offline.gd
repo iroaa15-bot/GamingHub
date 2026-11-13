@@ -127,7 +127,7 @@ func _next() -> void:
 		return
 	_layout("افتح قلبك — الجولة %d من %d" % [engine.round_index + 1, engine.round_limit])
 	_text("الدور على: %s" % engine.players[engine.active_player_index])
-	_text(str(card.get("text_ar", "")), 29)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"افتح قلبك",str(card.get("text_ar", "")))
 	_text("مسموح تتخطى السؤال من غير أي عقوبة.", 18)
 	_button("جاوبت — +10 نقاط", func(): _complete(true))
 	_button("تخطي السؤال — بدون نقاط", func(): _complete(false))
@@ -168,7 +168,7 @@ func _resume() -> void:
 func _show_existing() -> void:
 	_layout("افتح قلبك — الجولة %d من %d" % [engine.round_index + 1, engine.round_limit])
 	_text("الدور على: %s" % engine.players[engine.active_player_index])
-	_text(str(engine.current_card.get("text_ar", "")), 29)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"افتح قلبك",str(engine.current_card.get("text_ar", "")))
 	_button("جاوبت — +10 نقاط", func(): _complete(true))
 	_button("تخطي السؤال — بدون نقاط", func(): _complete(false))
 	_button("النتيجة الحالية", _render_results)

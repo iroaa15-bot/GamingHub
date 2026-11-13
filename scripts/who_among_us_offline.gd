@@ -123,7 +123,7 @@ func _draw_card() -> void:
 	seconds_left = 60
 	_screen("مين فينا؟ — الجولة %d/%d" % [engine.round_index + 1, engine.round_limit])
 	_label("دور: %s" % engine.players[engine.active_player_index])
-	_label(str(engine.current_card.get("text_ar", "")), 28)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"مين فينا؟",str(engine.current_card.get("text_ar", "")))
 	var countdown := _label("60 ثانية", 25)
 	countdown.name = "Countdown"
 	_button("ابدأ مؤقت التفكير", _begin_timer)
@@ -148,7 +148,7 @@ func _vote_screen() -> void:
 		return
 	voting = true
 	_screen("تصويت سري — مين فينا؟")
-	_label(str(engine.current_card.get("text_ar", "")), 24)
+	load("res://scripts/visual_skin.gd").add_social_prompt(panel,"مين فينا؟",str(engine.current_card.get("text_ar", "")))
 	_label("اختار المصوّت ثم الشخص اللي هيصوّت له. التصويت السابق مش بيظهر.", 18)
 	for voter in engine.players:
 		if engine.votes.has(voter):

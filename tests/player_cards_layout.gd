@@ -30,7 +30,7 @@ func run() -> void:
    await process_frame;await process_frame
    valid=valid and ui._seat_avatars[0].custom_minimum_size.x>=(80 if count==2 else 56)
    valid=valid and ui._seat_labels[0].text.contains("♛") and ui._seat_labels[0].text.contains("★")
-   valid=valid and ui._seat_labels[count-1].text.contains("إعادة اتصال" if language=="ar" else "Reconnecting")
+   valid=valid and ui._seat_statuses[count-1].text.contains("إعادة اتصال" if language=="ar" else "Reconnecting")
    if DisplayServer.get_name()!="headless":
     await RenderingServer.frame_post_draw
     root.get_texture().get_image().save_png(folder.path_join("cards-%s-%d.png"%[language,count]))

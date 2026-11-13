@@ -69,7 +69,10 @@ def social(body: SocialCredentials, authorization: str = Header(default="")):
         linked = db.execute("SELECT user_id FROM identity_providers WHERE provider=%s AND subject=%s",
             (body.provider,verified.subject)).fetchone()
         if linked:
-            uid = linked[0]
+            from identity_backend.provider_accounts import independent_provider_user
+            uid = independent_provider_user(db, linked[0], body.provider, verified.subject)
+            db.execute("UPDATE identity_users SET avatar_url=%s WHERE id=%s AND avatar_url=''",
+                       (verified.avatar,uid))
         else:
             # Providers identify independent accounts, even when their email is
             # identical. Only a guest may be upgraded; never attach a provider

@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "file_count": 1799,
+  "file_count": 1800,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
-    ".github/workflows/godot-checks.yml": "776c5296b8be009dc0e5cbb771c7ee310abe745bb0f4ef9e9a550746a2bef6ac",
+    ".github/workflows/godot-checks.yml": "c053df43038e964b8e07578e661f0292115db963a727dbca4381195a82ddba91",
     ".github/workflows/integrated-identity.yml": "58154437b7d265db4191c33d4864b2d237fc236dc7dfe365db0f3e558e908c91",
     ".github/workflows/photo-duel-validation.yml": "4bcbe76b20d2a3e067bb8f2dd1423fc9b14ddc67ebd04bbd2c55916036103199",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
@@ -1599,6 +1599,7 @@
     "tests/identity_android_runtime.gd.uid": "cdb51bb31dad6702f5acd8a7c8f22368ba8cd5f4497cffb2790d69d4c15e3421",
     "tests/journeys.gd": "3af7470f7a24c7f5b4c9dfe987a1be6b25f1a8bb842e89030a381fc186db55af",
     "tests/journeys.gd.uid": "62f8f9dc283d82f3872eb3dcba1f2d6bfb3bf62aa8c80035fd62b2561e2ddd11",
+    "tests/language_restart.gd": "3d550e6ed6f8afaeecf138e958b73a484c1b60ac10a69f59207afdcc9e641c74",
     "tests/languages.gd": "2d25a8814cd1a0aee3def760da45f8f13b78b14bcecd947c3179dd8f3ff1138a",
     "tests/languages.gd.uid": "65d861630ac004487ed5a11fd9f7160a801f0fd94869c893074d44d74c32e879",
     "tests/main_picture_flow_ui.gd": "32b9db4132f3b6b08adc82586b2e5108679b146081cd8c858c76c7f394cc7950",

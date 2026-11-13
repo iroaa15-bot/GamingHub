@@ -57,6 +57,15 @@ jobs:
             grep -q AVATAR_PICKER_DISPATCH_PASS godot-avatar-picker.log
             timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/account_progress_isolation.gd 2>&1 | tee godot-account-isolation.log
             grep -q ACCOUNT_PROGRESS_ISOLATION_PASS godot-account-isolation.log
+      - name: Verify Arabic and English across fresh Godot processes
+        shell: bash
+        run: |
+          set -eu
+          export XDG_DATA_HOME="$(mktemp -d)"
+          for language in en ar; do
+            timeout 30 godot --headless --path . --script res://tests/language_restart.gd -- save "$language"
+            timeout 30 godot --headless --path . --script res://tests/language_restart.gd -- check "$language"
+          done
       - name: Verify unified profile and server point display
         shell: bash
         run: |

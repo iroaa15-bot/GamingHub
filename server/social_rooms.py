@@ -211,7 +211,7 @@ class SocialHub(SharedQuizHub):
             return await super().handle(ws,{'type':'duel_hello','protocol':VERSION})
         if action=='duel_party_create':
             category=msg.get('category')
-            if not self.social_enabled or category not in CATEGORIES or self.social_requests.get(ws)!=category:raise ProtocolError('Social rooms unavailable')
+            if not self.social_enabled or not isinstance(category,str) or category not in CATEGORIES or self.social_requests.get(ws)!=category:raise ProtocolError('Social rooms unavailable')
             if ws in self.bindings or len(self.rooms)>=100:raise ProtocolError('Room capacity reached')
             capacity=integer(msg.get('players'),range(2,7));rounds=integer(msg.get('rounds'),(10,15,20))
             room=SocialRoom(new_room_code(self.rooms),capacity,rounds,self.catalog,category,self.social_cards)
@@ -220,12 +220,15 @@ class SocialHub(SharedQuizHub):
             await self.send(ws,{'type':'duel_created','code':room.code,'token':room.tokens[0],'player':0})
             return await self.publish(room)
         if action in ('duel_join','duel_resume'):
-            target=self.rooms.get(msg.get('code'))
+            code=msg.get('code')
+            if not isinstance(code,str):raise ProtocolError('Invalid room code')
+            target=self.rooms.get(code)
             if isinstance(target,SocialRoom) and self.social_requests.get(ws)!=target.category:raise ProtocolError('Join from the same game')
             if not isinstance(target,SocialRoom) and ws in self.social_requests:raise ProtocolError('Join from the same game')
         binding=self.bindings.get(ws);room=self.rooms.get(binding[0]) if binding else None
         if not isinstance(room,SocialRoom):return await super().handle(ws,msg)
         player=binding[1]
+        room.activity=time.monotonic()
         if action=='duel_party_propose':
             mode=msg.get('primary_mode')
             if player!=0 or room.started or mode not in ('voice','text','mixed','tap'):raise ProtocolError('Invalid host proposal')

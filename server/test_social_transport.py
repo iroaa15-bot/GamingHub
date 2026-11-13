@@ -5,7 +5,7 @@ import secrets
 import unittest
 from websockets.asyncio.server import serve
 from websockets.asyncio.client import connect
-from social_rooms import SocialHub, SocialRoom, PowerMatch, load_social_deck
+from social_rooms import SocialHub, SocialRoom, PowerMatch, load_social_deck, CATEGORIES
 from photo_duel_extension import ProtocolError
 from pathlib import Path
 
@@ -35,6 +35,19 @@ class SocialTransportTests(unittest.IsolatedAsyncioTestCase):
         for i in range(capacity):await self.send(i,'duel_accept',config_revision=1,picture_difficulty='easy')
         await self.send(0,'duel_start')
         return room
+
+    async def test_all_social_games_start_with_two_to_six_players(self):
+        for category in sorted(CATEGORIES):
+            for capacity in range(2,7):
+                with self.subTest(category=category,capacity=capacity):
+                    room=await self.create(category,capacity)
+                    self.assertEqual(room.phase,'active')
+                    for player in range(capacity):
+                        self.assertEqual(room.view(player)['party']['category'],category)
+                    for peer in self.peers[:capacity]:
+                        self.hub.bindings.pop(peer,None)
+                    self.hub.rooms.pop(room.code,None)
+                    self.hub.subjects.pop(room.code,None)
 
     async def test_open_heart_full_match_no_duplicate_awards(self):
         room=await self.create('open_heart')

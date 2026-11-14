@@ -615,7 +615,7 @@ func _state(value: Dictionary) -> void:
  for i in range(6):
   _seat_panels[i].visible = i < seats
   _seat_labels[i].add_theme_font_size_override("font_size",18 if seats<=4 else 16)
-  var avatar_size: float=88 if seats<=2 else ((72 if seats<=4 else 64) if not active else 56)
+  var avatar_size: float=64 if seats<=2 else (56 if seats<=4 and not active else 48)
   _seat_avatars[i].custom_minimum_size=Vector2(avatar_size,avatar_size)
   var is_turn: bool=active and int(value.get("current",-1))==i
   var seat_skin=VisualSkin.card(Color("082033"),12)

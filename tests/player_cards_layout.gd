@@ -28,7 +28,7 @@ func run() -> void:
    var state: Dictionary={"capacity":count,"joined":count,"connected":connected,"scores":scores,"profiles":profiles,"started":true,"current":0,"responder":1,"primary_mode":"tap","room_agreement":true,"opponents":[]}
    ui.client.state=state;ui._state(state)
    await process_frame;await process_frame
-   valid=valid and ui._seat_avatars[0].custom_minimum_size.x>=(80 if count==2 else 56)
+   valid=valid and ui._seat_avatars[0].custom_minimum_size.x<=(64 if count==2 else 56)
    valid=valid and ui._seat_labels[0].text.contains("♛") and ui._seat_labels[0].text.contains("★")
    valid=valid and ui._seat_statuses[count-1].text.contains("إعادة اتصال" if language=="ar" else "Reconnecting")
    if DisplayServer.get_name()!="headless":

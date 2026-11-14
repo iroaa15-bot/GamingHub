@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 1812,
+  "file_count": 1813,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "c053df43038e964b8e07578e661f0292115db963a727dbca4381195a82ddba91",
@@ -1424,6 +1424,7 @@
     "scripts/guess_picture_voice_turns.gd": "4cc0be3cdc04511d627454458d012d6101232f52995c52238f0e6b7d8b035cd3",
     "scripts/guess_picture_voice_turns.gd.uid": "fdbd23c585a77a088359bffc976b2ab30b1ff61d97d83c0f420100fd20a1414d",
     "scripts/home_layout_catalog.gd": "87bd838543e50270a7a3c10327fb8d5c95ea9c8cc504b463592ebc7a4a1833d1",
+    "scripts/home_layout_catalog.gd.uid": "eb0f9279cdee9007f8af86dd483217cb2c35090b3e2cc912ea0e12867f60f7f2",
     "scripts/live_ops.gd": "fe65c25afc4fbc6ad6d1b5b30bd958c83ca7c72a90f2b07e291a4485aca0b3e9",
     "scripts/live_ops.gd.uid": "ae3219c6457574fdf276f6a3680d2a40d44546a986c09e0559fed6a55d79d0fb",
     "scripts/main.gd": "3bf5667f557e525c72f3c3f029090225ff032145102b591fae648d2db99364a9",
@@ -1448,7 +1449,7 @@
     "scripts/photo_duel_mic_probe_staging.gd.uid": "72329a0bc65e34edbdb045303e2daec46e3600f5b2425693372bb7fdfb8a72e6",
     "scripts/photo_duel_network_staging.gd": "bee6c6cb5409586b3dd09a0cf966b27c343905565307ca2c469c47cfaa11a319",
     "scripts/photo_duel_network_staging.gd.uid": "f3e13b0595b34f79284f3affd7d75339223595ce5c6dc96f6b9bb1a8ae7cd5d8",
-    "scripts/photo_duel_voice_adapter.gd": "c66746e29b9ea86f4a1717d45d1a78e7cf4c833818cb5973944b0ecbe55d1b46",
+    "scripts/photo_duel_voice_adapter.gd": "53122b2edfc9ecd52afb0130b22a78fbf2d822d2c7ba65379f97f76e3546b442",
     "scripts/photo_duel_voice_adapter.gd.uid": "d319148882dca2bcea5f59a725e935cd8769b8d6081ef4aa8a600007ba22cf0d",
     "scripts/photo_duel_voice_receiver_staging.gd": "60d36d138ac937aed3048cef769ab76c1f351d77b5c08d47b395c07309681a1f",
     "scripts/photo_duel_voice_receiver_staging.gd.uid": "99bde559eea97d93ced69730b9ac7a49d5bfaa3e09ebf7500e58e9b67500407a",
@@ -1794,7 +1795,7 @@
     "tests/unified_profile.gd.uid": "36cc51e836b993cf95da0ee344ce40bc5e5c08b3cb16d25604587ef0a19b39b2",
     "tests/visual_switch_access_regression.gd": "201b3a9569a50ad594a44da6d0e8979ed2ece722f02d499ea26f3907263766d2",
     "tests/visual_switch_access_regression.gd.uid": "4342d710c6b2dce0c1d49e6f723d2d78616257ac4cd1fcdabac23109d11ad9f4",
-    "tests/voice_continuity.gd": "e70d41c83ebcf7ad6026c20acb10ae1db3eede785904064481c8236d0d86939e",
+    "tests/voice_continuity.gd": "832a177c445bde9ab134468ab4d0e8f106082f14a603dbef6e7a576cdb76cd0d",
     "tests/voice_continuity.gd.uid": "f24f1eb455acb196e21f403d0e6947824dafffc7c74f891b51a33e6d570502eb",
     "tests/voice_health_metadata.gd": "86f95889fa999965662ae9409912a668e82e6f45416afefe8679c80c332b3c4a",
     "tests/voice_health_metadata.gd.uid": "fe58a2529b1aae6d199d83277a3b1e24adc8cad3f81b4b260edda49451ca866b",

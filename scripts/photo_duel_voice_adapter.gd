@@ -72,6 +72,7 @@ func _state(snapshot: Dictionary) -> void:
  var next_epoch: int=int(voice.get("epoch",-1))
  if next_epoch!=epoch:
   bridge.stop_voice()
+  _sent_opt_in=false
   _sent_frame_times.clear()
   sequence=0
   epoch=next_epoch

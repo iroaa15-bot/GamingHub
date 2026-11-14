@@ -24,6 +24,14 @@ func run() -> void:
  snapshot.round=21;adapter._state(snapshot)
  var mute_preserved: bool=adapter.muted and adapter.requested and bridge.active
  adapter.set_muted(false)
+ adapter._sent_opt_in=true
+ var before_recovery_requests: int=connection.sent.size()
+ snapshot.voice.epoch=2;snapshot.voice.local_enabled=false;snapshot.voice.peer_enabled=false
+ adapter._state(snapshot)
+ continuous=continuous and connection.sent.size()==before_recovery_requests+1 and not bridge.active
+ snapshot.voice.local_enabled=true;snapshot.voice.peer_enabled=true
+ adapter._state(snapshot)
+ continuous=continuous and bridge.active
  for temporary_error in ["Voice paused until room reconnects","Voice room unavailable"]:
   adapter._event({"type":"duel_error","scope":"voice","message":temporary_error})
   continuous=continuous and adapter.requested and not bridge.active and adapter._permission_granted

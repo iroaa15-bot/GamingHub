@@ -24,7 +24,12 @@ func attach(connection: Node) -> void:
  bridge.outgoing_pcm.connect(_outgoing)
  bridge.permission_ready.connect(_permission)
  bridge.voice_unavailable.connect(_failure)
- bridge.status_changed.connect(func(_state: String, details: String): last_status=details; changed.emit())
+ bridge.status_changed.connect(func(state: String, details: String):
+  last_status=details
+  if OS.is_debug_build() and state == "active":
+   print("GH_VOICE_NATIVE_STATUS ", details)
+  changed.emit()
+ )
  add_child(bridge)
  client.state_changed.connect(_state)
  client.event_received.connect(_event)
@@ -72,6 +77,7 @@ func _state(snapshot: Dictionary) -> void:
  var next_epoch: int=int(voice.get("epoch",-1))
  if next_epoch!=epoch:
   bridge.stop_voice()
+  _sent_opt_in=false
   _sent_frame_times.clear()
   sequence=0
   epoch=next_epoch
@@ -117,6 +123,12 @@ func _event(message: Dictionary) -> void:
   # Keep the user's existing call intent; do not send more frames/opt-outs into
   # a socket the server has just declared unbound.
   if str(message.get("message","")).to_lower()=="not in a room":return
+  if str(message.get("message","")) in ["Voice paused until room reconnects","Voice room unavailable"]:
+   # In-flight PCM may arrive after a disconnect pauses the room. Suspend
+   # native I/O, but keep the explicit call intent for the next valid snapshot.
+   # Canonical closed/consent snapshots still govern whether audio can restart.
+   _stop(true)
+   return
   if str(message.get("message","")) in ["Request rate limit","Stale audio frame","Voice consent or epoch mismatch"]:
    # These reject individual media frames, not microphone consent or the call.
    # TCP/mobile jitter must not turn a dropped frame into a permanent hang-up.

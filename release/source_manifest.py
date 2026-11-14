@@ -20,7 +20,7 @@ TEXT_SUFFIXES = {'.gd', '.gdshader', '.uid', '.godot', '.cfg', '.json', '.yml', 
 
 def source_bytes(path):
     data = path.read_bytes()
-    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE'}:
+    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE', 'gradlew'}:
         return data.replace(b'\r\n', b'\n')
     return data
 
@@ -43,7 +43,7 @@ def included(root=ROOT):
         return True
     return sorted((p for p in files if enabled_binary(p) and p.relative_to(root).as_posix() not in EXCLUDE
                    and '__pycache__' not in p.parts and p.suffix not in {'.pyc', '.import'}
-                   and '.godot' not in p.parts and '.gradle' not in p.parts and 'build' not in p.parts),
+                   and '.godot' not in p.parts and '.gradle' not in p.parts and '.kotlin' not in p.parts and 'build' not in p.parts),
                   key=lambda p: p.relative_to(root).as_posix())
 
 def inventory(root=ROOT):

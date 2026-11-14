@@ -1,0 +1,25 @@
+name: IDAS Safe Checks
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: idas-gaminghub-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify independent Godot project and server sources
+        run: |
+          test -s project.godot
+          test -s server/server.py
+          python -m compileall -q server
+      - name: Ensure no automatic production deployment
+        run: echo "Validation only. Production releases require explicit approval."

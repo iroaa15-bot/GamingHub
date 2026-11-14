@@ -602,12 +602,15 @@ func show_hint() -> void:
   var alternate: int = (correct + 1) % choices.size()
   hint_label.text = tr_ui("الإجابة واحدة من: ", "One of these: ") + str(choices[correct]) + " / " + str(choices[alternate]) if rng.randf() < 0.5 else tr_ui("الإجابة واحدة من: ", "One of these: ") + str(choices[alternate]) + " / " + str(choices[correct])
 
-func play_clip(id: String) -> void:
+func play_clip(id: String, audio_format: String = "wav") -> void:
  stop_audio()
  load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player = AudioStreamPlayer.new()
  audio_player.bus="Game SFX"
- audio_player.stream = PublishedContent.media.get(id) as AudioStream if id.begins_with("pub_") else load("res://assets/audio/" + id + ".wav")
+ audio_player.stream = PublishedContent.media.get(id) as AudioStream if id.begins_with("pub_")
+ if not id.begins_with("pub_") and audio_format in ["wav","ogg"]:
+  var path := "res://assets/audio/" + id + "." + audio_format
+  if ResourceLoader.exists(path):audio_player.stream=load(path) as AudioStream
  if audio_player.stream==null:
   audio_player.queue_free()
   return
@@ -2714,7 +2717,7 @@ func show_round() -> void:
  VisualSkin.add_question_panel(root, str(item.get(selected_language, item.get("en", ""))), reading_scale, tr_ui("✦ السؤال ✦", "✦ THE CHALLENGE ✦"))
  if item.has("audio"):
   label(tr_ui("مقطع صوتي منشور • يمكنك إعادة الاستماع", "Published clip • replay any time") if str(item.get("audio","")).begins_with("pub_") else tr_ui("مقطع صوتي مُركّب • يمكنك إعادة الاستماع", "Synthesized clip • replay any time"), 15)
-  button(tr_ui("▶ استمع للصوت", "▶ PLAY SOUND"), func(): play_clip(str(item["audio"])), GREEN)
+  button(tr_ui("▶ استمع للصوت", "▶ PLAY SOUND"), func(): play_clip(str(item["audio"]),str(item.get("audio_format","wav"))), GREEN)
  var mode: String = str(item.get("mode", "choice"))
  if mode == "order":
   show_order_choices(item)

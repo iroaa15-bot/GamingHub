@@ -1416,7 +1416,7 @@
     "scripts/guess_picture_voice_turns.gd.uid": "fdbd23c585a77a088359bffc976b2ab30b1ff61d97d83c0f420100fd20a1414d",
     "scripts/live_ops.gd": "fe65c25afc4fbc6ad6d1b5b30bd958c83ca7c72a90f2b07e291a4485aca0b3e9",
     "scripts/live_ops.gd.uid": "ae3219c6457574fdf276f6a3680d2a40d44546a986c09e0559fed6a55d79d0fb",
-    "scripts/main.gd": "48fb824b1326465159dcfac1fd0a5346ed382b06b304b29518a22df50d601cbc",
+    "scripts/main.gd": "0ade308a01c17f3fd2c41fb631119f7754d03d657b77a3fba87c24305befb718",
     "scripts/main.gd.uid": "cac4c13aa0f7d6065030662e0079a30bb90ea705f0ac4c53c0ba426761a2dd57",
     "scripts/menu_touch_guard.gd": "12fba2e85d83c65fc411cfe5e061ce536f47c3250136039e026795b644b4329b",
     "scripts/menu_touch_guard.gd.uid": "1284f532a23d5c5fc670f33f61b2e5e6f285c873f1b320a121a01b3e6c7e08c8",

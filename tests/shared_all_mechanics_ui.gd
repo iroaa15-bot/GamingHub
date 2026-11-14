@@ -60,9 +60,9 @@ func suite(game: String) -> void:
  var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game=game
  var a=script.new();root.add_child(a);a.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var b=script.new();root.add_child(b);b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);b.hide()
- a.endpoint_field.text=endpoint;a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
+ a.service_endpoint=endpoint;a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
  if not await until(func():return not a.client.code.is_empty()):ck(false,game+" create: "+a.status.text);quit(1);return
- b.endpoint_field.text=endpoint;b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
+ b.service_endpoint=endpoint;b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
  ck(await until(func():return a.client.state.get("joined",0)==2 and b.client.state.get("joined",0)==2),game+" real UI join")
  if game=="8":
   a.client.send_action("duel_quiz_propose",{"category":"Place","primary_mode":"text"})

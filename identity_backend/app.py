@@ -25,6 +25,8 @@ from identity_backend.admin_assets import router as admin_assets_router
 app.include_router(admin_assets_router)
 from identity_backend.published_content import router as published_content_router
 app.include_router(published_content_router)
+from identity_backend.player_avatar import router as avatar_router, initialize_avatar
+app.include_router(avatar_router)
 DATABASE_URL = os.environ.get("GAMINGHUB_DATABASE_URL", "")
 if not DATABASE_URL:
     raise RuntimeError("GAMINGHUB_DATABASE_URL is required")
@@ -51,6 +53,7 @@ def initialize():
             family_id TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL,
             consumed BOOLEAN NOT NULL DEFAULT FALSE, revoked BOOLEAN NOT NULL DEFAULT FALSE)""")
         initialize_social(db)
+        initialize_avatar(db)
         initialize_admin(db)
         initialize_appearance(db)
         db.commit()

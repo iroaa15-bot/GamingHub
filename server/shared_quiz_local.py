@@ -70,7 +70,9 @@ class QuizRoom(Room):
    self.scores[player]+=points
    self.results.append({'player':player,'choice':choice,'correct':correct,'points':points,'elapsed_ms':elapsed})
   self.phase='finished' if self.index+1>=self.quiz_rounds else 'results';self.match_finished=self.phase=='finished';self.deadline=None;self.remaining=None
-  if self.match_finished:self.winner=max(range(self.capacity),key=lambda i:self.scores[i])
+  if self.match_finished:
+   leaders=[i for i,score in enumerate(self.scores) if score==max(self.scores)]
+   self.winner=leaders[0] if len(leaders)==1 else -1
  def expire(self):
   if self.phase=='question' and not self.paused and self.deadline is not None and time.monotonic()>=self.deadline:
    self.finish_question();self.revision+=1;return True

@@ -15,8 +15,9 @@ class NativeIdentityPackage(unittest.TestCase):
      actual=hashlib.sha256((ROOT/name).read_bytes().replace(b'\r\n',b'\n')).hexdigest()
      self.assertEqual(actual,digest,'Rebuild identity AAR after changing '+name)
     self.assertIn('native/android-identity/src/main/java/com/gaminghub/identity/ProviderLogin.java',evidence['sources'])
+    self.assertIn('native/android-identity/src/main/java/com/gaminghub/identity/AvatarPicker.java',evidence['sources'])
     with zipfile.ZipFile(io.BytesIO(aar.read('classes.jar'))) as classes:
-     for name in ('GamingHubIdentityPlugin','ProviderLogin'):
+     for name in ('GamingHubIdentityPlugin','ProviderLogin','AvatarPicker'):
       self.assertIn('com/gaminghub/identity/'+name+'.class',classes.namelist())
     manifest=ET.fromstring(aar.read('AndroidManifest.xml'))
     sdk=manifest.find('uses-sdk')

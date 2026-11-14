@@ -20,10 +20,14 @@ class FilterHub(DuelHub):
   by_asset={('res://assets/generated/'+c['image']+'.webp'):self.filters['items'][c['name']] for c in cards}
   by_asset.update({item['image']:self.filters['items'][item['name']] for item in approved['catalog']})
   self.filter_items={key:by_asset[item['image']] for key,item in self.catalog.items()}
+  import duel_questions
+  duel_questions.enrich(self.catalog, self.filter_items)
  async def send(self,ws,message):
   message=message.copy()
   if message.get('type')=='duel_capabilities':
    message.update(picture_filters=True,picture_categories=self.filters['categories'],picture_difficulties=self.filters['difficulties'])
+   import duel_questions
+   message['question_labels']=duel_questions.LABELS
   if message.get('type')=='duel_state' and ws in self.bindings:
    room=self.rooms.get(self.bindings[ws][0])
    message.update(picture_category=getattr(room,'picture_category','all'),picture_difficulty=getattr(room,'picture_difficulty','all'))

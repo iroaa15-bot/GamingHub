@@ -127,6 +127,7 @@ class SecureDuelHub(AccountRooms,DuelHub):
             if room:self.reset_voice(room)
         await super().disconnect(ws);self.identities.pop(ws,None)
         self.account_connections.pop(ws,None)
+        self.public_profiles.pop(ws,None)
     async def connection(self,ws):
         extension=False
         try:

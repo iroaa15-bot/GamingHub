@@ -1,4 +1,12 @@
 extends Control
+static func dismiss_text_input(viewport: Viewport) -> bool:
+ if viewport.get_meta("text_back_frame",-1)==Engine.get_process_frames():return true
+ var focus:=viewport.gui_get_focus_owner()
+ if not (focus is LineEdit or focus is TextEdit):return false
+ viewport.set_meta("text_back_frame",Engine.get_process_frames())
+ focus.release_focus()
+ DisplayServer.virtual_keyboard_hide()
+ return true
 # Gaming Hub visual identity: lightweight native drawing, no shaders or external assets.
 # One coherent skin for the home screen and the online lobby.
 const INK := Color("030a28")
@@ -284,9 +292,32 @@ static func enable_menu_swipe(node: Node) -> void:
 
 # Presentation-only helpers for the approved compact menu screens.
 static var _menu_icons: Dictionary = {}
+static func language_globe() -> Texture2D:
+ if _menu_icons.has("language_globe"):return _menu_icons["language_globe"]
+ # Rasterized once at 3x the visible size; no 3D viewport or per-frame shader.
+ var svg := """<svg xmlns='http://www.w3.org/2000/svg' width='168' height='168' viewBox='0 0 64 64'>
+ <defs><radialGradient id='ocean' cx='.32' cy='.23' r='.8'><stop stop-color='#b6ffff'/><stop offset='.28' stop-color='#28c9f7'/><stop offset='.65' stop-color='#1265c7'/><stop offset='1' stop-color='#122353'/></radialGradient>
+ <linearGradient id='land' x2='.8' y2='1'><stop stop-color='#ddffff'/><stop offset='.6' stop-color='#59ebdf'/><stop offset='1' stop-color='#168eae'/></linearGradient>
+ <clipPath id='sphere'><circle cx='32' cy='29' r='25'/></clipPath></defs>
+ <ellipse cx='33' cy='58' rx='22' ry='4' fill='#020a25' opacity='.7'/>
+ <circle cx='32' cy='29' r='28' fill='#1fc8ff' opacity='.13'/>
+ <circle cx='32' cy='29' r='25' fill='url(#ocean)' stroke='#66edff' stroke-width='1.5'/>
+ <g clip-path='url(#sphere)'><g fill='none' stroke='#b5ffff' opacity='.3'><ellipse cx='32' cy='29' rx='12' ry='25'/><path d='M7 29h50M11 17q21 10 42 0M11 41q21-10 42 0'/></g>
+ <g fill='url(#land)' stroke='#147fa4' stroke-width='.5'><path d='m15 11 10-4 6 5-3 6-5 1-2 6-5-1-2-7-5-2Zm8 16 7 1 4 7-4 6-2 10-5-5-2-10-4-4Z'/><path d='m38 8 12 5 7 7-6 7-6-2-2 6-6-2-4-8 4-4Zm5 30 9 1 4 7-9 3-6-5Z'/></g>
+ <ellipse cx='23' cy='13' rx='14' ry='7' fill='#fff' opacity='.24' transform='rotate(-28 23 13)'/></g>
+ <path d='M13 22A21 21 0 0 1 29 8' fill='none' stroke='#edffff' stroke-width='2' stroke-linecap='round'/>
+ <path d='m53 5 1 3 3 1-3 1-1 3-1-3-3-1 3-1Z' fill='#d9ffff'/></svg>"""
+ var image := Image.new()
+ if image.load_svg_from_string(svg)!=OK:return menu_icon("globe")
+ var texture := ImageTexture.create_from_image(image)
+ _menu_icons["language_globe"]=texture
+ return texture
+
 static func menu_icon(kind: String) -> Texture2D:
  if _menu_icons.has(kind): return _menu_icons[kind]
  var paths := {
+  "globe":"<circle cx='12' cy='12' r='10'/><ellipse cx='12' cy='12' rx='4' ry='10'/><path d='M2 12h20M4 6h16M4 18h16'/>",
+  "share":"<circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><path d='m8 10 7-4M8 14l7 4'/>",
   "player":"<circle cx='12' cy='7' r='4'/><path d='M4 22v-3a8 8 0 0 1 16 0v3'/>",
   "phone":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3Z'/>",
   "phone_off":"<path d='M5 3h4l2 5-3 2a15 15 0 0 0 6 6l2-3 5 2v4c0 2-2 3-4 2C9 18 5 14 3 6c0-2 0-3 2-3ZM3 3l18 18'/>",
@@ -359,7 +390,7 @@ static func compact_menu(parent: Node) -> void:
    node.add_theme_stylebox_override("focus",neon_surface(Color("193a62"),CYAN))
    node.add_theme_color_override("font_color",TEXT)
    node.add_theme_color_override("font_placeholder_color",Color("afc7df"))
-  if node is Button and not node is CheckButton and not node is OptionButton:
+  if node is Button and not node is CheckButton and not node is OptionButton and not node.has_meta("language_switcher"):
    var font_size: int=node.get_theme_font_size("font_size")
    decorate_button(node,str(node.get_meta("menu_tone","secondary")))
    node.add_theme_font_size_override("font_size",font_size)

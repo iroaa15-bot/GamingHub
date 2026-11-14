@@ -30,6 +30,56 @@ class Accounts(unittest.IsolatedAsyncioTestCase):
   self.hub.account_connections[self.a]='different-account'
   await self.hub.publish(room);await asyncio.sleep(.05)
   self.assertEqual(len(self.awards),1)
+ async def test_mixed_question_turns_and_final_guess_have_server_role_checks(self):
+  from photo_duel_extension import ProtocolError
+  self.hub.membership_voice=True
+  await self.hub.handle(self.a,{'type':'duel_create','protocol':3,'players':2,'timer':30,'target':10,'room_agreement':True,'picture_difficulty':'easy'})
+  code=self.hub.bindings[self.a][0];room=self.hub.rooms[code]
+  await self.hub.handle(self.b,{'type':'duel_join','protocol':3,'code':code})
+  await self.hub.handle(self.a,{'type':'duel_propose','protocol':3,'picture_category':'all','primary_mode':'mixed'})
+  for ws in (self.a,self.b):
+   await self.hub.handle(ws,{'type':'duel_accept','protocol':3,'config_revision':room.config_revision,'picture_difficulty':'easy'})
+  await self.hub.handle(self.a,{'type':'duel_start','protocol':3})
+  await self.hub.handle(self.a,{'type':'duel_voice_state','protocol':3,'enabled':True})
+  self.assertTrue(self.hub.voice[code]['enabled'][0])
+  async def act(ws,kind,**data):await self.hub.handle(ws,{'type':kind,'protocol':3,**data})
+  with self.assertRaises(ProtocolError):await act(self.b,'duel_question',text='Unauthorized turn')
+  await act(self.a,'duel_question',text='Is this an animal?')
+  with self.assertRaises(ProtocolError):await act(self.a,'duel_voice_question')
+  with self.assertRaises(ProtocolError):await act(self.a,'duel_reply',answer=True)
+  await act(self.b,'duel_reply',answer=True)
+  self.assertEqual(room.scores,[0,0]);self.assertEqual(room.current,1)
+  await act(self.b,'duel_voice_question')
+  with self.assertRaises(ProtocolError):await act(self.b,'duel_question',text='Concurrent question')
+  await act(self.a,'duel_reply',answer=False)
+  self.assertEqual(room.current,0)
+  await act(self.a,'duel_guess',guess='Final guess')
+  with self.assertRaises(ProtocolError):await act(self.b,'duel_reply',answer=True)
+  self.assertEqual(room.scores,[0,0])
+  await act(self.b,'duel_confirm',correct=True)
+  self.assertEqual(room.scores,[1,0])
+  with self.assertRaises(ProtocolError):await act(self.b,'duel_confirm',correct=True)
+ async def test_exact_quiz_ties_share_round_points_without_arbitrary_match_winner(self):
+  adapter=self.hub.adapters['3'];room=QuizRoom('345678',2,30,1,self.hub.catalog,adapter,'easy')
+  room.peers=[self.a,self.b];room.joined=2;room.started=True
+  room.queue=adapter.pool('easy','all')[:1];room.begin_question()
+  room.answers={0:(room.answer,100),1:(room.answer,100)}
+  room.finish_question()
+  self.assertEqual(room.scores[0],room.scores[1]);self.assertEqual(room.winner,-1)
+  self.hub.account_connections[self.a]='account-a';self.hub.account_connections[self.b]='account-b'
+  self.assertIsNone(self.hub.reward_intent(room))
+ async def test_duplicate_answers_and_client_elapsed_times_cannot_change_results(self):
+  from photo_duel_extension import ProtocolError
+  adapter=self.hub.adapters['3'];room=QuizRoom('456789',2,30,1,self.hub.catalog,adapter,'easy')
+  room.peers=[self.a,self.b];room.joined=2;room.started=True
+  room.queue=adapter.pool('easy','all')[:1];room.begin_question();room.start_clock=time.monotonic()-.2
+  self.hub.rooms[room.code]=room;self.hub.bindings[self.a]=(room.code,0);self.hub.bindings[self.b]=(room.code,1)
+  answer={'type':'duel_quiz_answer','protocol':3,'question_id':room.question['id'],'choice':room.answer,'elapsed_ms':-999999}
+  await self.hub.handle(self.a,answer)
+  first=room.answers[0]
+  self.assertGreaterEqual(first[1],190)
+  with self.assertRaises(ProtocolError):await self.hub.handle(self.a,{**answer,'choice':(room.answer+1)%4})
+  self.assertEqual(room.answers[0],first)
  async def test_authenticated_resume_replaces_half_open_socket_and_rejects_replay(self):
   from photo_duel_extension import ProtocolError
   for ws in (self.a,self.b):await self.hub.handle(ws,{'type':'duel_hello','protocol':3,'game_id':'3'})

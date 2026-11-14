@@ -21,10 +21,13 @@ import javax.crypto.spec.GCMParameterSpec;
 public final class GamingHubIdentityPlugin extends GodotPlugin {
     private static final String ALIAS = "gaminghub.identity.session.v1";
     private ProviderLogin providers;
+    private AvatarPicker avatars;
     public GamingHubIdentityPlugin(Godot godot) { super(godot); }
     @Override public String getPluginName() { return "GamingHubIdentity"; }
     @Override public java.util.Set<SignalInfo> getPluginSignals() {
-        return java.util.Collections.singleton(new SignalInfo("social_result",String.class,String.class,String.class));
+        return new java.util.HashSet<>(java.util.Arrays.asList(
+            new SignalInfo("social_result",String.class,String.class,String.class),
+            new SignalInfo("avatar_result",String.class,String.class)));
     }
     private ProviderLogin providers() {
         if (providers==null) providers=new ProviderLogin(getActivity(),(provider,token,error)->emitSignal("social_result",provider,token,error));
@@ -33,7 +36,27 @@ public final class GamingHubIdentityPlugin extends GodotPlugin {
     @UsedByGodot public void requestGoogleLogin(String clientId,String nonce) { providers().google(clientId,nonce); }
     @UsedByGodot public void requestFacebookLogin(String appId,String clientToken) { providers().facebook(appId,clientToken); }
     @UsedByGodot public void providerSignOut() { if (getActivity()!=null) providers().signOut(); }
+    @UsedByGodot public void pickAvatar() {
+        if(getActivity()==null)return;
+        if(avatars==null)avatars=new AvatarPicker(getActivity(),(image,error)->emitSignal("avatar_result",image,error));
+        avatars.open();
+    }
+    /** User-triggered Android share sheet; no contacts access or automatic sending. */
+    @UsedByGodot public void shareRoomCode(String code,String language) {
+        if (getActivity()==null || code==null || !code.matches("[0-9]{6}")) return;
+        getActivity().runOnUiThread(()-> {
+            android.content.Intent message=new android.content.Intent(android.content.Intent.ACTION_SEND);
+            message.setType("text/plain");
+            message.putExtra(android.content.Intent.EXTRA_TEXT,
+                ("ar".equals(language)?"انضم إلى غرفتي في Gaming Hub بالكود: ":"Join my Gaming Hub room with code: ")+code);
+            try {
+                getActivity().startActivity(android.content.Intent.createChooser(message,
+                    "ar".equals(language)?"مشاركة دعوة اللعب":"Share game invitation"));
+            } catch (android.content.ActivityNotFoundException ignored) { }
+        });
+    }
     @Override public void onMainActivityResult(int requestCode,int resultCode,android.content.Intent data) {
+        if(avatars!=null && avatars.activityResult(requestCode,resultCode,data))return;
         if (providers!=null) providers.activityResult(requestCode,resultCode,data);
     }
     private SecretKey key() throws Exception {

@@ -14,21 +14,32 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 class AccountRooms:
     def __init__(self,*args,**kwargs):
         self.account_connections={}
+        self.public_profiles={}
         self.award_jobs={}
         super().__init__(*args,**kwargs)
 
     async def bind_account(self,ws,msg):
         self.account_connections.pop(ws,None)
+        self.public_profiles.pop(ws,None)
         identity=self.identities.get(ws)
         ok=False
         if identity and identity['exp']>time.time() and msg.get('protocol')==3 and os.environ.get('GAMINGHUB_DATABASE_URL'):
             try:
                 from identity_backend.session_bindings import verify_session
                 bound=await asyncio.wait_for(asyncio.to_thread(verify_session,os.environ['GAMINGHUB_DATABASE_URL'],msg.get('access_token')),4)
-                if bound:self.account_connections[ws]=bound.user_id;ok=True
+                if bound:
+                    self.account_connections[ws]=bound.user_id;ok=True
+                    self.public_profiles[ws]={"display_name":bound.display_name,"avatar_url":bound.avatar_url}
             except Exception:
                 logging.getLogger(__name__).warning('Account binding unavailable')
         await self.send(ws,{'type':'duel_auth_bound','ok':ok})
+
+    async def send(self,ws,message):
+        if message.get('type')=='duel_state':
+            room=self.rooms.get(message.get('code'))
+            if room:
+                message={**message,'profiles':[self.public_profiles.get(peer,{}) if peer else {} for peer in room.peers]}
+        return await super().send(ws,message)
 
     def reward_intent(self,room):
         complete=getattr(room,'match_finished',False) or (room.closed and room.winner>=0 and room.scores[room.winner]>=room.target)

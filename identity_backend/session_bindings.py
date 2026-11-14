@@ -9,6 +9,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class BoundIdentity:
     user_id: str
+    display_name: str = ""
+    avatar_url: str = ""
 
 def verify_session(database_url: str, token: str):
     if not isinstance(token, str) or len(token) < 32 or len(token) > 512:
@@ -16,9 +18,10 @@ def verify_session(database_url: str, token: str):
     import psycopg
     digest = hashlib.sha256(token.encode()).hexdigest()
     with psycopg.connect(database_url,connect_timeout=3) as db:
-        row = db.execute("""SELECT user_id FROM identity_sessions
-            WHERE token_hash=%s AND NOT revoked AND expires_at>CURRENT_TIMESTAMP""",(digest,)).fetchone()
-    return BoundIdentity(row[0]) if row else None
+        row = db.execute("""SELECT s.user_id,u.display_name,u.avatar_url FROM identity_sessions s
+            JOIN identity_users u ON u.id=s.user_id
+            WHERE s.token_hash=%s AND NOT s.revoked AND s.expires_at>CURRENT_TIMESTAMP""",(digest,)).fetchone()
+    return BoundIdentity(*row) if row else None
 
 class SessionBindings:
     def __init__(self):

@@ -24,9 +24,9 @@ func run() -> void:
  var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game=game_id
  var a=script.new();root.add_child(a);a.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var b=script.new();root.add_child(b);b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);b.hide()
- a.endpoint_field.text="ws://127.0.0.1:8884";a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
+ a.service_endpoint="ws://127.0.0.1:8884";a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
  ck(await until(func():return not a.client.code.is_empty()),"shared UI create via authenticated transport")
- b.endpoint_field.text="ws://127.0.0.1:8884";b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
+ b.service_endpoint="ws://127.0.0.1:8884";b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
  ck(await until(func():return a.client.state.get("joined",0)==2 and b.client.state.get("joined",0)==2),"UI code join")
  a._accept_configuration();b._accept_configuration()
  await until(func():return a.client.state.confirmed.count(true)==2)

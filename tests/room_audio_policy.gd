@@ -18,17 +18,17 @@ func run():
  client.capabilities={"voice":true}
  client._received({"type":"duel_joined","code":"123456","token":"fixture","player":0})
  await create_timer(.5).timeout
- ck(policy.music_blocked() and not music.playing and AudioServer.is_bus_mute(AudioServer.get_bus_index("Music")),"lobby fade then complete stop")
+ ck(not policy.music_blocked() and music.playing and AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))<-18,"room music ducks for voice")
  for snapshot in [{"paused":false,"started":true},{"paused":true},{"match_finished":true},{"voice":{"local_enabled":false}}]:
   client._received({"type":"duel_state","code":"123456"}.merged(snapshot))
-  ck(policy.music_blocked() and not music.playing,"membership survives match/mute/pause")
- client.close_transport();ck(policy.music_blocked(),"transport loss keeps membership lock")
+  ck(music.playing and AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))<-18,"ducking survives match/mute/pause")
+ client.close_transport();ck(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))<-18,"transport loss keeps ducking")
  policy.set_music_enabled(false);client.queue_free();await process_frame
- ck(not music.playing,"disabled music stays stopped after exit")
+ ck(music.stream_paused,"disabled music stays paused after exit")
  policy.set_music_enabled(true);ck(music.playing,"enabled music resumes after full exit")
  var second=Node.new();root.add_child(second);policy.membership(second,true)
  await create_timer(.2).timeout
- policy.set_music_enabled(true);ck(not music.playing,"settings cannot restart room music")
+ policy.set_music_enabled(true);ck(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Music"))<-18,"settings preserve room ducking")
  policy.membership(second,false);ck(music.playing,"explicit membership release resumes")
  for bus in ["Music","UI SFX","Game SFX","Voice Chat"]:ck(AudioServer.get_bus_index(bus)>=0,"separate bus "+bus)
  second.queue_free();music.queue_free();await process_frame

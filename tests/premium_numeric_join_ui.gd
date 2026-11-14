@@ -14,9 +14,9 @@ func run():
  assert(load("res://scripts/multiplayer.gd").can_instantiate())
  var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game="6"
  var a=script.new();root.add_child(a);var b=script.new();root.add_child(b);b.hide()
- a.endpoint_field.text="ws://127.0.0.1:8886";a.terms.button_pressed=true;a._request_room_action("create")
+ a.service_endpoint="ws://127.0.0.1:8886";a.terms.button_pressed=true;a._request_room_action("create")
  assert(await wait_for(func():return a.client.code.length()==6))
- b.endpoint_field.text="ws://127.0.0.1:8886";b.terms.button_pressed=true
+ b.service_endpoint="ws://127.0.0.1:8886";b.terms.button_pressed=true
  var localized=""
  for character in a.client.code:localized+="٠١٢٣٤٥٦٧٨٩"[int(character)]
  b.code_field.text=localized;b._request_room_action("join")

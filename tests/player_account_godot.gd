@@ -9,7 +9,7 @@ func run() -> void:
  root.add_child(client)
  var ui=load("res://scripts/player_account_ui.gd").new()
  root.add_child(ui)
- var valid=not ui.admin.visible and load("res://scripts/main.gd").can_instantiate()
+ var valid=not ui.get_property_list().any(func(p: Dictionary):return p.name=="admin") and load("res://scripts/main.gd").can_instantiate()
  client.request("/auth/guest",{"name":"Godot integration test"})
  var response=await client.changed
  valid=valid and response[2] and not client.token.is_empty() and bool(client.user.get("guest",false))

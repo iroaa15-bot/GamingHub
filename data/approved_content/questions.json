@@ -129,6 +129,48 @@
           "source_url": "https://elcinema.com/work/1313173/content",
           "reviewed_at": "2026-11-13"
         }
+      },
+      {
+        "id": "GH-CINEMA-EG-ARRIVALS",
+        "mode": "choice",
+        "topic": "cinema",
+        "level": 1,
+        "ar": "إعادة تمثيل أصلية: مصوّر راجع مصر بعد سنين في أمريكا. المشهد يشير لفيلم إيه؟",
+        "en": "Original reconstruction: a photographer returns to Egypt after years in America. Which film?",
+        "tr": "Özgün canlandırma: Bir fotoğrafçı Amerika'da yıllar geçirdikten sonra Mısır'a dönüyor. Hangi film?",
+        "choices_ar": [
+          "عسل إسود",
+          "إكس لارج",
+          "طير إنت",
+          "زكي شان"
+        ],
+        "choices_en": [
+          "Asal Eswed",
+          "X Large",
+          "Teer Enta",
+          "Zaki Chan"
+        ],
+        "choices_tr": [
+          "Asal Eswed",
+          "X Large",
+          "Teer Enta",
+          "Zaki Chan"
+        ],
+        "correct": 0,
+        "explain_ar": "عسل إسود",
+        "explain_en": "Asal Eswed",
+        "explain_tr": "Asal Eswed",
+        "audiences": [
+          "family",
+          "teens",
+          "adults"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://elcinema.com/work/1313173/content",
+          "note": "Original locally generated game asset. No movie footage or sampled recording."
+        },
+        "video": "cairo_arrivals"
       }
     ],
     "5": [
@@ -439,6 +481,51 @@
           "reviewed_at": "2026-11-02",
           "note": "UNESCO country China verified."
         }
+      }
+    ],
+    "6": [
+      {
+        "id": "GH-SOUND-DOORBELL-CHIME",
+        "mode": "choice",
+        "topic": "audio",
+        "level": 1,
+        "ar": "الصوت ده أقرب لإيه؟",
+        "en": "What does this sound most like?",
+        "tr": "Bu ses en çok neye benziyor?",
+        "choices_ar": [
+          "جرس باب",
+          "طرق على الباب",
+          "مفتاح في قفل",
+          "غلاية"
+        ],
+        "choices_en": [
+          "Doorbell",
+          "Knocking",
+          "Key in a lock",
+          "Kettle"
+        ],
+        "choices_tr": [
+          "Doorbell",
+          "Knocking",
+          "Key in a lock",
+          "Kettle"
+        ],
+        "correct": 0,
+        "explain_ar": "جرس باب",
+        "explain_en": "Doorbell",
+        "explain_tr": "Doorbell",
+        "audiences": [
+          "family",
+          "teens",
+          "adults"
+        ],
+        "review": {
+          "status": "VERIFIED_EDITORIAL",
+          "source_url": "https://github.com/iroaa15-bot/GamingHub/pull/19",
+          "note": "Original locally generated game asset. No movie footage or sampled recording."
+        },
+        "audio": "doorbell_chime",
+        "audio_format": "ogg"
       }
     ]
   }

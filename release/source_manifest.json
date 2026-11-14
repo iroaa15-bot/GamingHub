@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 1801,
+  "file_count": 1803,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "c053df43038e964b8e07578e661f0292115db963a727dbca4381195a82ddba91",
@@ -940,7 +940,7 @@
     "content/qaadet_el_sohab/who_among_us_batch_10.json": "f640d40af816d8439b993149f532fef21a2e7bf0ed0aa515e823dbf3d30076e5",
     "data/approved_content/pictures.json": "b5d30ddcb652b2d0d4873ee30e81294f88a8f0cbf447d4df355c61f7c8d8c973",
     "data/approved_content/question_policy.json": "1b6612704bec451f6563d4b5460129b54c0af0c78d8a8b4516422c9ca4ab58dd",
-    "data/approved_content/questions.json": "fea436447538ddb1cbace9d33e2dfa351234235d6b6e02413865d43e6f48bfe1",
+    "data/approved_content/questions.json": "b852f87e049a4b26cb57569d6a58429b40aa28675fc5465fa9913568d4d2bcb7",
     "data/campaigns.json": "04ea4096812076c0e02ab7bcc36c023cc03fd891faa1fb7f6ac400c753239c96",
     "data/cards.json": "4e8b0f83d94e6fd6f26b3b9b819d1ef71502c68276a3679e82e71b3fccbeaaa0",
     "data/duel_service.json": "e9f1fe1bddfc23fba977835e501f62a29ab50a8ed132c8677aac1e7018acaaed",
@@ -1802,6 +1802,8 @@
     "tools/generate_premium_audio.py": "cb13d9ed904d7334dafaa26c9b917e4ba7ec68d0515647e521a224f962e555fe",
     "tools/run_social_tests.ps1": "4bbbae322975ebafd960b1432bb4eae27a282d30e4aec6ead1d51981ba7ca924",
     "tools/validate_daily.py": "c58ac22b74cff86a88e3aeb536d4fd031f3350a26bcd150fdfd435509b330aac",
-    "assets/ui/android_launch_background.png": "a1fdc0fc80bf861116b7b59c755b40c7b7114dc57f50cd508a47b74ee4a1f1be"
+    "assets/ui/android_launch_background.png": "a1fdc0fc80bf861116b7b59c755b40c7b7114dc57f50cd508a47b74ee4a1f1be",
+    "assets/cinema/cairo_arrivals.ogv": "fa688ebd352298689298f764cb8cb310f1844a1d0641e81b67aa70f4bb60c686",
+    "assets/audio/doorbell_chime.ogg": "c0f54925d7beddadd0ab77b71505c9e5e9d4ebda552b695418bb14ae9b0b2b4a"
   }
 }

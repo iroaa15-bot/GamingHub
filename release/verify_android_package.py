@@ -2,6 +2,16 @@
 """Validate APK/AAB output signatures and structural completeness (not Google Play approval)."""
 import argparse, pathlib, zipfile, sys
 
+UNNEEDED_PERMISSIONS = ('android.permission.READ_CONTACTS','android.permission.WRITE_CONTACTS',
+    'android.permission.READ_PHONE_STATE','android.permission.READ_BASIC_PHONE_STATE',
+    'android.permission.READ_EXTERNAL_STORAGE','android.permission.WRITE_EXTERNAL_STORAGE',
+    'android.permission.AD_ID','com.google.android.gms.permission.AD_ID',
+    'android.permission.USE_BIOMETRIC','android.permission.USE_FINGERPRINT',
+    'android.permission.ACCESS_ADSERVICES_ATTRIBUTION','android.permission.ACCESS_ADSERVICES_AD_ID',
+    'android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE','android.permission.ACCESS_ADSERVICES_TOPICS',
+    'com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE',
+    'android.permission.FOREGROUND_SERVICE','android.permission.WAKE_LOCK')
+
 def check(path: pathlib.Path, release: bool=False):
     errors=[]
     if not path.is_file(): return [f'Missing: {path}']
@@ -11,6 +21,12 @@ def check(path: pathlib.Path, release: bool=False):
         bad=z.testzip()
         if bad: errors.append(f'Corrupted entry: {bad}')
         names=set(z.namelist())
+        manifest_name='base/manifest/AndroidManifest.xml' if path.suffix=='.aab' else 'AndroidManifest.xml'
+        if manifest_name in names:
+            manifest=z.read(manifest_name)
+            for permission in UNNEEDED_PERMISSIONS:
+                if permission.encode() in manifest or permission.encode('utf-16-le') in manifest:
+                    errors.append('Unnecessary Android permission: '+permission)
         if path.suffix=='.apk':
             if 'AndroidManifest.xml' not in names: errors.append('Missing AndroidManifest.xml')
             if 'resources.arsc' not in names: errors.append('Missing compiled Android resources')

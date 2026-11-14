@@ -1,0 +1,74 @@
+[
+  {
+    "id": "GH-SCIENCE-NEW-0002",
+    "game": "5",
+    "source_url": "https://science.nasa.gov/venus/venus-facts/",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Clarified sidereal rotation versus solar day; qualitative astronomy, not arithmetic."
+  },
+  {
+    "id": "GH-SCIENCE-NEW-0005",
+    "game": "5",
+    "source_url": "https://www.energy.gov/science/doe-explainselectrons",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Negative electron charge verified against DOE; one valid option."
+  },
+  {
+    "id": "GH-GEOGRAPHY-NEW-0004",
+    "game": "5",
+    "source_url": "https://www.canada.ca/en/canadian-heritage/services/flag-canada-description.html",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Flag description verified; no flag artwork copied."
+  },
+  {
+    "id": "GH-GEOGRAPHY-B03-0003",
+    "game": "5",
+    "source_url": "https://whc.unesco.org/en/list/326/",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "UNESCO country Jordan verified."
+  },
+  {
+    "id": "GH-ANIMALS-0003",
+    "game": "5",
+    "source_url": "https://animals.sandiegozoo.org/animals/platypus",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Restricted to listed options; does not imply platypus is the only egg-laying mammal."
+  },
+  {
+    "id": "GH-ANIMALS-NEW-0014",
+    "game": "5",
+    "source_url": "https://home.nps.gov/subjects/bats/how-bats-fly.htm",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Powered flight distinguishes bats from gliding mammals; corrected question below to animals."
+  },
+  {
+    "id": "GH-CINEMA-0004",
+    "game": "1",
+    "source_url": "https://disneyanimation.com/films/frozen/",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "Official Disney character page identifies Olaf; no copyrighted media copied."
+  },
+  {
+    "id": "GH-GEOGRAPHY-B03-0002",
+    "game": "5",
+    "source_url": "https://whc.unesco.org/en/list/438/",
+    "decision": "APPROVED",
+    "corrected_ar": true,
+    "translated_en": true,
+    "note": "UNESCO country China verified."
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "checks": {
+    "spoofed_forwarded_header_ignored": true,
+    "invalid_token_401": true,
+    "membership": true,
+    "turn_ownership": true,
+    "identity": true,
+    "real_reconnect": true,
+    "malformed_recovery": true,
+    "chat_limit": true,
+    "idle_expiry": true,
+    "binary_first_frame": true,
+    "oversized": true
+  },
+  "passed": true,
+  "evidence_origin": "Actual tool execution before usage-limit interruption; not rerun",
+  "before_fix": {
+    "binary_first_frame_rejected": false,
+    "idle_expiry_closed": false
+  },
+  "scope": "Loopback real WebSocket clients, not Android/public WSS"
+}

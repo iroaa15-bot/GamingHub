@@ -1,0 +1,27 @@
+{
+  "source_commit": "52f5a86b02959583333a3c74466352d52256ce08",
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-122-content-52f5a86-debug.apk",
+  "sha256": "3738e64dd5249af2a1c42eec96969df8fec0110e1f4a204799be503910504446",
+  "bytes": 211720300,
+  "package": "com.iroaa15.gaminghub",
+  "versionCode": 122,
+  "versionName": "12.2",
+  "minSdk": 24,
+  "targetSdk": 36,
+  "exported_new_photo_count": 28,
+  "signature": "debug, verified by apksigner",
+  "review_files_exported": 0,
+  "android": {
+    "installation_oppo": "PASS verified installed SHA-256",
+    "installation_reeder": "PASS verified installed SHA-256",
+    "brain_two_device": "PASS room670380/core_3_4/both answers/final1000:0",
+    "sound_two_device": "PASS room319063/core_6_3/drum.wav/both answers/final0:1000",
+    "new_photo_two_device": "PENDING",
+    "voice_quality": "NOT_RETESTED",
+    "production_online": "NOT_DEPLOYED",
+    "sound_audibility": "PASS user confirmed audible on both devices",
+    "replay": "one shared replay observed in server audit",
+    "crashes": "No targeted fatal markers captured during these two matches; not a soak test"
+  },
+  "export_verifier_note": "Godot uses .webp.import -> .ctex. Initial .remap-only assertion was corrected; APK unchanged."
+}

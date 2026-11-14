@@ -1,0 +1,3407 @@
+{
+  "schema": 1,
+  "playable_count": 200,
+  "celebrity_integrated": 0,
+  "items": [
+    {
+      "id": "lion",
+      "group": "original_200",
+      "image": "res://assets/generated/lion.webp",
+      "name": "Lion",
+      "ar": "أسد",
+      "en": "Lion",
+      "tr": "Aslan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pizza",
+      "group": "original_200",
+      "image": "res://assets/generated/pizza.webp",
+      "name": "Pizza",
+      "ar": "بيتزا",
+      "en": "Pizza",
+      "tr": "Pizza",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "elephant",
+      "group": "original_200",
+      "image": "res://assets/generated/elephant.webp",
+      "name": "Elephant",
+      "ar": "فيل",
+      "en": "Elephant",
+      "tr": "Fil",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "apple",
+      "group": "original_200",
+      "image": "res://assets/generated/apple.webp",
+      "name": "Apple",
+      "ar": "تفاحة",
+      "en": "Apple",
+      "tr": "Elma",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "football",
+      "group": "original_200",
+      "image": "res://assets/generated/football.webp",
+      "name": "Football",
+      "ar": "كرة قدم",
+      "en": "Football",
+      "tr": "Futbol topu",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "guitar",
+      "group": "original_200",
+      "image": "res://assets/generated/guitar.webp",
+      "name": "Guitar",
+      "ar": "جيتار",
+      "en": "Guitar",
+      "tr": "Gitar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "panda",
+      "group": "original_200",
+      "image": "res://assets/generated/panda.webp",
+      "name": "Panda",
+      "ar": "باندا",
+      "en": "Panda",
+      "tr": "Panda",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "burger",
+      "group": "original_200",
+      "image": "res://assets/generated/burger.webp",
+      "name": "Burger",
+      "ar": "برجر",
+      "en": "Burger",
+      "tr": "Hamburger",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "dolphin",
+      "group": "original_200",
+      "image": "res://assets/generated/dolphin.webp",
+      "name": "Dolphin",
+      "ar": "دلفين",
+      "en": "Dolphin",
+      "tr": "Yunus",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "giraffe",
+      "group": "original_200",
+      "image": "res://assets/generated/giraffe.webp",
+      "name": "Giraffe",
+      "ar": "زرافة",
+      "en": "Giraffe",
+      "tr": "Zürafa",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "tiger",
+      "group": "original_200",
+      "image": "res://assets/generated/tiger.webp",
+      "name": "Tiger",
+      "ar": "نمر",
+      "en": "Tiger",
+      "tr": "Kaplan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "penguin",
+      "group": "original_200",
+      "image": "res://assets/generated/penguin.webp",
+      "name": "Penguin",
+      "ar": "بطريق",
+      "en": "Penguin",
+      "tr": "Penguen",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "banana",
+      "group": "original_200",
+      "image": "res://assets/generated/banana.webp",
+      "name": "Banana",
+      "ar": "موزة",
+      "en": "Banana",
+      "tr": "Muz",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "strawberry",
+      "group": "original_200",
+      "image": "res://assets/generated/strawberry.webp",
+      "name": "Strawberry",
+      "ar": "فراولة",
+      "en": "Strawberry",
+      "tr": "Çilek",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cake",
+      "group": "original_200",
+      "image": "res://assets/generated/cake.webp",
+      "name": "Cake",
+      "ar": "كعكة",
+      "en": "Cake",
+      "tr": "Pasta",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sushi",
+      "group": "original_200",
+      "image": "res://assets/generated/sushi.webp",
+      "name": "Sushi",
+      "ar": "سوشي",
+      "en": "Sushi",
+      "tr": "Suşi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bicycle",
+      "group": "original_200",
+      "image": "res://assets/generated/bicycle.webp",
+      "name": "Bicycle",
+      "ar": "دراجة",
+      "en": "Bicycle",
+      "tr": "Bisiklet",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "camera",
+      "group": "original_200",
+      "image": "res://assets/generated/camera.webp",
+      "name": "Camera",
+      "ar": "كاميرا",
+      "en": "Camera",
+      "tr": "Fotoğraf makinesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "laptop",
+      "group": "original_200",
+      "image": "res://assets/generated/laptop.webp",
+      "name": "Laptop",
+      "ar": "حاسوب محمول",
+      "en": "Laptop",
+      "tr": "Dizüstü bilgisayar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "violin",
+      "group": "original_200",
+      "image": "res://assets/generated/violin.webp",
+      "name": "Violin",
+      "ar": "كمان",
+      "en": "Violin",
+      "tr": "Keman",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pyramids",
+      "group": "original_200",
+      "image": "res://assets/generated/pyramids.webp",
+      "name": "Pyramids",
+      "ar": "الأهرامات",
+      "en": "Pyramids",
+      "tr": "Piramitler",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "eiffel",
+      "group": "original_200",
+      "image": "res://assets/generated/eiffel.webp",
+      "name": "Eiffel",
+      "ar": "برج إيفل",
+      "en": "Eiffel",
+      "tr": "Eyfel Kulesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "taj_mahal",
+      "group": "original_200",
+      "image": "res://assets/generated/taj_mahal.webp",
+      "name": "Taj_Mahal",
+      "ar": "تاج محل",
+      "en": "Taj Mahal",
+      "tr": "Tac Mahal",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lighthouse",
+      "group": "original_200",
+      "image": "res://assets/generated/lighthouse.webp",
+      "name": "Lighthouse",
+      "ar": "منارة",
+      "en": "Lighthouse",
+      "tr": "Deniz feneri",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cat",
+      "group": "original_200",
+      "image": "res://assets/generated/cat.webp",
+      "name": "Cat",
+      "ar": "قط",
+      "en": "Cat",
+      "tr": "Kedi",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "dog",
+      "group": "original_200",
+      "image": "res://assets/generated/dog.webp",
+      "name": "Dog",
+      "ar": "كلب",
+      "en": "Dog",
+      "tr": "Köpek",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "rabbit",
+      "group": "original_200",
+      "image": "res://assets/generated/rabbit.webp",
+      "name": "Rabbit",
+      "ar": "أرنب",
+      "en": "Rabbit",
+      "tr": "Tavşan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "horse",
+      "group": "original_200",
+      "image": "res://assets/generated/horse.webp",
+      "name": "Horse",
+      "ar": "حصان",
+      "en": "Horse",
+      "tr": "At",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cow",
+      "group": "original_200",
+      "image": "res://assets/generated/cow.webp",
+      "name": "Cow",
+      "ar": "بقرة",
+      "en": "Cow",
+      "tr": "İnek",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sheep",
+      "group": "original_200",
+      "image": "res://assets/generated/sheep.webp",
+      "name": "Sheep",
+      "ar": "خروف",
+      "en": "Sheep",
+      "tr": "Koyun",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "goat",
+      "group": "original_200",
+      "image": "res://assets/generated/goat.webp",
+      "name": "Goat",
+      "ar": "ماعز",
+      "en": "Goat",
+      "tr": "Keçi",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "donkey",
+      "group": "original_200",
+      "image": "res://assets/generated/donkey.webp",
+      "name": "Donkey",
+      "ar": "حمار",
+      "en": "Donkey",
+      "tr": "Eşek",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "camel",
+      "group": "original_200",
+      "image": "res://assets/generated/camel.webp",
+      "name": "Camel",
+      "ar": "جمل",
+      "en": "Camel",
+      "tr": "Deve",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "zebra",
+      "group": "original_200",
+      "image": "res://assets/generated/zebra.webp",
+      "name": "Zebra",
+      "ar": "حمار وحشي",
+      "en": "Zebra",
+      "tr": "Zebra",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "rhinoceros",
+      "group": "original_200",
+      "image": "res://assets/generated/rhinoceros.webp",
+      "name": "Rhinoceros",
+      "ar": "وحيد القرن",
+      "en": "Rhinoceros",
+      "tr": "Gergedan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "hippopotamus",
+      "group": "original_200",
+      "image": "res://assets/generated/hippopotamus.webp",
+      "name": "Hippopotamus",
+      "ar": "فرس النهر",
+      "en": "Hippopotamus",
+      "tr": "Su aygırı",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "gorilla",
+      "group": "original_200",
+      "image": "res://assets/generated/gorilla.webp",
+      "name": "Gorilla",
+      "ar": "غوريلا",
+      "en": "Gorilla",
+      "tr": "Goril",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "chimpanzee",
+      "group": "original_200",
+      "image": "res://assets/generated/chimpanzee.webp",
+      "name": "Chimpanzee",
+      "ar": "شمبانزي",
+      "en": "Chimpanzee",
+      "tr": "Şempanze",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "orangutan",
+      "group": "original_200",
+      "image": "res://assets/generated/orangutan.webp",
+      "name": "Orangutan",
+      "ar": "إنسان الغاب",
+      "en": "Orangutan",
+      "tr": "Orangutan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "kangaroo",
+      "group": "original_200",
+      "image": "res://assets/generated/kangaroo.webp",
+      "name": "Kangaroo",
+      "ar": "كنغر",
+      "en": "Kangaroo",
+      "tr": "Kanguru",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "koala",
+      "group": "original_200",
+      "image": "res://assets/generated/koala.webp",
+      "name": "Koala",
+      "ar": "كوالا",
+      "en": "Koala",
+      "tr": "Koala",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sloth",
+      "group": "original_200",
+      "image": "res://assets/generated/sloth.webp",
+      "name": "Sloth",
+      "ar": "كسلان",
+      "en": "Sloth",
+      "tr": "Tembel hayvan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "hedgehog",
+      "group": "original_200",
+      "image": "res://assets/generated/hedgehog.webp",
+      "name": "Hedgehog",
+      "ar": "قنفذ",
+      "en": "Hedgehog",
+      "tr": "Kirpi",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "squirrel",
+      "group": "original_200",
+      "image": "res://assets/generated/squirrel.webp",
+      "name": "Squirrel",
+      "ar": "سنجاب",
+      "en": "Squirrel",
+      "tr": "Sincap",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "beaver",
+      "group": "original_200",
+      "image": "res://assets/generated/beaver.webp",
+      "name": "Beaver",
+      "ar": "قندس",
+      "en": "Beaver",
+      "tr": "Kunduz",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "otter",
+      "group": "original_200",
+      "image": "res://assets/generated/otter.webp",
+      "name": "Otter",
+      "ar": "قضاعة",
+      "en": "Otter",
+      "tr": "Su samuru",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "raccoon",
+      "group": "original_200",
+      "image": "res://assets/generated/raccoon.webp",
+      "name": "Raccoon",
+      "ar": "راكون",
+      "en": "Raccoon",
+      "tr": "Rakun",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "fox",
+      "group": "original_200",
+      "image": "res://assets/generated/fox.webp",
+      "name": "Fox",
+      "ar": "ثعلب",
+      "en": "Fox",
+      "tr": "Tilki",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "wolf",
+      "group": "original_200",
+      "image": "res://assets/generated/wolf.webp",
+      "name": "Wolf",
+      "ar": "ذئب",
+      "en": "Wolf",
+      "tr": "Kurt",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "brown_bear",
+      "group": "original_200",
+      "image": "res://assets/generated/brown_bear.webp",
+      "name": "Brown_bear",
+      "ar": "دب بني",
+      "en": "Brown bear",
+      "tr": "Boz ayı",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "polar_bear",
+      "group": "original_200",
+      "image": "res://assets/generated/polar_bear.webp",
+      "name": "Polar_bear",
+      "ar": "دب قطبي",
+      "en": "Polar bear",
+      "tr": "Kutup ayısı",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "deer",
+      "group": "original_200",
+      "image": "res://assets/generated/deer.webp",
+      "name": "Deer",
+      "ar": "أيل",
+      "en": "Deer",
+      "tr": "Geyik",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "moose",
+      "group": "original_200",
+      "image": "res://assets/generated/moose.webp",
+      "name": "Moose",
+      "ar": "موظ",
+      "en": "Moose",
+      "tr": "Sığın",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bison",
+      "group": "original_200",
+      "image": "res://assets/generated/bison.webp",
+      "name": "Bison",
+      "ar": "بيسون",
+      "en": "Bison",
+      "tr": "Bizon",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "meerkat",
+      "group": "original_200",
+      "image": "res://assets/generated/meerkat.webp",
+      "name": "Meerkat",
+      "ar": "ميركات",
+      "en": "Meerkat",
+      "tr": "Mirket",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lemur",
+      "group": "original_200",
+      "image": "res://assets/generated/lemur.webp",
+      "name": "Lemur",
+      "ar": "ليمور",
+      "en": "Lemur",
+      "tr": "Lemur",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "red_panda",
+      "group": "original_200",
+      "image": "res://assets/generated/red_panda.webp",
+      "name": "Red_panda",
+      "ar": "باندا حمراء",
+      "en": "Red panda",
+      "tr": "Kızıl panda",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cheetah",
+      "group": "original_200",
+      "image": "res://assets/generated/cheetah.webp",
+      "name": "Cheetah",
+      "ar": "فهد",
+      "en": "Cheetah",
+      "tr": "Çita",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "leopard",
+      "group": "original_200",
+      "image": "res://assets/generated/leopard.webp",
+      "name": "Leopard",
+      "ar": "نمر مرقط",
+      "en": "Leopard",
+      "tr": "Leopar",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "crocodile",
+      "group": "original_200",
+      "image": "res://assets/generated/crocodile.webp",
+      "name": "Crocodile",
+      "ar": "تمساح",
+      "en": "Crocodile",
+      "tr": "Timsah",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "tortoise",
+      "group": "original_200",
+      "image": "res://assets/generated/tortoise.webp",
+      "name": "Tortoise",
+      "ar": "سلحفاة برية",
+      "en": "Tortoise",
+      "tr": "Kara kaplumbağası",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sea_turtle",
+      "group": "original_200",
+      "image": "res://assets/generated/sea_turtle.webp",
+      "name": "Sea_turtle",
+      "ar": "سلحفاة بحرية",
+      "en": "Sea turtle",
+      "tr": "Deniz kaplumbağası",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "frog",
+      "group": "original_200",
+      "image": "res://assets/generated/frog.webp",
+      "name": "Frog",
+      "ar": "ضفدع",
+      "en": "Frog",
+      "tr": "Kurbağa",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "chameleon",
+      "group": "original_200",
+      "image": "res://assets/generated/chameleon.webp",
+      "name": "Chameleon",
+      "ar": "حرباء",
+      "en": "Chameleon",
+      "tr": "Bukalemun",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "iguana",
+      "group": "original_200",
+      "image": "res://assets/generated/iguana.webp",
+      "name": "Iguana",
+      "ar": "إغوانا",
+      "en": "Iguana",
+      "tr": "İguana",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cobra",
+      "group": "original_200",
+      "image": "res://assets/generated/cobra.webp",
+      "name": "Cobra",
+      "ar": "كوبرا",
+      "en": "Cobra",
+      "tr": "Kobra",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "python",
+      "group": "original_200",
+      "image": "res://assets/generated/python.webp",
+      "name": "Python",
+      "ar": "ثعبان أصلة",
+      "en": "Python",
+      "tr": "Piton",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "owl",
+      "group": "original_200",
+      "image": "res://assets/generated/owl.webp",
+      "name": "Owl",
+      "ar": "بومة",
+      "en": "Owl",
+      "tr": "Baykuş",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "eagle",
+      "group": "original_200",
+      "image": "res://assets/generated/eagle.webp",
+      "name": "Eagle",
+      "ar": "عقاب",
+      "en": "Eagle",
+      "tr": "Kartal",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "parrot",
+      "group": "original_200",
+      "image": "res://assets/generated/parrot.webp",
+      "name": "Parrot",
+      "ar": "ببغاء",
+      "en": "Parrot",
+      "tr": "Papağan",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "flamingo",
+      "group": "original_200",
+      "image": "res://assets/generated/flamingo.webp",
+      "name": "Flamingo",
+      "ar": "نحام",
+      "en": "Flamingo",
+      "tr": "Flamingo",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "peacock",
+      "group": "original_200",
+      "image": "res://assets/generated/peacock.webp",
+      "name": "Peacock",
+      "ar": "طاووس",
+      "en": "Peacock",
+      "tr": "Tavus kuşu",
+      "facts": {
+        "living": true,
+        "animal": true,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "orange",
+      "group": "original_200",
+      "image": "res://assets/generated/orange.webp",
+      "name": "Orange",
+      "ar": "برتقال",
+      "en": "Orange",
+      "tr": "Portakal",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lemon",
+      "group": "original_200",
+      "image": "res://assets/generated/lemon.webp",
+      "name": "Lemon",
+      "ar": "ليمون",
+      "en": "Lemon",
+      "tr": "Limon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lime",
+      "group": "original_200",
+      "image": "res://assets/generated/lime.webp",
+      "name": "Lime",
+      "ar": "ليمون أخضر",
+      "en": "Lime",
+      "tr": "Misket limonu",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pear",
+      "group": "original_200",
+      "image": "res://assets/generated/pear.webp",
+      "name": "Pear",
+      "ar": "كمثرى",
+      "en": "Pear",
+      "tr": "Armut",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "peach",
+      "group": "original_200",
+      "image": "res://assets/generated/peach.webp",
+      "name": "Peach",
+      "ar": "خوخ",
+      "en": "Peach",
+      "tr": "Şeftali",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "apricot",
+      "group": "original_200",
+      "image": "res://assets/generated/apricot.webp",
+      "name": "Apricot",
+      "ar": "مشمش",
+      "en": "Apricot",
+      "tr": "Kayısı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "plum",
+      "group": "original_200",
+      "image": "res://assets/generated/plum.webp",
+      "name": "Plum",
+      "ar": "برقوق",
+      "en": "Plum",
+      "tr": "Erik",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cherries",
+      "group": "original_200",
+      "image": "res://assets/generated/cherries.webp",
+      "name": "Cherries",
+      "ar": "كرز",
+      "en": "Cherries",
+      "tr": "Kiraz",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "grapes",
+      "group": "original_200",
+      "image": "res://assets/generated/grapes.webp",
+      "name": "Grapes",
+      "ar": "عنب",
+      "en": "Grapes",
+      "tr": "Üzüm",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "watermelon",
+      "group": "original_200",
+      "image": "res://assets/generated/watermelon.webp",
+      "name": "Watermelon",
+      "ar": "بطيخ",
+      "en": "Watermelon",
+      "tr": "Karpuz",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pineapple",
+      "group": "original_200",
+      "image": "res://assets/generated/pineapple.webp",
+      "name": "Pineapple",
+      "ar": "أناناس",
+      "en": "Pineapple",
+      "tr": "Ananas",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "mango",
+      "group": "original_200",
+      "image": "res://assets/generated/mango.webp",
+      "name": "Mango",
+      "ar": "مانجو",
+      "en": "Mango",
+      "tr": "Mango",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "kiwi",
+      "group": "original_200",
+      "image": "res://assets/generated/kiwi.webp",
+      "name": "Kiwi",
+      "ar": "كيوي",
+      "en": "Kiwi",
+      "tr": "Kivi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "coconut",
+      "group": "original_200",
+      "image": "res://assets/generated/coconut.webp",
+      "name": "Coconut",
+      "ar": "جوز هند",
+      "en": "Coconut",
+      "tr": "Hindistan cevizi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pomegranate",
+      "group": "original_200",
+      "image": "res://assets/generated/pomegranate.webp",
+      "name": "Pomegranate",
+      "ar": "رمان",
+      "en": "Pomegranate",
+      "tr": "Nar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "avocado",
+      "group": "original_200",
+      "image": "res://assets/generated/avocado.webp",
+      "name": "Avocado",
+      "ar": "أفوكادو",
+      "en": "Avocado",
+      "tr": "Avokado",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "blueberries",
+      "group": "original_200",
+      "image": "res://assets/generated/blueberries.webp",
+      "name": "Blueberries",
+      "ar": "توت أزرق",
+      "en": "Blueberries",
+      "tr": "Yaban mersini",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "raspberries",
+      "group": "original_200",
+      "image": "res://assets/generated/raspberries.webp",
+      "name": "Raspberries",
+      "ar": "توت العليق",
+      "en": "Raspberries",
+      "tr": "Ahududu",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "blackberries",
+      "group": "original_200",
+      "image": "res://assets/generated/blackberries.webp",
+      "name": "Blackberries",
+      "ar": "توت أسود عليقي",
+      "en": "Blackberries",
+      "tr": "Böğürtlen",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "figs",
+      "group": "original_200",
+      "image": "res://assets/generated/figs.webp",
+      "name": "Figs",
+      "ar": "تين",
+      "en": "Figs",
+      "tr": "İncir",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "dates",
+      "group": "original_200",
+      "image": "res://assets/generated/dates.webp",
+      "name": "Dates",
+      "ar": "تمر",
+      "en": "Dates",
+      "tr": "Hurma",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "papaya",
+      "group": "original_200",
+      "image": "res://assets/generated/papaya.webp",
+      "name": "Papaya",
+      "ar": "بابايا",
+      "en": "Papaya",
+      "tr": "Papaya",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "guava",
+      "group": "original_200",
+      "image": "res://assets/generated/guava.webp",
+      "name": "Guava",
+      "ar": "جوافة",
+      "en": "Guava",
+      "tr": "Guava",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "passion_fruit",
+      "group": "original_200",
+      "image": "res://assets/generated/passion_fruit.webp",
+      "name": "Passion_fruit",
+      "ar": "فاكهة العاطفة",
+      "en": "Passion fruit",
+      "tr": "Çarkıfelek meyvesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "carrot",
+      "group": "original_200",
+      "image": "res://assets/generated/carrot.webp",
+      "name": "Carrot",
+      "ar": "جزر",
+      "en": "Carrot",
+      "tr": "Havuç",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "potato",
+      "group": "original_200",
+      "image": "res://assets/generated/potato.webp",
+      "name": "Potato",
+      "ar": "بطاطس",
+      "en": "Potato",
+      "tr": "Patates",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "tomato",
+      "group": "original_200",
+      "image": "res://assets/generated/tomato.webp",
+      "name": "Tomato",
+      "ar": "طماطم",
+      "en": "Tomato",
+      "tr": "Domates",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cucumber",
+      "group": "original_200",
+      "image": "res://assets/generated/cucumber.webp",
+      "name": "Cucumber",
+      "ar": "خيار",
+      "en": "Cucumber",
+      "tr": "Salatalık",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "eggplant",
+      "group": "original_200",
+      "image": "res://assets/generated/eggplant.webp",
+      "name": "Eggplant",
+      "ar": "باذنجان",
+      "en": "Eggplant",
+      "tr": "Patlıcan",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "broccoli",
+      "group": "original_200",
+      "image": "res://assets/generated/broccoli.webp",
+      "name": "Broccoli",
+      "ar": "بروكلي",
+      "en": "Broccoli",
+      "tr": "Brokoli",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cauliflower",
+      "group": "original_200",
+      "image": "res://assets/generated/cauliflower.webp",
+      "name": "Cauliflower",
+      "ar": "قرنبيط",
+      "en": "Cauliflower",
+      "tr": "Karnabahar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cabbage",
+      "group": "original_200",
+      "image": "res://assets/generated/cabbage.webp",
+      "name": "Cabbage",
+      "ar": "ملفوف",
+      "en": "Cabbage",
+      "tr": "Lahana",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lettuce",
+      "group": "original_200",
+      "image": "res://assets/generated/lettuce.webp",
+      "name": "Lettuce",
+      "ar": "خس",
+      "en": "Lettuce",
+      "tr": "Marul",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "spinach",
+      "group": "original_200",
+      "image": "res://assets/generated/spinach.webp",
+      "name": "Spinach",
+      "ar": "سبانخ",
+      "en": "Spinach",
+      "tr": "Ispanak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "onion",
+      "group": "original_200",
+      "image": "res://assets/generated/onion.webp",
+      "name": "Onion",
+      "ar": "بصل",
+      "en": "Onion",
+      "tr": "Soğan",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "garlic",
+      "group": "original_200",
+      "image": "res://assets/generated/garlic.webp",
+      "name": "Garlic",
+      "ar": "ثوم",
+      "en": "Garlic",
+      "tr": "Sarımsak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bell_pepper",
+      "group": "original_200",
+      "image": "res://assets/generated/bell_pepper.webp",
+      "name": "Bell_pepper",
+      "ar": "فلفل حلو",
+      "en": "Bell pepper",
+      "tr": "Dolmalık biber",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "chili_pepper",
+      "group": "original_200",
+      "image": "res://assets/generated/chili_pepper.webp",
+      "name": "Chili_pepper",
+      "ar": "فلفل حار",
+      "en": "Chili pepper",
+      "tr": "Acı biber",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pumpkin",
+      "group": "original_200",
+      "image": "res://assets/generated/pumpkin.webp",
+      "name": "Pumpkin",
+      "ar": "قرع عسلي",
+      "en": "Pumpkin",
+      "tr": "Bal kabağı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "zucchini",
+      "group": "original_200",
+      "image": "res://assets/generated/zucchini.webp",
+      "name": "Zucchini",
+      "ar": "كوسة",
+      "en": "Zucchini",
+      "tr": "Kabak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "corn",
+      "group": "original_200",
+      "image": "res://assets/generated/corn.webp",
+      "name": "Corn",
+      "ar": "ذرة",
+      "en": "Corn",
+      "tr": "Mısır",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "peas",
+      "group": "original_200",
+      "image": "res://assets/generated/peas.webp",
+      "name": "Peas",
+      "ar": "بازلاء",
+      "en": "Peas",
+      "tr": "Bezelye",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "green_beans",
+      "group": "original_200",
+      "image": "res://assets/generated/green_beans.webp",
+      "name": "Green_beans",
+      "ar": "فاصوليا خضراء",
+      "en": "Green beans",
+      "tr": "Taze fasulye",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "radish",
+      "group": "original_200",
+      "image": "res://assets/generated/radish.webp",
+      "name": "Radish",
+      "ar": "فجل",
+      "en": "Radish",
+      "tr": "Turp",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "beetroot",
+      "group": "original_200",
+      "image": "res://assets/generated/beetroot.webp",
+      "name": "Beetroot",
+      "ar": "شمندر",
+      "en": "Beetroot",
+      "tr": "Pancar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "asparagus",
+      "group": "original_200",
+      "image": "res://assets/generated/asparagus.webp",
+      "name": "Asparagus",
+      "ar": "هليون",
+      "en": "Asparagus",
+      "tr": "Kuşkonmaz",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "artichoke",
+      "group": "original_200",
+      "image": "res://assets/generated/artichoke.webp",
+      "name": "Artichoke",
+      "ar": "خرشوف",
+      "en": "Artichoke",
+      "tr": "Enginar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "mushroom",
+      "group": "original_200",
+      "image": "res://assets/generated/mushroom.webp",
+      "name": "Mushroom",
+      "ar": "فطر",
+      "en": "Mushroom",
+      "tr": "Mantar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": true
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "chair",
+      "group": "original_200",
+      "image": "res://assets/generated/chair.webp",
+      "name": "Chair",
+      "ar": "كرسي",
+      "en": "Chair",
+      "tr": "Sandalye",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "table",
+      "group": "original_200",
+      "image": "res://assets/generated/table.webp",
+      "name": "Table",
+      "ar": "طاولة",
+      "en": "Table",
+      "tr": "Masa",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sofa",
+      "group": "original_200",
+      "image": "res://assets/generated/sofa.webp",
+      "name": "Sofa",
+      "ar": "أريكة",
+      "en": "Sofa",
+      "tr": "Kanepe",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bed",
+      "group": "original_200",
+      "image": "res://assets/generated/bed.webp",
+      "name": "Bed",
+      "ar": "سرير",
+      "en": "Bed",
+      "tr": "Yatak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "wardrobe",
+      "group": "original_200",
+      "image": "res://assets/generated/wardrobe.webp",
+      "name": "Wardrobe",
+      "ar": "خزانة ملابس",
+      "en": "Wardrobe",
+      "tr": "Gardırop",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bookshelf",
+      "group": "original_200",
+      "image": "res://assets/generated/bookshelf.webp",
+      "name": "Bookshelf",
+      "ar": "رف كتب",
+      "en": "Bookshelf",
+      "tr": "Kitaplık",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "desk",
+      "group": "original_200",
+      "image": "res://assets/generated/desk.webp",
+      "name": "Desk",
+      "ar": "مكتب",
+      "en": "Desk",
+      "tr": "Çalışma masası",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "stool",
+      "group": "original_200",
+      "image": "res://assets/generated/stool.webp",
+      "name": "Stool",
+      "ar": "مقعد بلا ظهر",
+      "en": "Stool",
+      "tr": "Tabure",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "armchair",
+      "group": "original_200",
+      "image": "res://assets/generated/armchair.webp",
+      "name": "Armchair",
+      "ar": "كرسي بذراعين",
+      "en": "Armchair",
+      "tr": "Koltuk",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bathtub",
+      "group": "original_200",
+      "image": "res://assets/generated/bathtub.webp",
+      "name": "Bathtub",
+      "ar": "حوض استحمام",
+      "en": "Bathtub",
+      "tr": "Küvet",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sink",
+      "group": "original_200",
+      "image": "res://assets/generated/sink.webp",
+      "name": "Sink",
+      "ar": "حوض غسيل",
+      "en": "Sink",
+      "tr": "Lavabo",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "toilet",
+      "group": "original_200",
+      "image": "res://assets/generated/toilet.webp",
+      "name": "Toilet",
+      "ar": "مرحاض",
+      "en": "Toilet",
+      "tr": "Klozet",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "refrigerator",
+      "group": "original_200",
+      "image": "res://assets/generated/refrigerator.webp",
+      "name": "Refrigerator",
+      "ar": "ثلاجة",
+      "en": "Refrigerator",
+      "tr": "Buzdolabı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "washing_machine",
+      "group": "original_200",
+      "image": "res://assets/generated/washing_machine.webp",
+      "name": "Washing_machine",
+      "ar": "غسالة ملابس",
+      "en": "Washing machine",
+      "tr": "Çamaşır makinesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "microwave_oven",
+      "group": "original_200",
+      "image": "res://assets/generated/microwave_oven.webp",
+      "name": "Microwave_oven",
+      "ar": "فرن ميكروويف",
+      "en": "Microwave oven",
+      "tr": "Mikrodalga fırın",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "toaster",
+      "group": "original_200",
+      "image": "res://assets/generated/toaster.webp",
+      "name": "Toaster",
+      "ar": "محمصة خبز",
+      "en": "Toaster",
+      "tr": "Ekmek kızartma makinesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "electric_kettle",
+      "group": "original_200",
+      "image": "res://assets/generated/electric_kettle.webp",
+      "name": "Electric_kettle",
+      "ar": "غلاية كهربائية",
+      "en": "Electric kettle",
+      "tr": "Elektrikli su ısıtıcısı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "blender",
+      "group": "original_200",
+      "image": "res://assets/generated/blender.webp",
+      "name": "Blender",
+      "ar": "خلاط",
+      "en": "Blender",
+      "tr": "Blender",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "vacuum_cleaner",
+      "group": "original_200",
+      "image": "res://assets/generated/vacuum_cleaner.webp",
+      "name": "Vacuum_cleaner",
+      "ar": "مكنسة كهربائية",
+      "en": "Vacuum cleaner",
+      "tr": "Elektrikli süpürge",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "iron",
+      "group": "original_200",
+      "image": "res://assets/generated/iron.webp",
+      "name": "Iron",
+      "ar": "مكواة",
+      "en": "Iron",
+      "tr": "Ütü",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "sewing_machine",
+      "group": "original_200",
+      "image": "res://assets/generated/sewing_machine.webp",
+      "name": "Sewing_machine",
+      "ar": "ماكينة خياطة",
+      "en": "Sewing machine",
+      "tr": "Dikiş makinesi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "fan",
+      "group": "original_200",
+      "image": "res://assets/generated/fan.webp",
+      "name": "Fan",
+      "ar": "مروحة",
+      "en": "Fan",
+      "tr": "Vantilatör",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "air_conditioner",
+      "group": "original_200",
+      "image": "res://assets/generated/air_conditioner.webp",
+      "name": "Air_conditioner",
+      "ar": "مكيف هواء",
+      "en": "Air conditioner",
+      "tr": "Klima",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "television",
+      "group": "original_200",
+      "image": "res://assets/generated/television.webp",
+      "name": "Television",
+      "ar": "تلفاز",
+      "en": "Television",
+      "tr": "Televizyon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "radio",
+      "group": "original_200",
+      "image": "res://assets/generated/radio.webp",
+      "name": "Radio",
+      "ar": "مذياع",
+      "en": "Radio",
+      "tr": "Radyo",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "telephone",
+      "group": "original_200",
+      "image": "res://assets/generated/telephone.webp",
+      "name": "Telephone",
+      "ar": "هاتف أرضي",
+      "en": "Telephone",
+      "tr": "Sabit telefon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "smartphone",
+      "group": "original_200",
+      "image": "res://assets/generated/smartphone.webp",
+      "name": "Smartphone",
+      "ar": "هاتف ذكي",
+      "en": "Smartphone",
+      "tr": "Akıllı telefon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "tablet_computer",
+      "group": "original_200",
+      "image": "res://assets/generated/tablet_computer.webp",
+      "name": "Tablet_computer",
+      "ar": "حاسوب لوحي",
+      "en": "Tablet computer",
+      "tr": "Tablet bilgisayar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "keyboard",
+      "group": "original_200",
+      "image": "res://assets/generated/keyboard.webp",
+      "name": "Keyboard",
+      "ar": "لوحة مفاتيح",
+      "en": "Keyboard",
+      "tr": "Klavye",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "computer_mouse",
+      "group": "original_200",
+      "image": "res://assets/generated/computer_mouse.webp",
+      "name": "Computer_mouse",
+      "ar": "فأرة حاسوب",
+      "en": "Computer mouse",
+      "tr": "Bilgisayar faresi",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "printer",
+      "group": "original_200",
+      "image": "res://assets/generated/printer.webp",
+      "name": "Printer",
+      "ar": "طابعة",
+      "en": "Printer",
+      "tr": "Yazıcı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "headphones",
+      "group": "original_200",
+      "image": "res://assets/generated/headphones.webp",
+      "name": "Headphones",
+      "ar": "سماعات رأس",
+      "en": "Headphones",
+      "tr": "Kulaklık",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "microphone",
+      "group": "original_200",
+      "image": "res://assets/generated/microphone.webp",
+      "name": "Microphone",
+      "ar": "ميكروفون",
+      "en": "Microphone",
+      "tr": "Mikrofon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "loudspeaker",
+      "group": "original_200",
+      "image": "res://assets/generated/loudspeaker.webp",
+      "name": "Loudspeaker",
+      "ar": "مكبر صوت",
+      "en": "Loudspeaker",
+      "tr": "Hoparlör",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "telescope",
+      "group": "original_200",
+      "image": "res://assets/generated/telescope.webp",
+      "name": "Telescope",
+      "ar": "تلسكوب",
+      "en": "Telescope",
+      "tr": "Teleskop",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "microscope",
+      "group": "original_200",
+      "image": "res://assets/generated/microscope.webp",
+      "name": "Microscope",
+      "ar": "مجهر",
+      "en": "Microscope",
+      "tr": "Mikroskop",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "binoculars",
+      "group": "original_200",
+      "image": "res://assets/generated/binoculars.webp",
+      "name": "Binoculars",
+      "ar": "منظار مزدوج",
+      "en": "Binoculars",
+      "tr": "Dürbün",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "flashlight",
+      "group": "original_200",
+      "image": "res://assets/generated/flashlight.webp",
+      "name": "Flashlight",
+      "ar": "مصباح يدوي",
+      "en": "Flashlight",
+      "tr": "El feneri",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "lantern",
+      "group": "original_200",
+      "image": "res://assets/generated/lantern.webp",
+      "name": "Lantern",
+      "ar": "فانوس",
+      "en": "Lantern",
+      "tr": "Fener",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "candle",
+      "group": "original_200",
+      "image": "res://assets/generated/candle.webp",
+      "name": "Candle",
+      "ar": "شمعة",
+      "en": "Candle",
+      "tr": "Mum",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "umbrella",
+      "group": "original_200",
+      "image": "res://assets/generated/umbrella.webp",
+      "name": "Umbrella",
+      "ar": "مظلة",
+      "en": "Umbrella",
+      "tr": "Şemsiye",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "backpack",
+      "group": "original_200",
+      "image": "res://assets/generated/backpack.webp",
+      "name": "Backpack",
+      "ar": "حقيبة ظهر",
+      "en": "Backpack",
+      "tr": "Sırt çantası",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "suitcase",
+      "group": "original_200",
+      "image": "res://assets/generated/suitcase.webp",
+      "name": "Suitcase",
+      "ar": "حقيبة سفر",
+      "en": "Suitcase",
+      "tr": "Bavul",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "wallet",
+      "group": "original_200",
+      "image": "res://assets/generated/wallet.webp",
+      "name": "Wallet",
+      "ar": "محفظة",
+      "en": "Wallet",
+      "tr": "Cüzdan",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "wristwatch",
+      "group": "original_200",
+      "image": "res://assets/generated/wristwatch.webp",
+      "name": "Wristwatch",
+      "ar": "ساعة يد",
+      "en": "Wristwatch",
+      "tr": "Kol saati",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "alarm_clock",
+      "group": "original_200",
+      "image": "res://assets/generated/alarm_clock.webp",
+      "name": "Alarm_clock",
+      "ar": "منبه",
+      "en": "Alarm clock",
+      "tr": "Çalar saat",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "compass",
+      "group": "original_200",
+      "image": "res://assets/generated/compass.webp",
+      "name": "Compass",
+      "ar": "بوصلة",
+      "en": "Compass",
+      "tr": "Pusula",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "key",
+      "group": "original_200",
+      "image": "res://assets/generated/key.webp",
+      "name": "Key",
+      "ar": "مفتاح",
+      "en": "Key",
+      "tr": "Anahtar",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "padlock",
+      "group": "original_200",
+      "image": "res://assets/generated/padlock.webp",
+      "name": "Padlock",
+      "ar": "قفل",
+      "en": "Padlock",
+      "tr": "Asma kilit",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "scissors",
+      "group": "original_200",
+      "image": "res://assets/generated/scissors.webp",
+      "name": "Scissors",
+      "ar": "مقص",
+      "en": "Scissors",
+      "tr": "Makas",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "hammer",
+      "group": "original_200",
+      "image": "res://assets/generated/hammer.webp",
+      "name": "Hammer",
+      "ar": "مطرقة",
+      "en": "Hammer",
+      "tr": "Çekiç",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "screwdriver",
+      "group": "original_200",
+      "image": "res://assets/generated/screwdriver.webp",
+      "name": "Screwdriver",
+      "ar": "مفك براغي",
+      "en": "Screwdriver",
+      "tr": "Tornavida",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "wrench",
+      "group": "original_200",
+      "image": "res://assets/generated/wrench.webp",
+      "name": "Wrench",
+      "ar": "مفتاح ربط",
+      "en": "Wrench",
+      "tr": "İngiliz anahtarı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "pliers",
+      "group": "original_200",
+      "image": "res://assets/generated/pliers.webp",
+      "name": "Pliers",
+      "ar": "كماشة",
+      "en": "Pliers",
+      "tr": "Pense",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "saw",
+      "group": "original_200",
+      "image": "res://assets/generated/saw.webp",
+      "name": "Saw",
+      "ar": "منشار",
+      "en": "Saw",
+      "tr": "Testere",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "shovel",
+      "group": "original_200",
+      "image": "res://assets/generated/shovel.webp",
+      "name": "Shovel",
+      "ar": "مجرفة",
+      "en": "Shovel",
+      "tr": "Kürek",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "spoon",
+      "group": "original_200",
+      "image": "res://assets/generated/spoon.webp",
+      "name": "Spoon",
+      "ar": "ملعقة",
+      "en": "Spoon",
+      "tr": "Kaşık",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "fork",
+      "group": "original_200",
+      "image": "res://assets/generated/fork.webp",
+      "name": "Fork",
+      "ar": "شوكة",
+      "en": "Fork",
+      "tr": "Çatal",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "knife",
+      "group": "original_200",
+      "image": "res://assets/generated/knife.webp",
+      "name": "Knife",
+      "ar": "سكين",
+      "en": "Knife",
+      "tr": "Bıçak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "plate",
+      "group": "original_200",
+      "image": "res://assets/generated/plate.webp",
+      "name": "Plate",
+      "ar": "طبق مسطح",
+      "en": "Plate",
+      "tr": "Tabak",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bowl",
+      "group": "original_200",
+      "image": "res://assets/generated/bowl.webp",
+      "name": "Bowl",
+      "ar": "وعاء عميق",
+      "en": "Bowl",
+      "tr": "Kâse",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cup",
+      "group": "original_200",
+      "image": "res://assets/generated/cup.webp",
+      "name": "Cup",
+      "ar": "فنجان",
+      "en": "Cup",
+      "tr": "Fincan",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "mug",
+      "group": "original_200",
+      "image": "res://assets/generated/mug.webp",
+      "name": "Mug",
+      "ar": "كوب بمقبض",
+      "en": "Mug",
+      "tr": "Kupa",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "bottle",
+      "group": "original_200",
+      "image": "res://assets/generated/bottle.webp",
+      "name": "Bottle",
+      "ar": "زجاجة",
+      "en": "Bottle",
+      "tr": "Şişe",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "teapot",
+      "group": "original_200",
+      "image": "res://assets/generated/teapot.webp",
+      "name": "Teapot",
+      "ar": "إبريق شاي",
+      "en": "Teapot",
+      "tr": "Demlik",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "frying_pan",
+      "group": "original_200",
+      "image": "res://assets/generated/frying_pan.webp",
+      "name": "Frying_pan",
+      "ar": "مقلاة",
+      "en": "Frying pan",
+      "tr": "Tava",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "saucepan",
+      "group": "original_200",
+      "image": "res://assets/generated/saucepan.webp",
+      "name": "Saucepan",
+      "ar": "قدر بمقبض",
+      "en": "Saucepan",
+      "tr": "Saplı tencere",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "colander",
+      "group": "original_200",
+      "image": "res://assets/generated/colander.webp",
+      "name": "Colander",
+      "ar": "مصفاة",
+      "en": "Colander",
+      "tr": "Süzgeç",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "grater",
+      "group": "original_200",
+      "image": "res://assets/generated/grater.webp",
+      "name": "Grater",
+      "ar": "مبشرة",
+      "en": "Grater",
+      "tr": "Rende",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "rolling_pin",
+      "group": "original_200",
+      "image": "res://assets/generated/rolling_pin.webp",
+      "name": "Rolling_pin",
+      "ar": "نشابة",
+      "en": "Rolling pin",
+      "tr": "Merdane",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "corkscrew",
+      "group": "original_200",
+      "image": "res://assets/generated/corkscrew.webp",
+      "name": "Corkscrew",
+      "ar": "فتاحة فلين",
+      "en": "Corkscrew",
+      "tr": "Tirbuşon",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "whisk",
+      "group": "original_200",
+      "image": "res://assets/generated/whisk.webp",
+      "name": "Whisk",
+      "ar": "مضرب بيض",
+      "en": "Whisk",
+      "tr": "Çırpıcı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "ladle",
+      "group": "original_200",
+      "image": "res://assets/generated/ladle.webp",
+      "name": "Ladle",
+      "ar": "مغرفة",
+      "en": "Ladle",
+      "tr": "Kepçe",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "spatula",
+      "group": "original_200",
+      "image": "res://assets/generated/spatula.webp",
+      "name": "Spatula",
+      "ar": "ملعقة تقليب مسطحة",
+      "en": "Spatula",
+      "tr": "Spatula",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "chopsticks",
+      "group": "original_200",
+      "image": "res://assets/generated/chopsticks.webp",
+      "name": "Chopsticks",
+      "ar": "عيدان طعام",
+      "en": "Chopsticks",
+      "tr": "Yemek çubukları",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "mortar_and_pestle",
+      "group": "original_200",
+      "image": "res://assets/generated/mortar_and_pestle.webp",
+      "name": "Mortar_and_pestle",
+      "ar": "هاون ومدقة",
+      "en": "Mortar and pestle",
+      "tr": "Havan ve havaneli",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "measuring_jug",
+      "group": "original_200",
+      "image": "res://assets/generated/measuring_jug.webp",
+      "name": "Measuring_jug",
+      "ar": "إبريق قياس",
+      "en": "Measuring jug",
+      "tr": "Ölçü kabı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "cutting_board",
+      "group": "original_200",
+      "image": "res://assets/generated/cutting_board.webp",
+      "name": "Cutting_board",
+      "ar": "لوح تقطيع",
+      "en": "Cutting board",
+      "tr": "Kesme tahtası",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "oven_glove",
+      "group": "original_200",
+      "image": "res://assets/generated/oven_glove.webp",
+      "name": "Oven_glove",
+      "ar": "قفاز فرن",
+      "en": "Oven glove",
+      "tr": "Fırın eldiveni",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    },
+    {
+      "id": "potato_peeler",
+      "group": "original_200",
+      "image": "res://assets/generated/potato_peeler.webp",
+      "name": "Potato_peeler",
+      "ar": "مقشرة بطاطس",
+      "en": "Potato peeler",
+      "tr": "Patates soyacağı",
+      "facts": {
+        "living": false,
+        "animal": false,
+        "celebrity": false,
+        "edible": false
+      },
+      "fact_evidence": "data/cards.json; existing reviewed core card facts",
+      "rights_status": "CORE_200_EXISTING_LIBRARY"
+    }
+  ]
+}

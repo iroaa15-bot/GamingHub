@@ -1,0 +1,48 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+QUIZ_CHECK six reusable authenticated clients true
+QUIZ_CHECK 2 clients authenticated game 1 true
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0] [{ "player": 0.0, "choice": 0.0, "correct": true, "points": 1500.0, "elapsed_ms": 342.0 }, { "player": 1.0, "choice": 0.0, "correct": true, "points": 1250.0, "elapsed_ms": 343.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK 3 clients authenticated game 1 true
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0, 0.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 327.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1250.0, "elapsed_ms": 328.0 }, { "player": 2.0, "choice": 3.0, "correct": false, "points": 0.0, "elapsed_ms": 461.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK 6 clients authenticated game 6 true
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK one replay schedule synchronized true
+QUIZ_CHECK shared replay timestamp true
+QUIZ_CHECK second replay rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1400.0, 1300.0, 1200.0, 1100.0, 0.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 395.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1400.0, "elapsed_ms": 397.0 }, { "player": 2.0, "choice": 2.0, "correct": true, "points": 1300.0, "elapsed_ms": 513.0 }, { "player": 3.0, "choice": 2.0, "correct": true, "points": 1200.0, "elapsed_ms": 646.0 }, { "player": 4.0, "choice": 2.0, "correct": true, "points": 1100.0, "elapsed_ms": 779.0 }, { "player": 5.0, "choice": 3.0, "correct": false, "points": 0.0, "elapsed_ms": 913.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+SHARED_QUIZ_REAL_GODOT_WS true []

@@ -1,0 +1,6 @@
+PASS: federation boundary disabled by default and rejects cross-account link; test verifier only, NOT Google authentication
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.086s
+
+OK

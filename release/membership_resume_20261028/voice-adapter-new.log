@@ -1,0 +1,15 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+VOICE_CHECK permission denial blocks native and consent true
+VOICE_CHECK permission is not peer consent true
+VOICE_CHECK waiting room voice true
+VOICE_CHECK mute sends silence without disconnecting true
+VOICE_CHECK incoming remains active while muted true
+VOICE_CHECK finished match retains membership voice true
+VOICE_CHECK loss stops native and retains room intent true
+VOICE_CHECK resume requests fresh server consent true
+VOICE_CHECK fresh ack resumes with mute retained true
+VOICE_CHECK unmute uses original outgoing frame true
+VOICE_CHECK manual stop cancels reconnect intent true
+VOICE_CHECK different room never inherits microphone consent true
+AGREEMENT_VOICE_ADAPTER true fake JNI boundary only

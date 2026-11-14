@@ -1,0 +1,14 @@
+{
+  "checks": {
+    "health": true,
+    "terms_required": true,
+    "anonymous_ws_rejected": true,
+    "real_godot_new_security_media": true,
+    "report_persisted": true
+  },
+  "pass": true,
+  "public_wss": "BLOCKED: not deployed",
+  "voice_device": "BLOCKED: PCM transport does not prove Android audio",
+  "android_touch": "BLOCKED: no Android device",
+  "old_protocol_matrix_rerun": false
+}

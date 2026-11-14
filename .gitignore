@@ -1,4 +1,6 @@
 .godot/
+.gradle/
+local.properties
 .env
 .env.*
 !*.example
@@ -18,3 +20,6 @@ build/
 outputs/
 signing-private/
 addons/admob/downloads/
+
+# Godot import cache sidecars are regenerated from the bundled originals.
+*.import

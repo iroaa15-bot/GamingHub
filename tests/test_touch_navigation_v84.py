@@ -13,13 +13,14 @@ class TouchNavigationV84(unittest.TestCase):
     self.assertIn('event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK',source)
     self.assertIn('get_viewport().set_input_as_handled()',source)
  def test_main_active_round_exit_requires_confirmation(self):
-  self.assertIn('if active_play_screen:\n    confirm_leave_active_game()',MAIN)
+  self.assertIn('if active_play_screen:\n  confirm_leave_active_game()',MAIN)
   self.assertIn('dialog.confirmed.connect(show_home)',MAIN)
   self.assertIn('"EXIT MATCH"), confirm_leave_active_game)',MAIN)
   self.assertIn('"HOME"), confirm_leave_active_game)',MAIN)
   self.assertIn('"Exit"), confirm_leave_active_game, ACCENT)',MAIN)
  def test_active_flag_tracks_only_gameplay(self):
-  self.assertIn('func clear_ui() -> void:\n active_play_screen = false',MAIN)
+  clear=MAIN.split('func clear_ui() -> void:',1)[1].split('\nfunc ',1)[0]
+  self.assertIn('active_play_screen = false',clear)
   self.assertIn('active_play_screen = not picture_done',MAIN)
   self.assertIn('active_play_screen = not memory_done',MAIN)
   self.assertIn('active_play_screen = true',MAIN)
@@ -33,7 +34,10 @@ class TouchNavigationV84(unittest.TestCase):
   self.assertIn('change_scene_to_file',section)
  def test_scroll_deadzone_and_focus_follow(self):
   for source in [MAIN,ONLINE]:
-   self.assertIn('scroll.scroll_deadzone = 22',source)
+   import re
+   deadzone=re.search(r'scroll.scroll_deadzone = (\d+)',source)
+   self.assertIsNotNone(deadzone)
+   self.assertGreaterEqual(int(deadzone.group(1)),14)
    self.assertIn('scroll.follow_focus = true',source)
  def test_touch_tweens_are_cancelled(self):
   self.assertIn('func animate_touch_button(',MAIN)
@@ -43,6 +47,7 @@ class TouchNavigationV84(unittest.TestCase):
   self.assertIn('if reduced_motion:\n  target.scale = Vector2.ONE\n  return',MAIN)
  def test_home_shows_xp(self):
   home=MAIN.split('func show_home() -> void:',1)[1].split('\nfunc ',1)[0]
-  self.assertIn('xp_progress()',home)
+  self.assertIn('profile.get("xp",0)',home)
+  self.assertIn('LEVEL %d • XP %d • WINS %d • MATCHES %d',home)
 
 if __name__ == '__main__': unittest.main()

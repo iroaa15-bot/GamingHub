@@ -1,0 +1,34 @@
+{
+  "questions": {
+    "provided": 3000,
+    "decisions": {
+      "HOLD": 2989,
+      "APPROVED": 8,
+      "REJECTED": 3
+    },
+    "arithmetic_excluded": 0,
+    "semantic_candidates": 78,
+    "english_present_in_source": 0,
+    "approved_actual_translations": 8
+  },
+  "sounds": {
+    "manifest_entries": 200,
+    "provided_files": 158,
+    "approved": 0,
+    "decisions": {
+      "HOLD": 56,
+      "REJECTED": 102,
+      "MISSING": 42
+    },
+    "missing_not_used": 42
+  },
+  "photos": {
+    "original_preserved": 200,
+    "new_source_candidates": 132,
+    "new_approved": 28,
+    "new_rejected_duplicate_subject": 2,
+    "hold_existing_rights_review": 102,
+    "expected_playable_development": 228,
+    "replacement_49_package": "NOT_PROVIDED_IN_THESE_ATTACHMENTS"
+  }
+}

@@ -1,0 +1,19 @@
+10-26 17:25:08.676  3980  3980 V Godot   : OnPause: GodotFragment{c8bd1ab} (784dee6f-f5db-442f-b89b-2f46ea4b152c id=0x7f0800ae)
+10-26 17:25:08.711  3980  3980 V Godot   : OnResume: GodotFragment{c8bd1ab} (784dee6f-f5db-442f-b89b-2f46ea4b152c id=0x7f0800ae)
+10-26 17:25:27.830  3980  4014 E godot   : ERROR: Parameter "data.tree" is null.
+10-26 17:25:27.830  3980  4014 E godot   :    at: get_tree (scene/main/node.h:507)
+10-26 17:25:27.830  3980  4014 E godot   :    GDScript backtrace (most recent call first):
+10-26 17:25:27.830  3980  4014 E godot   :        [0] _home (res://scripts/photo_duel_extension_ui.gd:248)
+10-26 17:25:27.830  3980  4014 E godot   : SCRIPT ERROR: Cannot call method 'change_scene_to_file' on a null value.
+10-26 17:25:27.830  3980  4014 E godot   :    at: _home (res://scripts/photo_duel_extension_ui.gd:248)
+10-26 17:25:27.831  3980  4014 E godot   :    GDScript backtrace (most recent call first):
+10-26 17:25:27.831  3980  4014 E godot   :        [0] _home (res://scripts/photo_duel_extension_ui.gd:248)
+10-26 17:25:29.834  3980  4014 F libc    : FORTIFY: pthread_mutex_lock called on a destroyed mutex (0x76713fb940)
+10-26 17:25:32.962  3980  4014 F libc    : Fatal signal 6 (SIGABRT), code -6 (SI_TKILL) in tid 4014 (GLThread 15187), pid 3980 (oaa15.gaminghub)
+10-26 17:25:33.487  5413  5413 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+10-26 17:25:33.488  5413  5413 F DEBUG   : Build fingerprint: 'OPPO/CPH2015/OP4C7D:9/PPR1.180610.011/1640680627:user/release-keys'
+10-26 17:25:33.489  5413  5413 F DEBUG   : Revision: '0'
+10-26 17:25:33.489  5413  5413 F DEBUG   : ABI: 'arm64'
+10-26 17:25:33.489  5413  5413 F DEBUG   : pid: 3980, tid: 4014, name: GLThread 15187  >>> com.iroaa15.gaminghub <<<
+10-26 17:25:33.490  5413  5413 F DEBUG   : signal 6 (SIGABRT), code -6 (SI_TKILL), fault addr --------
+10-26 17:25:33.490  5413  5413 F DEBUG   : Abort message: 'FORTIFY: pthread_mutex_lock called on a destroyed mutex (0x76713fb940)'

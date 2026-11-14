@@ -1,0 +1,161 @@
+{
+  "origin": "Original procedural composition and synthesis for Gaming Hub; no third-party recordings or samples",
+  "commercial_use": "Project-owned original score/source; no external attribution or paid licenses required",
+  "tempo_bpm": 96,
+  "files": [
+    {
+      "file": "menu_sunrise.wav",
+      "seconds": 20.0,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.336090087890625,
+      "rms": 0.06213063160301559,
+      "loop": true,
+      "seam_jump": 0.005645751953125,
+      "sha256": "8379068e9d0649b3f6a1660dee46f4f2f3105362a9b7b5a315c6e04c6a8c5f18"
+    },
+    {
+      "file": "startup.wav",
+      "seconds": 1.0499773242630386,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.31884765625,
+      "rms": 0.08234863581350581,
+      "loop": false,
+      "seam_jump": 3.0517578125e-05,
+      "sha256": "089a06edb2d15487dd2e3e4a39c85c56733214b84ec17513e89ef2820c3a8100"
+    },
+    {
+      "file": "click.wav",
+      "seconds": 0.12997732426303854,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.21319580078125,
+      "rms": 0.0972254558240823,
+      "loop": false,
+      "seam_jump": 0.000152587890625,
+      "sha256": "c09596b46f7111cdfe58a99401e5e7095692aa8d5579b7a65fc1045d4a1ee9f4"
+    },
+    {
+      "file": "navigation.wav",
+      "seconds": 0.18498866213151927,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.343048095703125,
+      "rms": 0.11508739200903587,
+      "loop": false,
+      "seam_jump": 0.00018310546875,
+      "sha256": "94ee5577f3a60f402c49aef2008e8fdaed2e5f727415d1cccbf6f90e3c64e01b"
+    },
+    {
+      "file": "selection.wav",
+      "seconds": 0.1949659863945578,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.334869384765625,
+      "rms": 0.1121672774605945,
+      "loop": false,
+      "seam_jump": 0.000152587890625,
+      "sha256": "42aab23969d3e0e3584568f4dda452c6f1c1c17c4654ad3a3c9e9c1f14748408"
+    },
+    {
+      "file": "room_create.wav",
+      "seconds": 0.8299773242630385,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.3369140625,
+      "rms": 0.08030825358237248,
+      "loop": false,
+      "seam_jump": 0.0,
+      "sha256": "f1f5e40a6bfd3a817d7655d626190405a5737b63c8ecf4e9507371e8b3d8b926"
+    },
+    {
+      "file": "player_join.wav",
+      "seconds": 0.7699773242630386,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.263763427734375,
+      "rms": 0.06808290787167216,
+      "loop": false,
+      "seam_jump": 0.0,
+      "sha256": "59fd4e2698b63074e40911d72b7ce26b58e96f520e4b86b9e851656b9b7d9774"
+    },
+    {
+      "file": "all_ready.wav",
+      "seconds": 0.8499773242630385,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.318450927734375,
+      "rms": 0.07929612585910993,
+      "loop": false,
+      "seam_jump": 0.0,
+      "sha256": "581d5af287c541301fe791d7aee3c492947d45a1949253776d7c20f774949259"
+    },
+    {
+      "file": "countdown.wav",
+      "seconds": 0.12997732426303854,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.21331787109375,
+      "rms": 0.09722511095777049,
+      "loop": false,
+      "seam_jump": 0.00018310546875,
+      "sha256": "6d8d78e5b1605770504102fc465fd944ba34c75856997ee8f5b8241b7062ee39"
+    },
+    {
+      "file": "round_start.wav",
+      "seconds": 0.8099773242630386,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.349090576171875,
+      "rms": 0.08085745024869642,
+      "loop": false,
+      "seam_jump": 0.0,
+      "sha256": "73465cac9794f126b96b746c4a722f769e03cc1e9ec07f6629418a5479e3005c"
+    },
+    {
+      "file": "correct.wav",
+      "seconds": 0.8499773242630385,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.33306884765625,
+      "rms": 0.07923684129727794,
+      "loop": false,
+      "seam_jump": 3.0517578125e-05,
+      "sha256": "2a352d26f9a8276607f3eb6c5fd8a187f44585721f6cb465ff6cffc7b260f2b4"
+    },
+    {
+      "file": "incorrect.wav",
+      "seconds": 0.7699773242630386,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.26763916015625,
+      "rms": 0.0677683092624243,
+      "loop": false,
+      "seam_jump": 3.0517578125e-05,
+      "sha256": "f01eb54e8adaabd162b76a5368a44070f679297a3aa1c324523f5aa3c465738f"
+    },
+    {
+      "file": "victory.wav",
+      "seconds": 1.2499773242630385,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.297119140625,
+      "rms": 0.08460688691428714,
+      "loop": false,
+      "seam_jump": 3.0517578125e-05,
+      "sha256": "b04830058e66cc8d66cfde38ac5a460670b975089539bc7c5f8a22ac3067f725"
+    },
+    {
+      "file": "results.wav",
+      "seconds": 0.9299773242630386,
+      "sample_rate": 22050,
+      "channels": 1,
+      "peak": 0.2979736328125,
+      "rms": 0.07578910195055964,
+      "loop": false,
+      "seam_jump": 0.0,
+      "sha256": "4f3de10c11b107bdf96f7df6e4a9249fd8c0bd1d04176c6c141a2ffd4985ecee"
+    }
+  ]
+}

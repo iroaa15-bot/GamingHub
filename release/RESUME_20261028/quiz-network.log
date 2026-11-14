@@ -1,0 +1,36 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+QUIZ_CHECK 2 clients authenticated game 1 true
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+QUIZ_CHECK fastest correct gets more server points false
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK 3 clients authenticated game 1 true
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+QUIZ_CHECK fastest correct gets more server points false
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK 6 clients authenticated game 6 false
+QUIZ_CHECK room created true
+QUIZ_CHECK all real clients joined false
+SCRIPT ERROR: Invalid access to property or key 'config_revision' on a base object of type 'Dictionary'.
+   at: suite (res://tests/shared_quiz_network.gd:26)
+   GDScript backtrace (most recent call first):
+       [0] suite (res://tests/shared_quiz_network.gd:26)
+       [1] until (res://tests/shared_quiz_network.gd:14)
+SHARED_QUIZ_REAL_GODOT_WS false ["fastest correct gets more server points", "fastest correct gets more server points", "6 clients authenticated game 6", "all real clients joined"]

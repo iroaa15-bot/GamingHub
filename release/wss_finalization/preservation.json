@@ -1,0 +1,24 @@
+{
+  "protected_files_match_previous_evidence": {
+    "server/server.py": true,
+    "server/photo_duel_extension.py": true,
+    "server/photo_duel_staging.py": true,
+    "server/photo_room_service.py": true,
+    "server/photo_match_protocol.py": true,
+    "data/network_config.json": true,
+    "data/cards.json": true,
+    "scripts/multiplayer.gd": true,
+    "scripts/android_voice_bridge.gd": true,
+    "scripts/ad_manager.gd": true,
+    "scripts/poing_admob_bridge.gd": true,
+    "scripts/daily_ai.gd": true,
+    "scripts/daily_rounds.gd": true,
+    "render.yaml": true,
+    "export_presets.cfg": true,
+    "addons/gaminghub_voice/bin/gaminghub-voice-debug.aar": true,
+    "addons/gaminghub_voice/bin/gaminghub-voice-release.aar": true
+  },
+  "all_match": true,
+  "main": "39162256ccbea20151b6bb66a129baad1fd0bd42",
+  "project_godot_previous_dirty_work_preserved": true
+}

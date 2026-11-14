@@ -1,0 +1,6 @@
+Executing <Task pending name='Task-2' coro=<QuizBoundaries.test_pending_security_and_resume() running at C:\Users\Omar\Documents\GitHub\GamingHub\tests\shared_quiz_security_resume.py:28> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py:459> cb=[_run_until_complete_cb() at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py:181] created at C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py:109> took 0.149 seconds
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.323s
+
+OK

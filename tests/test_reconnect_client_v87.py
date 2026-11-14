@@ -18,7 +18,10 @@ class ReconnectClientContract(unittest.TestCase):
         self.assertIn('"paused":', SRC)
         self.assertIn('"peer_resumed":', SRC)
     def test_cancel_clears_session(self):
-        self.assertIn('if reconnecting:\n  socket.close()', SRC)
+        cancel=SRC.split('func _leave_match() -> void:',1)[1].split('\nfunc ',1)[0]
+        self.assertIn('if reconnecting:', cancel)
+        self.assertIn('socket.close()', cancel)
+        self.assertIn('_reset_match_state()', cancel)
         self.assertIn('resume_token = ""', SRC)
 
 if __name__=='__main__': unittest.main()

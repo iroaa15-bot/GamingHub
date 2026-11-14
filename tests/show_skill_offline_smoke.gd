@@ -1,0 +1,33 @@
+extends SceneTree
+const PartyEngine = preload("res://scripts/qaadet_el_sohab_engine.gd")
+const Game = preload("res://scripts/show_skill_offline.gd")
+func _initialize() -> void:
+	var game = Game.new()
+	var cards: Array[Dictionary] = game._load_cards()
+	assert(cards.size() == 550)
+	var seen := {}
+	for card in cards:
+		assert(card["category"] == "show_skill")
+		assert(int(card.get("points", -1)) == 20)
+		assert(int(card.get("duration_seconds", -1)) == 30)
+		assert(not str(card.get("text_ar", "")).is_empty())
+		assert(not seen.has(card["id"]))
+		seen[card["id"]] = true
+	var engine = PartyEngine.new()
+	assert(engine.setup(["a", "b", "c", "d"], cards, 10, 7))
+	assert(engine.lock_category("show_skill"))
+	assert(not engine.draw_next("show_skill").is_empty())
+	assert(not engine.submit_vote("a", true))
+	assert(engine.submit_vote("b", true))
+	assert(engine.submit_vote("c", true))
+	assert(engine.submit_vote("d", false))
+	var result = engine.resolve_round()
+	assert(result["awards"]["a"] == 20)
+	assert(not engine.draw_next("show_skill").is_empty())
+	assert(engine.submit_vote("a", true))
+	assert(engine.submit_vote("c", false))
+	assert(engine.submit_vote("d", false))
+	var failure = engine.resolve_round()
+	assert(not failure["awards"].has("b"))
+	print("SHOW_SKILL_SMOKE_PASS")
+	quit()

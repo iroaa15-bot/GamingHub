@@ -1,0 +1,45 @@
+{
+  "base_commit": "395bb3d0fb1dc6882cd871a61dd313b5f3c442b8",
+  "root_cause": "False has_method result for Android JNISingleton triggers synchronous recursive voice failure/mute/UI callbacks, exhausting native stack",
+  "phone_evidence": {
+    "model": "CPH2015",
+    "android": "9",
+    "installed_apk_sha256": "250c348f660dc51ff6ed48341d5cd69b9dd56aca990db54a8a672e14b21345b2",
+    "singleton": true,
+    "has_method": false,
+    "direct_getVoiceApiVersion": 2,
+    "original_room_transition_without_touch": "FAIL SIGSEGV",
+    "original_main_to_empty": "Survived 15 seconds",
+    "fixed_photo_room_then_home": "Observed diagnostic source overlay; not final APK acceptance"
+  },
+  "local_tests": {
+    "jni_boundary_adapter": "PASS",
+    "duel_recursive_failure": "PASS",
+    "legacy_recursive_failure": "PASS"
+  },
+  "new_android_apk_acceptance": "BLOCKED pending build and device reconnection",
+  "microphone_and_audio": "BLOCKED; no permission dialog/capture/group acoustic test performed",
+  "protected_file_hashes": {
+    "server/server.py": true,
+    "server/photo_duel_extension.py": true,
+    "server/photo_duel_staging.py": true,
+    "server/photo_room_service.py": true,
+    "server/photo_match_protocol.py": true,
+    "data/network_config.json": true,
+    "data/cards.json": true,
+    "scripts/android_voice_bridge.gd": true,
+    "scripts/ad_manager.gd": true,
+    "scripts/poing_admob_bridge.gd": true,
+    "scripts/daily_ai.gd": true,
+    "scripts/daily_rounds.gd": true,
+    "render.yaml": true,
+    "export_presets.cfg": true,
+    "addons/gaminghub_voice/bin/gaminghub-voice-debug.aar": true,
+    "addons/gaminghub_voice/bin/gaminghub-voice-release.aar": true
+  },
+  "all_protected_match": true,
+  "core_voice_modified": false,
+  "ui_changes": false,
+  "production_changes": false,
+  "symbolication": "Official release symbol Build ID differs from installed debug library; not used to identify source frame"
+}

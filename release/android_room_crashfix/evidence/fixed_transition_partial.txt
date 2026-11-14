@@ -1,0 +1,61 @@
+10-26 15:08:33.329 10321 10321 V Godot   : InitEngine with params: [--xr_mode_regular, --xr-mode, off, --fullscreen, --background_color, #000000, --script, user://gh_diagnostic122/gh_fixed_transitions.gd, --verbose]
+10-26 15:08:33.329 10321 10321 V Godot   : Initializing Godot plugin registry
+10-26 15:08:33.483 10321 10321 D Godot   : background color = -16777216
+10-26 15:08:33.517 10321 10321 V Godot   : Godot native layer initialization completed: true
+10-26 15:08:33.571 10321 10321 I godot   : WorkerThreadPool: 8 threads, 2 max low-priority.
+10-26 15:08:33.585 10321 10321 V Godot   : Godot native layer setup completed
+10-26 15:08:33.587 10321 10321 V Godot   : OnInitRenderView: GodotFragment{c8bd1ab} (a795ec03-55b7-4ba5-917c-caf15b234da9 id=0x7f0800ae)
+10-26 15:08:33.644 10321 10321 D Godot   : Render view should be transparent: false
+10-26 15:08:33.644 10321 10321 D Godot   : usesVulkan(): false
+10-26 15:08:33.644 10321 10321 D Godot   : 			renderingDevice: opengl3 (ProjectSettings)
+10-26 15:08:33.644 10321 10321 D Godot   : 			renderer: gl_compatibility (ProjectSettings)
+10-26 15:08:33.757 10321 10321 V Godot   : OnStart: GodotFragment{c8bd1ab} (a795ec03-55b7-4ba5-917c-caf15b234da9 id=0x7f0800ae)
+10-26 15:08:33.770 10321 10321 V Godot   : OnResume: GodotFragment{c8bd1ab} (a795ec03-55b7-4ba5-917c-caf15b234da9 id=0x7f0800ae)
+10-26 15:08:33.930 10321 10353 I godot   : Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+10-26 15:08:33.938 10321 10353 I godot   : TextServer: Added interface "Dummy"
+10-26 15:08:33.998 10321 10353 I godot   : TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+10-26 15:08:34.025 10321 10353 I godot   : Using "default" pen tablet driver...
+10-26 15:08:34.027 10321 10353 I godot   : godot: ENABLING GL DEBUG
+10-26 15:08:34.032 10321 10353 I godot   : Shader 'CanvasSdfShaderGLES3' SHA256: 302b7866e6f387dcbaca1f258cf71fa84986e8b088603e692091b5d507e7f64e
+10-26 15:08:34.040 10321 10353 I godot   : Shader 'SkeletonShaderGLES3' SHA256: e8730508f2d61a40c3418dd36b31b8bb1fce633c683f8ca0d0a3c91008120f91
+10-26 15:08:34.042 10321 10353 I godot   : Shader 'ParticlesShaderGLES3' SHA256: 9feb81c256554bf0e1384eeebaa8d752168171f75d953443cf4110c98385bdc3
+10-26 15:08:34.045 10321 10353 I godot   : Shader 'ParticlesCopyShaderGLES3' SHA256: a9f30d05d8ae12549449a207a05bedd081cd943b6827a85d5ed0955697597535
+10-26 15:08:34.046 10321 10353 I godot   : Shader 'CopyShaderGLES3' SHA256: 56cb9940fbe8fc64da0694084ee6694b85c5a776ad2de32d97510ea339c9b42c
+10-26 15:08:34.051 10321 10353 I godot   : Shader 'CubemapFilterShaderGLES3' SHA256: 5d1f200a346c768bcba13ef0915821c8685a85974bc4c5f6315af3dac30eaf6d
+10-26 15:08:34.052 10321 10353 I godot   : Shader 'GlowShaderGLES3' SHA256: 6ef46a1b70fa6b7cd1bd77eb06d879e420491c965f87ba7ece714876a4b8f3c8
+10-26 15:08:34.054 10321 10353 I godot   : Shader 'PostShaderGLES3' SHA256: fb4cd7743c05be506790e9c25fbf078ed42a8a9cda09c2e23d57f9c9b58fc5d9
+10-26 15:08:34.056 10321 10353 I godot   : Shader 'FeedShaderGLES3' SHA256: 33f4bbe14bcb01669560e7dae0309a9efb6c038bb792faf0312a9f3d98090d9c
+10-26 15:08:34.063 10321 10353 I godot   : Shader 'CanvasShaderGLES3' SHA256: ae2ed445c3982229f8f1df650c54df1f2fbb67f29d66ee2bd3eea6bcc2117650
+10-26 15:08:34.063 10321 10353 I godot   : Shader 'CanvasOcclusionShaderGLES3' SHA256: 7b86d6708fd2b68c5d9dc64590451669ccd207f9fb466bf467b2205630ffaf90
+10-26 15:08:34.076 10321 10353 I godot   : Shader 'SceneShaderGLES3' SHA256: 97e9f677bfb1678ed078c728d3941a5d950e75605e4ede85559ef6d1aa0ab4a0
+10-26 15:08:34.100 10321 10353 I godot   : Shader 'SkyShaderGLES3' SHA256: f291d6e2abc22854cf1213f6be7fe4cbe2c06f5fb64dc8bfa4c77db67284d052
+10-26 15:08:34.101 10321 10353 I godot   : OpenGL API OpenGL ES 3.2 build 1.10@5130912 - Compatibility - Using Device: Imagination Technologies - PowerVR Rogue GE8320
+10-26 15:08:34.116 10321 10353 I godot   : 
+10-26 15:08:34.118 10321 10353 I godot   : TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+10-26 15:08:34.433 10321 10353 I godot   : CORE API HASH: 1227019437
+10-26 15:08:34.435 10321 10353 I godot   : EDITOR API HASH: 601663816
+10-26 15:08:34.455 10321 10353 I godot   : Loading resource: user://gh_diagnostic122/gh_fixed_transitions.gd
+10-26 15:08:34.464 10321 10353 I godot   : SceneTreeFTI: traversal method DEFAULT
+10-26 15:08:34.468 10321 10353 I godot   : Loading resource: res://scripts/ad_manager.gdc
+10-26 15:08:34.488 10321 10353 I godot   : Loading resource: res://scripts/poing_admob_bridge.gdc
+10-26 15:08:34.680 10321 10353 I godot   : Loading resource: res://scripts/live_ops.gdc
+10-26 15:08:34.708 10321 10353 I godot   : Loading resource: res://scripts/daily_ai.gdc
+10-26 15:08:34.750 10321 10353 I godot   : Loading resource: res://scripts/daily_rounds.gdc
+10-26 15:08:35.737 10321 10353 I godot   : Loaded system CA certificates
+10-26 15:08:35.738 10321 10353 V Godot   : OnGodotSetupCompleted
+10-26 15:08:35.812 10321 10353 V Godot   : OnGodotMainLoopStarted
+10-26 15:08:35.816 10321 10353 I godot   : Loading resource: res://.godot/exported/133200997/export-4a24720ee5e787dbe30abc634fa3679d-Main.scn
+10-26 15:08:35.816 10321 10353 I godot   : Loading resource: res://scripts/main.gdc
+10-26 15:08:36.912 10321 10353 I godot   : Loading resource: res://assets/ui/gaming_hub_brand.png
+10-26 15:08:36.913 10321 10353 I godot   : Loading resource: res://.godot/imported/gaming_hub_brand.png-a3a03beed8e673fc83419a41bb0d4fc5.ctex
+10-26 15:08:46.540 10321 10353 I godot   : GH_FIXED_TRANSITION 1
+10-26 15:08:46.540 10321 10353 I godot   : Loading resource: user://gh_diagnostic122/PhotoDuelLocal.tscn
+10-26 15:08:46.542 10321 10353 I godot   : Loading resource: user://gh_diagnostic122/photo_duel_extension_ui.gd
+10-26 15:08:46.824 10321 10353 I godot   : Loading resource: res://assets/ui/gaming_hub_brand.png
+10-26 15:08:46.825 10321 10353 I godot   : Loading resource: res://.godot/imported/gaming_hub_brand.png-a3a03beed8e673fc83419a41bb0d4fc5.ctex
+10-26 15:08:47.117 10321 10353 I godot   : Loading resource: user://gh_diagnostic122/photo_duel_voice_adapter.gd
+10-26 15:08:47.133 10321 10353 I godot   : Loading resource: user://gh_diagnostic122/android_voice_integration_bridge.gd
+10-26 15:08:59.055 10321 10353 I godot   : GH_FIXED_TRANSITION 2
+10-26 15:08:59.056 10321 10353 I godot   : Loading resource: res://.godot/exported/133200997/export-4a24720ee5e787dbe30abc634fa3679d-Main.scn
+10-26 15:08:59.571 10321 10353 I godot   : Loading resource: res://assets/ui/gaming_hub_brand.png
+10-26 15:08:59.572 10321 10353 I godot   : Loading resource: res://.godot/imported/gaming_hub_brand.png-a3a03beed8e673fc83419a41bb0d4fc5.ctex

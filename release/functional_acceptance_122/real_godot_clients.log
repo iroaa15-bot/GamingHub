@@ -1,0 +1,20 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+PASS main UI exposes Games
+PASS Games exposes Guess Your Picture
+PASS Guess Your Picture exposes room entry
+PASS Guess Your Picture exposes library
+PASS gameplay catalog contains 200 original cards
+PASS all 200 gameplay card textures load in engine
+PASS last library page still exposes real game action
+PASS offline original game assigns distinct playable cards
+PASS original room UI includes native voice controls
+PASS actual Godot client creates room on existing production server
+PASS second actual Godot client joins by real room code
+PASS both real clients bound to same room
+PASS both room clients load actual opponent image
+PASS preset question sends to server and transfers turn
+PASS server question acknowledgement updates client
+PASS real guess is validated and match completes on server
+ANDROID_HARDWARE_BLOCKED; TWO_ANDROID_DEVICES_BLOCKED; VOICE_AUDIO_HARDWARE_BLOCKED
+ACCEPTANCE_DESKTOP_PASS

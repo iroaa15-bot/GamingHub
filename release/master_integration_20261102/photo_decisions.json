@@ -1,0 +1,432 @@
+[
+  {
+    "id": "Shuttlecock",
+    "source": "additional_candidates/white_shuttlecock_on_badminton_court.png",
+    "source_sha256": "2143617e7519b8b577556d46e2cded5e47c4ae32dfe8fc615969539dc19fd25f",
+    "asset": "res://assets/imported_photos/shuttlecock.webp",
+    "sha256": "8d6c1f29c6b30d859a522d7d0b3aa0b1451bea078ae7545ac18ecc2a0389b52b",
+    "bytes": 81830,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Power_strip",
+    "source": "additional_candidates/white_three_socket_power_strip.png",
+    "source_sha256": "981ff8c4736f612f2cb26377ad5d7b2beb2d9162c74840d7d5b34d324ec86bf3",
+    "asset": "res://assets/imported_photos/power_strip.webp",
+    "sha256": "57d459d79df439e31b2219e7ad337f66b5f53cacc3c3edcd90fe54aa145ddc5a",
+    "bytes": 137542,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Toilet_paper",
+    "source": "additional_candidates/white_toilet_paper_roll.png",
+    "source_sha256": "3d7f29f27ef1cfe00aecd1f4e8f7f2e1826a52fce68258058125de3f2f68ba9d",
+    "asset": "res://assets/imported_photos/toilet_paper.webp",
+    "sha256": "98cfb50d169b111960f076a95b218b8c4b58eb66d47256b2511b8d099b447e84",
+    "bytes": 90260,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Light_switch",
+    "source": "additional_candidates/white_wall_light_switch.png",
+    "source_sha256": "4ef889028fb3a96bdf2761f0df23e8223ca9f956a3077e933158eb7b97968aab",
+    "asset": "res://assets/imported_photos/light_switch.webp",
+    "sha256": "c2f0317ef32699fa366b84e6f2b1e1168ddb19c5aadd099c85b7e9fb21626a9a",
+    "bytes": 51740,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Wifi_router",
+    "source": "additional_candidates/white_wi_fi_router_with_blinking_leds.png",
+    "source_sha256": "a245ea889cca974b5ce80173e34b91b4bcae493a3c8448b35dacea17be692e2f",
+    "asset": "res://assets/imported_photos/wifi_router.webp",
+    "sha256": "b37a79fde48171da5a630967db265f01240d33ae30b2e7f389a068c8a14e1bb2",
+    "bytes": 37042,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Wind_turbine",
+    "source": "additional_candidates/white_wind_turbine_against_blue_sky.png",
+    "source_sha256": "857d83e43cc044d66ec4cd37dd349be49100824994fef18de5cee9e3223d9b5c",
+    "asset": "res://assets/imported_photos/wind_turbine.webp",
+    "sha256": "c3c66e0e901020029da70834670df44a66865b79ea2ae92a71d36526ae3736c6",
+    "bytes": 55612,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "River",
+    "source": "additional_candidates/winding_river_through_lush_green_banks.png",
+    "source_sha256": "13ee73fbd25f8e4c1a2bbcc2fc8650e21ceb537ba8afe4d9e31721f012d9a796",
+    "asset": "res://assets/imported_photos/river.webp",
+    "sha256": "61cbffe7c15b78b95a801b10ea4c01b3bb16540a333911f2fa1a805be3fdd5c8",
+    "bytes": 312594,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Game_controller",
+    "source": "additional_candidates/wireless_game_controller.png",
+    "source_sha256": "8b4a1baccc103aaa7d0d0ff69d4e546e0e48102aa83a047e0f7a023afa39d609",
+    "asset": "res://assets/imported_photos/game_controller.webp",
+    "sha256": "d84063cb32c9d6167c8093921ee49cdd33f8a11c79100bc54838fc0ccc84ddbc",
+    "bytes": 71692,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Park_bench",
+    "source": "additional_candidates/wooden_bench_beneath_a_shady_tree.png",
+    "source_sha256": "52b204d23e1554ad76e76924edd790ba512effd0eb5eb114477c925b5ca20797",
+    "asset": "res://assets/imported_photos/park_bench.webp",
+    "sha256": "45cbedb4f1e9d0108d1375c03d5c223c82ee2a7b08ed7e7bc2e8b1ddaaed0a52",
+    "bytes": 298466,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Clothespin",
+    "source": "additional_candidates/wooden_clothespin_against_blue_sky.png",
+    "source_sha256": "88da3d40c5fc754e09b12b47cb50855bed8f6786b87149a62f7a0b46dfbc221c",
+    "asset": "res://assets/imported_photos/clothespin.webp",
+    "sha256": "252bc49b44177b69f2e20e3faa5c8d8a1408ca5c4745c3832bb056fa19b317c2",
+    "bytes": 51994,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Doghouse",
+    "source": "additional_candidates/wooden_dog_kennel_in_the_garden.png",
+    "source_sha256": "8b36031363982b04b164c499d602c5dbeced931c39b8f2310f97898e2fedff82",
+    "asset": "res://assets/imported_photos/doghouse.webp",
+    "sha256": "99fce33f68bd48878c0c717a13b248fb151e122ae7418435beef539dabae7447",
+    "bytes": 235726,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Picture_frame",
+    "source": "additional_candidates/wooden_frame_with_landscape_photo.png",
+    "source_sha256": "6b66b8505d578d6dd01a21fa52813a75520fcf67bc3db38865d1c92bce3dd2cb",
+    "asset": "res://assets/imported_photos/picture_frame.webp",
+    "sha256": "9221dac158db28653390b857574a5d2fadfc2b6f8b8116d6bff6fd7fa211bc15",
+    "bytes": 125744,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Tambourine",
+    "source": "additional_candidates/wooden_tambourine_with_metal_jingles.png",
+    "source_sha256": "c1f7396fbc353615bb0e9208b9c9c2b510a9470fa5b03851c22271069375175f",
+    "asset": "res://assets/imported_photos/tambourine.webp",
+    "sha256": "400142c883465cb9fa24518ad058ab3f163392cfb85cfd659c14e92933d2e123",
+    "bytes": 145750,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Laundry_basket",
+    "source": "additional_candidates/woven_laundry_basket_with_folded_clothes.png",
+    "source_sha256": "88a735f1ed955c1e7ac9a1103c78de6e0f64cbb84ad0589a97b549a15be189f0",
+    "asset": "res://assets/imported_photos/laundry_basket.webp",
+    "sha256": "7ab4a2e4bedb83f5997c26841902322cb8bf8df5c06d6f21eaf590af3a8f24f1",
+    "bytes": 216020,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Doormat",
+    "source": "additional_candidates/woven_welcome_mat_by_a_doorway.png",
+    "source_sha256": "2a6a108bf80d43af976b4608eef327e66e520249a8c32623fc2d1b67a0a2dc9e",
+    "asset": "res://assets/imported_photos/doormat.webp",
+    "sha256": "0bd260a28b22261cda22625e9997c05b7f3cd9748b092a0c90c14bb535a6d287",
+    "bytes": 230950,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Mallard",
+    "source": "additional_candidates/yellow_billed_mallard_by_the_pond.png",
+    "source_sha256": "c9f0f2e098461d8594355f69c0495fc766d69d103c4a506284213f87f5777dda",
+    "asset": "res://assets/imported_photos/mallard.webp",
+    "sha256": "815ed7d6b5c0539bcd30ed1cae3466166c9c768f4679caf007677897a29de4b1",
+    "bytes": 222518,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Bulldozer",
+    "source": "additional_candidates/yellow_bulldozer_at_a_construction_site.png",
+    "source_sha256": "4120028f0289ef3fa0320cf03a277c2e731050327afa31a526b2e2c1a08f1a31",
+    "asset": "res://assets/imported_photos/bulldozer.webp",
+    "sha256": "570eada5cab67422b87f2ac0298e1b79ed659ce3664a7cc9c4be8f9438944d0b",
+    "bytes": 229074,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Safety_helmet",
+    "source": "additional_candidates/yellow_construction_safety_helmet.png",
+    "source_sha256": "4ef5a1ff3f9ddb0ead5d1f1339de9f1343d2d1a0d6622841a209480cb28d552a",
+    "asset": "res://assets/imported_photos/safety_helmet.webp",
+    "sha256": "3a71b4b72412be4f03528503d21e79f1e0b8612c09df26670200e5b66c67695a",
+    "bytes": 90904,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Excavator",
+    "source": "additional_candidates/yellow_excavator_at_a_construction_site.png",
+    "source_sha256": "20db75ea438e6246f3399c64164a85b6624a321c4e491cb906f36a49cede346f",
+    "asset": "res://assets/imported_photos/excavator.webp",
+    "sha256": "fbebb160beb4aaf16610b242b76139d8f3614657716d76422a4eb4c5f6bd892e",
+    "bytes": 232014,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Forklift",
+    "source": "additional_candidates/yellow_forklift_in_a_warehouse.png",
+    "source_sha256": "1f245884fdd06d8db4d7058d65b17e129379bf936e96b3b4934f0a6a00cb70a9",
+    "asset": "res://assets/imported_photos/forklift.webp",
+    "sha256": "423f2b4df7f951d7ef4f981661e496de21020c45b6e5db9ea98205e475596552",
+    "bytes": 147160,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Pencil",
+    "source": "additional_candidates/yellow_pencil_on_white_paper.png",
+    "source_sha256": "9a1d2b5abec67a22be3b905f39d6ca22434408e5c65a4b766b79dfa02d04c5b9",
+    "asset": "res://assets/imported_photos/pencil.webp",
+    "sha256": "8a5e1542a1880b347030e778f51b62e9bca62ce1f511e1dbb063244e7c5ec893",
+    "bytes": 32372,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Road_roller",
+    "source": "additional_candidates/yellow_road_roller_compacting_asphalt.png",
+    "source_sha256": "d2ac4dc631df212fa80632e60cd0a93f8f3296e51004f29ac86489767c413ccf",
+    "asset": "res://assets/imported_photos/road_roller.webp",
+    "sha256": "08be46a255874814d6a37dbdb4aafa0469ea62d7e7c91d1797b0fea90bf33619",
+    "bytes": 163228,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Taxi",
+    "source": "additional_candidates/yellow_taxi_parked_roadside.png",
+    "source_sha256": "2f01a5d5713a841fef7ab18905de60fc75f6aa7ef1c106ffd9bf0af5076426ec",
+    "asset": "res://assets/imported_photos/taxi.webp",
+    "sha256": "025c353ac630a83dd4f04c2c264b2da993bcd7d6cd758001662e9eb9a4618733",
+    "bytes": 140408,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Submarine",
+    "source": "additional_candidates/yellow_tourist_submarine_at_sea.png",
+    "source_sha256": "40bed7c0201b7b1654dbb8f3541cdf461521e26829ddb9d03ea9653c066bc560",
+    "asset": "res://assets/imported_photos/submarine.webp",
+    "sha256": "dfb61b223626ecb4d4ee845b0bcc77f49d01d1a313fe03c8e982e7c15e2d44e0",
+    "bytes": 176198,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Pedestrian_crossing",
+    "source": "additional_candidates/zebra_crossing_in_daylight.png",
+    "source_sha256": "c07377086134e5420db0a1cce10c1aa5295773c13813a6d6aadb738f6def80dc",
+    "asset": "res://assets/imported_photos/pedestrian_crossing.webp",
+    "sha256": "f81d05822b9eb9f7ab61b60725e345502ee96fadef9fe5b4c06fead32f2a822d",
+    "bytes": 270994,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Ice_skates",
+    "source": "additional_candidates/حذاء_تزلج_جليد.png",
+    "source_sha256": "479750869bdb2d710111b2c73f3f7b48d1c3b3896faa3d9db941127425373108",
+    "asset": "res://assets/imported_photos/ice_skates.webp",
+    "sha256": "c634daad48d355b2a9df13182539cbdb38afe67036230f0ba4d02a30a65eaa8c",
+    "bytes": 102040,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Dumbbell",
+    "source": "additional_candidates/دمبل.png",
+    "source_sha256": "8935fbba8a686f099008f2f8fd5462c56d1a524909e33b88af31208a3ccbb1fb",
+    "asset": "res://assets/imported_photos/dumbbell.webp",
+    "sha256": "c73b7154e46ddbc3a94413dd57264d880dabefbf3bee6da621734b640457ad60",
+    "bytes": 227166,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "id": "Table_tennis_paddle",
+    "source": "additional_candidates/مضرب_تنس_طاولة.png",
+    "source_sha256": "efffdd630ce64c5cb9a7b5468e889fea32d15ce750d8082aa3400ad04423606a",
+    "asset": "res://assets/imported_photos/table_tennis_paddle.webp",
+    "sha256": "f732ced40883d90326fc88aad65a591ac0eb5c25f437122fceaa2e45392a769f",
+    "bytes": 85704,
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "decision": "APPROVED_DEVELOPMENT",
+    "basis": "User commercial-use attestation; actual 30-image contact-sheet inspection; manual bilingual labels and subject deduplication",
+    "difficulty_basis": "Editorial, not player-calibrated"
+  },
+  {
+    "source": "additional_candidates/white_shuttlecock_on_green_badminton_court.png",
+    "decision": "REJECTED_DUPLICATE_SUBJECT",
+    "duplicate_of": "additional_candidates/white_shuttlecock_on_badminton_court.png"
+  },
+  {
+    "source": "additional_candidates/yellow_bulldozer_on_construction_site.png",
+    "decision": "REJECTED_DUPLICATE_SUBJECT",
+    "duplicate_of": "additional_candidates/yellow_bulldozer_at_a_construction_site.png"
+  }
+]

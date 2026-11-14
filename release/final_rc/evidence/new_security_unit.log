@@ -1,0 +1,9 @@
+test_expiry_and_short_secret (test_duel_security.SecurityTests.test_expiry_and_short_secret) ... ok
+test_rate_limit_is_enforced (test_duel_security.SecurityTests.test_rate_limit_is_enforced) ... ok
+test_report_and_block_persistence (test_duel_security.SecurityTests.test_report_and_block_persistence) ... ok
+test_signed_session_and_tamper_rejection (test_duel_security.SecurityTests.test_signed_session_and_tamper_rejection) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.076s
+
+OK

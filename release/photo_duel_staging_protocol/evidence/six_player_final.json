@@ -1,0 +1,23 @@
+{
+  "endpoint": "ws://127.0.0.1:62674",
+  "godot_exit": 0,
+  "local_extension_pass": true,
+  "script_errors": false,
+  "editor_shutdown_resource_warnings": true,
+  "protected_files_unchanged": true,
+  "protected_sha256": {
+    "server/server.py": "0297ab2b8b91b36d01a488903c0dc8b77dea36a70804293893f4f52a6e750131",
+    "server/photo_duel_staging.py": "55b06479b47a6cdd3f257cd6cd63b2ef46a82c9c33a90b22d61a7d4d7e6d9e1c",
+    "server/photo_room_service.py": "781f0d6f3a70945acb6054bf940433fa0e8694457321ad2dd1ba956539f2f049",
+    "server/photo_match_protocol.py": "558c586797f3791c8d088bf635f5d2ce031808453b576b2286273a329c7d1584",
+    "data/network_config.json": "3a03c58321ee1c6b1e6ac73903f1b222fd38b7b071982ab28bb51814490d182b",
+    "scripts/multiplayer.gd": "c7be3c4cad4da3cca0f6d8b29eaca16145d63a57eaf822cbdf2ea88910826add",
+    "scripts/android_voice_bridge.gd": "b7dd7dc9e19104574bd2954c491aba9ddf4357ae0351fcd00f707d5b73eaaec1",
+    "project.godot": "a68ba34f03a86ed95bc381f05db7593f569823b7fe82a5cae04c1e3364f7fe8c",
+    "export_presets.cfg": "ca1a82e80c6392b0b44e3b5bc1c74c10145ae5bbbbf9ea198dd843047850a142"
+  },
+  "apk_built": false,
+  "production_contacted_by_test_clients": false,
+  "android_audio": "BLOCKED: no real device test",
+  "android_touch": "BLOCKED: no real device test"
+}

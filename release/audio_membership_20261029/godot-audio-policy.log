@@ -1,0 +1,20 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+AUDIO_POLICY main parses with audio routes true
+AUDIO_POLICY classic parses with membership lock true
+AUDIO_POLICY shared quiz parses with game bus true
+AUDIO_POLICY fixture playing outside room true
+AUDIO_POLICY lobby fade then complete stop true
+AUDIO_POLICY membership survives match/mute/pause true
+AUDIO_POLICY membership survives match/mute/pause true
+AUDIO_POLICY membership survives match/mute/pause true
+AUDIO_POLICY membership survives match/mute/pause true
+AUDIO_POLICY transport loss keeps membership lock true
+AUDIO_POLICY disabled music stays stopped after exit true
+AUDIO_POLICY enabled music resumes after full exit true
+AUDIO_POLICY settings cannot restart room music true
+AUDIO_POLICY explicit membership release resumes true
+AUDIO_POLICY separate bus Music true
+AUDIO_POLICY separate bus UI SFX true
+AUDIO_POLICY separate bus Game SFX true
+AUDIO_POLICY separate bus Voice Chat true

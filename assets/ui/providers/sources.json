@@ -1,0 +1,12 @@
+{
+  "google": {
+    "page": "https://developers.google.com/identity/branding-guidelines",
+    "download": "https://developers.google.com/static/identity/images/branding_guideline_sample_lt_rd_sl.svg",
+    "sha256": "4d197ab476078c8979c90ea9c4ed98e56a6748e118ace7a07caeb43266cad469"
+  },
+  "facebook": {
+    "page": "https://www.meta.com/brand/resources/facebook/logo/",
+    "sha256": "15844d06cf33bc71cbd13c89fc160aff65f28bafc3bf3833ab87bc761ac7b481",
+    "display": "AtlasTexture selects the centered logo with clear space; source PNG unchanged"
+  }
+}

@@ -1,0 +1,7 @@
+scripts/photo_duel_extension_client.gd
+scripts/photo_duel_extension_ui.gd
+server/photo_duel_agreement_local.py
+tests/room_agreement_network.gd
+tests/room_agreement_security.py
+tests/room_agreement_ui.gd
+release/room_agreement_20261027/ (reports, logs, screenshots)

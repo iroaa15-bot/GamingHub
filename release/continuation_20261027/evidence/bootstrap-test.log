@@ -1,0 +1,6 @@
+PASS: explicit local first-admin grant, repeat blocked, audited; disposable test DB only
+.
+----------------------------------------------------------------------
+Ran 1 test in 1.974s
+
+OK

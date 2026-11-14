@@ -1,0 +1,1590 @@
+{
+  "added": 176,
+  "total": 200,
+  "assets": [
+    {
+      "id": "cat",
+      "image": "res://assets/generated/cat.webp",
+      "sha256": "ab9b30f917e28be2b026b2a419bb2bc0aefe84b65e0e982d9081ea1a131a3acb",
+      "bytes": 92620,
+      "prompt": "Use case: photorealistic-natural. Asset type: single square guessing-game card photograph. Subject: one domestic orange cat, full body sitting, clearly recognizable ears whiskers paws and tail, natural anatomy. Neutral uncluttered garden backdrop softly blurred, natural daylight, sharp detailed photographic fur. Only the cat is the salient subject. No text, no labels, no logos, no watermark. Produce one individual image, not a grid. Intended filename cat.webp.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "dog",
+      "image": "res://assets/generated/dog.webp",
+      "sha256": "2f1e0b9348fe575c98f0b2a90c2055186b66a62a077dcc0d557bb58bda078390",
+      "bytes": 85920,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Dog. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "rabbit",
+      "image": "res://assets/generated/rabbit.webp",
+      "sha256": "b9de5310ba0228901e6858f1ba668439f02749dd6c92859b2aa62d463d026ec7",
+      "bytes": 109974,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Rabbit. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "horse",
+      "image": "res://assets/generated/horse.webp",
+      "sha256": "6481019e39423b4fe7080c80851cd7ab6f487c57b2bc1018a25f412faf2ce7b0",
+      "bytes": 84060,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Horse. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cow",
+      "image": "res://assets/generated/cow.webp",
+      "sha256": "31bd44aac4204b9465224c4fdf904be24387a57a15d44fa191989c63a4d3ec28",
+      "bytes": 93678,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Cow. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sheep",
+      "image": "res://assets/generated/sheep.webp",
+      "sha256": "30137a117185ff819c89e695efa5e330e7ddb8236218701a54c5b94108e8354c",
+      "bytes": 114944,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Sheep. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "goat",
+      "image": "res://assets/generated/goat.webp",
+      "sha256": "6ce904f4d19af0ab2e5d748c49d627527cb110175f3de32be9bcf11d26863bb3",
+      "bytes": 84054,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Goat. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "donkey",
+      "image": "res://assets/generated/donkey.webp",
+      "sha256": "c4df06af8b1b589e5e7fa759f6bbb1c34837e21120efbd6f04e765d844b338bb",
+      "bytes": 100750,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Donkey. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "camel",
+      "image": "res://assets/generated/camel.webp",
+      "sha256": "1243815a9dbb8fc4d1caf81d86af7fae3f30e9b93c47debf16b66f69af1257c5",
+      "bytes": 108676,
+      "prompt": "Use case: photorealistic-natural. Individual square educational guessing card photograph of one Camel. Full recognizable subject centered with all identifying features visible, natural anatomy and materials. Realistic appropriate simple background softly blurred, natural daylight, crisp professional photography, no other salient subjects, no text, no logos, no watermark, not an illustration, not a collage.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "zebra",
+      "image": "res://assets/generated/zebra.webp",
+      "sha256": "d45aa36323238e18805f8f6d5311a37584958bb19605f27ddb369c3b81ec224f",
+      "bytes": 129318,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Zebra. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "rhinoceros",
+      "image": "res://assets/generated/rhinoceros.webp",
+      "sha256": "ffdd33184e6352eb678666f239f41d57822ddd11b2b29f2703ff5fc480e40e18",
+      "bytes": 130088,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Rhinoceros. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "hippopotamus",
+      "image": "res://assets/generated/hippopotamus.webp",
+      "sha256": "8ad98c2b3f4e07a5e498a67b25872b68c8caebf745a1f1ac320c0bfae9780de3",
+      "bytes": 106288,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Hippopotamus. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "gorilla",
+      "image": "res://assets/generated/gorilla.webp",
+      "sha256": "fc7bcbaf812bddd31bbfc37dd9af4429c1c97170e62be81aa92d87fc99fd1c85",
+      "bytes": 125418,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Gorilla. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "chimpanzee",
+      "image": "res://assets/generated/chimpanzee.webp",
+      "sha256": "e438e562a0a714c42dd3dc1b51a04c99ea3ac1537d25d3e9212a81ab20b5ae11",
+      "bytes": 110148,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Chimpanzee. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "orangutan",
+      "image": "res://assets/generated/orangutan.webp",
+      "sha256": "53fa94288cca059ec83ff8bf2ac82c5c4674978f195c4aa9df6bdcaf6c1e8dd2",
+      "bytes": 141350,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Orangutan. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "kangaroo",
+      "image": "res://assets/generated/kangaroo.webp",
+      "sha256": "93ff81e804d5f73f201ac6cb562768752a368596503b4dfee19d833081e26fde",
+      "bytes": 121534,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Kangaroo. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "koala",
+      "image": "res://assets/generated/koala.webp",
+      "sha256": "489c657b8cf75405ff08e273f1edcab7e5967e59c8a5f5df628bfc5176f23f85",
+      "bytes": 140530,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Koala. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sloth",
+      "image": "res://assets/generated/sloth.webp",
+      "sha256": "801b9523a6278e78f4993f8cdbdc2b84efd3bace1803efa88dbff4346dc0a995",
+      "bytes": 153550,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Sloth. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "hedgehog",
+      "image": "res://assets/generated/hedgehog.webp",
+      "sha256": "61543d02cb00ba383db0f0c29de941be860fc920b2b9d174667c75a878ffe615",
+      "bytes": 136106,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Hedgehog. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "squirrel",
+      "image": "res://assets/generated/squirrel.webp",
+      "sha256": "8f495004e085d6513bb9f569e296eb5a50a6a94c412d0b9e82f4d4909ca2131e",
+      "bytes": 120634,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Squirrel. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "beaver",
+      "image": "res://assets/generated/beaver.webp",
+      "sha256": "32f681681bb670734d43ce71bf829d1b5a07b9100308a033c06de3f092912506",
+      "bytes": 113032,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Beaver. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "otter",
+      "image": "res://assets/generated/otter.webp",
+      "sha256": "04f80832f7efa8964d419fc1dac46e1fd9e5efda71a6974527ce2cae66281d93",
+      "bytes": 157168,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Otter. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "raccoon",
+      "image": "res://assets/generated/raccoon.webp",
+      "sha256": "4bbf2b4091f2187123b55df2393e8906f5ae762b7fdf7fc58c80566a2a88bd67",
+      "bytes": 138570,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Raccoon. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "fox",
+      "image": "res://assets/generated/fox.webp",
+      "sha256": "06c9166b533e9c99834eca5f45995861ffb59313641e09558e228c1be1110fe8",
+      "bytes": 129402,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Fox. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "wolf",
+      "image": "res://assets/generated/wolf.webp",
+      "sha256": "9fd59e36c8151ad41cea0a2e684a850e9257720a1576daf754d93da9e0ec7f1d",
+      "bytes": 119620,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Wolf. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "brown_bear",
+      "image": "res://assets/generated/brown_bear.webp",
+      "sha256": "9f1f0fcb099e67ce9c3b538da95abc04952e1891d6e6aa406235e65ff58abc89",
+      "bytes": 115924,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: brown grizzly bear. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "polar_bear",
+      "image": "res://assets/generated/polar_bear.webp",
+      "sha256": "87bbac0b45128dc5c9e52a8e510249791501508860d1bac98b988c7d632616f7",
+      "bytes": 60982,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: white polar bear. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "deer",
+      "image": "res://assets/generated/deer.webp",
+      "sha256": "911a34b51e11a605089d4d1b8ffd4724a7b66b98bf1ba4f34f8f1244b1033e8e",
+      "bytes": 135374,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Deer. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "moose",
+      "image": "res://assets/generated/moose.webp",
+      "sha256": "0b0347737eb401a6019bd0d418578c11fc200516b9b9b0483e9b032aaf6b84c3",
+      "bytes": 128132,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Moose. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bison",
+      "image": "res://assets/generated/bison.webp",
+      "sha256": "d6431b8f5358fcea15dfaa8d9e39300cde14d9c29a4f9d48e3e401530bd5fe78",
+      "bytes": 118404,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bison. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "meerkat",
+      "image": "res://assets/generated/meerkat.webp",
+      "sha256": "951127637347178a0e1a31d54091589c92c1d2fd21e117edc0fc7af4cd2bb242",
+      "bytes": 133464,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Meerkat. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "lemur",
+      "image": "res://assets/generated/lemur.webp",
+      "sha256": "d3ce4f3d2ebf3defd06387d05819681491a2096f523e46560653c9d407b0398e",
+      "bytes": 103882,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Lemur. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "red_panda",
+      "image": "res://assets/generated/red_panda.webp",
+      "sha256": "4f26860cb4e3a9ee9d4d796da301dcd9f53985935cecb9e70d770c813d8d9b21",
+      "bytes": 112686,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Red panda. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cheetah",
+      "image": "res://assets/generated/cheetah.webp",
+      "sha256": "1de93994c97dc95318c863f83723497757e02d5cd3fc347ffa22521f8e7227bc",
+      "bytes": 113740,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: slender cheetah with small black solid spots and black tear lines. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "leopard",
+      "image": "res://assets/generated/leopard.webp",
+      "sha256": "20b392a0592c1f0fd655c4b62ab4048486ca6b7366bdddd2713d8539a79090dc",
+      "bytes": 137946,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: leopard with rosette spots, not a tiger. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "crocodile",
+      "image": "res://assets/generated/crocodile.webp",
+      "sha256": "3ceaafe0c7a614664b8d8ddc6f70345192c62233a25de2d09942c9b2e8b63aa8",
+      "bytes": 126348,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Crocodile. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "tortoise",
+      "image": "res://assets/generated/tortoise.webp",
+      "sha256": "9deadcd523ff2c409d9d095c85520d4b28739b21c5e0983059c65aaef9e66dfc",
+      "bytes": 181956,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Tortoise. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sea_turtle",
+      "image": "res://assets/generated/sea_turtle.webp",
+      "sha256": "bac71c9b99f78f37d773552521d1def2cbce711076dd21897fcd20be24260f71",
+      "bytes": 158876,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Sea turtle. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "frog",
+      "image": "res://assets/generated/frog.webp",
+      "sha256": "9780bccf34a1efcf1e125e1f803920455779697568205fe2359710cbf5635c9c",
+      "bytes": 89442,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Frog. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "chameleon",
+      "image": "res://assets/generated/chameleon.webp",
+      "sha256": "6cca68352dbe5af8f2f629d6a2f3b7ee8c1187dff3162b242b660cd5e8f27b0b",
+      "bytes": 143148,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Chameleon. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "iguana",
+      "image": "res://assets/generated/iguana.webp",
+      "sha256": "0cb9d00d842d1ff21799db7968276161fcd7232344898d397d440f279331480e",
+      "bytes": 166190,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Iguana. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cobra",
+      "image": "res://assets/generated/cobra.webp",
+      "sha256": "c78d39ecab54e1c1e858408c0eb1caa5a2141fa7585eff1c7f1af20918b26007",
+      "bytes": 123596,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cobra. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "python",
+      "image": "res://assets/generated/python.webp",
+      "sha256": "736ca7246fe2e2970fc1b57d2a48b698ef5b8e0b4e820dc130ae9813cd91d450",
+      "bytes": 162980,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: non-venomous python snake, not computer programming. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "owl",
+      "image": "res://assets/generated/owl.webp",
+      "sha256": "6948431cc46b739615e885a2e4237aa209924ed65b9cc8210e9346b15fa2f090",
+      "bytes": 105860,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Owl. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "eagle",
+      "image": "res://assets/generated/eagle.webp",
+      "sha256": "4f78b6b8409e7ba32b74fdc1897a65c1524de047ca28b6d3917d290bcde437a6",
+      "bytes": 95514,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Eagle. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "parrot",
+      "image": "res://assets/generated/parrot.webp",
+      "sha256": "499bd15b3a2e662ddaf51d6917c701cc89bb38498581a1295b6e1f07e430929a",
+      "bytes": 90282,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Parrot. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "flamingo",
+      "image": "res://assets/generated/flamingo.webp",
+      "sha256": "3603a9283702c11fcc1d3c02fd5ebbe223a28f90056336be89fe1f9597d64d66",
+      "bytes": 40444,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Flamingo. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "peacock",
+      "image": "res://assets/generated/peacock.webp",
+      "sha256": "2b32018fc4ccf9d9d001f7faa0c5da9b7b3e600987b67f67b80bba76884c1d12",
+      "bytes": 230072,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Peacock. One healthy animal, full recognizable body and all identifying features visible, natural anatomy, appropriate quiet habitat. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "orange",
+      "image": "res://assets/generated/orange.webp",
+      "sha256": "825dc9708eeaf7ba28a5f2a3f1464e228cf40b7b3a5b60204efe2791349a56e0",
+      "bytes": 73930,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Orange. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "lemon",
+      "image": "res://assets/generated/lemon.webp",
+      "sha256": "012f2f71c896dc97cb5adb5a643e0983ba1925640dc00846f8a01cf4b301423e",
+      "bytes": 64960,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: whole yellow lemons with one cut in half. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "lime",
+      "image": "res://assets/generated/lime.webp",
+      "sha256": "869ec11b3f84ceebeb723d80eb06c37d8383a0f516472c9d48c509898d2f8f36",
+      "bytes": 89396,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: whole green limes with one cut in half. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "pear",
+      "image": "res://assets/generated/pear.webp",
+      "sha256": "56d699024021636453a3374d1109e855801fb47c1e04e52b9c04c1427471ed48",
+      "bytes": 60914,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Pear. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "peach",
+      "image": "res://assets/generated/peach.webp",
+      "sha256": "ec42150c9b46a2a4b10cc11361e7c4720bb456a09ff6166723da9c0465203309",
+      "bytes": 95524,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Peach. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "apricot",
+      "image": "res://assets/generated/apricot.webp",
+      "sha256": "af4bd894a9c5147945e1148f7970eb2664d483dc1ae8cc0052bd43df3803f3ac",
+      "bytes": 62030,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Apricot. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "plum",
+      "image": "res://assets/generated/plum.webp",
+      "sha256": "d9265a04852cb1f52d586a2c5c1e27a7527dea4ea8ebe717ff86a5fbe901f7d6",
+      "bytes": 76980,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Plum. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cherries",
+      "image": "res://assets/generated/cherries.webp",
+      "sha256": "37a62cb8e7db7f3757ca3d8ed6c032ef1b22c738d9944d1e31628cdb38a6fae6",
+      "bytes": 75572,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cherries. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "grapes",
+      "image": "res://assets/generated/grapes.webp",
+      "sha256": "deb47ebc7547ef4ab83779b04035ddd8052284d401a99704b2b024e1feab2c23",
+      "bytes": 90356,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Grapes. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "watermelon",
+      "image": "res://assets/generated/watermelon.webp",
+      "sha256": "ffa9c1904551408dda2adaacbba43c21483086541ab8b8c43b23f7e7647e1e17",
+      "bytes": 122838,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Watermelon. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "pineapple",
+      "image": "res://assets/generated/pineapple.webp",
+      "sha256": "c983547f21835716543faff40fea70f8dcdff98dd3981c123f3e84916e452964",
+      "bytes": 78418,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Pineapple. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "mango",
+      "image": "res://assets/generated/mango.webp",
+      "sha256": "aa9e57e607a979b540600cb8faebcdd31db2388f15e996232f6cec3d64de034f",
+      "bytes": 73254,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Mango. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "kiwi",
+      "image": "res://assets/generated/kiwi.webp",
+      "sha256": "f9375da29ddbd1eb3d44d7807744a2b28fcc3a61f1016f50548df066d0db14a7",
+      "bytes": 116838,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Kiwi. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "coconut",
+      "image": "res://assets/generated/coconut.webp",
+      "sha256": "71975bafa81f399c063a2d5e2e2732955152b08fc11f03024d8b4c38283b90c4",
+      "bytes": 152490,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Coconut. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "pomegranate",
+      "image": "res://assets/generated/pomegranate.webp",
+      "sha256": "f35f600b34357c6b6fb2eba90158c87b2897b9abbaa521815a2e4717e6d1cd38",
+      "bytes": 108504,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Pomegranate. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "avocado",
+      "image": "res://assets/generated/avocado.webp",
+      "sha256": "8bf8188974b3372c07f314f2b48859e52e509ee1a167431d48c61534fe594515",
+      "bytes": 99848,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Avocado. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "blueberries",
+      "image": "res://assets/generated/blueberries.webp",
+      "sha256": "a17be117375d97fb95b0149df8470f8b7b85c142b6048331bd30101d7477c1da",
+      "bytes": 79188,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Blueberries. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "raspberries",
+      "image": "res://assets/generated/raspberries.webp",
+      "sha256": "3921bffdac63203d09cc0f2e943da5813e39cf59217e5d3e74222547adefbac8",
+      "bytes": 118946,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Raspberries. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "blackberries",
+      "image": "res://assets/generated/blackberries.webp",
+      "sha256": "a35e92ecd828ab652f82095bdb21be44b738a297f3b59b6fd06941bbe70bc086",
+      "bytes": 87798,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Blackberries. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "figs",
+      "image": "res://assets/generated/figs.webp",
+      "sha256": "7034141a6ad8d590c71424661eca27110b700b0d98166cdabaf373cc86cb62ae",
+      "bytes": 103492,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Figs. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "dates",
+      "image": "res://assets/generated/dates.webp",
+      "sha256": "3a2bd25d06f750f8b8fd39995ea61f47e381aab3dc0d274a5bcfffb65c78321d",
+      "bytes": 106144,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Dates. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "papaya",
+      "image": "res://assets/generated/papaya.webp",
+      "sha256": "ae9d9dceb32fe2352cf5daf762c46b7e451cd074b0522a23f3a7c9d1f3c31415",
+      "bytes": 77120,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Papaya. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "guava",
+      "image": "res://assets/generated/guava.webp",
+      "sha256": "0226b0f194be349c29c001cb340fa7670c81ad032c4ca70f726b57b471caf355",
+      "bytes": 81600,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Guava. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "passion_fruit",
+      "image": "res://assets/generated/passion_fruit.webp",
+      "sha256": "1587eab8231611443bead72289b7d6ea5deeaf8d6ea67b68297a0c7d52ab4200",
+      "bytes": 97950,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Passion fruit. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "carrot",
+      "image": "res://assets/generated/carrot.webp",
+      "sha256": "755757786bc1a033b44f61c61cb24a22c5290cd1e4f3af3e66fc4cdbd42958fd",
+      "bytes": 72840,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Carrot. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "potato",
+      "image": "res://assets/generated/potato.webp",
+      "sha256": "38cc61fd5f751dcd1d413cf517e1f3ba85f4b4a4d3eda77fdc9e4f82cc488e18",
+      "bytes": 80666,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Potato. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "tomato",
+      "image": "res://assets/generated/tomato.webp",
+      "sha256": "3b937416144d16de432c226b471c5d750f904806abfb08b125acea9f8ba847fb",
+      "bytes": 61484,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Tomato. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cucumber",
+      "image": "res://assets/generated/cucumber.webp",
+      "sha256": "58b6dd18f7025b941fc1336bc66ee0b2adcfa4d970acd80cd58cf34a0677f3e2",
+      "bytes": 81898,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cucumber. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "eggplant",
+      "image": "res://assets/generated/eggplant.webp",
+      "sha256": "b220329e249ae2fbe08a91325d1d15dd10907ba8fa716d6e34799e32ac78b17d",
+      "bytes": 65394,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Eggplant. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "broccoli",
+      "image": "res://assets/generated/broccoli.webp",
+      "sha256": "2736f51a6fe8ed6032aa57289a3352db0a2ff439169fc47aa3d956fbbdec058e",
+      "bytes": 121142,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Broccoli. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cauliflower",
+      "image": "res://assets/generated/cauliflower.webp",
+      "sha256": "938c174a67388810bb0b465b9f439f242f534c4dd55e3b3cb6667875f4691e78",
+      "bytes": 82118,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cauliflower. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cabbage",
+      "image": "res://assets/generated/cabbage.webp",
+      "sha256": "345a0e7822eca2603f8ee069b472ed31e4eb35b2c4eefe26602ccf7ed923580f",
+      "bytes": 91294,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cabbage. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "lettuce",
+      "image": "res://assets/generated/lettuce.webp",
+      "sha256": "95b59c7e001eee16aa0e8be069004418a1a827d5e740e35ceabfa652c5215553",
+      "bytes": 83474,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Lettuce. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "spinach",
+      "image": "res://assets/generated/spinach.webp",
+      "sha256": "88791e14cf3ea74d621325817fc6e83f3a9abedcbb996824784d095ff8265783",
+      "bytes": 110408,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Spinach. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "onion",
+      "image": "res://assets/generated/onion.webp",
+      "sha256": "5a94332c5fd3ee6ffe4cad287356e70bd80b9d184b14e170c5a090d8473149e0",
+      "bytes": 63482,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Onion. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "garlic",
+      "image": "res://assets/generated/garlic.webp",
+      "sha256": "237437f38302ab27215b48979ee22708ab0cb405809ef001bbdda919e9abc6c7",
+      "bytes": 63898,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Garlic. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bell_pepper",
+      "image": "res://assets/generated/bell_pepper.webp",
+      "sha256": "8793ecc5d63d11f10e161dbeb4fd81740dc9a2253d5efb7d4e9de2ed11d93ac7",
+      "bytes": 45746,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: large blocky sweet red bell pepper. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "chili_pepper",
+      "image": "res://assets/generated/chili_pepper.webp",
+      "sha256": "d82b12b603ebc265c0d86b016becccbd6910862510bea01ad55fa03742925e86",
+      "bytes": 69222,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: long slender red hot chili pepper. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "pumpkin",
+      "image": "res://assets/generated/pumpkin.webp",
+      "sha256": "1f7a9b03b31ff31331ced595dfbf782a6033d3d23bc277aa04cdb6592ebeb079",
+      "bytes": 68822,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Pumpkin. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "zucchini",
+      "image": "res://assets/generated/zucchini.webp",
+      "sha256": "47c6ba939757fc87242b78e3674e2a91a1aae6208700f4fb5a2c4531cd479db0",
+      "bytes": 116140,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Zucchini. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "corn",
+      "image": "res://assets/generated/corn.webp",
+      "sha256": "cd5aee269470dcc39ed18f6dcaace9e95b8d1aa9e1405b0e82ce68d736d10a35",
+      "bytes": 72568,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Corn. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "peas",
+      "image": "res://assets/generated/peas.webp",
+      "sha256": "1e70a1119a093230f48fe380cd6f2d1ed4932f3a1ab9c9d871c8c1c40c49dcab",
+      "bytes": 92528,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Peas. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "green_beans",
+      "image": "res://assets/generated/green_beans.webp",
+      "sha256": "77ffccc58fdcd1e025a68e569e2c28e51b2ceb30ecbc92cd72868a443d36e790",
+      "bytes": 90788,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Green beans. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "radish",
+      "image": "res://assets/generated/radish.webp",
+      "sha256": "dfc4396532a24cc1eaa0654c638c8ee6ab1768e5825719effc479e62f965f256",
+      "bytes": 93870,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Radish. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "beetroot",
+      "image": "res://assets/generated/beetroot.webp",
+      "sha256": "4f045e7340c49bfa22bb48d5c01c99c634e536c974bd0554dd78c8cff48c436d",
+      "bytes": 104024,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Beetroot. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "asparagus",
+      "image": "res://assets/generated/asparagus.webp",
+      "sha256": "62c483b224ae3fb879048904c8574917ad03a0562df43742526391b02cad81a5",
+      "bytes": 93258,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Asparagus. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "artichoke",
+      "image": "res://assets/generated/artichoke.webp",
+      "sha256": "957fc0404b0e097ec14e95b5f079e5ba38cea2f4ba495d809b59315139453735",
+      "bytes": 111670,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Artichoke. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "mushroom",
+      "image": "res://assets/generated/mushroom.webp",
+      "sha256": "652bc970274a05d8e9e5b57653a73e8696a99f895b82ee0821aafbaeaa654abc",
+      "bytes": 58568,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Mushroom. Fresh raw edible produce, visually distinctive shape and texture, isolated on a simple neutral tabletop, no utensils or other foods. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "chair",
+      "image": "res://assets/generated/chair.webp",
+      "sha256": "27809944fb669a6c04ff56525de3b547c4ef302d345bbb9d3304d82cdc45ec7c",
+      "bytes": 28016,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: plain wooden dining chair without armrests. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "table",
+      "image": "res://assets/generated/table.webp",
+      "sha256": "33cfaf74939a77ef84d527d7753446cf3a855e24580680f23c63fde3e4b02639",
+      "bytes": 18250,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: plain dining table without drawers. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sofa",
+      "image": "res://assets/generated/sofa.webp",
+      "sha256": "d709b26f486331998a0f1ce395899fb0b7b5d54656206a692fc98e7609a8f5e1",
+      "bytes": 37798,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Sofa. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bed",
+      "image": "res://assets/generated/bed.webp",
+      "sha256": "ea8d8c24de9700a6d7fdeb7e72df30ccd60f78782e759fc40a87cf044446aaaa",
+      "bytes": 24254,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bed. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "wardrobe",
+      "image": "res://assets/generated/wardrobe.webp",
+      "sha256": "ca26514ef58f88295ad8dbdef0716fce00c97b2293db8f398b3a6a4da876ac43",
+      "bytes": 42504,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Wardrobe. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bookshelf",
+      "image": "res://assets/generated/bookshelf.webp",
+      "sha256": "94141b70c9d60465acf01bba8e04397b096875ec01a686490409a84081edffec",
+      "bytes": 33194,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bookshelf. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "desk",
+      "image": "res://assets/generated/desk.webp",
+      "sha256": "fc43f8cb0ee8f226e983b3a6d4bc168b9ba3f75fa091ef2d73db9f3b43d983e0",
+      "bytes": 29254,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: writing desk with drawers. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "stool",
+      "image": "res://assets/generated/stool.webp",
+      "sha256": "456ab0cd2305147271daf75ea98d8575e6b14a663d0f51f00521ac8c41d584ad",
+      "bytes": 36668,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: wooden stool without backrest. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "armchair",
+      "image": "res://assets/generated/armchair.webp",
+      "sha256": "a84f3f1c40f47d92f0e7eb60255572e802f86b00b6c9c09eef2d9f49de9bcd1d",
+      "bytes": 43922,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: upholstered armchair with armrests. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bathtub",
+      "image": "res://assets/generated/bathtub.webp",
+      "sha256": "4ad7c175f9cfea729a7a06b96b375724dff3484eab3435aeffc1da55e163b241",
+      "bytes": 11992,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bathtub. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sink",
+      "image": "res://assets/generated/sink.webp",
+      "sha256": "30974be3450063c4c2e0791fd225f8e2be5ff155523c6a18d602f99b53bd2300",
+      "bytes": 28258,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Sink. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "toilet",
+      "image": "res://assets/generated/toilet.webp",
+      "sha256": "10b17f3451ccaa79dc5b18481c644275fc3d57b7389c8e56e6999be33479c64d",
+      "bytes": 10366,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Toilet. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "refrigerator",
+      "image": "res://assets/generated/refrigerator.webp",
+      "sha256": "4154970885462ff52e0e883dfcd2db70e1bfd6cebdb00804910ff25ef8d599ca",
+      "bytes": 10004,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Refrigerator. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "washing_machine",
+      "image": "res://assets/generated/washing_machine.webp",
+      "sha256": "b28bf67f1be921f2e85fef5ae4cceeec8dcfcae595f260d91e59a610d4133c1b",
+      "bytes": 24208,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Washing machine. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "microwave_oven",
+      "image": "res://assets/generated/microwave_oven.webp",
+      "sha256": "9ffe2b51899fe98121715d24f76c4f75dc468d1831ed9cd7bcaf078e95239c7d",
+      "bytes": 45160,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Microwave oven. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "toaster",
+      "image": "res://assets/generated/toaster.webp",
+      "sha256": "462cbcb81d6645047bc700903f365141cce764f7d4db2b6d4a4d1dc4afd384be",
+      "bytes": 25810,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Toaster. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "electric_kettle",
+      "image": "res://assets/generated/electric_kettle.webp",
+      "sha256": "0abf450c8e91d1a17ed51e05ff744527770a5507e54b44465503720c53443bea",
+      "bytes": 24776,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Electric kettle. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "blender",
+      "image": "res://assets/generated/blender.webp",
+      "sha256": "31d3f37d3b3aa0e0e420b097fb201d595e79dce7ed9c360e6696f4d0065e4296",
+      "bytes": 28980,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Blender. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "vacuum_cleaner",
+      "image": "res://assets/generated/vacuum_cleaner.webp",
+      "sha256": "6f7153ea36827f59800bbbdc22b4af932d229991ea8c4828cfa2011430a357f1",
+      "bytes": 23084,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Vacuum cleaner. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "iron",
+      "image": "res://assets/generated/iron.webp",
+      "sha256": "300a3f3825b19808c2b7c1bba783d12057de42a4fb3e2ca3089c669f56aeeacc",
+      "bytes": 32408,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: electric clothes iron. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "sewing_machine",
+      "image": "res://assets/generated/sewing_machine.webp",
+      "sha256": "84cda9c5b0aefae2de8da65edc135f5adbe8846d5ff461ee94049e2a69ce18ff",
+      "bytes": 15444,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Sewing machine. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "fan",
+      "image": "res://assets/generated/fan.webp",
+      "sha256": "52ebc6cb21b676348f23229a67ffe95e03aee581d571e0ece8e51efcc8a7cd5d",
+      "bytes": 47674,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: electric desk fan. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "air_conditioner",
+      "image": "res://assets/generated/air_conditioner.webp",
+      "sha256": "5553a442d9f8a192e6ac0f41fc19245e506a34425bf30246d06120424af8fb17",
+      "bytes": 17870,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Air conditioner. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "television",
+      "image": "res://assets/generated/television.webp",
+      "sha256": "2e48778afe33872d645a89140c05eb2709fc00f19027d7291806da86e16200fb",
+      "bytes": 7270,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Television. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "radio",
+      "image": "res://assets/generated/radio.webp",
+      "sha256": "8f1660cce4fb454b506b2d075982199a893bbab47602c5fcf3a7502408a8228a",
+      "bytes": 77958,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Radio. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "telephone",
+      "image": "res://assets/generated/telephone.webp",
+      "sha256": "7c653d69a5c587a16593da80603a8a104b1789ca5240015b22db6dfcf5f4e5c8",
+      "bytes": 23976,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: corded landline desk telephone. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "smartphone",
+      "image": "res://assets/generated/smartphone.webp",
+      "sha256": "d56fb7a2b4d46fab4346aad994b7bfea6390511aad12099fc76da09b2714c243",
+      "bytes": 12412,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Smartphone. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "tablet_computer",
+      "image": "res://assets/generated/tablet_computer.webp",
+      "sha256": "bd2f10a28ce69f4833b3f5103bf3f97b176ea591d6ae4bf931627467513a69b3",
+      "bytes": 12050,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Tablet computer. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "keyboard",
+      "image": "res://assets/generated/keyboard.webp",
+      "sha256": "b4eaba1b0980c9801558f03f4bcd492c9b5f336b54f0151d73cb70021dce8763",
+      "bytes": 26762,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Keyboard. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "computer_mouse",
+      "image": "res://assets/generated/computer_mouse.webp",
+      "sha256": "1645d133860e40bec3921a5c2f490cc87f5a7736f5528b08743aed5720d44cdb",
+      "bytes": 47388,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Computer mouse. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "printer",
+      "image": "res://assets/generated/printer.webp",
+      "sha256": "30308200c0d6be645f91b234224e912fe0cc3e14894c55bf89d3f35b6812d0db",
+      "bytes": 12988,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Printer. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "headphones",
+      "image": "res://assets/generated/headphones.webp",
+      "sha256": "c985a629c245b99d524d48158365183e59b5cd837cd1ea9eb74634886ef9590a",
+      "bytes": 33684,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Headphones. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "microphone",
+      "image": "res://assets/generated/microphone.webp",
+      "sha256": "6f1f3591b79f35f1577d800b3c020537ba340cb10a080356d2377c350f0158da",
+      "bytes": 26114,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Microphone. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "loudspeaker",
+      "image": "res://assets/generated/loudspeaker.webp",
+      "sha256": "19649f426696b80833c559b8210a075ee41c57f8ed748e01bd240dd15f4e8357",
+      "bytes": 49320,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Loudspeaker. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "telescope",
+      "image": "res://assets/generated/telescope.webp",
+      "sha256": "46b377a6ea180d1e788bdcd89eefa7755207d246731296828dc55ad96198aaa5",
+      "bytes": 24940,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Telescope. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "microscope",
+      "image": "res://assets/generated/microscope.webp",
+      "sha256": "b546d764b295a12c92fc1d83cb9c2b08c9b86bd3c8dd2727d68bb6c5271502ad",
+      "bytes": 22346,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Microscope. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "binoculars",
+      "image": "res://assets/generated/binoculars.webp",
+      "sha256": "e807b94384c5012aa5963c218191bef58f17745aa143113824076ca8217f4b03",
+      "bytes": 36754,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Binoculars. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "flashlight",
+      "image": "res://assets/generated/flashlight.webp",
+      "sha256": "4dc7ef81bbada72c198b26566ca6834baac8527e97ea0bbdf235240b669d985e",
+      "bytes": 29304,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Flashlight. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "lantern",
+      "image": "res://assets/generated/lantern.webp",
+      "sha256": "014dd4008965f7147fbfe99448ae327bb017318b305f331b488df8537370428e",
+      "bytes": 33850,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: traditional camping lantern. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "candle",
+      "image": "res://assets/generated/candle.webp",
+      "sha256": "5b47979b902d154c029b11420f7cbb8aa87653cdd02d2b658ff8afe4faa585aa",
+      "bytes": 10312,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Candle. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "umbrella",
+      "image": "res://assets/generated/umbrella.webp",
+      "sha256": "affd16c6385492fd7210100b52df5aee2fe0588f5aad5f1e51928aa23dfb60e0",
+      "bytes": 22200,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Umbrella. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "backpack",
+      "image": "res://assets/generated/backpack.webp",
+      "sha256": "2e980e1ac2a33ef3d0c968793076988613119e8564c039ee141674ef65774a2b",
+      "bytes": 54382,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Backpack. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "suitcase",
+      "image": "res://assets/generated/suitcase.webp",
+      "sha256": "76dcdc976525b0ecfad84ac43b2455785633f185e6c8eacd48654fff5cf5cf22",
+      "bytes": 29216,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Suitcase. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "wallet",
+      "image": "res://assets/generated/wallet.webp",
+      "sha256": "c927885915b9523c77fd15890626e9bf679e2514ad760413d16479a389ca984c",
+      "bytes": 67266,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Wallet. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "wristwatch",
+      "image": "res://assets/generated/wristwatch.webp",
+      "sha256": "44d1192ca40a6c63c5f73a080bad1f70cdaac42af558a408952bc2e75f7fc142",
+      "bytes": 35528,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Wristwatch. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "alarm_clock",
+      "image": "res://assets/generated/alarm_clock.webp",
+      "sha256": "0c526428d622e4a96a0374709be01b0cce3badcf73dfd8d93787d5b4065483e0",
+      "bytes": 40250,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Alarm clock. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "compass",
+      "image": "res://assets/generated/compass.webp",
+      "sha256": "8d7bbc3eb9c67a49db1f7900aa7e0e1d4ae89647d354eeb26ac071b07fce6c87",
+      "bytes": 65482,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Compass. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "key",
+      "image": "res://assets/generated/key.webp",
+      "sha256": "e0fcec0b549ddacc956430ae171dc006268057fb00210584548b71d26f52dbba",
+      "bytes": 35644,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Key. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "padlock",
+      "image": "res://assets/generated/padlock.webp",
+      "sha256": "9775f45d8af392b275d5d3fa5c05f53595db107b3787ee7996e7df061a74b200",
+      "bytes": 38392,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Padlock. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "scissors",
+      "image": "res://assets/generated/scissors.webp",
+      "sha256": "6b10cd87248c44c23de025455573070992312fdb980bd8d2253820e6ecb10c85",
+      "bytes": 16156,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Scissors. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "hammer",
+      "image": "res://assets/generated/hammer.webp",
+      "sha256": "af7f9734472d0e179fbaadb534151929a0368ac7dffb3bf95de81e6df1763d63",
+      "bytes": 25194,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Hammer. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "screwdriver",
+      "image": "res://assets/generated/screwdriver.webp",
+      "sha256": "5093b2b77b2db32c23be1d02bd952fa3e3fb61810afd0adc893ba8807ecf8813",
+      "bytes": 20920,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Screwdriver. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "wrench",
+      "image": "res://assets/generated/wrench.webp",
+      "sha256": "70fc20b8bb39d23366398f0ee3caf507e64fbfaec54af102e0fcc72a14a885e0",
+      "bytes": 24422,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Wrench. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "pliers",
+      "image": "res://assets/generated/pliers.webp",
+      "sha256": "16848d14a727a0aa2a501f471603dc84a9e1c396d8b249fadf1fbea4d3bbd99a",
+      "bytes": 26888,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Pliers. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "saw",
+      "image": "res://assets/generated/saw.webp",
+      "sha256": "9e70fb78496ec164302eea1e947854a5f45db68f067e76cd166481fa0820d562",
+      "bytes": 25564,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Saw. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "shovel",
+      "image": "res://assets/generated/shovel.webp",
+      "sha256": "99e16afab7627f18b0f6515d617d53c2ea59fc7ca35ba985372837bb3bb6d6fe",
+      "bytes": 17544,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Shovel. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "spoon",
+      "image": "res://assets/generated/spoon.webp",
+      "sha256": "a18520fa7460cb9e300f1eaa5a807e4987e90d466998bda608416b10a8682915",
+      "bytes": 14882,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Spoon. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "fork",
+      "image": "res://assets/generated/fork.webp",
+      "sha256": "649ebef4342c31590bf7f9a5c24a7de0461eeacde78e6317b1d562aade782f31",
+      "bytes": 14956,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Fork. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "knife",
+      "image": "res://assets/generated/knife.webp",
+      "sha256": "b03270862d103f40f5db867714e3097803cc52ed5f009e5119425a96a2870d72",
+      "bytes": 12566,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Knife. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "plate",
+      "image": "res://assets/generated/plate.webp",
+      "sha256": "e6a3584c871cf2250a07c3805cd44894ed3d5deab60ed2df0137101df1048129",
+      "bytes": 8670,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Plate. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bowl",
+      "image": "res://assets/generated/bowl.webp",
+      "sha256": "9975f87510f0cde299dc747c9bf26ee5ca5a5a0184bbfb2953aac073579788f6",
+      "bytes": 24144,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bowl. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cup",
+      "image": "res://assets/generated/cup.webp",
+      "sha256": "7f31cce3861e2809aa03cff89fc3f3ee80d3b0fd9d1543644817fdfeffb67c9b",
+      "bytes": 31092,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: porcelain teacup with saucer, delicate small handle. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "mug",
+      "image": "res://assets/generated/mug.webp",
+      "sha256": "042fa5e358b5e95b158b0f876ab24b328d97c9cbc01c3632dd47ebf95352bd53",
+      "bytes": 49954,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: tall ceramic coffee mug, thick handle, no saucer. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "bottle",
+      "image": "res://assets/generated/bottle.webp",
+      "sha256": "088ceb5ed534a54bbdcbbbbcc575c698fb810800231dd431ca68633452008664",
+      "bytes": 12958,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Bottle. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "teapot",
+      "image": "res://assets/generated/teapot.webp",
+      "sha256": "79b242637672ced49368469adcf11c225c5761715ee9585ccfbf0c6e593537a3",
+      "bytes": 26812,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Teapot. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "frying_pan",
+      "image": "res://assets/generated/frying_pan.webp",
+      "sha256": "72d4ba67c4dc7b7f096f404e87675de661b86ea31212f69413b40ff67cd51a91",
+      "bytes": 24996,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Frying pan. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "saucepan",
+      "image": "res://assets/generated/saucepan.webp",
+      "sha256": "c8da177c4e53ee27a277aac5cf277a086f89ef07ffaff195a1720499230f5b40",
+      "bytes": 20020,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Saucepan. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "colander",
+      "image": "res://assets/generated/colander.webp",
+      "sha256": "aacf3f71b01f9093c43c638218d14fd7c74bb0fa5a57b19f0fe46fb3375d1d11",
+      "bytes": 29496,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Colander. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "grater",
+      "image": "res://assets/generated/grater.webp",
+      "sha256": "a0cf8c19a0e5c28a91283545bebec1167ae35033d85bb83fa23786dd7ce12284",
+      "bytes": 38270,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Grater. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "rolling_pin",
+      "image": "res://assets/generated/rolling_pin.webp",
+      "sha256": "c0083637db1d8aa6c750ec999e0c2f38ad9b4f2619b830e2dd24afa2e618bc8d",
+      "bytes": 19150,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Rolling pin. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "corkscrew",
+      "image": "res://assets/generated/corkscrew.webp",
+      "sha256": "c4243c54296d31d8317d20260cb4e1aade674826cf7ea527420751460a3d100b",
+      "bytes": 27970,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Corkscrew. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "whisk",
+      "image": "res://assets/generated/whisk.webp",
+      "sha256": "b244401a192bebc0453381c37a6df270f11e23a174123cf3a3cb147fdb9372d1",
+      "bytes": 27492,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Whisk. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "ladle",
+      "image": "res://assets/generated/ladle.webp",
+      "sha256": "ff2eccf5bf648321195728fa1706d71a022d7dbf56f68f401c20d4d570800b90",
+      "bytes": 14558,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Ladle. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "spatula",
+      "image": "res://assets/generated/spatula.webp",
+      "sha256": "2af02694ea0ed4246da9bba1e4343fd46e555230cc86086c5c63134d84c80258",
+      "bytes": 17328,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Spatula. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "chopsticks",
+      "image": "res://assets/generated/chopsticks.webp",
+      "sha256": "0723389bafb36f57dacb0aaa2f63b407ccf14bd2732a20677aa59f5e0e31168b",
+      "bytes": 19640,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Chopsticks. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "mortar_and_pestle",
+      "image": "res://assets/generated/mortar_and_pestle.webp",
+      "sha256": "31d14d30bf54138cbbcb5d1e158d9834195344adc47dc17cd66d394d904467f4",
+      "bytes": 97200,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: stone mortar with its pestle inside. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "measuring_jug",
+      "image": "res://assets/generated/measuring_jug.webp",
+      "sha256": "388087a485926f1a794d4eba7abe8ab0ebc2e7aabb5fbdf75a179dbc2958ccd2",
+      "bytes": 28310,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: transparent graduated measuring jug, subtle volume markings only. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "cutting_board",
+      "image": "res://assets/generated/cutting_board.webp",
+      "sha256": "16c94c922821262957aa0881fd3a5b9f36abbee845632470210de28de7ce5769",
+      "bytes": 60002,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Cutting board. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "oven_glove",
+      "image": "res://assets/generated/oven_glove.webp",
+      "sha256": "33ef18ffc368f17e5b2a2f32c239c9c6f194ebd2f59bd41b33304e97cdcc214a",
+      "bytes": 56820,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Oven glove. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    },
+    {
+      "id": "potato_peeler",
+      "image": "res://assets/generated/potato_peeler.webp",
+      "sha256": "228dddd5ac97160064211858d183588aaba33b7336ba6b8744b949f2eddf3160",
+      "bytes": 19456,
+      "prompt": "Use case: photorealistic-natural. Asset type: ONE independent square guessing-game card image. Main subject: Potato peeler. One clearly identifiable object (a matched pair only for chopsticks or mortar and pestle), entire object visible, plain uncluttered neutral background, no other objects. Professional realistic photography, natural soft lighting, sharp identifying detail. No label, text, branding, watermark, illustration, collage, or grid.",
+      "source": "built-in image_gen",
+      "disclosure": "AI-generated photorealistic image"
+    }
+  ]
+}

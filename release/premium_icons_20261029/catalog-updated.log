@@ -1,0 +1,9 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+UNIFIED_CATALOG_UI true — each original game once; mode routes preserved; no backend/old tests rerun
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2514)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

@@ -1,0 +1,145 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+QUIZ_CHECK six authenticated actual Godot clients true
+QUIZ_CHECK 2 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_EFFECT startup bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 492.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1250.0, "elapsed_ms": 493.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+QUIZ_CHECK 3 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0, 0.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 388.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1250.0, "elapsed_ms": 390.0 }, { "player": 2.0, "choice": 3.0, "correct": false, "points": 0.0, "elapsed_ms": 505.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+QUIZ_CHECK 4 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1333.0, 1166.0, 0.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 385.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1333.0, "elapsed_ms": 386.0 }, { "player": 2.0, "choice": 2.0, "correct": true, "points": 1166.0, "elapsed_ms": 502.0 }, { "player": 3.0, "choice": 3.0, "correct": false, "points": 0.0, "elapsed_ms": 635.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+QUIZ_CHECK 5 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1375.0, 1250.0, 1125.0, 0.0] [{ "player": 0.0, "choice": 2.0, "correct": true, "points": 1500.0, "elapsed_ms": 381.0 }, { "player": 1.0, "choice": 2.0, "correct": true, "points": 1375.0, "elapsed_ms": 382.0 }, { "player": 2.0, "choice": 2.0, "correct": true, "points": 1250.0, "elapsed_ms": 497.0 }, { "player": 3.0, "choice": 2.0, "correct": true, "points": 1125.0, "elapsed_ms": 631.0 }, { "player": 4.0, "choice": 3.0, "correct": false, "points": 0.0, "elapsed_ms": 764.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+QUIZ_CHECK 6 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1400.0, 1300.0, 1200.0, 1100.0, 0.0] [{ "player": 0.0, "choice": 1.0, "correct": true, "points": 1500.0, "elapsed_ms": 388.0 }, { "player": 1.0, "choice": 1.0, "correct": true, "points": 1400.0, "elapsed_ms": 389.0 }, { "player": 2.0, "choice": 1.0, "correct": true, "points": 1300.0, "elapsed_ms": 505.0 }, { "player": 3.0, "choice": 1.0, "correct": true, "points": 1200.0, "elapsed_ms": 638.0 }, { "player": 4.0, "choice": 1.0, "correct": true, "points": 1100.0, "elapsed_ms": 772.0 }, { "player": 5.0, "choice": 2.0, "correct": false, "points": 0.0, "elapsed_ms": 905.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK wrong answer receives zero true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+QUIZ_CHECK 2 clients authenticated game 5 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0] [{ "player": 0.0, "choice": 0.0, "correct": true, "points": 1500.0, "elapsed_ms": 379.0 }, { "player": 1.0, "choice": 0.0, "correct": true, "points": 1250.0, "elapsed_ms": 380.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+QUIZ_CHECK next filtered question synchronized true
+QUIZ_CHECK no repeated question inside the same match true
+QUIZ_CHECK second question and shuffled choices identical true
+QUIZ_CHECK final results after two filtered rounds true
+QUIZ_CHECK final synchronized scores and ranking true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+POST_POLICY_REAL_GODOT_WS true []
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2514)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

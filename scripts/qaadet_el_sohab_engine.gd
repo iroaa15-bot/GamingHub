@@ -1,0 +1,308 @@
+extends RefCounted
+class_name QaadetElSohabEngine
+
+# Standalone rules prototype. Server must validate authoritative actions in online play.
+const MIN_PLAYERS := 2
+const MAX_PLAYERS := 6
+const VALID_ROUNDS := [10, 15, 20]
+const CATEGORIES := ["open_heart", "act_it", "who_among_us", "show_skill", "truth_or_fiction", "table_flip"]
+var players: Array[String] = []
+var scores: Dictionary = {}
+var deck: Array[Dictionary] = []
+var used_ids: Dictionary = {}
+var current_card: Dictionary = {}
+var round_index := 0
+var round_limit := 10
+var active_player_index := 0
+var votes: Dictionary = {}
+var resolved := false
+var story_committed := false
+var committed_story_truth := false
+var power_applied := false
+var power_effect: Dictionary = {}
+var rng := RandomNumberGenerator.new()
+var active_category := ""
+var turn_direction := 1
+var free_skips: Dictionary = {}
+var next_card_choice := 1
+var offered_card_ids: Array[String] = []
+var pending_free_skip_target := ""
+var swap_turns_remaining := 0
+
+func setup(player_ids: Array[String], cards: Array[Dictionary], rounds: int = 10, seed_value: int = 0) -> bool:
+	if player_ids.size() < MIN_PLAYERS or player_ids.size() > MAX_PLAYERS or not VALID_ROUNDS.has(rounds):
+		return false
+	if player_ids.size() != _unique_count(player_ids) or player_ids.has(""):
+		return false
+	players = player_ids.duplicate()
+	active_category = ""
+	turn_direction = 1
+	free_skips.clear()
+	next_card_choice = 1
+	offered_card_ids.clear()
+	pending_free_skip_target = ""
+	swap_turns_remaining = 0
+	scores.clear()
+	used_ids.clear()
+	for id in players:
+		scores[id] = 0
+	deck.clear()
+	var seen_card_ids := {}
+	var seen_prompts := {}
+	var punctuation := RegEx.new()
+	punctuation.compile("[^\\p{L}\\p{N}]+")
+	for card in cards:
+		if not card.has("id") or not card.has("category") or not CATEGORIES.has(str(card["category"])):
+			continue
+		if str(card["id"]).is_empty() or seen_card_ids.has(str(card["id"])):
+			continue
+		var prompt: String=str(card.get("text_ar","")).to_lower().replace("أ","ا").replace("إ","ا").replace("آ","ا").replace("ى","ي").replace("ة","ه")
+		prompt=punctuation.sub(prompt,"",true)
+		var prompt_key: String=str(card["category"])+":"+prompt
+		if not prompt.is_empty() and seen_prompts.has(prompt_key):continue
+		if not prompt.is_empty():seen_prompts[prompt_key]=true
+		seen_card_ids[str(card["id"])] = true
+		deck.append(card.duplicate(true))
+	round_limit = rounds
+	round_index = 0
+	active_player_index = 0
+	current_card.clear()
+	votes.clear()
+	resolved = false
+	story_committed = false
+	power_applied = false
+	power_effect.clear()
+	if seed_value == 0:
+		rng.randomize()
+	else:
+		rng.seed = seed_value
+	return not deck.is_empty()
+
+func _unique_count(items: Array[String]) -> int:
+	var seen := {}
+	for item in items:
+		seen[item] = true
+	return seen.size()
+
+func lock_category(category: String) -> bool:
+	if not CATEGORIES.has(category) or not current_card.is_empty() or round_index > 0:
+		return false
+	active_category = category
+	return true
+
+func draw_next(category: String = "") -> Dictionary:
+	if not category.is_empty() and not CATEGORIES.has(category):
+		return {}
+	if active_category.is_empty() or category != active_category:
+		return {}
+	if next_card_choice > 1:
+		return {}
+	if round_index >= round_limit or not current_card.is_empty() and not resolved:
+		return {}
+	var available: Array[Dictionary] = []
+	for card in deck:
+		if not used_ids.has(card["id"]) and (category.is_empty() or str(card["category"]) == category):
+			available.append(card)
+	if available.is_empty():
+		return {}
+	current_card = available[rng.randi_range(0, available.size() - 1)].duplicate(true)
+
+	used_ids[current_card["id"]] = true
+	votes.clear()
+	resolved = false
+	story_committed = false
+	power_applied = false
+	power_effect.clear()
+	return current_card.duplicate(true)
+
+func commit_story(actor: String, is_true: bool) -> bool:
+	if current_card.is_empty() or resolved or story_committed or str(current_card.get("category", "")) != "truth_or_fiction":
+		return false
+	if actor != players[active_player_index]:
+		return false
+	committed_story_truth = is_true
+	story_committed = true
+	return true
+
+func submit_vote(voter: String, choice: Variant) -> bool:
+	if current_card.is_empty() or resolved or not players.has(voter):
+		return false
+	var category := str(current_card["category"])
+	var actor := players[active_player_index]
+	if category == "open_heart" or category == "table_flip" or votes.has(voter):
+		return false
+	if category != "who_among_us" and voter == actor:
+		return false
+	if category == "who_among_us":
+		if not choice is String or not players.has(choice) or choice == voter:
+			return false
+	elif category == "act_it" or category == "show_skill" or category == "truth_or_fiction":
+		if not choice is bool:
+			return false
+		if category == "truth_or_fiction" and not story_committed:
+			return false
+	else:
+		return false
+	votes[voter] = choice
+	return true
+
+func apply_power(actor: String, target: String = "") -> Dictionary:
+	if current_card.is_empty() or resolved or power_applied or str(current_card.get("category", "")) != "table_flip":
+		return {}
+	if actor != players[active_player_index]:
+		return {}
+	var card_id := str(current_card.get("id", ""))
+	var effect := {}
+	match card_id:
+		"qs_power_001":
+			if players.size() < 3:
+				return {}
+			effect = {"type": "swap_next_turns"}
+		"qs_power_012", "qs_power_014":
+			effect = {"type": "reverse_direction"}
+		"qs_power_006", "qs_power_013":
+			effect = {"type": "choose_two_next"}
+		"qs_power_011", "qs_power_015":
+			if not players.has(target):
+				return {}
+			effect = {"type": "grant_free_skip", "target": target}
+		_:
+			# Unsupported cross-game powers must never be silently consumed.
+			return {}
+	power_applied = true
+	power_effect = effect.duplicate(true)
+	power_effect["card_id"] = card_id
+	return power_effect.duplicate(true)
+
+func available_card_choices(category: String) -> Array[Dictionary]:
+	if not current_card.is_empty() or next_card_choice < 2 or active_category.is_empty() or category != active_category:
+		return []
+	if not offered_card_ids.is_empty():
+		var cached: Array[Dictionary] = []
+		for offered_id in offered_card_ids:
+			for card in deck:
+				if str(card.get("id", ""))==offered_id and not used_ids.has(card["id"]):
+					cached.append(card.duplicate(true))
+					break
+		return cached
+	var available: Array[Dictionary] = []
+	for card in deck:
+		if not used_ids.has(card["id"]) and (category.is_empty() or str(card["category"]) == category):
+			available.append(card.duplicate(true))
+	if available.size() < 2:
+		return []
+	available.shuffle()
+	var offered := available.slice(0, 2)
+	offered_card_ids.clear()
+	for item in offered:
+		offered_card_ids.append(str(item["id"]))
+	return offered
+
+func draw_chosen_card(category: String, card_id: String) -> Dictionary:
+	if not current_card.is_empty() or next_card_choice < 2 or round_index >= round_limit or not offered_card_ids.has(card_id):
+		return {}
+	if active_category.is_empty() or category != active_category:
+		return {}
+	for card in deck:
+		if str(card.get("id", "")) == card_id and str(card.get("category", "")) == category and not used_ids.has(card_id):
+			current_card = card.duplicate(true)
+			used_ids[card_id] = true
+			next_card_choice = 1
+			offered_card_ids.clear()
+			votes.clear()
+			story_committed = false
+			power_applied = false
+			power_effect.clear()
+			resolved = false
+			return current_card.duplicate(true)
+	return {}
+
+func consume_free_skip(player: String) -> bool:
+	if not players.has(player) or int(free_skips.get(player, 0)) < 1:
+		return false
+	free_skips[player] = int(free_skips[player]) - 1
+	return true
+
+func resolve_round(participated: bool = true, timeout: bool = false) -> Dictionary:
+	if current_card.is_empty() or resolved:
+		return {}
+	var category := str(current_card["category"])
+	if category == "truth_or_fiction" and not story_committed:
+		return {}
+	if category == "table_flip" and not power_applied:
+		return {}
+	var required_votes := players.size() if category == "who_among_us" else players.size() - 1
+	if ["act_it", "show_skill", "who_among_us", "truth_or_fiction"].has(category) and not timeout and votes.size() < required_votes:
+		return {}
+	var actor := players[active_player_index]
+	var award := {}
+	if category == "open_heart":
+		if participated:
+			_award(actor, 10, award)
+	elif category == "act_it" or category == "show_skill":
+		var approvals := 0
+		var rejects := 0
+		for value in votes.values():
+			if value == true:
+				approvals += 1
+			else:
+				rejects += 1
+		if approvals > float(players.size() - 1) / 2.0:
+			_award(actor, 20, award)
+	elif category == "who_among_us":
+		var counts := {}
+		for target in votes.values():
+			counts[target] = counts.get(target, 0) + 1
+		var top := 0
+		var winners: Array = []
+		for target in counts:
+			if counts[target] > top:
+				top = counts[target]
+				winners = [target]
+			elif counts[target] == top:
+				winners.append(target)
+		if winners.size() == 1 and top > 0:
+			_award(str(winners[0]), 10, award)
+	elif category == "truth_or_fiction":
+		var correct := 0
+		var wrong := 0
+		for voter in votes:
+			if votes[voter] == committed_story_truth:
+				_award(voter, 10, award)
+				correct += 1
+			else:
+				wrong += 1
+		if wrong > float(players.size() - 1) / 2.0:
+			_award(actor, 10, award)
+	var applied_power := power_effect.duplicate(true)
+	resolved = true
+	round_index += 1
+	if applied_power.get("type", "") == "reverse_direction":
+		turn_direction *= -1
+	if applied_power.get("type", "") == "choose_two_next":
+		next_card_choice = 2
+	if applied_power.get("type", "") == "grant_free_skip":
+		var target := str(applied_power.get("target", ""))
+		free_skips[target] = int(free_skips.get(target, 0)) + 1
+	if applied_power.get("type", "") == "swap_next_turns" and players.size() >= 3:
+		# A,B,C,D becomes A,C,B,D, then resumes normal turn order.
+		swap_turns_remaining = 2
+		active_player_index = posmod(active_player_index + 2 * turn_direction, players.size())
+	elif swap_turns_remaining == 2:
+		swap_turns_remaining = 1
+		active_player_index = posmod(active_player_index - turn_direction, players.size())
+	elif swap_turns_remaining == 1:
+		swap_turns_remaining = 0
+		active_player_index = posmod(active_player_index + 2 * turn_direction, players.size())
+	else:
+		active_player_index = posmod(active_player_index + turn_direction, players.size())
+	var result := {"awards": award, "scores": scores.duplicate(), "round": round_index, "finished": round_index >= round_limit, "power": applied_power}
+	current_card.clear()
+	story_committed = false
+	power_applied = false
+	power_effect.clear()
+	return result
+
+func _award(player_id: String, amount: int, awards: Dictionary) -> void:
+	scores[player_id] = int(scores[player_id]) + amount
+	awards[player_id] = awards.get(player_id, 0) + amount

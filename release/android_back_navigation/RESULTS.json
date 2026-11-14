@@ -1,0 +1,22 @@
+{
+  "base_commit": "2b048ed11e761ff63b5001b09a6216a9d568b375",
+  "previous_apk_acceptance": "FAIL: back navigation abort; not a stable release",
+  "confirmed": "Android quit_on_go_back defaults true, concurrent deferred _home reached detached scene and null SceneTree",
+  "minimal_fix": [
+    "Set SceneTree.quit_on_go_back false in all three entry controllers",
+    "Queue and coalesce back navigation",
+    "Guard/capture SceneTree before room exit; avoid duplicate exit dialogs"
+  ],
+  "tests": {
+    "local_room_back_coalescing": "PASS",
+    "local_detached_duel_exit": "PASS",
+    "phone_default_setting_true": "Observed",
+    "phone_photo_room_back_to_main": "PASS diagnostic source overlay, PID9465 preserved",
+    "phone_legacy_room_back_to_main": "PASS diagnostic source overlay, PID9465 preserved",
+    "final_apk": "NOT BUILT for this commit yet"
+  },
+  "harness_failure": "Initial static MainProbe editor test could not resolve autoload AdManager; not counted PASS; replaced with valid room/detached tests and direct phone tests",
+  "other_observations": "Repeated Activity launch emitted Engine already initialized; no unproven manifest change applied",
+  "production_modified": false,
+  "ui_design_changes_in_this_commit": false
+}

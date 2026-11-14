@@ -1,4 +1,6 @@
 extends Control
+const PlayerPrefs=preload("res://scripts/player_preferences.gd")
+var current_screen := ""
 
 const VisualSkin = preload("res://scripts/visual_skin.gd")
 
@@ -120,26 +122,50 @@ func show_audiences() -> void:
 
 func show_accessibility() -> void:
  clear_ui()
- label(tr_ui("القراءة ومدة الجلسة", "READING AND SESSION LENGTH"), 29)
+ VisualSkin.compact_header(root,tr_ui("الإعدادات", "SETTINGS"))
+ _add_language_control(show_accessibility)
  label(tr_ui("حجم النص", "TEXT SIZE"), 22)
+ var text_sizes := HBoxContainer.new()
+ text_sizes.add_theme_constant_override("separation",8)
+ root.add_child(text_sizes)
  for scale_value in [1.0, 1.25, 1.5]:
   var chosen: float = float(scale_value)
-  button("%d%%" % int(chosen * 100), func(): reading_scale = chosen; save_progress(); show_accessibility(), GREEN if is_equal_approx(chosen, reading_scale) else PANEL)
+  var option := button("%d%%" % int(chosen * 100), func(): reading_scale = chosen; save_progress(); show_accessibility(), GREEN if is_equal_approx(chosen, reading_scale) else PANEL)
+  option.reparent(text_sizes)
  label(tr_ui("الحد الأقصى لأسئلة الجلسة", "MAX QUESTIONS PER SESSION"), 22)
+ var round_sizes := GridContainer.new()
+ round_sizes.columns = 2 if reading_scale >= 1.25 else 3
+ round_sizes.add_theme_constant_override("h_separation",8)
+ round_sizes.add_theme_constant_override("v_separation",8)
+ root.add_child(round_sizes)
  for length_value in [10, 15, 20, 50, 100, 150]:
   var chosen: int = int(length_value)
-  button(str(chosen), func(): session_length = chosen; save_progress(); show_accessibility(), GREEN if chosen == session_length else PANEL)
+  var option := button(str(chosen), func(): session_length = chosen; save_progress(); show_accessibility(), GREEN if chosen == session_length else PANEL)
+  option.reparent(round_sizes)
  label(tr_ui("الصوت والمؤثرات", "SOUND & EFFECTS"), 22)
- button(tr_ui("📳 اهتزاز اللمس: يعمل", "📳 TOUCH FEEDBACK: ON") if haptics_enabled else tr_ui("📳 اهتزاز اللمس: مغلق", "📳 TOUCH FEEDBACK: OFF"), func(): haptics_enabled = not haptics_enabled; save_progress(); show_accessibility(), GREEN if haptics_enabled else PANEL)
- button(tr_ui("🔊 الصوت: يعمل", "🔊 SOUND: ON") if sound_enabled else tr_ui("🔇 الصوت: مغلق", "🔇 SOUND: OFF"), func(): sound_enabled = not sound_enabled; save_progress(); show_accessibility(), GREEN if sound_enabled else PANEL)
- button(tr_ui("✨ الحركة: خفيفة", "✨ MOTION: REDUCED") if reduced_motion else tr_ui("✨ الحركة: عادية", "✨ MOTION: NORMAL"), func(): reduced_motion = not reduced_motion; save_progress(); show_accessibility(), GREEN if reduced_motion else PANEL)
- label(tr_ui("إيقاف الحركة يقلل التحريك الزائد؛ الأصوات قصيرة ويمكن إيقافها.", "Reduced motion limits UI animation; short sounds can be muted."), 16)
- label(tr_ui("يمكن تعديل القراءة دون تغيير مستوى الصعوبة", "Reading size is independent of difficulty"), 17)
+ setting_switch(tr_ui("اهتزاز اللمس", "TOUCH FEEDBACK"),haptics_enabled,func(value: bool): haptics_enabled=value; save_progress())
+ setting_switch(tr_ui("أصوات الأزرار", "BUTTON SOUNDS"),ui_sound_enabled,func(value: bool): ui_sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_ui_effects_enabled(value); save_progress())
+ setting_switch(tr_ui("مؤثرات وأصوات الألعاب", "GAME SOUNDS & EFFECTS"),sound_enabled,func(value: bool): sound_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_game_effects_enabled(value); save_progress())
+ setting_switch(tr_ui("موسيقى الخلفية", "BACKGROUND MUSIC"),music_enabled,func(value: bool): music_enabled=value; load("res://scripts/room_audio_policy.gd").acquire(get_tree()).set_music_enabled(value); save_progress())
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ _audio_volume_control(tr_ui("مستوى الموسيقى","MUSIC VOLUME"),audio_policy.music_volume,func(value: float):audio_policy.set_music_volume(value);save_progress())
+ _audio_volume_control(tr_ui("مستوى المؤثرات","EFFECTS VOLUME"),audio_policy.effects_volume,func(value: float):audio_policy.set_effects_volume(value);save_progress())
+ setting_switch(tr_ui("تقليل الحركة", "REDUCED MOTION"),reduced_motion,func(value: bool): reduced_motion=value; save_progress())
  button(tr_ui("العودة", "BACK"), show_home, ACCENT)
+
+ VisualSkin.compact_menu(root)
+ _add_bottom_navigation("settings")
+
+func _audio_volume_control(title: String,value: float,action: Callable) -> void:
+ var caption:=label(title+" • %d%%"%roundi(value*100),18)
+ var slider:=HSlider.new();slider.min_value=0;slider.max_value=1;slider.step=.05;slider.value=value
+ slider.custom_minimum_size=Vector2(0,48);root.add_child(slider)
+ slider.value_changed.connect(func(next: float):caption.text=title+" • %d%%"%roundi(next*100);action.call(next))
 
 func eligible_questions(index: int, use_topic: bool = true) -> Array:
  var result: Array = []
  for item in question_bank.get(str(index), []):
+  if not load("res://scripts/approved_content.gd").question_allowed(item):continue
   # Everyone plays the same challenge ladder. Hide elementary recognition prompts.
   if str(item.get("id", "")).begins_with("visual_v36_"):
    continue
@@ -256,6 +282,8 @@ var picture_recorded: bool = false
 var picture_question_page: int = 0
 var art_style: String = "realistic"
 var sound_enabled: bool = true
+var ui_sound_enabled: bool = true
+var music_enabled: bool = true
 var haptics_enabled: bool = true
 var reduced_motion: bool = false
 # The Android Back key must never silently discard an active round.
@@ -267,6 +295,7 @@ var texture_cache: Dictionary = {}
 var texture_cache_order: Array[String] = []
 
 func cached_texture(path: String) -> Texture2D:
+ if path.begins_with("pub_"):return PublishedContent.media.get(path) as Texture2D
  if path.is_empty() or not path.begins_with("res://assets/"):
   return null
  if texture_cache.has(path):
@@ -385,12 +414,19 @@ func load_upgrade() -> void:
  session_length = 150
  var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/questions.json"))
  if parsed is Dictionary:
-  question_bank = parsed
+  question_bank = load("res://scripts/approved_content.gd").questions(parsed)
  apply_daily_rounds()
+ _apply_published_content()
  if FileAccess.file_exists(profile_path()):
   var saved: Variant = JSON.parse_string(FileAccess.get_file_as_string(profile_path()))
   if saved is Dictionary:
    profile.merge(saved, true)
+ _picture_filter_data=PictureFilters.definition()
+ picture_category=str(profile.get("picture_category","all"))
+ picture_guess_difficulty=str(profile.get("picture_guess_difficulty","all"))
+ if picture_category!="all" and not _picture_filter_data.get("categories",{}).has(picture_category): picture_category="all"
+ if not _picture_filter_data.get("difficulties",{}).has(picture_guess_difficulty): picture_guess_difficulty="all"
+ if PictureFilters.select(CARDS,_picture_filter_data,picture_category,picture_guess_difficulty).size()<2: picture_guess_difficulty="all"
  reading_scale = clampf(float(profile.get("reading_scale", reading_scale)), 1.0, 1.5)
  if int(profile.get("session_version", 0)) < 15:
   session_length = maxi(session_length, int(profile.get("session_length", session_length)))
@@ -399,9 +435,9 @@ func load_upgrade() -> void:
  session_length = clampi(session_length, 10, 150)
  difficulty = clampi(int(profile.get("difficulty", 2)), 1, 3)
  family_all_ages = bool(profile.get("family_all_ages", true))
- selected_language = str(profile.get("language", "ar"))
+ selected_language = PlayerPrefs.language()
  art_style = str(profile.get("art_style", "realistic"))
- sound_enabled = bool(profile.get("sound_enabled", true))
+ _apply_audio_preferences(profile)
  haptics_enabled = bool(profile.get("haptics_enabled", true))
  reduced_motion = bool(profile.get("reduced_motion", false))
  selected_campaign = str(profile.get("selected_campaign", "island"))
@@ -436,8 +472,28 @@ func apply_daily_rounds() -> void:
   combined.append_array(bundled)
   question_bank[key] = combined
 
+func _apply_published_content() -> void:
+ for key in ["1","3","5","6"]:
+  if not question_bank.has(key):continue
+  question_bank[key]=question_bank[key].filter(func(item):return not str(item.get("id","")).begins_with("pub_"))
+  for item in PublishedContent.questions.get(key,[]):
+   if load("res://scripts/approved_content.gd").question_allowed(item):question_bank[key].append(item.duplicate(true))
+
 func _on_daily_rounds_changed() -> void:
  apply_daily_rounds()
+ _apply_published_content()
+
+func _apply_audio_preferences(saved: Dictionary) -> void:
+ # Old profiles used one effects toggle. Preserve it for both buses until customized.
+ sound_enabled=bool(saved.get("sound_enabled",true))
+ ui_sound_enabled=bool(saved.get("ui_sound_enabled",sound_enabled))
+ music_enabled=bool(saved.get("music_enabled",true))
+ var policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ policy.set_music_volume(float(saved.get("music_volume",0.7)))
+ policy.set_effects_volume(float(saved.get("effects_volume",0.8)))
+ policy.set_ui_effects_enabled(ui_sound_enabled)
+ policy.set_game_effects_enabled(sound_enabled)
+ policy.set_music_enabled(music_enabled)
 
 func save_progress() -> void:
  if audience.is_empty():
@@ -445,11 +501,18 @@ func save_progress() -> void:
  profile["language"] = selected_language
  profile["art_style"] = art_style
  profile["sound_enabled"] = sound_enabled
+ profile["ui_sound_enabled"] = ui_sound_enabled
+ profile["music_enabled"] = music_enabled
+ var audio_policy=load("res://scripts/room_audio_policy.gd").acquire(get_tree())
+ profile["music_volume"]=audio_policy.music_volume
+ profile["effects_volume"]=audio_policy.effects_volume
  profile["haptics_enabled"] = haptics_enabled
  profile["reduced_motion"] = reduced_motion
  profile["reading_scale"] = reading_scale
  profile["session_length"] = session_length
  profile["session_version"] = 15
+ profile["picture_category"] = picture_category
+ profile["picture_guess_difficulty"] = picture_guess_difficulty
  profile["difficulty"] = difficulty
  profile["family_all_ages"] = family_all_ages
  profile["selected_campaign"] = selected_campaign
@@ -459,6 +522,8 @@ func save_progress() -> void:
   save_warning = false
  else:
   save_warning = true
+ var account_client=get_tree().root.get_node_or_null("PlayerAccountSession") if is_inside_tree() else null
+ if account_client!=null: account_client.sync_progress(profile)
 
 func panel_style(color: Color) -> StyleBoxFlat:
  var style := StyleBoxFlat.new()
@@ -537,43 +602,35 @@ func show_hint() -> void:
   var alternate: int = (correct + 1) % choices.size()
   hint_label.text = tr_ui("الإجابة واحدة من: ", "One of these: ") + str(choices[correct]) + " / " + str(choices[alternate]) if rng.randf() < 0.5 else tr_ui("الإجابة واحدة من: ", "One of these: ") + str(choices[alternate]) + " / " + str(choices[correct])
 
-func play_clip(id: String) -> void:
+func play_clip(id: String, audio_format: String = "wav") -> void:
  stop_audio()
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player = AudioStreamPlayer.new()
- audio_player.stream = load("res://assets/audio/" + id + ".wav")
+ audio_player.bus="Game SFX"
+ audio_player.stream = PublishedContent.media.get(id) as AudioStream if id.begins_with("pub_")
+ if not id.begins_with("pub_") and audio_format in ["wav","ogg"]:
+  var path := "res://assets/audio/" + id + "." + audio_format
+  if ResourceLoader.exists(path):audio_player.stream=load(path) as AudioStream
+ if audio_player.stream==null:
+  audio_player.queue_free()
+  return
  audio_player.volume_db = -8
  add_child(audio_player)
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,true)
+ audio_player.finished.connect(func():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,false))
  audio_player.play()
 
 # Short original feedback tones, generated offline and bundled locally.
 # Never loads remote audio or blocks the main thread waiting for network.
 func play_tap() -> void:
- var tap_path: String = "res://assets/audio/ui_tap.wav"
- if not ResourceLoader.exists(tap_path):
-  return
- var tap_player := AudioStreamPlayer.new()
- tap_player.stream = load(tap_path)
- tap_player.volume_db = -21.0
- add_child(tap_player)
- tap_player.finished.connect(tap_player.queue_free)
- tap_player.play()
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("click",true)
 
 func play_feedback(effect: String) -> void:
- if not sound_enabled:
-  return
- if effect not in ["success", "celebrate", "retry"]:
-  return
- var path: String = "res://assets/audio/feedback_" + effect + ".wav"
- if not ResourceLoader.exists(path):
-  return
- var player := AudioStreamPlayer.new()
- player.stream = load(path)
- player.volume_db = -13.0
- add_child(player)
- player.finished.connect(player.queue_free)
- player.play()
+ if not sound_enabled:return
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect({"success":"correct","retry":"incorrect","celebrate":"victory"}.get(effect,"results"))
 
 func stop_audio() -> void:
+ load("res://scripts/room_audio_policy.gd").acquire(get_tree()).sample_playback(self,false)
  if is_instance_valid(audio_player):
   audio_player.stop()
   audio_player.queue_free()
@@ -800,7 +857,10 @@ func start_daily() -> void:
  show_round()
 
 func card_texture(card_name: String) -> Texture2D:
+ if card_name.begins_with("pub_"):return PublishedContent.media.get(card_name) as Texture2D
  var id: String = card_name.to_lower()
+ var approved_path: String="res://assets/imported_photos/"+id+".webp"
+ if ResourceLoader.exists(approved_path):return cached_texture(approved_path)
  var illustration: String = "res://assets/cards/" + id + ".png"
  if art_style == "illustration" and ResourceLoader.exists(illustration):
   return cached_texture(illustration)
@@ -905,10 +965,15 @@ func game_title(index: int) -> String:
 
 func toggle_language() -> void:
  selected_language = ["ar", "en"][(["ar", "en"].find(selected_language) + 1) % 2]
+ PlayerPrefs.save_language(selected_language)
  save_progress()
  show_home()
 
 func _ready() -> void:
+ get_tree().quit_on_go_back = false
+ var account=get_node("/root/GamingHubAccount")
+ account.progress_restored.connect(_secure_progress_restored)
+ PublishedContent.changed.connect(_apply_published_content)
  if not DailyRounds.changed.is_connected(_on_daily_rounds_changed):
   DailyRounds.changed.connect(_on_daily_rounds_changed)
  if not AdManager.reward_earned.is_connected(_on_earned_ad_reward):
@@ -917,10 +982,10 @@ func _ready() -> void:
  load_upgrade()
  _load_age_group()
  AdManager.set_audience("adults" if age_group == "18plus" else "children")
- if age_group == "unknown":
-  show_age_group_selection()
- else:
-  show_home()
+ if account.enter_home_once:
+  account.enter_home_once=false
+  _welcome_guest()
+ else:show_welcome()
 
 func _load_age_group() -> void:
  age_group = "unknown"
@@ -951,17 +1016,16 @@ func show_age_group_selection() -> void:
  button("العربية / English", show_languages, PANEL)
 
 func _on_earned_ad_reward(kind: String, amount: int) -> void:
- # AdManager emits only after the real native earned-reward callback for a pending ID.
- if kind != "Coins" or amount != 50 or age_group != "18plus":
-  return
- profile["coins"] = int(profile.get("coins", 0)) + amount
- save_progress()
- if is_inside_tree():
-  show_ad_status()
+ # Native completion is NOT server-side verification. Preserve old saved balances,
+ # but never mint spendable coins from a client callback.
+ if kind!="Coins" or amount<=0:return
+ if is_inside_tree():show_rewards()
 
 
 func _notification(what: int) -> void:
- if what == NOTIFICATION_APPLICATION_PAUSED:
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+  _queue_back_navigation()
+ elif what == NOTIFICATION_APPLICATION_PAUSED:
   blitz_background_paused = true
   if is_instance_valid(blitz_timer):
    blitz_timer.paused = true
@@ -980,7 +1044,13 @@ func _process(_delta: float) -> void:
  if is_instance_valid(blitz_counter):
   blitz_counter.text = tr_ui("⏱ متبقي %d ثانية", "⏱ %d SECONDS LEFT") % ceili(remaining)
 
+var ui_action_generation := 0
+var _menu_touch_guard: Node
+
 func clear_ui() -> void:
+ current_screen=""
+ layout_direction = Control.LAYOUT_DIRECTION_RTL if selected_language == "ar" else Control.LAYOUT_DIRECTION_LTR
+ ui_action_generation += 1
  active_play_screen = false
  if is_instance_valid(blitz_timer):
   blitz_timer.stop()
@@ -1004,12 +1074,16 @@ func clear_ui() -> void:
  scroll.offset_right = -16
  scroll.offset_bottom = -36
  # Allow a finger swipe to scroll without accidentally pressing a quiz answer.
- scroll.scroll_deadzone = 22
+ scroll.scroll_deadzone = 14
+ scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  scroll.follow_focus = true
+ _menu_touch_guard = load("res://scripts/menu_touch_guard.gd").new()
+ _menu_touch_guard.scroll_area = scroll
+ scroll.add_child(_menu_touch_guard)
  add_child(scroll)
  root = VBoxContainer.new()
  root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- root.add_theme_constant_override("separation", 17)
+ root.add_theme_constant_override("separation", 10)
  var margins := MarginContainer.new()
  margins.add_theme_constant_override("margin_left", 5)
  margins.add_theme_constant_override("margin_right", 5)
@@ -1017,15 +1091,21 @@ func clear_ui() -> void:
  margins.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margins)
  margins.add_child(root)
+ _configure_menu_swipe.call_deferred(ui_action_generation)
  if reduced_motion:
   root.modulate.a = 1.0
  else:
   root.modulate.a = 0.0
   root.create_tween().tween_property(root, "modulate:a", 1.0, 0.18)
 
+func _configure_menu_swipe(generation: int) -> void:
+ if is_inside_tree() and generation == ui_action_generation and is_instance_valid(root):
+  VisualSkin.enable_menu_swipe(root)
+
 func label(text_value: String, font_size: int = 23) -> Label:
  var l := Label.new()
  l.text = text_value
+ l.mouse_filter = Control.MOUSE_FILTER_IGNORE
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  l.add_theme_font_size_override("font_size", int(font_size * reading_scale))
@@ -1036,7 +1116,7 @@ func label(text_value: String, font_size: int = 23) -> Label:
 func button(text_value: String, action: Callable, color: Color = PANEL) -> Button:
  var b := Button.new()
  b.text = text_value
- b.custom_minimum_size = Vector2(0, 80 if reading_scale >= 1.25 or audience == "children" else 66)
+ b.custom_minimum_size = Vector2(0, 68 if reading_scale >= 1.25 or audience == "children" else 56)
  b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  b.add_theme_font_size_override("font_size", int(19 * reading_scale))
  b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1057,6 +1137,7 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  VisualSkin.decorate_button(b, tone)
  # Consistent touch targets and immediate tactile feedback for all game modes.
  b.focus_mode = Control.FOCUS_ALL
+ b.mouse_filter = Control.MOUSE_FILTER_PASS
  b.add_theme_color_override("font_hover_color", Color("ffffff"))
  b.add_theme_color_override("font_pressed_color", Color("ffffff"))
  b.mouse_entered.connect(func() -> void:
@@ -1073,22 +1154,47 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  b.button_up.connect(func() -> void:
   animate_touch_button(b, Vector2.ONE, 0.10)
  )
- b.pressed.connect(func() -> void:
-  if haptics_enabled and OS.get_name() == "Android":
-   Input.vibrate_handheld(14)
-  if sound_enabled:
-   play_tap()
- )
- b.pressed.connect(action)
+ b.pressed.connect(_run_ui_action.bind(weakref(b), ui_action_generation, action), CONNECT_DEFERRED)
  root.add_child(b)
  return b
 
 # Kill a previous animation before starting another: rapid taps cannot queue
 # overlapping tweens that keep changing button scale after the touch ends.
+func _admin_ui_authorized() -> bool:
+ var account_client=get_tree().root.get_node_or_null("PlayerAccountSession") if is_inside_tree() else null
+ return account_client!=null and not account_client.token.is_empty() and not account_client.endpoint.is_empty() and account_client.user.get("role","")=="super_admin"
+
+func setting_switch(title: String, enabled: bool, action: Callable) -> CheckButton:
+ var control := CheckButton.new()
+ control.name = "SettingSwitch"+str(root.get_child_count())
+ control.custom_minimum_size.y=56
+ control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ control.mouse_filter=Control.MOUSE_FILTER_PASS
+ control.set_pressed_no_signal(enabled)
+ VisualSkin.decorate_switch(control,title,enabled)
+ control.toggled.connect(_setting_switch_requested.bind(weakref(control),ui_action_generation,title,enabled,action),CONNECT_DEFERRED)
+ root.add_child(control)
+ return control
+
+func _setting_switch_requested(value: bool, ref: WeakRef, generation: int, title: String, original: bool, action: Callable) -> void:
+ var control: Variant=ref.get_ref()
+ if generation!=ui_action_generation or not is_instance_valid(control) or not control.is_inside_tree(): return
+ # Revert the native preview until the existing swipe guard accepts this tap.
+ # Read the last committed value; repeated toggles must not restore the initial value.
+ var committed: bool=bool(control.get_meta("committed_value",original))
+ control.set_pressed_no_signal(committed)
+ _run_ui_action(ref,generation,func():
+  if not is_instance_valid(control): return
+  control.set_pressed_no_signal(value)
+  VisualSkin.decorate_switch(control,title,value)
+  action.call(value)
+ )
+
+
 func animate_touch_button(target: Button, desired_scale: Vector2, seconds: float) -> void:
  if not is_instance_valid(target):
   return
- var old: Variant = target.get_meta("touch_tween", null)
+ var old: Variant = target.get_meta("touch_tween") if target.has_meta("touch_tween") else null
  if old is Tween:
   var previous: Tween = old as Tween
   if previous.is_valid():
@@ -1105,12 +1211,24 @@ func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
   if event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK:
    get_viewport().set_input_as_handled()
-   if active_play_screen:
-    confirm_leave_active_game()
-   elif game != -1:
-    show_home()
-   else:
-    confirm_quit_game()
+   _queue_back_navigation()
+
+var _back_navigation_pending := false
+func _queue_back_navigation() -> void:
+ if VisualSkin.dismiss_text_input(get_viewport()):return
+ if _back_navigation_pending or not is_inside_tree() or is_queued_for_deletion(): return
+ _back_navigation_pending = true
+ _perform_back_navigation.call_deferred(ui_action_generation)
+
+func _perform_back_navigation(generation: int) -> void:
+ _back_navigation_pending = false
+ if not is_inside_tree() or is_queued_for_deletion() or generation != ui_action_generation: return
+ if active_play_screen:
+  confirm_leave_active_game()
+ elif game != -1:
+  show_home()
+ else:
+  confirm_quit_game()
 
 func confirm_leave_active_game() -> void:
  if is_instance_valid(blitz_timer):
@@ -1267,10 +1385,11 @@ func feature_card(title_text: String, description: String, action_text: String, 
 
 func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContainer:
  var tile := PanelContainer.new()
+ tile.mouse_filter = Control.MOUSE_FILTER_PASS
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
  skin.bg_color = Color("142447")
- skin.border_color = Color("3a5893")
+ skin.border_color = Color("ffcc42") if index==0 else [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
  skin.set_border_width_all(2)
  skin.set_corner_radius_all(20)
  skin.content_margin_left = 8
@@ -1284,18 +1403,23 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  column.add_theme_constant_override("separation", 6)
  tile.add_child(column)
  var art := TextureRect.new()
- art.texture = card_texture(art_id)
- art.custom_minimum_size.y = 150
+ var premium_art: Texture2D=VisualSkin.game_cover(index)
+ art.texture=premium_art if premium_art!=null else card_texture(art_id)
+ art.custom_minimum_size.y = 76 if index==0 else 64
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+ art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
  column.add_child(art)
  var idx: int = index
- var b := button(("★ " if favorite else "") + game_title(index) + "\n" + game_subtitle(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
+ var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
+ b.tooltip_text = game_subtitle(index)
+ b.add_theme_font_size_override("font_size", int(14 * reading_scale))
  root.remove_child(b)
  column.add_child(b)
- b.icon = cached_texture("res://assets/ui/game_%d.svg" % index)
+ b.set_meta("compact_game_tile",true)
+ b.icon = null # Existing artwork already identifies the game; keep Arabic title width.
  b.expand_icon = true
- b.add_theme_constant_override("icon_max_width", 28)
+ b.add_theme_constant_override("icon_max_width", 22)
  return tile
 
 # World journey: a persistent stage map with themed chapters and replayable challenges.
@@ -1470,11 +1594,11 @@ func show_expedition() -> void:
   button(tr_ui("🌳 الغابة — استعادة الطاقة", "🌳 Forest — restore energy"), func(): expedition_choose("forest"), GREEN)
   button(tr_ui("🌉 الجسر — مفتاحان، مخاطرة أكبر", "🌉 Bridge — two keys, higher cost"), func(): expedition_choose("bridge"), GOLD)
  elif expedition_room == 1:
-  label(tr_ui("🔐 بوابة الأرقام: 2، 4، 8، 16، ؟", "🔐 Number gate: 2, 4, 8, 16, ?"), 26)
+  label(tr_ui("🔐 بوابة الكهف: ماذا تستخدم لإضاءة الطريق المظلم؟", "🔐 Cave gate: what lights a dark path?"), 26)
   label(tr_ui("الإجابة الصحيحة تمنحك مفتاحًا. الخطأ يستهلك طاقتين.", "Correct answer earns a key; a mistake costs two energy."), 18)
-  button("24", func(): expedition_puzzle(0))
-  button("30", func(): expedition_puzzle(1))
-  button("32", func(): expedition_puzzle(2), ACCENT)
+  button(tr_ui("بوصلة", "Compass"), func(): expedition_puzzle(0))
+  button(tr_ui("حبل", "Rope"), func(): expedition_puzzle(1))
+  button(tr_ui("مصباح", "Torch"), func(): expedition_puzzle(2), ACCENT)
  elif expedition_room == 2:
   label(tr_ui("⛺ قبل غرفة الكنز: ترتاح أم تبحث عن مفتاح آخر؟", "⛺ Before the treasure: rest or search for another key?"), 25)
   button(tr_ui("💚 استراحة: +2 طاقة", "💚 Rest: +2 energy"), func(): expedition_prepare("rest"), GREEN)
@@ -1806,30 +1930,151 @@ func show_home() -> void:
  daily_ai_screen_active = false
  game = -1
  clear_ui()
- VisualSkin.add_brand_banner(root, "res://assets/ui/gaming_hub_brand.png", tr_ui("✨ Gaming Hub • العب، اكتشف، واكسب", "✨ GAMING HUB • PLAY, DISCOVER, WIN"))
- xp_progress()
- stat_strip(tr_ui("مباريات", "MATCHES"), str(int(profile.get("matches", 0))), tr_ui("انتصارات", "WINS"), str(int(profile.get("wins", 0))))
- label(tr_ui("اللعب الأساسي", "MAIN GAME"), 24)
- if age_group != "under13":
-  button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
-  button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
- button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
- button(tr_ui("⚡ جولات جديدة: سباق السرعة ورحلة الكنز", "⚡ NEW ARCADE: BLITZ & TREASURE"), func(): show_modes(5), GOLD)
- button(tr_ui("🎲 مفاجأة الجولة • لعبة مختلفة كل مرة", "🎲 SURPRISE ME • A DIFFERENT GAME EACH TIME"), start_surprise_arcade, ACCENT)
- button(tr_ui("🏆 بطولة الأبطال • 3 مراحل وزعماء", "🏆 CHAMPIONSHIP • 3 STAGES & BOSSES"), start_championship, GOLD)
- if not DailyRounds.current_pack.is_empty():
-  label(tr_ui("🌟 تحديات اليوم جديدة • محفوظ لديك %d سؤال إضافي", "🌟 TODAY'S CHALLENGES FIRST • %d STORED EXTRA QUESTIONS") % [DailyRounds.total_questions()], 17)
- else:
-  label(tr_ui("🌐 تحديث الجولات اليومية قيد الانتظار • الألعاب الأساسية متاحة", "🌐 Daily refresh pending • built-in games available"), 16)
- button(tr_ui("🔄 جلب تحديات جديدة", "🔄 FETCH NEW CHALLENGES"), func(): DailyRounds.refresh(true), PANEL)
- button(tr_ui("📚 إضافة أسئلة أقدم للأرشيف", "📚 LOAD OLDER QUESTION PACKS"), func(): DailyRounds.load_older(), PANEL)
- button(tr_ui("🖼️ خمن الصورة • 6 ألغاز جديدة يوميًا", "🖼️ GUESS THE PICTURE • 6 NEW DAILY CHALLENGES"), show_ai_daily, GOLD)
- label(tr_ui("الأونلاين يحتاج سيرفر متصل. اللعب ضد الكمبيوتر متاح دون سيرفر.", "Online requires a connected server. AI/offline mode works without one."), 16)
- label(tr_ui("ألعاب إضافية", "MORE GAMES"), 23)
- button(tr_ui("🧩 اكتشف الألعاب الأخرى", "🧩 EXPLORE OTHER GAMES"), show_more_games, PANEL)
- button("العربية / English", show_languages, PANEL)
- button(tr_ui("إعدادات اللعب والقراءة", "GAME & ACCESSIBILITY SETTINGS"), show_accessibility, PANEL)
- button(tr_ui("🛡 الخصوصية والإعلانات", "🛡 PRIVACY & ADS"), show_privacy_and_ads, PANEL)
+ current_screen="home"
+ var presentation: Dictionary = PublishedContent.settings
+ VisualSkin.compact_header(root,str(presentation.get("title_"+selected_language,tr_ui("Gaming Hub • الألعاب", "Gaming Hub • GAMES"))))
+ var notice: String = str(presentation.get("notice_"+selected_language,""))
+ if not notice.is_empty(): label(notice,16)
+ var xp: int=maxi(0,int(profile.get("xp",0)))
+ label(tr_ui("المستوى %d • XP %d • انتصارات %d • مباريات %d", "LEVEL %d • XP %d • WINS %d • MATCHES %d") % [1+floori(xp/100.0),xp,int(profile.get("wins",0)),int(profile.get("matches",0))],14)
+ _add_unique_game_catalog()
+ _add_social_game_catalog()
+ _home_activity_section(tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES"),[
+  [tr_ui("مفاجأة الجولة", "SURPRISE ROUND"),start_surprise_arcade],
+  [tr_ui("تحدي اليوم", "DAILY CHALLENGE"),start_daily],
+  [tr_ui("الإنجازات", "ACHIEVEMENTS"),show_achievements],
+  [tr_ui("المساعدات والعملات","HINTS & COINS"),show_rewards]
+ ])
+ _home_activity_section(tr_ui("المحتوى اليومي والخصوصية", "DAILY CONTENT & PRIVACY"),[
+  [tr_ui("جلب تحديات جديدة", "FETCH NEW CHALLENGES"),func(): DailyRounds.refresh(true)],
+  [tr_ui("إضافة أسئلة أقدم للأرشيف", "LOAD OLDER QUESTION PACKS"),func(): DailyRounds.load_older()],
+  [tr_ui("الخصوصية والإعلانات", "PRIVACY & ADS"),show_privacy_and_ads]
+ ])
+ VisualSkin.compact_menu(root)
+ _add_bottom_navigation("games")
+
+func _add_unique_game_catalog() -> void:
+ var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
+ var configured_columns: int=int(PublishedContent.settings.get("home_columns",0))
+ if configured_columns>0: columns=configured_columns
+ if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1
+ var catalog_order: Array=PublishedContent.catalog_order()
+ if 0 in catalog_order:
+  catalog_order.erase(0);catalog_order.push_front(0)
+ var primary_count: int=int(PublishedContent.settings.get("primary_count",6))
+ var grid := GridContainer.new()
+ grid.name="UnifiedGameCatalog";grid.columns=columns
+ root.add_child(grid)
+ var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
+ var favorites: Array=profile.get("favorites",[])
+ # Six primary games mirror the approved board; every other original game remains reachable once.
+ for index in catalog_order.slice(0,primary_count):
+  var tile := make_game_tile(index,previews[index],index in favorites)
+  tile.set_meta("game_id",index);grid.add_child(tile)
+ var more := GridContainer.new()
+ more.name="MoreOriginalGames";more.columns=columns;more.visible=false
+ if catalog_order.size()>primary_count:
+  var toggle := button(tr_ui("المزيد من الألعاب • %d", "MORE GAMES • %d") % (catalog_order.size()-primary_count),func():more.visible=not more.visible,PANEL)
+  toggle.set_meta("more_original_games",true)
+ root.add_child(more)
+ for index in catalog_order.slice(primary_count):
+  var tile := make_game_tile(index,previews[index],index in favorites)
+  tile.set_meta("game_id",index);more.add_child(tile)
+
+func _add_social_game_catalog() -> void:
+ label(tr_ui("قعدة الصحاب","Friends gathering"),22)
+ var social_grid:=GridContainer.new()
+ social_grid.name="SocialGameCatalog"
+ social_grid.columns=1 if reading_scale>=1.25 else 2
+ root.add_child(social_grid)
+ var entries: Array=[
+  ["افتح قلبك","Open Heart","OpenHeartMode"],
+  ["مثّل وورّينا","Act It","ActItMode"],
+  ["مين فينا؟","Who Among Us","WhoAmongUsMode"],
+  ["ورّينا شطارتك","Show Your Skill","ShowSkillMode"],
+  ["صدق ولا تأليف؟","Truth or Fiction","TruthOrFictionMode"],
+  ["اقلب الترابيزة","Flip the Table","TableFlipMode"]]
+ for index in range(entries.size()):
+  var entry: Array=entries[index]
+  var scene_path: String="res://scenes/"+str(entry[2])+".tscn"
+  var item:=button(tr_ui(entry[0],entry[1]),func():get_tree().change_scene_to_file.call_deferred(scene_path),PANEL)
+  item.set_meta("social_game_id",index)
+  item.reparent(social_grid)
+
+func _home_activity_section(title: String, entries: Array) -> void:
+ if title==tr_ui("التحديات والأنشطة", "CHALLENGES & ACTIVITIES") and not PublishedContent.settings.get("show_activities",true): return
+ var body := VBoxContainer.new()
+ body.visible=false
+ body.add_theme_constant_override("separation",8)
+ var toggle := button(title,func(): body.visible=not body.visible,PANEL)
+ toggle.icon=VisualSkin.menu_icon("list")
+ toggle.expand_icon=true
+ toggle.add_theme_constant_override("icon_max_width",20)
+ root.add_child(body)
+ for entry in entries:
+  var item := button(entry[0],entry[1],PANEL)
+  item.reparent(body)
+
+func show_player_account() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.back_requested.connect(show_home)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+ _add_bottom_navigation("account")
+
+func show_player_friends() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.show_friends_first=true
+ account.back_requested.connect(show_home)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+ _add_bottom_navigation("friends")
+
+func _add_bottom_navigation(selected: String) -> void:
+ if has_node("PlayerBottomNavigation"):return
+ for child in get_children():
+  if child is ScrollContainer:child.offset_bottom=-96
+ var panel:=PanelContainer.new()
+ panel.name="PlayerBottomNavigation"
+ panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+ panel.offset_left=16;panel.offset_right=-16;panel.offset_top=-86;panel.offset_bottom=-18
+ var style:=VisualSkin.card(Color("0b2042"),16)
+ style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=4;style.content_margin_bottom=4
+ panel.add_theme_stylebox_override("panel",style)
+ add_child(panel)
+ var bar:=HBoxContainer.new();bar.add_theme_constant_override("separation",4);panel.add_child(bar)
+ var entries: Array=[["games",tr_ui("الألعاب","Games"),"list",show_home],["friends",tr_ui("الأصدقاء","Friends"),"player",show_player_friends],["account",tr_ui("حسابي","Profile"),"player",show_player_account],["settings",tr_ui("الإعدادات","Settings"),"settings",show_accessibility]]
+ for entry in entries:
+  var control:=button(str(entry[1]),entry[3],GOLD if entry[0]==selected else PANEL)
+  control.reparent(bar)
+  control.icon=VisualSkin.menu_icon(str(entry[2]));control.expand_icon=true
+  control.add_theme_constant_override("icon_max_width",18)
+  control.add_theme_font_size_override("font_size",12)
+  control.add_theme_constant_override("h_separation",4)
+  control.autowrap_mode=TextServer.AUTOWRAP_OFF
+  for state in ["normal","hover","pressed","disabled"]:
+   var button_style: StyleBox=control.get_theme_stylebox(state).duplicate()
+   button_style.content_margin_left=4;button_style.content_margin_right=4
+   control.add_theme_stylebox_override(state,button_style)
+  control.custom_minimum_size=Vector2(0,54)
+  control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  control.set_meta("navigation_target",entry[0])
+
+func _merge_account_progress(value: Dictionary) -> void:
+ for key in ["xp","wins","matches","picture_wins"]:
+  if value.get(key) is int or value.get(key) is float: profile[key]=maxi(int(profile.get(key,0)),int(value[key]))
+ save_progress()
+
+func _secure_progress_restored(value: Dictionary) -> void:
+ _merge_account_progress(value)
+ if current_screen=="home":show_home()
+
 
 func start_championship() -> void:
  # No network, matchmaking, ads, or paid rewards. A deterministic 15-question local run.
@@ -1860,20 +2105,42 @@ func start_surprise_arcade() -> void:
  start_quick_match()
 
 func show_more_games() -> void:
- clear_ui()
- label(tr_ui("ألعاب إضافية", "MORE GAMES"), 30)
- var grid := GridContainer.new()
- grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 650 else 2
- root.add_child(grid)
- var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
- var favorites: Array = profile.get("favorites", [])
- for i in range(GAMES.size()):
-  grid.add_child(make_game_tile(i, previews[i], i in favorites))
- button(tr_ui("🧠 تحدي اليوم", "🧠 DAILY CHALLENGE"), start_daily, ACCENT)
- button(tr_ui("الإنجازات", "ACHIEVEMENTS"), show_achievements)
- button(tr_ui("العودة للرئيسية", "BACK HOME"), show_home, GOLD)
+ # Existing back/menu routes resolve to the same catalog, never a second game list.
+ show_home()
 
 func show_modes(index: int) -> void:
+ if index<0 or index>=GAMES.size():return
+ if index!=game:selected_topic="all"
+ game=index;daily_match=false;family_active=false;campaign_active=false
+ clear_ui()
+ current_screen="mode"
+ VisualSkin.compact_header(root,game_title(index))
+ var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,ACCENT)
+ friends.set_meta("mode_action","friends")
+ friends.disabled=age_group in ["under13","unknown"]
+ if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
+ var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
+ local.set_meta("mode_action","offline")
+ var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_home,PANEL)
+ back.set_meta("mode_action","games")
+ VisualSkin.compact_menu(root)
+
+func _open_friend_rooms() -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry="landing"
+ if game==0:get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
+ else:
+  var quiz_ui=load("res://scripts/shared_quiz_ui.gd")
+  quiz_ui.selected_game=str(game)
+  get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn")
+
+func _start_offline_mode() -> void:
+ quick_match_active=false
+ match_style="classic"
+ selected_topic="all"
+ start_game()
+
+func _show_legacy_game_options(index: int) -> void:
  if index != game:
   selected_topic = "all"
   quick_match_active = false
@@ -1882,7 +2149,28 @@ func show_modes(index: int) -> void:
  family_active = false
  campaign_active = false
  clear_ui()
- VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
+ if game==0:
+  VisualSkin.compact_header(root,game_title(game))
+ else:
+  VisualSkin.add_hero(root, game_title(game), game_subtitle(game), tr_ui("اختر تحديك", "CHOOSE YOUR CHALLENGE"))
+ if game == 0:
+  if age_group not in ["under13", "unknown"]:
+   button(tr_ui("اللعب مع صديق • إنشاء غرفة", "PLAY WITH A FRIEND • CREATE ROOM"),func():_open_picture_room("create"),ACCENT)
+   button(tr_ui("اللعب أونلاين • انضمام بكود", "PLAY ONLINE • JOIN WITH CODE"),func():_open_picture_room("join"),PANEL)
+   _home_activity_section(tr_ui("الخدمة الكلاسيكية الحالية","Existing classic service"),[[tr_ui("فتح غرفة كلاسيكية • لاعبان","Open classic room • two players"),open_guess_multiplayer]])
+  else:
+   label(tr_ui("الغرف غير متاحة للفئة العمرية الحالية؛ اللعب بدون إنترنت متاح.", "Rooms are unavailable for the current age group; offline play is available."), 16)
+  if _admin_ui_authorized():
+   button(tr_ui("مكتبة الصور • للمسؤول", "PHOTO LIBRARY • ADMIN"), func(): picture_library_page = 0; show_picture_library(), PANEL)
+  button(tr_ui("ألغاز الصور اليومية", "DAILY PICTURE PUZZLES"),show_ai_daily,PANEL)
+  label(tr_ui("شارك كود غرفتك مع الأصدقاء، أو العب ضد الكمبيوتر دون إنترنت.", "Share a room code with friends, or play against the computer offline."), 16)
+ if game in [1,2,3,4,5,6,7,8,9] and age_group not in ["under13","unknown"]:
+  button(tr_ui("اللعب مع الأصدقاء • غرفة أسئلة","PLAY WITH FRIENDS • QUIZ ROOM"),func():
+   var screen=load("res://scripts/shared_quiz_ui.gd")
+   screen.selected_game=str(game)
+   get_tree().change_scene_to_file("res://scenes/SharedQuiz.tscn"),ACCENT)
+ if game == 5:
+  button(tr_ui("بطولة الأبطال • 3 مراحل", "CHAMPIONSHIP • 3 STAGES"),start_championship,ACCENT)
  if game not in [0, 4]:
   button(tr_ui("طول الجولة: %d • تعديل", "ROUND LENGTH: %d • CHANGE") % session_length, show_accessibility)
  button(tr_ui("★ أضف أو أزل من المفضلة", "★ TOGGLE FAVORITE"), toggle_favorite)
@@ -1920,23 +2208,30 @@ func show_modes(index: int) -> void:
  else:
   if game > 0 and game not in [4, 8]:
    button(tr_ui("🚀 مباراة سريعة • 10 أسئلة فقط", "🚀 QUICK MATCH • JUST 10 QUESTIONS"), start_quick_match, GREEN)
-  label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"), 21)
-  label(match_style_name(), 19)
-  for level in range(1, 4):
-   var chosen: int = level
-   button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
+  if game==0:
+   button(tr_ui("اللعب ضد الكمبيوتر • بدون إنترنت", "PLAY AGAINST THE COMPUTER • OFFLINE"),func(): quick_match_active=false;start_game(),GREEN)
+  else:
+   label(tr_ui("اختر مستوى التحدي", "CHOOSE DIFFICULTY"),21)
+   label(match_style_name(), 19)
+   for level in range(1, 4):
+    var chosen: int = level
+    button(difficulty_name(level), func(): difficulty = chosen; quick_match_active = false; start_game(), GREEN if level == 2 else PANEL)
  label(tr_ui("أفضل نتيجة: %d", "Personal best: %d") % int(profile.get("best_" + str(game), 0)), 17)
- if game == 0 and audience != "children":
-  button(tr_ui("غرفة الأصدقاء • تجريبي", "FRIENDS ROOM • experimental"), func(): get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn"), ACCENT)
- else:
+ if not (game == 0 and age_group not in ["under13", "unknown"]):
   label(tr_ui("هذا الإصدار يدعم اللعب المحلي لهذه اللعبة", "This edition supports local play for this game"), 14)
  button(tr_ui("قائمة الألعاب", "Games menu"), show_home, ACCENT)
+ _add_bottom_navigation("games")
 
 func show_unavailable(feature: String) -> void:
  clear_ui()
  label(feature, 26)
  label(tr_ui("غير متصل بعد. يحتاج هذا الوضع خادمًا واختبارًا بجهازين.", "Not connected yet. This mode needs a multiplayer backend and testing on two devices."), 19)
  button(tr_ui("العودة", "Back"), func(): show_modes(game), ACCENT)
+
+func _open_picture_room(entry: String) -> void:
+ var room_ui=load("res://scripts/photo_duel_extension_ui.gd")
+ room_ui.requested_entry=entry
+ get_tree().change_scene_to_file("res://scenes/PhotoDuelLocal.tscn")
 
 func adaptive_level_for(game_index: int) -> int:
  var stats: Dictionary = profile.get("adaptive_stats", {})
@@ -2421,8 +2716,8 @@ func show_round() -> void:
   round_picture_card(str(item["image"]))
  VisualSkin.add_question_panel(root, str(item.get(selected_language, item.get("en", ""))), reading_scale, tr_ui("✦ السؤال ✦", "✦ THE CHALLENGE ✦"))
  if item.has("audio"):
-  label(tr_ui("مقطع صوتي مُركّب • يمكنك إعادة الاستماع", "Synthesized clip • replay any time"), 15)
-  button(tr_ui("▶ استمع للصوت", "▶ PLAY SOUND"), func(): play_clip(str(item["audio"])), GREEN)
+  label(tr_ui("مقطع صوتي منشور • يمكنك إعادة الاستماع", "Published clip • replay any time") if str(item.get("audio","")).begins_with("pub_") else tr_ui("مقطع صوتي مُركّب • يمكنك إعادة الاستماع", "Synthesized clip • replay any time"), 15)
+  button(tr_ui("▶ استمع للصوت", "▶ PLAY SOUND"), func(): play_clip(str(item["audio"]),str(item.get("audio_format","wav"))), GREEN)
  var mode: String = str(item.get("mode", "choice"))
  if mode == "order":
   show_order_choices(item)
@@ -2823,7 +3118,7 @@ func show_picture_game() -> void:
   var recommended: int = suggestion
   button(tr_ui("💡 سؤال ذكي: ", "💡 SMART QUESTION: ") + picture_question_text(recommended), func(): ask_picture_question(recommended), GREEN)
  elif player_candidates.size() == 1:
-  label(tr_ui("وصلت لبطاقة واحدة! جرب تخمينها.", "One card left! Try guessing it."), 18)
+  label(tr_ui("يمكنك إكمال الأسئلة أو اختيار التخمين وقتما تريد.", "Keep asking, or choose to guess whenever you want."), 18)
  var available: Array[int] = available_picture_questions()
  if not available.is_empty():
   var page_count_questions: int = ceili(float(available.size()) / 6.0)
@@ -2992,7 +3287,7 @@ var answer_feedback: String = ""
 func load_catalog() -> void:
  var data: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
  if data is Dictionary:
-  CARDS = data.get("cards", [])
+  CARDS = load("res://scripts/approved_content.gd").cards(data.get("cards", []))
   QUESTIONS = data.get("questions", [])
  CARD_NAMES_AR.clear()
  PICTURE_QUESTIONS_AR.clear()
@@ -3010,6 +3305,7 @@ func matches_card_guess(value: String, card: Dictionary) -> bool:
 
 func picture_panel(id: String, height: int) -> void:
  var art := TextureRect.new()
+ art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.texture = card_texture(id)
  art.custom_minimum_size.y = height
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -3018,8 +3314,12 @@ func picture_panel(id: String, height: int) -> void:
  label(artwork_note(id), 13)
 
 func select_answer(index: int) -> void:
+ if round_finished or question_index < 0 or question_index >= round_bank.size():
+  return
  var item: Dictionary = round_bank[question_index]
  var choices: Array = item["choices_" + selected_language]
+ if index < 0 or index >= choices.size():
+  return
  var feedback: Array = item.get("feedback_" + selected_language, [])
  answer_feedback = tr_ui("اختيارك: ", "Your choice: ") + str(choices[index])
  if index < feedback.size():
@@ -3101,10 +3401,14 @@ func show_languages() -> void:
  var names: Dictionary = {"ar": "العربية", "en": "English"}
  for key in ["ar", "en"]:
   var chosen: String = str(key)
-  button(str(names[key]), func(): selected_language = chosen; save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
+  button(str(names[key]), func(): selected_language = chosen; PlayerPrefs.save_language(chosen); save_progress(); show_home(), GREEN if chosen == selected_language else PANEL)
  button(tr_ui("العودة", "BACK"), show_home)
 
 var deck: String = "all"
+var picture_category := "all"
+var picture_guess_difficulty := "all"
+var _picture_filter_data: Dictionary = {}
+const PictureFilters = preload("res://scripts/picture_filter_catalog.gd")
 var player_candidates: Array = []
 var card_name_page: int = 0
 var order_picks: Array[int] = []
@@ -3121,6 +3425,11 @@ var memory_generation: int = 0
 var memory_status: Label
 
 func deck_title(key: String = "") -> String:
+ if key.is_empty() and game==0:
+  _ensure_picture_filters()
+  var labels: Dictionary=_picture_filter_data.get("categories",{}).get(picture_category,{"ar":"كل الصور","en":"All pictures"})
+  var rank: Dictionary=_picture_filter_data.get("difficulties",{}).get(picture_guess_difficulty,{})
+  return str(labels.get(selected_language,labels.get("en","")))+" • "+str(rank.get(selected_language,rank.get("en","")))
  if key.is_empty():
   key = deck
  var ar: Dictionary = {"all": "كل الصور", "Animal": "الحيوانات", "Food": "الأطعمة", "Object": "الأدوات", "Place": "المعالم"}
@@ -3128,6 +3437,9 @@ func deck_title(key: String = "") -> String:
  return tr_ui(str(ar.get(key, key)), str(en.get(key, key)))
 
 func deck_cards() -> Array:
+ if game==0:
+  _ensure_picture_filters()
+  return PictureFilters.select(CARDS,_picture_filter_data,picture_category,picture_guess_difficulty)
  var pool: Array = []
  for card in CARDS:
   if deck == "all" or str(card["category"]) == deck:
@@ -3135,6 +3447,9 @@ func deck_cards() -> Array:
  return pool
 
 func show_decks() -> void:
+ if game==0:
+  show_picture_filters()
+  return
  clear_ui()
  label(tr_ui("اختر مجموعة الصور", "CHOOSE A CARD COLLECTION"), 28)
  for key in ["all", "Animal", "Food", "Object", "Place"]:
@@ -3145,19 +3460,34 @@ func show_decks() -> void:
 func show_order_choices(item: Dictionary) -> void:
  order_picks.clear()
  order_buttons.clear()
- order_label = label(tr_ui("اضغط الخطوات حسب ترتيبها الصحيح", "TAP STEPS IN THE CORRECT ORDER"), 18)
+ order_label = label(tr_ui("اسحب الخطوات لترتيبها ثم اضغط تأكيد", "Drag the steps into order, then confirm"), 18)
  var steps: Array = item["steps_" + selected_language]
  var order: Array = range(steps.size())
  shuffle_items(order)
  # Avoid presenting an already solved ordering.
  if order == range(steps.size()):
   order.reverse()
+ order_picks.assign(order)
  order_buttons.resize(steps.size())
  for value in order:
   var index: int = int(value)
-  order_buttons[index] = button(str(steps[index]), func(): pick_order_step(index))
- button(tr_ui("تراجع خطوة", "UNDO STEP"), undo_order_step)
- button(tr_ui("تحقق من الترتيب", "CHECK ORDER"), submit_order, GREEN)
+  var item_button=load("res://scripts/order_drag_item.gd").new()
+  item_button.text=str(steps[index]);item_button.item_index=index
+  item_button.group_key=str(question_index);item_button.ordering_enabled=true
+  item_button.custom_minimum_size.y=60
+  item_button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  VisualSkin.decorate_button(item_button,"teal")
+  item_button.move_requested.connect(_move_local_order,CONNECT_DEFERRED)
+  root.add_child(item_button);order_buttons[index]=item_button
+ button(tr_ui("تأكيد الترتيب", "CONFIRM ORDER"), submit_order, GREEN)
+
+func _move_local_order(source: int,target: int) -> void:
+ if round_finished or source not in order_picks or target not in order_picks:return
+ var destination: int=order_picks.find(target)
+ order_picks.erase(source);order_picks.insert(destination,source)
+ var first: int=order_label.get_index()+1
+ for position in range(order_picks.size()):
+  root.move_child(order_buttons[order_picks[position]],first+position)
 
 func pick_order_step(index: int) -> void:
  if round_finished or index in order_picks or index < 0 or index >= order_buttons.size():
@@ -3194,7 +3524,9 @@ func submit_order() -> void:
  var answer: Array[String] = []
  for step in steps:
   answer.append(str(step))
- answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + order_label.text
+ var chosen: Array[String]=[]
+ for index in order_picks:chosen.append(str(steps[index]))
+ answer_feedback = tr_ui("ترتيبك: ", "YOUR ORDER: ") + " → ".join(chosen)
  finish_round(correct, " → ".join(answer))
 
 func build_memory_board() -> void:
@@ -3397,6 +3729,9 @@ var picture_stage_count: int = 5
 var picture_order: Array = []
 
 func start_picture_game() -> void:
+ if deck_cards().size()<2:
+  show_picture_filters()
+  return
  campaign_active = false
  picture_stage = 1
  picture_order = deck_cards().duplicate(true)
@@ -3441,7 +3776,7 @@ func show_ad_status() -> void:
  label(tr_ui("الإعلانات والأرباح", "ADS & MONETIZATION"), 32)
  label(tr_ui("لا توجد إعلانات إنتاج أو أرباح. الإعلانات التجريبية تتطلب SDK واختبار الهاتف.", "No production ads or revenue. Test ads require SDK and device verification."), 19)
  label(AdManager.status_text(), 16)
- label(tr_ui("رصيد العملات: %d", "COINS BALANCE: %d") % int(profile.get("coins", 0)), 20)
+ label(tr_ui("رصيد محلي سابق غير قابل للإنفاق: %d", "LEGACY LOCAL BALANCE • NOT SPENDABLE: %d") % int(profile.get("coins", 0)),20)
  label(tr_ui("ملفات الأطفال والمراهقين والعائلات: بدون إعلانات. لا مكافأة قبل إشارة المشاهدة الحقيقية.", "Children, teens and families: no ads. Rewards require the native earned callback."), 17)
  if age_group == "18plus" and AdManager.is_ad_eligible():
   button(tr_ui("🎬 إعلان تجريبي اختياري • 50 عملة", "🎬 OPTIONAL TEST AD • 50 COINS"), func(): AdManager.request_rewarded_ad(), GREEN)
@@ -3457,3 +3792,200 @@ func open_guess_multiplayer() -> void:
   return
  get_tree().change_scene_to_file("res://scenes/Multiplayer.tscn")
 
+
+func open_photo_duel() -> void:
+ if age_group == "under13" or age_group == "unknown":
+  return
+ open_guess_multiplayer()
+
+func _run_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
+ if is_instance_valid(_menu_touch_guard):
+  _menu_touch_guard.dispatch(_execute_ui_action.bind(ref,generation,action))
+ else: _execute_ui_action(ref,generation,action)
+
+func _execute_ui_action(ref: WeakRef, generation: int, action: Callable) -> void:
+ var control: Variant = ref.get_ref()
+ if is_inside_tree() and generation == ui_action_generation and is_instance_valid(control):
+  if control.is_inside_tree() and not control.is_queued_for_deletion():
+   if haptics_enabled and OS.get_name() == "Android": Input.vibrate_handheld(14)
+   if ui_sound_enabled:
+    load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("navigation" if control.text.contains("العودة") or control.text.to_lower().contains("back") else "click",true)
+   action.call()
+
+var picture_library_page := 0
+func show_picture_library() -> void:
+ if not _admin_ui_authorized():
+  show_modes(0)
+  return
+ clear_ui()
+ game = 0
+ label(tr_ui("مكتبة الصور الأصلية • %d", "ORIGINAL PICTURE LIBRARY • %d") % CARDS.size(), 26)
+ button(tr_ui("العب بكل الصور • بدون إنترنت", "PLAY WITH ALL IMAGES • OFFLINE"), func(): deck = "all"; start_picture_game(), GOLD)
+ var first := picture_library_page * 8
+ for index in range(first, mini(first + 8, CARDS.size())):
+  var card: Dictionary = CARDS[index]
+  picture_panel(str(card["name"]), 170)
+  label(str(card.get("ar" if selected_language == "ar" else "en", card["name"])), 21)
+ if picture_library_page > 0:
+  button(tr_ui("الصفحة السابقة", "PREVIOUS PAGE"), func(): picture_library_page -= 1; show_picture_library())
+ if first + 8 < CARDS.size():
+  button(tr_ui("الصفحة التالية", "NEXT PAGE"), func(): picture_library_page += 1; show_picture_library())
+ button(tr_ui("خمن صورتك • الغرف واللعب", "GUESS YOUR PICTURE • ROOMS & PLAY"), func(): show_modes(0), GOLD)
+
+func _ensure_picture_filters() -> void:
+ if _picture_filter_data.is_empty(): _picture_filter_data=PictureFilters.definition()
+
+func show_picture_filters() -> void:
+ _ensure_picture_filters()
+ clear_ui()
+ VisualSkin.compact_header(root,tr_ui("صنف الصور وصعوبتها","Picture category & difficulty"))
+ label(tr_ui("اختر الصنف","Choose a category"),20)
+ var grid := GridContainer.new()
+ grid.columns=1 if reading_scale>=1.25 else 2
+ grid.add_theme_constant_override("h_separation",8)
+ grid.add_theme_constant_override("v_separation",8)
+ root.add_child(grid)
+ var keys: Array=["all"]+_picture_filter_data.get("categories",{}).keys()
+ for key in keys:
+  var selected: String=str(key)
+  var labels: Dictionary=_picture_filter_data.get("categories",{}).get(selected,{"ar":"كل الصور","en":"All pictures"})
+  var count: int=PictureFilters.select(CARDS,_picture_filter_data,selected,"all").size()
+  var option := button(str(labels.get(selected_language,labels.get("en","")))+" (%d)"%count,func(): picture_category=selected;picture_guess_difficulty="all";save_progress();show_picture_filters(),GREEN if selected==picture_category else PANEL)
+  option.add_theme_font_size_override("font_size",int(15*reading_scale))
+  option.disabled=count<2
+  option.reparent(grid)
+ label(tr_ui("صعوبة التعرف على الصور","Picture recognition difficulty"),20)
+ var ranks := GridContainer.new()
+ ranks.columns=1 if reading_scale>=1.25 else 2
+ ranks.add_theme_constant_override("h_separation",8)
+ ranks.add_theme_constant_override("v_separation",8)
+ root.add_child(ranks)
+ for key in ["all","easy","medium","hard"]:
+  var rank: String=str(key)
+  var labels: Dictionary=_picture_filter_data.get("difficulties",{}).get(rank,{})
+  var count: int=PictureFilters.select(CARDS,_picture_filter_data,picture_category,rank).size()
+  var option := button(str(labels.get(selected_language,labels.get("en","")))+" (%d)"%count,func(): picture_guess_difficulty=rank;save_progress();show_picture_filters(),GREEN if rank==picture_guess_difficulty else PANEL)
+  option.disabled=count<2
+  option.tooltip_text=tr_ui("تحتاج المجموعة صورتين مختلفتين على الأقل","A collection needs at least two different pictures")
+  option.reparent(ranks)
+ label(tr_ui("هذا الاختيار للعب دون إنترنت؛ داخل الغرف تظهر خيارات الصنف عندما تدعمها الخدمة.","These choices apply offline; room category controls appear when the service supports them."),14)
+ button(tr_ui("العودة لخيارات اللعب","Back to play options"),func(): show_modes(0),GOLD)
+ VisualSkin.compact_menu(root)
+
+# First-run navigation reuses the existing account and age-group systems.
+func show_welcome() -> void:
+ clear_ui()
+ current_screen="welcome"
+ var poster: Control=load("res://scripts/welcome_backdrop.gd").new()
+ poster.name="WelcomeBackdrop"
+ poster.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ add_child(poster)
+ move_child(poster,1)
+ root.custom_minimum_size.y=maxf(500,get_viewport_rect().size.y-90)
+ var welcome_scroll:=root.get_parent().get_parent() as ScrollContainer
+ if welcome_scroll!=null:welcome_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_NEVER
+ _add_language_control(show_welcome)
+ var artwork_space:=Control.new()
+ artwork_space.name="WelcomeArtSpace"
+ artwork_space.mouse_filter=Control.MOUSE_FILTER_IGNORE
+ artwork_space.custom_minimum_size.y=clampf(get_viewport_rect().size.y*0.43,240,440)
+ artwork_space.size_flags_vertical=Control.SIZE_EXPAND_FILL
+ root.add_child(artwork_space)
+ var guest := button(tr_ui("العب كضيف","Guest Play"),_welcome_guest,GOLD)
+ guest.set_meta("welcome_action","guest")
+ for provider in ["Google","Facebook"]:
+  var login := button(tr_ui("المتابعة باستخدام ","Continue with ")+provider,_welcome_provider.bind(provider.to_lower()),PANEL)
+  login.tooltip_text=tr_ui("تسجيل دخول اختياري؛ تقدم الضيف محفوظ","Optional sign-in; guest progress is preserved")
+  login.set_meta("welcome_action",provider.to_lower())
+  login.set_meta("provider_brand",true)
+  login.expand_icon=true
+  login.add_theme_constant_override("icon_max_width",40)
+  login.add_theme_constant_override("h_separation",12)
+  if provider=="Google":login.icon=load("res://assets/ui/providers/google.svg")
+  else:
+   var mark:=AtlasTexture.new()
+   mark.atlas=load("res://assets/ui/providers/facebook.png")
+   mark.region=Rect2(625,98,1100,1100)
+   login.icon=mark
+  for state_name in ["normal","hover","pressed","disabled"]:
+   var brand_surface:=StyleBoxFlat.new()
+   brand_surface.bg_color=Color("e7edf5") if state_name=="pressed" else Color.WHITE
+   brand_surface.border_color=Color("747775")
+   brand_surface.set_border_width_all(1)
+   brand_surface.set_corner_radius_all(16)
+   brand_surface.content_margin_left=12;brand_surface.content_margin_right=12
+   brand_surface.content_margin_top=8;brand_surface.content_margin_bottom=8
+   login.add_theme_stylebox_override(state_name,brand_surface)
+  for state_name in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:login.add_theme_color_override(state_name,Color("1f1f1f"))
+  login.add_theme_color_override("font_shadow_color",Color.TRANSPARENT)
+ # Email/password remains under My profile -> Account settings and sign-in.
+ # Keep the welcome screen limited to the three existing entry actions.
+ VisualSkin.compact_menu(root)
+
+func _add_language_control(redraw: Callable) -> void:
+ var row:=HBoxContainer.new();row.alignment=BoxContainer.ALIGNMENT_END
+ row.layout_direction=Control.LAYOUT_DIRECTION_LTR
+ root.add_child(row)
+ var globe:=MenuButton.new();globe.name="LanguageGlobe"
+ globe.icon=VisualSkin.language_globe();globe.expand_icon=true
+ globe.add_theme_constant_override("icon_max_width",64)
+ globe.custom_minimum_size=Vector2(72,72)
+ globe.tooltip_text="اللغة / Language"
+ VisualSkin.decorate_button(globe,"secondary")
+ globe.set_meta("language_switcher",true)
+ for state_name in ["normal","hover","pressed","disabled"]:
+  var surface: StyleBox=globe.get_theme_stylebox(state_name).duplicate()
+  surface.content_margin_left=4;surface.content_margin_right=4
+  surface.content_margin_top=4;surface.content_margin_bottom=4
+  globe.add_theme_stylebox_override(state_name,surface)
+ row.add_child(globe)
+ globe.button_down.connect(func():globe.self_modulate=Color(1.2,1.35,1.4);globe.pivot_offset=globe.size/2;globe.create_tween().tween_property(globe,"scale",Vector2(0.94,0.94),0.08))
+ globe.button_up.connect(func():globe.self_modulate=Color.WHITE;globe.create_tween().tween_property(globe,"scale",Vector2.ONE,0.12))
+ var popup:=globe.get_popup()
+ popup.add_theme_stylebox_override("panel",VisualSkin.card(Color("211455"),22))
+ popup.add_theme_stylebox_override("hover",VisualSkin.neon_surface(Color("007cde"),VisualSkin.CYAN))
+ popup.add_theme_font_size_override("font_size",22)
+ popup.add_theme_constant_override("v_separation",20)
+ popup.add_theme_color_override("font_color",VisualSkin.TEXT)
+ popup.add_theme_color_override("font_hover_color",Color.WHITE)
+ popup.add_radio_check_item("🇪🇬 العربية",0);popup.add_radio_check_item("🇬🇧 English",1)
+ popup.set_item_checked(0,selected_language=="ar");popup.set_item_checked(1,selected_language=="en")
+ popup.id_pressed.connect(func(id: int):_set_player_language.call_deferred("ar" if id==0 else "en",redraw))
+
+func _set_player_language(value: String,redraw: Callable) -> void:
+ selected_language=value
+ PlayerPrefs.save_language(value)
+ save_progress()
+ redraw.call()
+
+func _welcome_guest() -> void:
+ if age_group=="unknown":show_age_group_selection()
+ else:show_home()
+
+func _welcome_provider(provider: String) -> void:
+ get_node("/root/GamingHubAccount").requested_provider = provider
+ get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
+
+func _open_account_sign_in(action: String) -> void:
+ get_node("/root/GamingHubAccount").requested_action=action
+ get_tree().change_scene_to_file.call_deferred("res://scenes/AccountScreen.tscn")
+
+func show_welcome_account() -> void:
+ clear_ui()
+ var account=load("res://scripts/player_account_ui.gd").new()
+ account.language=selected_language
+ account.local_progress=profile.duplicate()
+ account.back_requested.connect(show_welcome)
+ account.progress_received.connect(_merge_account_progress)
+ root.add_child(account)
+
+func show_rewards() -> void:
+ clear_ui()
+ var view=load("res://scripts/rewards_ui.gd").new()
+ view.language=selected_language
+ view.back_requested.connect(show_home)
+ root.add_child(view)
+
+func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.sample_playback(self,false)

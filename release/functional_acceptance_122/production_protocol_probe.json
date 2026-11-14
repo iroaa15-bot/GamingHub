@@ -1,0 +1,120 @@
+{
+  "endpoint": "wss://gaminghub-multiplayer.onrender.com",
+  "events": [
+    {
+      "client": "a",
+      "message": {
+        "type": "room",
+        "code": "WSEI7Q",
+        "status": "waiting"
+      }
+    },
+    {
+      "client": "a",
+      "message": {
+        "type": "started",
+        "room": "WSEI7Q",
+        "opponent_card": {
+          "name": "Laptop"
+        },
+        "your_turn": true,
+        "player_index": 0
+      }
+    },
+    {
+      "client": "b",
+      "message": {
+        "type": "room",
+        "code": "WSEI7Q",
+        "status": "joined"
+      }
+    },
+    {
+      "client": "b",
+      "message": {
+        "type": "started",
+        "room": "WSEI7Q",
+        "opponent_card": {
+          "name": "Bicycle"
+        },
+        "your_turn": false,
+        "player_index": 1
+      }
+    },
+    {
+      "client": "b",
+      "message": {
+        "type": "voice_state",
+        "player": 0,
+        "enabled": true,
+        "local_enabled": false,
+        "peer_enabled": true,
+        "protocol": 2,
+        "epoch": 2,
+        "reset": false
+      }
+    },
+    {
+      "client": "a",
+      "message": {
+        "type": "voice_state_ack",
+        "player": 1,
+        "enabled": true,
+        "local_enabled": true,
+        "peer_enabled": false,
+        "protocol": 2,
+        "epoch": 2,
+        "reset": false
+      }
+    },
+    {
+      "client": "a",
+      "message": {
+        "type": "error",
+        "message": "Unknown action"
+      }
+    },
+    {
+      "client": "a",
+      "message": {
+        "type": "question",
+        "player": 0,
+        "question_index": 0,
+        "text": "Am I an animal?",
+        "text_ar": "هل أنا حيوان؟",
+        "text_tr": "Bir hayvan mıyım?",
+        "answer": false
+      }
+    },
+    {
+      "client": "a",
+      "message": {
+        "type": "turn",
+        "player": 1,
+        "moves": 1
+      }
+    },
+    {
+      "client": "b",
+      "message": {
+        "type": "question",
+        "player": 0,
+        "question_index": 0,
+        "text": "Am I an animal?",
+        "text_ar": "هل أنا حيوان؟",
+        "text_tr": "Bir hayvan mıyım?",
+        "answer": false
+      }
+    },
+    {
+      "client": "b",
+      "message": {
+        "type": "turn",
+        "player": 1,
+        "moves": 1
+      }
+    }
+  ],
+  "room_code": "WSEI7Q",
+  "two_client_room_connection": "PASS"
+}

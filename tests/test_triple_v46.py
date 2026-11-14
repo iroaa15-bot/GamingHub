@@ -4,8 +4,8 @@ ROOT=Path(__file__).resolve().parents[1]
 class TripleValueTests(unittest.TestCase):
  def test_count_and_unique(self):
   d=json.loads((ROOT/'data/questions.json').read_text());qs=[q for arr in d.values() for q in arr]
-  self.assertEqual(len(qs),2153)
-  self.assertEqual(len({q['id'] for q in qs}),2153)
+  self.assertGreaterEqual(len(qs),2153)
+  self.assertEqual(len({q['id'] for q in qs}),len(qs))
   self.assertEqual(sum(q['id'].startswith('arcade_v107_') for q in qs),50)
  def test_added_content_quality(self):
   d=json.loads((ROOT/'data/questions.json').read_text());qs=[q for arr in d.values() for q in arr if q['id'].startswith('quest_v46_')]

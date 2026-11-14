@@ -14,7 +14,7 @@ class ImmersiveTouch(unittest.TestCase):
    source=(ROOT/f'scripts/{name}.gd').read_text()
    self.assertIn('preload("res://scripts/visual_skin.gd")',source)
    self.assertIn('VisualSkin.new()',source)
-   self.assertIn('VisualSkin.add_hero(',source)
+   self.assertIn('VisualSkin.compact_header(',source)
    self.assertIn('VisualSkin.decorate_button(',source)
  def test_tactile_accessibility(self):
   source=(ROOT/'scripts/main.gd').read_text()

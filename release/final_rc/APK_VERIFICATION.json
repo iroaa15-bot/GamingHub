@@ -1,0 +1,48 @@
+{
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-final-RC-debug.apk",
+  "sha256": "0a92b9735138a818c3af38c0ac0210c0e849ce864595fd532aab0f0f66e87344",
+  "size": 186762196,
+  "checks": {
+    "zip_integrity": true,
+    "original_main_scene": true,
+    "gameplay_catalog_source_match": true,
+    "catalog_count": 200,
+    "native_voice_dex": true,
+    "bytecode_main": true,
+    "bytecode_multiplayer": true,
+    "bytecode_android_voice_bridge": true,
+    "bytecode_photo_duel_extension_client": true,
+    "bytecode_photo_duel_extension_ui": true,
+    "bytecode_photo_duel_voice_adapter": true,
+    "original_image_imports_resolved": 200,
+    "network_config_unchanged": true,
+    "new_service_pending_activation": true,
+    "no_private_signing_or_db_files": true
+  },
+  "elf_alignment": [
+    {
+      "library": "lib/arm64-v8a/libgodot_android.so",
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "supports_16k_alignment": true
+    },
+    {
+      "library": "lib/arm64-v8a/libc++_shared.so",
+      "load_segment_alignment": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "supports_16k_alignment": true
+    }
+  ],
+  "android_runtime": "BLOCKED: no real device",
+  "signed_aab": "BLOCKED: original upload key and Play upload certificate not available",
+  "online": "BLOCKED: no new service deployed",
+  "publishable": false
+}

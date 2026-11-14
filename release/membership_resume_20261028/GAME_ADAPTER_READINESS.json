@@ -1,0 +1,50 @@
+{
+  "1": {
+    "questions": 37,
+    "multiple_choice_candidates": 37,
+    "audio_questions": 0,
+    "ordered_questions": 0
+  },
+  "2": {
+    "questions": 39,
+    "multiple_choice_candidates": 39,
+    "audio_questions": 0,
+    "ordered_questions": 0
+  },
+  "3": {
+    "questions": 942,
+    "multiple_choice_candidates": 942,
+    "audio_questions": 0,
+    "ordered_questions": 0
+  },
+  "4": {
+    "questions": 55,
+    "multiple_choice_candidates": 49,
+    "audio_questions": 4,
+    "ordered_questions": 4
+  },
+  "5": {
+    "questions": 1157,
+    "multiple_choice_candidates": 1157,
+    "audio_questions": 0,
+    "ordered_questions": 0
+  },
+  "6": {
+    "questions": 20,
+    "multiple_choice_candidates": 20,
+    "audio_questions": 20,
+    "ordered_questions": 0
+  },
+  "7": {
+    "questions": 37,
+    "multiple_choice_candidates": 25,
+    "audio_questions": 0,
+    "ordered_questions": 0
+  },
+  "9": {
+    "questions": 42,
+    "multiple_choice_candidates": 0,
+    "audio_questions": 0,
+    "ordered_questions": 42
+  }
+}

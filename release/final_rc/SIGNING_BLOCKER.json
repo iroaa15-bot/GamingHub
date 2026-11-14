@@ -1,0 +1,19 @@
+{
+  "status": "BLOCKED",
+  "aab_generated": false,
+  "replacement_keystore_created": false,
+  "original_upload_key_found": false,
+  "alias": null,
+  "play_upload_certificate_available": false,
+  "searched": [
+    "Current project/Godot/Gradle signing locations and environment variable names",
+    "GamingHub-Safety-Backup-20261025",
+    "Previous same-project GamingHub-services build/source configurations"
+  ],
+  "missing": [
+    "Original upload keystore and alias",
+    "Secure local credentials, never passwords in chat",
+    "Play Console Upload Key certificate for fingerprint comparison"
+  ],
+  "apk": "Existing debug key only; not Google Play upload identity"
+}

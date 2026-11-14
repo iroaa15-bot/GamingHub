@@ -1,0 +1,31 @@
+extends SceneTree
+const PartyEngine = preload("res://scripts/qaadet_el_sohab_engine.gd")
+const Game = preload("res://scripts/truth_or_fiction_offline.gd")
+func _initialize() -> void:
+	var game = Game.new()
+	var cards: Array[Dictionary] = game._load_cards()
+	assert(cards.size() == 550)
+	var seen := {}
+	for card in cards:
+		assert(card["category"] == "truth_or_fiction")
+		assert(int(card.get("points", -1)) == 10)
+		assert(not str(card.get("text_ar", "")).is_empty())
+		assert(not seen.has(card["id"]))
+		seen[card["id"]] = true
+	var engine = PartyEngine.new()
+	assert(engine.setup(["a", "b", "c", "d"], cards, 10, 17))
+	assert(engine.lock_category("truth_or_fiction"))
+	assert(not engine.draw_next("truth_or_fiction").is_empty())
+	assert(not engine.submit_vote("b", true))
+	assert(engine.commit_story("a", true))
+	assert(not engine.commit_story("a", false))
+	assert(engine.submit_vote("b", true))
+	assert(engine.submit_vote("c", false))
+	assert(engine.submit_vote("d", false))
+	var result = engine.resolve_round()
+	assert(result["awards"]["b"] == 10)
+	assert(result["awards"]["a"] == 10)
+	assert(not result["awards"].has("c"))
+	assert(not result["awards"].has("d"))
+	print("TRUTH_OR_FICTION_SMOKE_PASS")
+	quit()

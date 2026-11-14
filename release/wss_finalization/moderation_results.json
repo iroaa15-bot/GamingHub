@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "outsider_report_rejected": true,
+    "invalid_moderation_targets_rejected": true,
+    "invalid_reports_not_stored": true,
+    "generic_message_limit": true,
+    "moderation_rate_limit": true
+  },
+  "passed": true,
+  "scope": "loopback real WebSocket; no deployment"
+}

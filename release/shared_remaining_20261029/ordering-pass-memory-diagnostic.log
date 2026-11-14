@@ -1,0 +1,76 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:335)
+OpenGL API 3.3.0 Core Profile Context 23.19.24.251211 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon (TM) Graphics
+
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 9 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 9 actual controls visible true
+MECHANICS_UI 9 same question payload true
+MECHANICS_UI ordering retains step selection true
+ORDER_PICKS_BEFORE [1, 0, 2, 3] expected 4 undo_disabled false
+GH_AUDIO_EFFECT click bus=UI SFX
+ORDER_PICKS_AFTER [1, 0, 2]
+MECHANICS_UI order undo true
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+MECHANICS_UI 9 shared final results true
+MECHANICS_UI 9 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 8 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 8 actual controls visible true
+MECHANICS_UI 8 same question payload true
+MECHANICS_UI memory retains actual pair board true
+MEMORY_STEP 1 first 0 matched [] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 2 first 2 matched [] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 3 first 1 matched [] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 4 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 5 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 6 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 7 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 8 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 9 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 10 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 11 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 12 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 13 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 14 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 15 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 16 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 17 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 18 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 19 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 20 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 21 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 22 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 23 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+MEMORY_STEP 24 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+GH_AUDIO_EFFECT countdown bus=Game SFX
+MEMORY_STEP 25 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+GH_AUDIO_EFFECT countdown bus=Game SFX
+MEMORY_STEP 26 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+GH_AUDIO_EFFECT countdown bus=Game SFX
+MEMORY_STEP 27 first 1 matched [1.0, 3.0] status نفس السؤال للجميع • اختر إجابة واحدة
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT incorrect bus=Game SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+MECHANICS_UI memory solved by real flip callbacks without board disclosure false
+MECHANICS_UI memory solved by real flip callbacks without board disclosure false
+MECHANICS_UI 8 shared final results true
+MECHANICS_UI 8 authoritative identical scores false
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+ORIGINAL_ALL_REAL_GODOT_UI_WS false ["memory solved by real flip callbacks without board disclosure", "memory solved by real flip callbacks without board disclosure", "8 authoritative identical scores"]

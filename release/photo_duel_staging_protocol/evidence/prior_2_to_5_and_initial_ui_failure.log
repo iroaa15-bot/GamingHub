@@ -1,0 +1,144 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+PASS local-only harness: runtime production autoloads not instantiated
+PASS explicit local endpoint accepted
+PASS client refuses production endpoint
+PASS client refuses public endpoint
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+PASS v3 capability negotiation for 2 players
+PASS create 2 player room
+PASS all 2 real WebSocket Godot clients joined
+PASS configured timer 0 accepted by server
+PASS timer 0 has no authoritative deadline
+PASS per-player state hides own picture and uses only original assets for 2
+PASS free Unicode chat reaches every real client in 2 player room
+PASS free text question becomes authoritative pending action
+PASS spoofed/self yes-no reply rejected
+PASS designated opponent No reply transfers turn
+PASS No answer retained for reconnect
+PASS preset question pending on actual server
+PASS preset yes-no reply contradicting photo rejected
+PASS correct preset yes/no reply accepted
+PASS guess waits for opponent confirmation
+PASS self/forged guess confirmation rejected
+PASS opponent confirmation alone awards score
+PASS new round starts after confirmed guess
+PASS disconnect pauses 2 player room
+PASS real reconnect rotates token and resumes room
+PASS reconnect preserves turn
+PASS reconnect restores free chat history
+PASS old resume token cannot hijack room
+PASS v3 capability negotiation for 3 players
+PASS create 3 player room
+PASS all 3 real WebSocket Godot clients joined
+PASS configured timer 10 accepted by server
+PASS server supplies actual configured deadline
+PASS per-player state hides own picture and uses only original assets for 3
+PASS free Unicode chat reaches every real client in 3 player room
+PASS free text question becomes authoritative pending action
+PASS spoofed/self yes-no reply rejected
+PASS designated opponent No reply transfers turn
+PASS No answer retained for reconnect
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (5 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Reopening scenes...[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Loading central editor layout...[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Loading plugin window layout...[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editor layout ready.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+PASS preset question pending on actual server
+PASS preset yes-no reply contradicting photo rejected
+PASS correct preset yes/no reply accepted
+PASS guess waits for opponent confirmation
+PASS self/forged guess confirmation rejected
+PASS opponent confirmation alone awards score
+PASS new round starts after confirmed guess
+PASS disconnect pauses 3 player room
+PASS real reconnect rotates token and resumes room
+PASS reconnect preserves turn
+PASS reconnect restores free chat history
+PASS reconnect preserves remaining timer without reset
+PASS old resume token cannot hijack room
+PASS actual 10 second server timer expires and advances turn
+PASS authoritative timeout event reaches Godot client
+PASS v3 capability negotiation for 4 players
+PASS create 4 player room
+PASS all 4 real WebSocket Godot clients joined
+PASS configured timer 20 accepted by server
+PASS server supplies actual configured deadline
+PASS per-player state hides own picture and uses only original assets for 4
+PASS free Unicode chat reaches every real client in 4 player room
+PASS free text question becomes authoritative pending action
+PASS spoofed/self yes-no reply rejected
+PASS designated opponent No reply transfers turn
+PASS No answer retained for reconnect
+PASS preset question pending on actual server
+PASS preset yes-no reply contradicting photo rejected
+PASS correct preset yes/no reply accepted
+PASS guess waits for opponent confirmation
+PASS self/forged guess confirmation rejected
+PASS opponent confirmation alone awards score
+PASS new round starts after confirmed guess
+PASS disconnect pauses 4 player room
+PASS real reconnect rotates token and resumes room
+PASS reconnect preserves turn
+PASS reconnect restores free chat history
+PASS reconnect preserves remaining timer without reset
+PASS old resume token cannot hijack room
+PASS v3 capability negotiation for 5 players
+PASS create 5 player room
+PASS all 5 real WebSocket Godot clients joined
+PASS configured timer 30 accepted by server
+PASS server supplies actual configured deadline
+PASS per-player state hides own picture and uses only original assets for 5
+PASS free Unicode chat reaches every real client in 5 player room
+PASS free text question becomes authoritative pending action
+PASS spoofed/self yes-no reply rejected
+PASS designated opponent No reply transfers turn
+PASS No answer retained for reconnect
+PASS preset question pending on actual server
+PASS preset yes-no reply contradicting photo rejected
+PASS correct preset yes/no reply accepted
+PASS guess waits for opponent confirmation
+PASS self/forged guess confirmation rejected
+PASS opponent confirmation alone awards score
+PASS new round starts after confirmed guess
+PASS disconnect pauses 5 player room
+PASS real reconnect rotates token and resumes room
+PASS reconnect preserves turn
+PASS reconnect restores free chat history
+PASS reconnect preserves remaining timer without reset
+PASS old resume token cannot hijack room
+SCRIPT ERROR: Parse Error: The member "Skin" shadows a native class.
+   at: GDScript::reload (res://scripts/photo_duel_extension_ui.gd:4)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/photo_duel_extension_godot.gd:62)
+       [1] cleanup (res://tests/photo_duel_extension_godot.gd:32)
+ERROR: Failed to load script "res://scripts/photo_duel_extension_ui.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3041)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/photo_duel_extension_godot.gd:62)
+       [1] cleanup (res://tests/photo_duel_extension_godot.gd:32)
+SCRIPT ERROR: Invalid access to property or key 'client' on a base object of type 'Control (photo_duel_extension_ui.gd)'.
+   at: run (res://tests/photo_duel_extension_godot.gd:64)
+   GDScript backtrace (most recent call first):
+       [0] run (res://tests/photo_duel_extension_godot.gd:64)
+       [1] cleanup (res://tests/photo_duel_extension_godot.gd:32)

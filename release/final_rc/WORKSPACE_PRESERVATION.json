@@ -1,0 +1,16 @@
+{
+  "previous_untracked_files": {
+    ") {": true,
+    "= @(": true,
+    "scripts\\photo_duel_mic_probe_staging.gd.uid": true,
+    "scripts\\photo_duel_network_staging.gd.uid": true,
+    "scripts\\photo_duel_voice_receiver_staging.gd.uid": true,
+    "t \uf022`n===== $branch =====\uf022": true,
+    "tests\\acceptance_original_rounds.gd.uid": true,
+    "tests\\picture_200_runtime.gd.uid": true
+  },
+  "previous_project_godot_bytes_preserved": true,
+  "safety_backup": "GamingHub-final-rc-safety-20261026-063603.zip",
+  "original_backup": "C:/Users/Omar/Documents/GamingHub-Safety-Backup-20261025",
+  "old_apk_aab": "Not overwritten or deleted"
+}

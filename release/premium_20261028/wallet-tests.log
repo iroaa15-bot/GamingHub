@@ -1,0 +1,111 @@
+EE
+======================================================================
+ERROR: test_authoritative_credit_and_atomic_spend (__main__.Authority.test_authoritative_credit_and_atomic_spend)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\tests\wallet_authority.py", line 8, in setUp
+    self.tmp=tempfile.TemporaryDirectory();self.store=Store(str(Path(self.tmp.name)/'wallet.sqlite'))
+                                                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\services\player_portal\service.py", line 34, in __init__
+    with self.db() as c:
+         ~~~~~~~^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\services\player_portal\service.py", line 51, in db
+    c=sqlite3.connect(self.path,timeout=10);c.row_factory=sqlite3.Row;c.execute("PRAGMA foreign_keys=ON")
+sqlite3.OperationalError: unable to open database file
+
+======================================================================
+ERROR: test_guest_link_and_admin_policy (__main__.Authority.test_guest_link_and_admin_policy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\tests\wallet_authority.py", line 8, in setUp
+    self.tmp=tempfile.TemporaryDirectory();self.store=Store(str(Path(self.tmp.name)/'wallet.sqlite'))
+                                                      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\services\player_portal\service.py", line 34, in __init__
+    with self.db() as c:
+         ~~~~~~~^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 141, in __enter__
+    return next(self.gen)
+  File "C:\Users\Omar\Documents\GitHub\GamingHub\services\player_portal\service.py", line 51, in db
+    c=sqlite3.connect(self.path,timeout=10);c.row_factory=sqlite3.Row;c.execute("PRAGMA foreign_keys=ON")
+sqlite3.OperationalError: unable to open database file
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.037s
+
+FAILED (errors=2)
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 707, in _rmtree_unsafe
+    os.rmdir(path)
+    ~~~~~~~~^^^^^^
+PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Omar\\AppData\\Local\\Packages\\sandbox.{627a19ae-c06a-47b6-b996-942832453994}\\AC\\Temp\\tmpjz91hr29'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\weakref.py", line 566, in _exitfunc
+    f()
+    ~^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\weakref.py", line 490, in __call__
+    return info.func(*info.args, **(info.kwargs or {}))
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 960, in _cleanup
+    cls._rmtree(name, ignore_errors=ignore_errors)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 711, in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 927, in onexc
+    _resetperms(path)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 287, in _resetperms
+    _dont_follow_symlinks(_os.chmod, path, 0o700)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 276, in _dont_follow_symlinks
+    func(path, *args, follow_symlinks=False)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Omar\\AppData\\Local\\Packages\\sandbox.{627a19ae-c06a-47b6-b996-942832453994}\\AC\\Temp\\tmpjz91hr29'
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 707, in _rmtree_unsafe
+    os.rmdir(path)
+    ~~~~~~~~^^^^^^
+PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Omar\\AppData\\Local\\Packages\\sandbox.{627a19ae-c06a-47b6-b996-942832453994}\\AC\\Temp\\tmpcf2q8izi'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\weakref.py", line 566, in _exitfunc
+    f()
+    ~^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\weakref.py", line 490, in __call__
+    return info.func(*info.args, **(info.kwargs or {}))
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 960, in _cleanup
+    cls._rmtree(name, ignore_errors=ignore_errors)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 955, in _rmtree
+    _shutil.rmtree(name, onexc=onexc)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 852, in rmtree
+    _rmtree_impl(path, dir_fd, onexc)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\shutil.py", line 711, in _rmtree_unsafe
+    onexc(os.rmdir, path, err)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 927, in onexc
+    _resetperms(path)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 287, in _resetperms
+    _dont_follow_symlinks(_os.chmod, path, 0o700)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Omar\AppData\Local\Programs\Python\Python314\Lib\tempfile.py", line 276, in _dont_follow_symlinks
+    func(path, *args, follow_symlinks=False)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [WinError 5] Access is denied: 'C:\\Users\\Omar\\AppData\\Local\\Packages\\sandbox.{627a19ae-c06a-47b6-b996-942832453994}\\AC\\Temp\\tmpcf2q8izi'

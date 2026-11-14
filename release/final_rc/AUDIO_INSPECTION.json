@@ -1,0 +1,13 @@
+{
+  "original_module_unchanged": true,
+  "source_ref": "ef357d9442952d090a753d2bc3ea84f2b1f7d30a",
+  "source_findings": {
+    "permission": "Original runtime RECORD_AUDIO request and callback; APK also has MODIFY_AUDIO_SETTINGS",
+    "routing": "Original communication mode; Android 31+ communication device selection prefers wired/BT if present, else built-in speaker; older speakerphone fallback",
+    "focus": "Original transient communication AudioFocus; interruption stops audio",
+    "effects": "Original AEC/NS/AGC are conditional on hardware support",
+    "lifecycle": "Original foreground check, onMainPause/onMainDestroy stop and generation/request guards preserved",
+    "adapter": "Separate original-codec PCM mixer stream per recipient; consent/mute/epoch reset on reconnect; one mute request on native failure"
+  },
+  "hardware_status": "BLOCKED: no acoustic, routing, permission or AudioFocus testing on Android"
+}

@@ -20,7 +20,7 @@ TEXT_SUFFIXES = {'.gd', '.gdshader', '.uid', '.godot', '.cfg', '.json', '.yml', 
 
 def source_bytes(path):
     data = path.read_bytes()
-    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE'}:
+    if path.suffix in TEXT_SUFFIXES or path.name in {'.gitignore', '.gitkeep', 'Dockerfile', 'LICENSE', 'gradlew'}:
         return data.replace(b'\r\n', b'\n')
     return data
 

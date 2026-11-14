@@ -20,6 +20,10 @@ config/features=PackedStringArray("4.5", "GL Compatibility")
 run/max_fps=60
 config/icon="res://assets/ui/gaming_hub_icon.png"
 
+boot_splash/show_image=true
+boot_splash/image="res://assets/ui/gaming_hub_brand.png"
+boot_splash/bg_color=Color(0.086275, 0.070588, 0.286275, 1)
+
 [audio]
 
 driver/enable_input=true
@@ -59,6 +63,8 @@ identity_api_url="https://gaminghub-voice-staging.onrender.com"
 theme/default_font_size=21
 
 [rendering]
+
+environment/defaults/default_clear_color=Color(0.086275, 0.070588, 0.286275, 1)
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

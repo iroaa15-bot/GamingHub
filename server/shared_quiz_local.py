@@ -39,6 +39,14 @@ class QuestionAdapter:
   return result,order.index(item['correct'])
 class CinemaAdapter(QuestionAdapter):
  def __init__(self):super().__init__('1')
+ def validate_media(self,item):
+  if 'video' not in item:return
+  clip=item['video']
+  if not isinstance(clip,str) or re.fullmatch(r'[a-z0-9_]+',clip) is None or not (ROOT/'assets/cinema'/f'{clip}.ogv').is_file():raise ValueError('Missing packaged cinema video')
+ def public(self,item):
+  result,correct=super().public(item)
+  if 'video' in item:result['video']=f"res://assets/cinema/{item['video']}.ogv"
+  return result,correct
 class SoundAdapter(QuestionAdapter):
  def __init__(self):super().__init__('6')
  def validate_media(self,item):

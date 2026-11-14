@@ -21,6 +21,8 @@ var step_controls: Array[Button]=[]
 var order_submit: Button
 var order_undo: Button
 var question_image: TextureRect
+var scene_video: VideoStreamPlayer
+var scene_replay: Button
 var story_text: Label
 var memory_grid: GridContainer
 var memory_controls: Array[Button]=[]
@@ -44,6 +46,17 @@ func _ready() -> void:
   if child is Label and child.text in ["نقاط الفوز","Winning score"]:child.text=tr_pair("عدد الأسئلة","Number of questions")
  column=_main_column
  quiz_panel=VBoxContainer.new();quiz_panel.add_theme_constant_override("separation",8);_main_column.add_child(quiz_panel)
+ scene_video=VideoStreamPlayer.new()
+ scene_video.expand=true
+ scene_video.custom_minimum_size.y=180
+ quiz_panel.add_child(scene_video)
+ scene_video.hide()
+ scene_replay=button(tr_pair("شغّل المشهد","Play scene"),func():
+  if scene_video.stream!=null:
+   scene_video.stop()
+   scene_video.play()
+ )
+ scene_replay.hide()
  column=quiz_panel
  quiz_title=label("",21)
  quiz_question_card=PanelContainer.new();quiz_question_card.name="QuizQuestionCard"
@@ -108,6 +121,10 @@ func _quiz_state(value: Dictionary) -> void:
  var question: Dictionary=quiz.get("question") if quiz.get("question") is Dictionary else {}
  quiz_panel.visible=not question.is_empty() and not bool(value.get("closed",false))
  if not quiz_panel.visible:
+  scene_video.stop()
+  scene_video.stream=null
+  scene_video.hide()
+  scene_replay.hide()
   audio_player.stop()
   audio_player.stream_paused=false
   _audio_pending=false
@@ -140,6 +157,17 @@ func _quiz_state(value: Dictionary) -> void:
  var image_path: String=str(question.get("image",""))
  question_image.visible=image_path.begins_with("res://assets/") and ResourceLoader.exists(image_path)
  if changed:question_image.texture=load(image_path) if question_image.visible else null
+ var video_path: String=str(question.get("video",""))
+ if changed or scene_video.stream==null:
+  scene_video.stop()
+  scene_video.stream=null
+  if video_path.begins_with("res://assets/cinema/") and video_path.get_extension()=="ogv" and ResourceLoader.exists(video_path):
+   scene_video.stream=load(video_path) as VideoStream
+ scene_video.visible=scene_video.stream!=null and phase=="question"
+ scene_replay.visible=scene_video.visible
+ scene_replay.disabled=bool(value.get("paused",false))
+ scene_video.paused=scene_replay.disabled
+ if not scene_video.visible:scene_video.stop()
  memory_grid.visible=mechanic=="memory"
  var can_answer: bool=phase=="question" and not bool(value.get("paused",false)) and quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0))
  written_field.visible=mechanic in ["write","identity"];written_submit.visible=written_field.visible

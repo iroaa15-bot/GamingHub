@@ -4,9 +4,38 @@ const VisualSkin = preload("res://scripts/visual_skin.gd")
 
 const BG := Color("0b1027")
 const PANEL := Color("19234b")
+const AuthClient = preload("res://scripts/network/gaminghub_auth.gd")
 var socket := WebSocketPeer.new()
+var android_voice_bridge: Node = null
+var _menu_touch_guard: Node
+var voice_local_enabled := false
+var voice_peer_enabled := false
+var voice_requested := false
+var voice_muted := false
+var voice_room_membership_supported := false
+var voice_mute_button: Button
+var _voice_resume_intent := false
+var _voice_resume_room := ""
+var _voice_resume_muted := false
+var _silent_voice_pcm := ""
+var voice_permission_pending := false
+var voice_request_id := 0
+var voice_epoch := -1
+var voice_sequence := 0
+var _voice_health_at := 0
+var _voice_sent := 0
+var _voice_congested := 0
+var _voice_received := 0
+var _voice_forwarded := 0
+var _voice_epoch_rejected := 0
+var _voice_sender_rejected := 0
+var voice_button: Button
+var voice_label: Label
 var connected := false
 var room_code := ""
+var _audio_restoring := false
+func _room_effect(name: String) -> void:
+ if not _audio_restoring:load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect(name)
 var opponent_card := ""
 var questions: Array = []
 var my_turn := false
@@ -70,6 +99,25 @@ var reconnect_pending := false
 var reconnect_deadline_ms: int = 0
 var reconnect_next_ms: int = 0
 var opponent_paused := false
+var _room_header: HBoxContainer
+var _settings_control: Button
+var _history_panel: VBoxContainer
+var _player_strip: HBoxContainer
+var _player_labels: Array[Label] = []
+var _room_heading: Label
+var _room_settings: VBoxContainer
+var _room_toolbar: HBoxContainer
+var _intro_label: Label
+var _guess_panel: VBoxContainer
+var _questions_panel: VBoxContainer
+var _candidates_panel: VBoxContainer
+var _guess_toggle: Button
+var _questions_toggle: Button
+var _details_toggle: Button
+var _latest_reply: Label
+var _show_guess := false
+var _show_questions := false
+var _show_candidates := false
 var match_view: VBoxContainer
 var lobby_controls: VBoxContainer
 var match_label: Label
@@ -86,7 +134,172 @@ const CANDIDATES_PER_PAGE: int = 6
 func _t(ar: String, en: String) -> String:
  return ar if language == "ar" else _local(en)
 
+func _setup_native_voice() -> void:
+ if android_voice_bridge != null:
+  return
+ android_voice_bridge = load("res://scripts/android_voice_integration_bridge.gd").new()
+ android_voice_bridge.outgoing_pcm.connect(_send_native_voice_pcm)
+ android_voice_bridge.permission_ready.connect(_on_voice_permission)
+ android_voice_bridge.voice_unavailable.connect(_on_voice_unavailable)
+ android_voice_bridge.status_changed.connect(_on_voice_status)
+ add_child(android_voice_bridge)
+
+func _voice_room_ready() -> bool:
+ return connected and not reconnecting and not opponent_paused and (not finished or voice_room_membership_supported) and not leaving and player_index >= 0 and not room_code.is_empty()
+
+func _send_native_voice_pcm(pcm: String) -> void:
+ if not (_voice_room_ready() and voice_local_enabled and voice_peer_enabled and voice_requested and voice_epoch >= 0):
+  return
+ voice_sequence += 1
+ # Drop live audio under transport congestion; never enqueue seconds of old speech.
+ if socket.get_ready_state() == WebSocketPeer.STATE_OPEN and socket.get_current_outbound_buffered_amount() < 4096:
+  var err := socket.send_text(JSON.stringify({"type":"voice_audio", "pcm":_voice_payload(pcm), "seq":voice_sequence, "epoch":voice_epoch}))
+  if err == OK: _voice_sent+=1
+  if err != OK:
+   _on_voice_unavailable("Voice transport interrupted")
+ else: _voice_congested+=1
+
+func set_voice_opt_in(enabled: bool) -> void:
+ _setup_native_voice()
+ var was_requested := voice_requested or voice_local_enabled
+ if enabled and not _voice_room_ready():
+  return
+ voice_requested = enabled
+ if not enabled:
+  _voice_resume_intent=false
+  _voice_resume_room=""
+  voice_permission_pending = false
+  voice_local_enabled = false
+  android_voice_bridge.set_consent(false, voice_peer_enabled)
+  if was_requested and _voice_room_ready():
+   voice_request_id += 1
+   _send({"type":"voice_state", "enabled":false, "request_id":voice_request_id})
+  _update_voice_ui()
+  return
+ voice_permission_pending = true
+ _update_voice_ui()
+ android_voice_bridge.request_permission()
+
+func _on_voice_permission(granted: bool) -> void:
+ if not voice_permission_pending:
+  return
+ voice_permission_pending = false
+ if not voice_requested or not _voice_room_ready():
+  voice_requested = false
+ elif not granted:
+  _on_voice_unavailable("Microphone permission denied")
+  return
+ else:
+  voice_request_id += 1
+  _send({"type":"voice_state", "enabled":true, "request_id":voice_request_id})
+ _update_voice_ui()
+
+func _apply_voice_state(msg: Dictionary) -> void:
+ if not _voice_room_ready():
+  return
+ if int(msg.get("protocol", 0)) != 2:
+  _on_voice_unavailable("Voice server needs an update")
+  return
+ if str(msg.get("type", "")) == "voice_state_ack" and int(msg.get("request_id", voice_request_id)) != voice_request_id:
+  return
+ _voice_event("server_state",{"reset":bool(msg.get("reset",false)),"epoch":int(msg.get("epoch",-1)),"peer_enabled":bool(msg.get("peer_enabled",false))})
+ var epoch := int(msg.get("epoch", -1))
+ if epoch < voice_epoch:
+  return
+ if epoch != voice_epoch:
+  android_voice_bridge.stop_voice()
+  voice_epoch = epoch
+  voice_sequence = 0
+ if bool(msg.get("reset", false)):
+  voice_requested = false
+ voice_local_enabled = voice_requested and bool(msg.get("local_enabled", msg.get("enabled", false)))
+ voice_peer_enabled = bool(msg.get("peer_enabled", false))
+ _refresh_native_voice()
+
+func _refresh_native_voice() -> void:
+ if android_voice_bridge != null:
+  android_voice_bridge.set_consent(voice_requested and voice_local_enabled and _voice_room_ready(), voice_peer_enabled)
+ _update_voice_ui()
+
+func _reset_voice_on_connection_loss(keep_intent: bool = false) -> void:
+ if keep_intent and voice_requested:
+  _voice_resume_intent=true
+  _voice_resume_room=room_code
+  _voice_resume_muted=voice_muted
+ elif not keep_intent:
+  _voice_resume_intent=false
+  _voice_resume_room=""
+  voice_muted=false
+ if voice_requested: _voice_event("connection_reset",{"connected":connected,"reconnecting":reconnecting,"opponent_paused":opponent_paused,"finished":finished})
+ voice_requested = false
+ voice_permission_pending = false
+ voice_peer_enabled = false
+ voice_local_enabled = false
+ voice_epoch = -1
+ voice_sequence = 0
+ _refresh_native_voice()
+
+var _handling_voice_failure := false
+
+func _on_voice_unavailable(reason: String) -> void:
+ if _handling_voice_failure: return
+ _handling_voice_failure = true
+ var safe_reason := reason if reason in ["audio_focus_lost","audio_focus_denied","Audio interrupted; enable voice again","Microphone permission denied","microphone_muted","Voice transport interrupted","Voice server needs an update"] else (reason if reason.begins_with("record_read_") or reason.begins_with("playback_write_") or reason in ["audio_route_lost","communication_route_failed","recording_not_started"] else "native_or_transport_error")
+ _voice_event("unavailable",{"reason":safe_reason})
+ set_voice_opt_in(false)
+ if is_instance_valid(voice_label):
+  voice_label.text = _t("الصوت متوقف: ", "Voice unavailable: ") + _voice_failure_text(reason)
+ _handling_voice_failure = false
+
+func _voice_failure_text(reason: String) -> String:
+ match reason:
+  "Microphone permission denied", "microphone_muted":
+   return _t("اسمح باستخدام الميكروفون وتأكد أنه غير مكتوم.", "Allow microphone access and check that it is not muted.")
+  "audio_focus_lost", "Audio interrupted; enable voice again", "audio_focus_denied":
+   return _t("توقف الصوت بسبب مقاطعة؛ يمكنك تفعيله مجددًا.", "Audio was interrupted; enable voice again.")
+  "Voice server needs an update":
+   return _t("خدمة الصوت تحتاج تحديثًا.", "The voice service needs an update.")
+  _:
+   return _t("تعذر تشغيل الصوت؛ جرّب تفعيله مجددًا.", "Could not start voice; try enabling it again.")
+
+func _on_voice_status(state: String, details: String) -> void:
+ _voice_event("native_state",{"state":state})
+ _update_voice_ui()
+ if state == "active" and OS.is_debug_build():
+  # Capability data only; no PCM, tokens, or conversation contents are logged.
+  print("VOICE_CAPABILITIES ", details)
+
+func _update_voice_ui() -> void:
+ if not is_instance_valid(voice_button):
+  return
+ voice_button.disabled = (not _voice_room_ready() and not _voice_resume_intent and not voice_requested) or not android_voice_bridge.is_available()
+ var voice_title := _t("فصل الاتصال الصوتي", "End voice call") if voice_requested or _voice_resume_intent else _t("اتصال صوتي", "Connect voice")
+ if player_index>=0 and not room_code.is_empty(): VisualSkin.icon_action(voice_button,"phone_off" if voice_requested or _voice_resume_intent else "phone",voice_title)
+ else: voice_button.text=voice_title
+ if is_instance_valid(voice_mute_button):
+  voice_mute_button.disabled=not (voice_requested and voice_local_enabled and voice_peer_enabled and _voice_room_ready())
+  VisualSkin.icon_action(voice_mute_button,"mic_off" if voice_muted else "mic",_t("إلغاء كتم إرسال الميكروفون","Unmute microphone transmission") if voice_muted else _t("كتم إرسال الميكروفون","Mute microphone transmission"))
+ if not android_voice_bridge.is_available():
+  voice_label.text = _t("الصوت غير متاح في هذه النسخة؛ استخدم نسخة Android المحدثة.", "Voice is unavailable in this version; use the updated Android app.")
+ elif not voice_requested:
+  voice_label.text = _t("الصوت اختياري؛ كل لاعب يفعله بنفسه.", "Voice is optional; each player enables it.")
+ elif voice_permission_pending:
+  voice_label.text = _t("اسمح باستخدام الميكروفون للمتابعة.", "Allow microphone access to continue.")
+ elif android_voice_bridge.active:
+  voice_label.text = _t("الصوت متصل • إرسال الميكروفون مكتوم", "Voice connected • microphone transmission muted") if voice_muted else _t("المحادثة الصوتية تعمل", "Voice chat active")
+ elif not voice_local_enabled:
+  voice_label.text = _t("جاري تأكيد الصوت مع السيرفر…", "Confirming voice with the server…")
+ else:
+  voice_label.text = _t("في انتظار تفعيل الطرف الآخر للصوت…", "Waiting for the other player to enable voice…")
+
+func _exit_tree() -> void:
+ var policy=get_tree().root.get_node_or_null("RoomAudioPolicy")
+ if policy!=null:policy.membership(self,false)
+ _reset_voice_on_connection_loss()
+ socket.close()
+
 func _ready() -> void:
+ get_tree().quit_on_go_back = false
  ui_tr = JSON.parse_string(FileAccess.get_file_as_string("res://data/ui_tr.json"))
  ui_ar = JSON.parse_string(FileAccess.get_file_as_string("res://data/online_ar.json"))
  catalog = JSON.parse_string(FileAccess.get_file_as_string("res://data/cards.json"))
@@ -103,6 +316,7 @@ func _ready() -> void:
   language = str(saved.get("language", "ar"))
  if language not in ["ar", "en"]:
   language = "ar"
+ layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
  var bg := VisualSkin.new()
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
@@ -111,6 +325,9 @@ func _ready() -> void:
  scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
  scroll.scroll_deadzone = 22
  scroll.follow_focus = true
+ _menu_touch_guard = load("res://scripts/menu_touch_guard.gd").new()
+ _menu_touch_guard.scroll_area = scroll
+ scroll.add_child(_menu_touch_guard)
  add_child(scroll)
  output = VBoxContainer.new()
  output.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -123,27 +340,41 @@ func _ready() -> void:
  margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  scroll.add_child(margin)
  margin.add_child(output)
- VisualSkin.add_hero(output, _t("🎭 خمن صورتك", "🎭 GUESS YOUR PICTURE"), _t("العب مع صاحبك واكشف صورتك السرية", "Play with a friend. Discover your secret picture."), _t("ساحة الأصدقاء", "FRIENDS ARENA"))
- var lobby_brand := TextureRect.new()
- lobby_brand.texture = load("res://assets/ui/gaming_hub_brand.png") as Texture2D
- lobby_brand.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- lobby_brand.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- lobby_brand.custom_minimum_size.y = 125
- output.add_child(lobby_brand)
+ VisualSkin.compact_header(output, _t("خمن صورتك", "GUESS YOUR PICTURE"))
  language_button = Button.new()
  language_button.text = "العربية / English"
  language_button.custom_minimum_size.y = 52
- language_button.pressed.connect(_toggle_language)
+ language_button.pressed.connect(_invoke_room_action.bind(weakref(language_button), _toggle_language), CONNECT_DEFERRED)
  VisualSkin.decorate_button(language_button, "secondary")
  output.add_child(language_button)
  var network_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/network_config.json"))
  if network_settings is Dictionary:
   server_url = str(network_settings.get("server_url", "")).strip_edges()
- _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
+ # Only an explicitly enabled local staging profile can override production.
+ # Exported release builds have no staging profile by default.
+ if FileAccess.file_exists("res://data/voice_staging.json"):
+  var staging_settings: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/voice_staging.json"))
+  if staging_settings is Dictionary and staging_settings.get("enabled", false) == true:
+   var staging_url := str(staging_settings.get("server_url", "")).strip_edges()
+   if staging_url == "wss://gaminghub-voice-staging.onrender.com":
+    server_url = staging_url
+ _intro_label = _label(_t("العب مع صاحبك بكود غرفة أو اختار منافس عشوائي.", "Play a friend using a room code or find a random opponent."), 17)
  # The active match is placed ABOVE lobby actions for portrait phones.
  status = _label(_t("جاهز للاتصال", "Ready to connect"), 18)
  health_label = _label(_t("الشبكة: غير متصل", "Network: offline"), 14)
  health_label.add_theme_color_override("font_color", Color("a7b6d7"))
+ _setup_native_voice()
+ voice_button = Button.new()
+ voice_button.custom_minimum_size.y = 52
+ voice_button.pressed.connect(_invoke_room_action.bind(weakref(voice_button), _toggle_voice_call), CONNECT_DEFERRED)
+ _style_button(voice_button)
+ output.add_child(voice_button)
+ voice_label = _label("", 14)
+ _update_voice_ui()
+ # Local-only diagnostics for staging; never collect audio, room codes or resume tokens.
+ if OS.get_name() == "Android" and FileAccess.file_exists("res://data/voice_staging.json"):
+  _button(_t("تشخيص الصوت (نسخ التقرير)", "Voice diagnostics (copy report)"), _show_voice_diagnostics)
+
  match_view = VBoxContainer.new()
  match_view.add_theme_constant_override("separation", 10)
  output.add_child(match_view)
@@ -161,7 +392,7 @@ func _ready() -> void:
  create_button = Button.new()
  create_button.text = _t("إنشاء غرفة لصديق", "Create a friend room")
  create_button.custom_minimum_size.y = 64
- create_button.pressed.connect(func(): _request_action({"type":"create"}))
+ create_button.pressed.connect(_invoke_room_action.bind(weakref(create_button), func(): _request_action({"type":"create"})), CONNECT_DEFERRED)
  _style_button(create_button, true)
  lobby_controls.add_child(create_button)
  code_input = _text_input("كود الغرفة - 6 حروف أو أرقام")
@@ -171,27 +402,27 @@ func _ready() -> void:
  join_button = Button.new()
  join_button.text = _t("انضمام بكود", "Join with code")
  join_button.custom_minimum_size.y = 64
- join_button.pressed.connect(_join_room)
+ join_button.pressed.connect(_invoke_room_action.bind(weakref(join_button), _join_room), CONNECT_DEFERRED)
  _style_button(join_button)
  lobby_controls.add_child(join_button)
  match_button = Button.new()
  match_button.text = _t("منافس عشوائي", "Find an opponent")
  match_button.custom_minimum_size.y = 64
- match_button.pressed.connect(func(): _request_action({"type":"matchmake"}))
+ match_button.pressed.connect(_invoke_room_action.bind(weakref(match_button), func(): _request_action({"type":"matchmake"})), CONNECT_DEFERRED)
  _style_button(match_button, true)
  lobby_controls.add_child(match_button)
  share_button = Button.new()
  share_button.text = _t("نسخ دعوة الغرفة", "Copy room invitation")
  share_button.custom_minimum_size.y = 52
  share_button.disabled = true
- share_button.pressed.connect(_copy_invite)
+ share_button.pressed.connect(_invoke_room_action.bind(weakref(share_button), _copy_invite), CONNECT_DEFERRED)
  _style_button(share_button)
  lobby_controls.add_child(share_button)
- _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
+ var leave_control := _button(_t("إلغاء البحث / مغادرة الغرفة", "Cancel / Leave room"), _leave_match)
  var advanced_toggle := Button.new()
  advanced_toggle.text = _t("إعدادات الاتصال (متقدمة)", "Connection settings (advanced)")
  VisualSkin.decorate_button(advanced_toggle, "secondary")
- advanced_toggle.pressed.connect(func(): advanced_panel.visible = not advanced_panel.visible)
+ advanced_toggle.pressed.connect(_invoke_room_action.bind(weakref(advanced_toggle), func(): advanced_panel.visible = not advanced_panel.visible), CONNECT_DEFERRED)
  output.add_child(advanced_toggle)
  advanced_panel = VBoxContainer.new()
  advanced_panel.visible = false
@@ -202,20 +433,164 @@ func _ready() -> void:
  address_input.custom_minimum_size.y = 52
  advanced_panel.add_child(address_input)
  _button(_t("اتصال يدوي", "Connect manually"), _connect_server, advanced_panel)
- _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
+ var back_control := _button(_t("العودة للألعاب", "Back to games"), _request_exit_to_games)
+ _room_header=HBoxContainer.new()
+ _room_header.add_theme_constant_override("separation",8)
+ output.add_child(_room_header)
+ output.move_child(_room_header,0)
+ _room_heading=Label.new()
+ _room_heading.add_theme_font_size_override("font_size",22)
+ _room_heading.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ _room_heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ _room_heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ _room_header.add_child(_room_heading)
+ _room_toolbar=HBoxContainer.new()
+ _room_toolbar.add_theme_constant_override("separation",8)
+ match_view.add_child(_room_toolbar)
+ _guess_toggle=Button.new()
+ _guess_toggle.text=_t("تخمين","Guess")
+ _guess_toggle.pressed.connect(_invoke_room_action.bind(weakref(_guess_toggle),func(): _show_guess=not _show_guess; _apply_action_panels()),CONNECT_DEFERRED)
+ VisualSkin.decorate_button(_guess_toggle,"amber")
+ _room_toolbar.add_child(_guess_toggle)
+ _questions_toggle=Button.new()
+ _questions_toggle.text=_t("الأسئلة","Questions")
+ _questions_toggle.icon=VisualSkin.menu_icon("list")
+ _questions_toggle.expand_icon=true
+ _questions_toggle.add_theme_constant_override("icon_max_width",20)
+ _questions_toggle.pressed.connect(_invoke_room_action.bind(weakref(_questions_toggle),func(): _show_questions=not _show_questions; _apply_action_panels()),CONNECT_DEFERRED)
+ VisualSkin.decorate_button(_questions_toggle,"gold")
+ _room_toolbar.add_child(_questions_toggle)
+ voice_button.reparent(_room_toolbar)
+ voice_mute_button=Button.new()
+ voice_mute_button.pressed.connect(_invoke_room_action.bind(weakref(voice_mute_button),_toggle_voice_mute),CONNECT_DEFERRED)
+ VisualSkin.decorate_button(voice_mute_button)
+ _room_toolbar.add_child(voice_mute_button)
+ for control in [_guess_toggle,_questions_toggle,voice_button,voice_mute_button]:
+  control.custom_minimum_size=Vector2(56,56)
+  control.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  control.add_theme_font_size_override("font_size",16)
+ _player_strip=HBoxContainer.new()
+ _player_strip.add_theme_constant_override("separation",8)
+ match_view.add_child(_player_strip)
+ for index in range(2):
+  var frame := PanelContainer.new()
+  frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  frame.add_theme_stylebox_override("panel",VisualSkin.card(Color("10243b"),12))
+  _player_strip.add_child(frame)
+  var player := HBoxContainer.new()
+  player.add_theme_constant_override("separation",8)
+  frame.add_child(player)
+  var avatar := TextureRect.new()
+  avatar.texture=VisualSkin.menu_icon("player")
+  avatar.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+  avatar.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+  avatar.custom_minimum_size=Vector2(28,28)
+  avatar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+  player.add_child(avatar)
+  var player_name := Label.new()
+  player_name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  player_name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  player_name.add_theme_font_size_override("font_size",14)
+  player.add_child(player_name)
+  _player_labels.append(player_name)
+ _latest_reply=Label.new()
+ _latest_reply.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ _latest_reply.add_theme_font_size_override("font_size",18)
+ _latest_reply.visible=false
+ match_view.add_child(_latest_reply)
+ _room_settings=VBoxContainer.new()
+ _room_settings.visible=false
+ _room_settings.add_theme_constant_override("separation",8)
+ output.add_child(_room_settings)
+ for control in [language_button,health_label,share_button,advanced_toggle,advanced_panel,leave_control,back_control]: control.reparent(_room_settings)
+ _history_panel=VBoxContainer.new()
+ _history_panel.add_theme_constant_override("separation",8)
+ _room_settings.add_child(_history_panel)
+ var settings_control := Button.new()
+ _settings_control=settings_control
+ settings_control.text=_t("إعدادات الغرفة ومغادرتها","Room settings & leave")
+ settings_control.icon=VisualSkin.menu_icon("settings")
+ settings_control.expand_icon=true
+ settings_control.add_theme_constant_override("icon_max_width",20)
+ settings_control.custom_minimum_size.y=52
+ VisualSkin.decorate_button(settings_control)
+ settings_control.pressed.connect(_invoke_room_action.bind(weakref(settings_control),func(): _room_settings.visible=not _room_settings.visible),CONNECT_DEFERRED)
+ output.add_child(settings_control)
+ output.move_child(settings_control,output.get_child_count()-2)
  _update_lobby()
+ VisualSkin.enable_menu_swipe(output)
+
+func _voice_diagnostics_text() -> String:
+ _setup_native_voice()
+ var plugin_found := Engine.has_singleton("GamingHubVoice")
+ var api_version := -1
+ var permission := "unknown"
+ if plugin_found:
+  var plugin := Engine.get_singleton("GamingHubVoice")
+  if plugin != null:
+   api_version = int(plugin.call("getVoiceApiVersion"))
+  if plugin != null:
+   permission = str(plugin.call("hasMicrophonePermission"))
+ var bridge_ready: bool = android_voice_bridge != null and android_voice_bridge.is_available()
+ var endpoint_kind := "staging" if server_url == "wss://gaminghub-voice-staging.onrender.com" else "other"
+ return "\n".join(PackedStringArray([
+  "Gaming Hub Voice Diagnostics v1",
+  "os=" + OS.get_name(),
+  "os_version=" + OS.get_version(),
+  "app_debug=" + str(OS.is_debug_build()),
+  "native_singleton=" + str(plugin_found),
+  "native_api_version=" + str(api_version),
+  "bridge_available=" + str(bridge_ready),
+  "mic_permission=" + permission,
+  "endpoint=" + endpoint_kind,
+  "ws_state=" + str(socket.get_ready_state()),
+  "game_connected=" + str(connected),
+  "voice_active=" + str(android_voice_bridge.active if android_voice_bridge != null else false)
+ ]))
+
+func _show_voice_diagnostics() -> void:
+ var report := _voice_diagnostics_text()
+ var dialog := AcceptDialog.new()
+ dialog.title = _t("تشخيص المحادثة الصوتية", "Voice diagnostics")
+ dialog.dialog_text = report
+ dialog.ok_button_text = _t("إغلاق", "Close")
+ add_child(dialog)
+ dialog.popup_centered_ratio(0.92)
+ DisplayServer.clipboard_set(report)
+ # This report is copied locally; the app never sends diagnostics to a server.
+ dialog.confirmed.connect(dialog.queue_free)
+ dialog.canceled.connect(dialog.queue_free)
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo:
   if event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK:
    get_viewport().set_input_as_handled()
-   _request_exit_to_games()
+   _queue_room_back()
+
+var _leaving_scene := false
+var _exit_dialog: ConfirmationDialog
+var _back_exit_pending := false
+
+func _notification(what: int) -> void:
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST: _queue_room_back()
+
+func _queue_room_back() -> void:
+ if _back_exit_pending or _leaving_scene or not is_inside_tree(): return
+ _back_exit_pending = true
+ _perform_room_back.call_deferred()
+
+func _perform_room_back() -> void:
+ _back_exit_pending = false
+ if is_inside_tree() and not _leaving_scene: _request_exit_to_games()
 
 func _request_exit_to_games() -> void:
+ if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
+ if is_instance_valid(_exit_dialog): return
  if room_code.is_empty() and not matchmaking_pending and pending_action.is_empty() and not lobby_request_pending and not leaving:
   _exit_to_games()
   return
  var dialog := ConfirmationDialog.new()
+ _exit_dialog = dialog
  dialog.title = _t("مغادرة الأونلاين؟", "LEAVE ONLINE GAME?")
  dialog.dialog_text = _t("سيتم إلغاء البحث أو مغادرة الغرفة الحالية.", "Matchmaking will be cancelled or you will leave your current room.")
  dialog.ok_button_text = _t("مغادرة", "LEAVE")
@@ -229,17 +604,23 @@ func _request_exit_to_games() -> void:
  )
 
 func _exit_to_games() -> void:
+ if _leaving_scene or not is_inside_tree() or is_queued_for_deletion(): return
+ _leaving_scene = true
+ var scene_tree := get_tree()
+ _reset_voice_on_connection_loss()
  if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
   _send({"type": "cancel_queue"})
   _send({"type": "leave"})
   socket.poll()
  socket.close()
  pending_action.clear()
- get_tree().change_scene_to_file("res://scenes/Main.tscn")
+ var result := scene_tree.change_scene_to_file("res://scenes/Main.tscn")
+ if result != OK: _leaving_scene = false
 
 func _label(value: String, size: int = 20) -> Label:
  var l := Label.new()
  l.text = _local(value)
+ l.mouse_filter = Control.MOUSE_FILTER_IGNORE
  l.set_meta("ui_source", value)
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.add_theme_font_size_override("font_size", size)
@@ -256,15 +637,16 @@ func _text_input(hint: String) -> LineEdit:
  output.add_child(i)
  return i
 
-func _button(value: String, callback: Callable, parent: VBoxContainer = null) -> void:
+func _button(value: String, callback: Callable, parent: VBoxContainer = null) -> Button:
  var b := Button.new()
  b.text = _local(value)
  b.set_meta("ui_source", value)
  b.custom_minimum_size.y = 52
- b.pressed.connect(callback)
+ b.pressed.connect(_invoke_room_action.bind(weakref(b), callback), CONNECT_DEFERRED)
  _style_button(b)
  var target: VBoxContainer = parent if parent != null else output
  target.add_child(b)
+ return b
 
 func _style_button(button: Button, primary: bool = false) -> void:
  VisualSkin.decorate_button(button, "violet" if primary else "secondary")
@@ -279,21 +661,24 @@ func _style_button(button: Button, primary: bool = false) -> void:
    var animation := button.create_tween()
    animation.tween_property(button, "scale", Vector2.ONE, 0.09)
  )
- button.pressed.connect(func() -> void:
-  if OS.get_name() == "Android":
-   Input.vibrate_handheld(12)
- )
 
 func _clear_match_view() -> void:
  if not is_instance_valid(match_view):
   return
  for child in match_view.get_children():
-  if child != action_area and child != match_label:
+  if child != action_area and child != match_label and child != _room_toolbar and child != _latest_reply and child != _player_strip:
    child.queue_free()
  match_label.text = ""
+ if is_instance_valid(_latest_reply):
+  _latest_reply.text=""
+  _latest_reply.hide()
+ if is_instance_valid(_history_panel):
+  for item in _history_panel.get_children(): item.queue_free()
  deduction_status = null
 
 func _update_lobby() -> void:
+ _update_voice_ui()
+ _update_match_layout()
  if not is_instance_valid(lobby_controls):
   return
  var active := not room_code.is_empty() or matchmaking_pending or not pending_action.is_empty() or lobby_request_pending or leaving
@@ -304,6 +689,7 @@ func _update_lobby() -> void:
  share_button.disabled = room_code.is_empty() or leaving
 
 func _reset_match_state() -> void:
+ _reset_voice_on_connection_loss()
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -341,16 +727,19 @@ func _reset_match_state() -> void:
  _update_lobby()
 
 func _join_room() -> void:
- var code := code_input.text.strip_edges().to_upper()
- if code.length() != 6:
+ var invites=preload("res://scripts/room_invite_code.gd")
+ var code: String=invites.normalize(code_input.text)
+ if not invites.valid(code,true):
   status.text = _t("كود الغرفة لازم يكون 6 حروف أو أرقام", "Room code must be 6 characters")
   return
  _request_action({"type":"join", "code":code})
 
 func _leave_match() -> void:
+ _reset_voice_on_connection_loss()
  if leaving:
   return
  if reconnecting:
+  load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
   socket.close()
   socket = WebSocketPeer.new()
   _reset_match_state()
@@ -435,13 +824,15 @@ func _connect_server() -> void:
  _update_lobby()
  connect_started_ms = Time.get_ticks_msec()
  socket = WebSocketPeer.new()
- var err := socket.connect_to_url(url)
+ server_url = url
+ var err := socket.connect_to_url(server_url)
  if err != OK:
   pending_action.clear()
   _update_lobby()
  status.text = _t("جاري الاتصال...", "Connecting...") if err == OK else _t("فشل بدء الاتصال: ", "Connection error: ") + str(err)
 
 func _start_reconnect() -> void:
+ _reset_voice_on_connection_loss(true)
  sync_pending = false
  sync_started_ms = 0
  ping_waiting = false
@@ -463,7 +854,15 @@ func _start_reconnect() -> void:
  _refresh_actions()
  status.text = _t("انقطع الاتصال؛ جاري استكمال نفس المباراة...", "Connection lost; restoring your match...")
 
+func _bind_account_if_available() -> void:
+ # Identity is optional. Server verifies the token; no client-provided score or user ID.
+ # WebSocket ordering ensures the binding precedes lobby actions or resume.
+ var token: String = AuthClient.session_token
+ if not token.is_empty() and server_url.replace("wss://","https://").trim_suffix("/")==AuthClient.session_origin and server_url.begins_with("wss://") and socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+  _send({"type": "auth_bind", "access_token": token})
+
 func _process(_delta: float) -> void:
+ _record_voice_health()
  socket.poll()
  var state := socket.get_ready_state()
  if reconnecting:
@@ -492,13 +891,14 @@ func _process(_delta: float) -> void:
    return
   if state == WebSocketPeer.STATE_CLOSED and reconnect_now >= reconnect_next_ms:
    socket = WebSocketPeer.new()
-   var err := socket.connect_to_url(address_input.text.strip_edges())
+   var err := socket.connect_to_url(server_url)
    connect_started_ms = reconnect_now if err == OK else 0
    reconnect_next_ms = reconnect_now + 2500
    return
   if state == WebSocketPeer.STATE_OPEN and not reconnect_pending:
    reconnect_pending = true
    connect_started_ms = reconnect_now
+   _bind_account_if_available()
    _send({"type":"resume", "code":room_code, "token":resume_token})
   if state != WebSocketPeer.STATE_OPEN:
    return
@@ -547,6 +947,7 @@ func _process(_delta: float) -> void:
    status.text = _t("جاري مراجعة الحركة مع السيرفر...", "Checking move status with server...")
    _send({"type":"sync"})
   if not connected:
+   _bind_account_if_available()
    connected = true
    last_ping_ms = Time.get_ticks_msec()
    ping_waiting = false
@@ -620,18 +1021,39 @@ func _send(message: Dictionary) -> void:
 
 func _handle(msg: Dictionary) -> void:
  var kind := str(msg.get("type", ""))
+ if kind in ["voice_state_ack", "voice_state"]:
+  _apply_voice_state(msg)
+  return
+ if kind == "voice_audio":
+  _voice_received+=1
+  if int(msg.get("epoch",-2))!=voice_epoch: _voice_epoch_rejected+=1
+  if int(msg.get("player",player_index))==player_index: _voice_sender_rejected+=1
+  if _voice_room_ready() and android_voice_bridge != null and voice_local_enabled and voice_peer_enabled and int(msg.get("epoch", -2)) == voice_epoch and int(msg.get("player", player_index)) != player_index:
+   _voice_forwarded+=1
+   android_voice_bridge.receive_pcm(str(msg.get("pcm", "")), int(msg.get("seq", -1)))
+  return
+ if kind == "error" and str(msg.get("scope", "")) == "voice":
+  _reset_voice_on_connection_loss()
+  if is_instance_valid(voice_label):
+   voice_label.text = _t("الصوت متوقف: ", "Voice unavailable: ") + _voice_failure_text(str(msg.get("message", "")))
+  return
  if leaving and kind not in ["left", "disconnected"]:
   # A create/matchmake request can race with leave; never resurrect its UI.
   return
- if kind in ["turn", "finished", "error", "left", "disconnected"]:
+ # A generic error can be unrelated to an in-flight move (e.g. voice).
+ # Do not discard a move awaiting authoritative sync because of that error.
+ if kind in ["turn", "finished", "left", "disconnected"]:
   action_in_flight = false
   move_started_ms = 0
   sync_pending = false
   sync_started_ms = 0
- if kind in ["room", "queue", "started", "error", "left", "disconnected"]:
+ if kind in ["room", "queue", "started", "left", "disconnected"]:
   lobby_request_pending = false
   lobby_request_started_ms = 0
  match kind:
+  "auth_bound":
+   # Optional account binding must never block guest gameplay.
+   pass
   "pong":
    if ping_waiting and int(msg.get("id", -1)) == ping_sent_ms:
     latency_ms = maxi(0, Time.get_ticks_msec() - ping_sent_ms)
@@ -639,15 +1061,20 @@ func _handle(msg: Dictionary) -> void:
     if is_instance_valid(health_label):
      health_label.text = (_t("الشبكة: بطيئة • %d مللي ثانية", "Network: slow • %d ms") if latency_ms > 600 else _t("الشبكة: مستقرة • %d مللي ثانية", "Network: stable • %d ms")) % latency_ms
   "paused":
+   _reset_voice_on_connection_loss(true)
    opponent_paused = true
    status.text = _t("المنافس فقد الاتصال؛ المباراة متوقفة مؤقتًا في انتظار عودته.", "Opponent disconnected; match paused until they return.")
    _refresh_actions()
   "peer_resumed":
+   _reset_voice_on_connection_loss(true)
    opponent_paused = false
    my_turn = int(msg.get("turn", -1)) == player_index
    status.text = _t("المنافس رجع؛ المباراة مستمرة.", "Opponent reconnected; match resumed.")
    _refresh_actions()
+   _resume_voice_after_sync()
   "resumed", "synced":
+   if kind == "resumed":
+    _reset_voice_on_connection_loss(true)
    # The authoritative snapshot replaces local state; do NOT replay a timed-out move.
    var replay: Array = msg.get("history", [])
    var started_message: Dictionary = msg.duplicate()
@@ -655,10 +1082,12 @@ func _handle(msg: Dictionary) -> void:
    # A sync snapshot deliberately has no credential: preserve our existing token.
    if kind == "synced":
     started_message["resume_token"] = resume_token
+   _audio_restoring=true
    _handle(started_message)
    for event in replay:
     if event is Dictionary and str(event.get("type", "")) in ["question", "guess", "finished"]:
      _handle(event)
+   _audio_restoring=false
    opponent_paused = bool(msg.get("paused", false))
    finished = bool(msg.get("finished", false))
    reconnecting = false
@@ -674,7 +1103,9 @@ func _handle(msg: Dictionary) -> void:
    else:
     status.text = _t("تمت مزامنة المباراة مع السيرفر", "Match synchronized with server") if kind == "synced" else _t("تم استكمال المباراة بنجاح", "Match restored successfully")
    _refresh_actions()
+   _resume_voice_after_sync()
   "left":
+   load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,false)
    _reset_match_state()
    status.text = _t("خرجت من الغرفة", "Left the room")
   "queue":
@@ -687,10 +1118,21 @@ func _handle(msg: Dictionary) -> void:
    matchmaking_pending = false
    my_turn = false
    finished = false
+   _room_effect("room_create")
    room_code = str(msg.get("code", ""))
+   if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
    _update_lobby()
    status.text = _local("ROOM CODE: ") + room_code + " • " + _local(str(msg.get("status", "")))
   "started":
+   # Joiners and random matches receive the room in started, without a prior room message.
+   var assigned_room := str(msg.get("room", room_code))
+   if assigned_room != room_code:
+    _reset_voice_on_connection_loss()
+   _room_effect("player_join")
+   _room_effect("round_start")
+   room_code = assigned_room
+   if not room_code.is_empty():load("res://scripts/room_audio_policy.gd").acquire(get_tree()).membership(self,true)
+   voice_room_membership_supported=bool(msg.get("voice_room_lifetime",false))
    pending_action.clear()
    matchmaking_pending = false
    _clear_match_view()
@@ -722,18 +1164,18 @@ func _handle(msg: Dictionary) -> void:
    match_view.add_child(deduction_status)
    _update_deduction_status()
    var art_frame := PanelContainer.new()
-   art_frame.custom_minimum_size.y = 255
+   art_frame.custom_minimum_size.y = 250
    art_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
    var art_style_box := StyleBoxFlat.new()
    art_style_box.bg_color = PANEL
    art_style_box.set_corner_radius_all(18)
-   art_style_box.set_content_margin_all(10)
+   art_style_box.set_content_margin_all(0)
    art_frame.add_theme_stylebox_override("panel", art_style_box)
    card_art = TextureRect.new()
    card_art.texture = online_card_texture(opponent_card)
    card_art.custom_minimum_size.y = 235
    card_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-   card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+   card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
    art_frame.add_child(card_art)
    match_view.add_child(art_frame)
    match_view.move_child(art_frame, 1)
@@ -754,17 +1196,20 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("سؤال: ", "Question: ") + str(msg.get("text_" + language, msg.get("text", ""))) + " → " + (_t("نعم", "YES") if msg.get("answer", false) else _t("لا", "NO")), 16)
    _update_deduction_status()
   "guess":
+   _room_effect("correct" if bool(msg.get("correct",false)) else "incorrect")
    if int(msg.get("player", -1)) == player_index and not bool(msg.get("correct", false)):
     _remove_wrong_guess(str(msg.get("guess", "")))
    _match_note(_t("تخمين: ", "Guess: ") + str(msg.get("guess", "")) + (" ✓" if msg.get("correct", false) else " ✗"), 16)
    _update_deduction_status()
   "finished":
+   if not voice_room_membership_supported: _reset_voice_on_connection_loss()
    finished = true
    my_turn = false
    var names: Array[String] = []
    for name in msg.get("cards", []):
     names.append(display_card(str(name)))
    var winner := int(msg.get("winner", -1))
+   _room_effect("victory" if winner==player_index else "results")
    var result_text := _t("تعادل!", "Draw!") if winner == -1 else (_t("مبروك! أنت الفائز", "You won!") if winner == player_index else _t("المنافس فاز", "Opponent won"))
    _match_note(result_text + " • " + _t("الصور: ", "Cards: ") + " / ".join(names), 20)
    status.text = _t("المباراة انتهت. غادر الغرفة لبدء مباراة جديدة.", "Match finished. Leave the room to start a new game.")
@@ -775,7 +1220,8 @@ func _handle(msg: Dictionary) -> void:
    _match_note(_t("المنافس خرج من المباراة", "Opponent disconnected"), 18)
    _refresh_actions()
   "error":
-   if reconnect_pending:
+   # Do not cancel unrelated gameplay operations on an uncorrelated error.
+   if reconnect_pending and str(msg.get("scope", "")) == "resume":
     if str(msg.get("message", "")) == "Original player still connected":
      # Server may not have detected the dead TCP peer yet; wait for its ping timeout.
      socket.close()
@@ -787,10 +1233,16 @@ func _handle(msg: Dictionary) -> void:
      return
     _abort_stalled_session(_t("السيرفر رفض استكمال المباراة. يمكنك بدء مباراة جديدة.", "Server rejected resume. Start a new match."))
     return
-   action_in_flight = false
-   _refresh_actions()
-   matchmaking_pending = false
-   _update_lobby()
+   # Generic server errors have no request ID. An error may belong to
+   # signaling while a gameplay move is still awaiting acknowledgement.
+   # Keep that move pending until authoritative sync resolves its outcome.
+   if lobby_request_pending:
+    lobby_request_pending = false
+    lobby_request_started_ms = 0
+    matchmaking_pending = false
+    _update_lobby()
+   if not action_in_flight:
+    _refresh_actions()
    status.text = _local(str(msg.get("message", "Server error")))
 
 var deduction_status: Label
@@ -866,12 +1318,16 @@ func _next_candidates() -> void:
  _refresh_actions()
 
 func _match_note(value: String, size: int = 16) -> void:
+ if is_instance_valid(_latest_reply):
+  _latest_reply.text=value
+  _latest_reply.visible=player_index>=0 and not room_code.is_empty()
  var l := Label.new()
  l.text = value
  l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
  l.add_theme_font_size_override("font_size", size)
  l.add_theme_color_override("font_color", Color.WHITE)
- match_view.add_child(l)
+ if is_instance_valid(_history_panel): _history_panel.add_child(l)
+ else: match_view.add_child(l)
 
 func _copy_invite() -> void:
  if room_code.is_empty():
@@ -881,6 +1337,9 @@ func _copy_invite() -> void:
 
 func _toggle_language() -> void:
  language = ["ar", "en"][(["ar", "en"].find(language) + 1) % 2]
+ layout_direction=Control.LAYOUT_DIRECTION_RTL if language=="ar" else Control.LAYOUT_DIRECTION_LTR
+ var compact_title=output.get_node_or_null("CompactHeader")
+ if compact_title!=null: compact_title.get_child(1).text=_t("خمن صورتك", "GUESS YOUR PICTURE")
  refresh_localized_controls(output)
  language_button.text = "العربية / English"
  if is_instance_valid(create_button):
@@ -967,6 +1426,8 @@ func _recommended_question_index() -> int:
  return best_index
 
 func _refresh_actions() -> void:
+ _update_voice_ui()
+ _update_match_layout()
  for child in action_area.get_children():
   child.queue_free()
  if finished or not my_turn or action_in_flight or reconnecting or opponent_paused:
@@ -999,6 +1460,7 @@ func _refresh_actions() -> void:
   ready_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
   ready_note.add_theme_color_override("font_color", Color("a7f3d0"))
   action_area.add_child(ready_note)
+ var candidate_start := action_area.get_child_count()
  if not possible_cards.is_empty():
   var page_count_cards := ceili(float(possible_cards.size()) / float(CANDIDATES_PER_PAGE))
   candidate_page = clampi(candidate_page, 0, page_count_cards - 1)
@@ -1014,7 +1476,7 @@ func _refresh_actions() -> void:
    back.disabled = candidate_page == 0
    back.custom_minimum_size.y = 48
    back.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-   back.pressed.connect(_previous_candidates)
+   back.pressed.connect(_invoke_room_action.bind(weakref(back), _previous_candidates), CONNECT_DEFERRED)
    _style_button(back)
    paging.add_child(back)
    var forward := Button.new()
@@ -1022,20 +1484,24 @@ func _refresh_actions() -> void:
    forward.disabled = candidate_page >= page_count_cards - 1
    forward.custom_minimum_size.y = 48
    forward.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-   forward.pressed.connect(_next_candidates)
+   forward.pressed.connect(_invoke_room_action.bind(weakref(forward), _next_candidates), CONNECT_DEFERRED)
    _style_button(forward)
    paging.add_child(forward)
  # Manual guess remains available for aliases and accessibility.
+ var guess_start := action_area.get_child_count()
  guess_input = LineEdit.new()
  guess_input.placeholder_text = _t("اكتب اسم صورتك السرية", "Guess your secret picture")
  guess_input.custom_minimum_size.y = 52
  guess_input.max_length = 80
  action_area.add_child(guess_input)
  _button(_t("تأكيد التخمين", "Submit guess"), _submit_guess, action_area)
+ var questions_start := action_area.get_child_count()
  if questions.is_empty():
+  _arrange_action_panels(candidate_start,guess_start,questions_start)
   return
  var available: Array[int] = _available_question_indices()
  if available.is_empty():
+  _arrange_action_panels(candidate_start,guess_start,questions_start)
   return
  var page_count := int(ceil(float(available.size()) / float(QUESTIONS_PER_PAGE)))
  question_page = clampi(question_page, 0, page_count - 1)
@@ -1068,6 +1534,8 @@ func _refresh_actions() -> void:
   _style_button(next)
   nav.add_child(next)
 
+ _arrange_action_panels(candidate_start,guess_start,questions_start)
+
 func _submit_guess() -> void:
  if not is_instance_valid(guess_input):
   return
@@ -1082,3 +1550,135 @@ func _prev_questions() -> void:
 func _next_questions() -> void:
  question_page += 1
  _refresh_actions()
+
+func _invoke_room_action(ref: WeakRef, callback: Callable) -> void:
+ if is_instance_valid(_menu_touch_guard): _menu_touch_guard.dispatch(_execute_room_action.bind(ref,callback))
+ else: _execute_room_action(ref,callback)
+
+func _execute_room_action(ref: WeakRef, callback: Callable) -> void:
+ var control: Variant = ref.get_ref()
+ if is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(control):
+  if control.is_inside_tree() and not control.is_queued_for_deletion() and not control.disabled:
+   if OS.get_name() == "Android": Input.vibrate_handheld(12)
+   load("res://scripts/room_audio_policy.gd").acquire(get_tree()).effect("click",true)
+   callback.call()
+
+func _update_match_layout() -> void:
+ if not is_instance_valid(_room_heading): return
+ var playing: bool=player_index>=0 and not room_code.is_empty()
+ output.get_node("CompactHeader").visible=not playing
+ _intro_label.visible=not playing
+ _room_header.visible=playing
+ _room_heading.visible=playing
+ if playing:
+  if _settings_control.get_parent()!=_room_header: _settings_control.reparent(_room_header)
+  VisualSkin.icon_action(_settings_control,"settings",_t("إعدادات الغرفة ومغادرتها","Room settings & leave"))
+ else:
+  if _settings_control.get_parent()!=output: _settings_control.reparent(output)
+  output.move_child(_settings_control,output.get_children().find(_room_settings))
+  _settings_control.text=_t("إعدادات الغرفة ومغادرتها","Room settings & leave")
+ _room_toolbar.visible=playing
+ _player_strip.visible=playing
+ lobby_controls.visible=not playing
+ voice_label.visible=playing
+ status.add_theme_font_size_override("font_size",14 if playing else 18)
+ match_label.add_theme_font_size_override("font_size",14)
+ if playing:
+  _room_heading.text=(_t("دورك","Your turn") if my_turn else _t("دور المنافس","Opponent turn"))+" • "+(_t("متوقف مؤقتًا","Paused") if opponent_paused else "2/2")
+  if finished: _room_heading.text=_t("انتهت المباراة","Match finished")
+  match_view.move_child(_room_toolbar,match_view.get_children().find(action_area))
+  match_view.move_child(_latest_reply,match_view.get_children().find(_room_toolbar))
+  match_view.move_child(_player_strip,match_view.get_children().find(action_area))
+  for index in range(2):
+   var local_player: bool=index==0
+   var taking_turn: bool=my_turn if local_player else not my_turn
+   var title := _t("أنت","You") if local_player else _t("المنافس","Opponent")
+   var state := _t("دوره","Taking turn") if taking_turn else _t("ينتظر","Waiting")
+   if finished: state=_t("انتهت","Finished")
+   elif opponent_paused and not local_player: state=_t("إعادة اتصال","Reconnecting")
+   _player_labels[index].text=title+"\n"+state
+   _player_labels[index].add_theme_color_override("font_color",Color("59ed9b") if taking_turn and not finished else Color("b4c4df"))
+  if is_instance_valid(deduction_status): deduction_status.hide()
+ var may_act: bool=playing and my_turn and not finished and not action_in_flight and not reconnecting and not opponent_paused
+ _guess_toggle.disabled=not may_act
+ _questions_toggle.disabled=not may_act or questions.is_empty()
+
+func _arrange_action_panels(candidate_start: int,guess_start: int,questions_start: int) -> void:
+ var controls := action_area.get_children()
+ _candidates_panel=VBoxContainer.new()
+ _guess_panel=VBoxContainer.new()
+ _questions_panel=VBoxContainer.new()
+ for panel in [_guess_panel,_questions_panel,_candidates_panel]:
+  panel.add_theme_constant_override("separation",8)
+  action_area.add_child(panel)
+ for i in range(controls.size()):
+  var node: Node=controls[i]
+  if i<2 or (i>=candidate_start and i<guess_start): node.reparent(_candidates_panel)
+  elif i>=guess_start and i<questions_start: node.reparent(_guess_panel)
+  elif i>=questions_start: node.reparent(_questions_panel)
+ _details_toggle=Button.new()
+ _details_toggle.text=_t("الصور المحتملة والتفاصيل","Candidate pictures & details")
+ _details_toggle.custom_minimum_size.y=52
+ VisualSkin.decorate_button(_details_toggle)
+ _details_toggle.pressed.connect(_invoke_room_action.bind(weakref(_details_toggle),func(): _show_candidates=not _show_candidates; _apply_action_panels()),CONNECT_DEFERRED)
+ action_area.add_child(_details_toggle)
+ action_area.move_child(_details_toggle,action_area.get_child_count()-2)
+ _apply_action_panels()
+
+func _apply_action_panels() -> void:
+ if is_instance_valid(_guess_panel): _guess_panel.visible=_show_guess
+ if is_instance_valid(_questions_panel): _questions_panel.visible=_show_questions
+ if is_instance_valid(_candidates_panel): _candidates_panel.visible=_show_candidates
+
+func _record_voice_health() -> void:
+ if OS.get_name()!="Android" or not OS.is_debug_build() or android_voice_bridge==null or not voice_requested: return
+ var now := Time.get_ticks_msec()
+ if now-_voice_health_at<5000: return
+ _voice_health_at=now
+ var health: Dictionary=android_voice_bridge.voice_health_snapshot()
+ health.merge({"sent_frames":_voice_sent,"congested_frames":_voice_congested,"received_packets":_voice_received,"forwarded_packets":_voice_forwarded,"epoch_rejected":_voice_epoch_rejected,"sender_rejected":_voice_sender_rejected,"local_enabled":voice_local_enabled,"peer_enabled":voice_peer_enabled,"ws_open":socket.get_ready_state()==WebSocketPeer.STATE_OPEN,"epoch":voice_epoch},true)
+ print("VOICE_HEALTH "+JSON.stringify(health))
+ var file := FileAccess.open("user://voice_health.json",FileAccess.WRITE)
+ if file!=null: file.store_string(JSON.stringify(health))
+
+func _voice_event(event: String, fields: Dictionary) -> void:
+ if OS.get_name()!="Android" or not OS.is_debug_build(): return
+ var record := {"event":event,"fields":fields,"at_ms":Time.get_ticks_msec()}
+ if android_voice_bridge!=null: record["health"]=android_voice_bridge.voice_health_snapshot()
+ print("VOICE_EVENT "+JSON.stringify(record))
+ var file := FileAccess.open("user://voice_last_event.json",FileAccess.WRITE)
+ if file!=null: file.store_string(JSON.stringify(record))
+ if event in ["unavailable","connection_reset"]:
+  var failure := FileAccess.open("user://voice_last_failure.json",FileAccess.WRITE)
+  if failure!=null: failure.store_string(JSON.stringify(record))
+
+func _voice_payload(pcm: String) -> String:
+ if not voice_muted: return pcm
+ if _silent_voice_pcm.is_empty():
+  var silence := PackedByteArray()
+  silence.resize(640)
+  silence.fill(0)
+  _silent_voice_pcm=Marshalls.raw_to_base64(silence)
+ return _silent_voice_pcm
+
+func _toggle_voice_mute() -> void:
+ if not (voice_requested and voice_local_enabled and voice_peer_enabled and _voice_room_ready()): return
+ voice_muted=not voice_muted
+ _update_voice_ui()
+
+func _toggle_voice_call() -> void:
+ set_voice_opt_in(not (voice_requested or _voice_resume_intent))
+
+func _resume_voice_after_sync() -> void:
+ if not _voice_resume_intent: return
+ if room_code!=_voice_resume_room or leaving:
+  _voice_resume_intent=false
+  _voice_resume_room=""
+  return
+ if not _voice_room_ready(): return
+ var muted := _voice_resume_muted
+ _voice_resume_intent=false
+ _voice_resume_room=""
+ voice_muted=muted
+ # New voice_state request and fresh mutual consent are mandatory; no PCM replay.
+ set_voice_opt_in(true)

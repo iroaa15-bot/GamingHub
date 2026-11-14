@@ -1,0 +1,286 @@
+[
+  {
+    "time": 1793648368.8839068,
+    "event": "state",
+    "code": "319063",
+    "joined": 1,
+    "phase": "lobby",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": null,
+    "answered_count": 0
+  },
+  {
+    "time": 1793648417.468818,
+    "event": "incoming",
+    "type": "duel_join",
+    "binding": null,
+    "code": "319063"
+  },
+  {
+    "time": 1793648417.4712899,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "lobby",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": null,
+    "answered_count": 0
+  },
+  {
+    "time": 1793648501.3940275,
+    "event": "incoming",
+    "type": "duel_accept",
+    "binding": [
+      "319063",
+      0
+    ]
+  },
+  {
+    "time": 1793648501.395513,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "lobby",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": null,
+    "answered_count": 0
+  },
+  {
+    "time": 1793648501.653643,
+    "event": "incoming",
+    "type": "duel_accept",
+    "binding": [
+      "319063",
+      1
+    ]
+  },
+  {
+    "time": 1793648501.6557207,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "lobby",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": null,
+    "answered_count": 0
+  },
+  {
+    "time": 1793648507.4082944,
+    "event": "incoming",
+    "type": "duel_start",
+    "binding": [
+      "319063",
+      0
+    ]
+  },
+  {
+    "time": 1793648507.4103186,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648614.3635314,
+    "event": "incoming",
+    "type": "duel_voice_state",
+    "binding": [
+      "319063",
+      1
+    ]
+  },
+  {
+    "time": 1793648614.3658242,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648615.312531,
+    "event": "incoming",
+    "type": "duel_voice_state",
+    "binding": [
+      "319063",
+      0
+    ]
+  },
+  {
+    "time": 1793648615.3146255,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648628.8156724,
+    "event": "incoming",
+    "type": "duel_voice_state",
+    "binding": [
+      "319063",
+      0
+    ]
+  },
+  {
+    "time": 1793648628.8175452,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648630.021422,
+    "event": "incoming",
+    "type": "duel_voice_state",
+    "binding": [
+      "319063",
+      1
+    ]
+  },
+  {
+    "time": 1793648630.0238483,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648656.3415885,
+    "event": "incoming",
+    "type": "duel_quiz_replay",
+    "binding": [
+      "319063",
+      0
+    ],
+    "question_id": "core_6_3"
+  },
+  {
+    "time": 1793648656.343061,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 0
+  },
+  {
+    "time": 1793648702.4102058,
+    "event": "incoming",
+    "type": "duel_quiz_answer",
+    "binding": [
+      "319063",
+      0
+    ],
+    "question_id": "core_6_3",
+    "choice": 0
+  },
+  {
+    "time": 1793648702.4124131,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "question",
+    "scores": [
+      0,
+      0
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 1
+  },
+  {
+    "time": 1793648760.773555,
+    "event": "incoming",
+    "type": "duel_quiz_answer",
+    "binding": [
+      "319063",
+      1
+    ],
+    "question_id": "core_6_3",
+    "choice": 1
+  },
+  {
+    "time": 1793648760.775756,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "finished",
+    "scores": [
+      0,
+      1000
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 2
+  },
+  {
+    "time": 1793648805.2240412,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "finished",
+    "scores": [
+      0,
+      1000
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 2
+  },
+  {
+    "time": 1793648890.2319615,
+    "event": "state",
+    "code": "319063",
+    "joined": 2,
+    "phase": "finished",
+    "scores": [
+      0,
+      1000
+    ],
+    "question_id": "core_6_3",
+    "answered_count": 2
+  }
+]

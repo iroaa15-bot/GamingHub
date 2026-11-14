@@ -18,9 +18,9 @@ class FeedbackAccessibilityV82(unittest.TestCase):
     self.assertLess(f.getnframes(),22050)
     self.assertLess(path.stat().st_size,50000)
  def test_sound_opt_out_persisted(self):
-  self.assertIn('sound_enabled = bool(profile.get("sound_enabled", true))',MAIN)
+  self.assertIn('sound_enabled=bool(saved.get("sound_enabled",true))',MAIN)
   self.assertIn('profile["sound_enabled"] = sound_enabled',MAIN)
-  self.assertIn('if not sound_enabled:\n  return',MAIN)
+  self.assertIn('if not sound_enabled:return',MAIN)
  def test_reduced_motion_opt_out_persisted(self):
   self.assertIn('reduced_motion = bool(profile.get("reduced_motion", false))',MAIN)
   self.assertIn('profile["reduced_motion"] = reduced_motion',MAIN)
@@ -34,8 +34,10 @@ class FeedbackAccessibilityV82(unittest.TestCase):
   self.assertIn('selected_language = ["ar", "en"]',MAIN)
  def test_sounds_are_only_local_bundled_assets(self):
   section=MAIN.split('func play_feedback(effect: String) -> void:',1)[1].split('\nfunc ',1)[0]
-  self.assertIn('res://assets/audio/feedback_',section)
-  self.assertIn('ResourceLoader.exists(path)',section)
+  self.assertIn('room_audio_policy.gd',section)
+  policy=(ROOT/'scripts/room_audio_policy.gd').read_text(encoding='utf-8')
+  self.assertIn('res://assets/audio/premium/',policy)
+  self.assertNotIn('HTTPRequest',policy)
   self.assertNotIn('http',section)
   self.assertNotIn('request(',section)
  def test_gameplay_events_are_wired(self):

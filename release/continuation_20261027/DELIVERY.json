@@ -1,0 +1,25 @@
+{
+  "build_commit": "4c3f75a38ae9f84fc5334cd6901e816ef26d874a",
+  "apk": "C:\\Users\\Omar\\Documents\\GitHub\\GamingHub\\build\\GamingHub-122-accounts-4c3f75a-debug.apk",
+  "sha256": "ec373e899dc574a316b25b7935a67533f9d8b10c199ad6354ba3a5da01c17a21",
+  "zip_integrity": true,
+  "catalog_unchanged": true,
+  "original_photos": 200,
+  "resolved_textures": 200,
+  "bytecode_matches_export": {
+    "main": true,
+    "player_account_ui": true,
+    "player_account_client": true,
+    "photo_duel_extension_ui": true,
+    "visual_skin": true
+  },
+  "runtime_database_packaged": false,
+  "service_web_files_in_apk": [
+    "assets/services/player_portal/SETUP_AR.md"
+  ],
+  "phone_install": "PASS: adb install -r Success",
+  "phone_new_acceptance": "BLOCKED: automatic review rejected adb reverse + diagnostic launch; no bypass",
+  "release_ready": false,
+  "previous_apk_preserved": true,
+  "main_unchanged": true
+}

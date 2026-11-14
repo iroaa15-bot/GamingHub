@@ -1,0 +1,548 @@
+[
+  {
+    "a": "GH-GENERAL-0010",
+    "b": "GH-GENERAL-NEW-0005",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-MUSIC-0002",
+    "b": "GH-B21-0019",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-MUSIC-0002",
+    "b": "GH-B26-0029",
+    "token_jaccard": 0.667,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B12-0016",
+    "b": "GH-B25-0031",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B12-0016",
+    "b": "GH-B33-0030",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B21-0019",
+    "b": "GH-B26-0029",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B25-0031",
+    "b": "GH-B33-0030",
+    "token_jaccard": 0.545,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-0003",
+    "b": "GH-GEOGRAPHY-NEW-0020",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-NEW-0020",
+    "b": "GH-GEOGRAPHY-B03-0009",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B22-0045",
+    "b": "GH-B33-0039",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-0008",
+    "b": "GH-B21-0025",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0046",
+    "b": "GH-B09-0022",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B09-0022",
+    "b": "GH-B20-0025",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-ANIMALS-B04-0004",
+    "b": "GH-B15-0022",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B18-0015",
+    "b": "GH-B24-0051",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-WHO-B07-0001",
+    "b": "GH-B32-0048",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B12-0028",
+    "b": "GH-B28-0051",
+    "token_jaccard": 0.545,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-WHO-B07-0009",
+    "b": "GH-B34-0043",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-SCIENCE-NEW-0006",
+    "b": "GH-SCIENCE-B04-0005",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-HISTORY-0002",
+    "b": "GH-B31-0060",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-HISTORY-0005",
+    "b": "GH-B32-0067",
+    "token_jaccard": 0.556,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B18-0027",
+    "b": "GH-B24-0094",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-B03-0002",
+    "b": "GH-B24-0097",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-B03-0008",
+    "b": "GH-B31-0118",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-0008",
+    "b": "GH-PUZZLES-NEW-0019",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-0008",
+    "b": "GH-B20-0056",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-NEW-0019",
+    "b": "GH-B21-0056",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-NEW-0019",
+    "b": "GH-B33-0118",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B20-0056",
+    "b": "GH-B23-0091",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0024",
+    "b": "GH-B11-0012",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B11-0012",
+    "b": "GH-B23-0021",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B11-0012",
+    "b": "GH-B30-0020",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B22-0021",
+    "b": "GH-B30-0020",
+    "token_jaccard": 0.556,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-CINEMA-NEW-0010",
+    "b": "GH-B08-0027",
+    "token_jaccard": 0.625,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-MUSIC-NEW-0017",
+    "b": "GH-B26-0031",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-NEW-0017",
+    "b": "GH-B30-0041",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B25-0051",
+    "b": "GH-B26-0048",
+    "token_jaccard": 0.538,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-WHO-B07-0022",
+    "b": "GH-B19-0016",
+    "token_jaccard": 0.556,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-SCIENCE-NEW-0008",
+    "b": "GH-B16-0036",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B16-0036",
+    "b": "GH-B26-0060",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-FOOD-NEW-0005",
+    "b": "GH-B28-0084",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-FOOD-NEW-0006",
+    "b": "GH-B34-0068",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-FOOD-NEW-0008",
+    "b": "GH-FOOD-B05-0002",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B24-0081",
+    "b": "GH-B27-0078",
+    "token_jaccard": 0.538,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-B03-0002",
+    "b": "GH-B32-0041",
+    "token_jaccard": 0.667,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-B03-0003",
+    "b": "GH-B27-0040",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B15-0017",
+    "b": "GH-B27-0040",
+    "token_jaccard": 0.714,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-B03-0007",
+    "b": "GH-B15-0019",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B23-0044",
+    "b": "GH-B33-0044",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-B04-0008",
+    "b": "GH-B10-0023",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-GEOGRAPHY-B04-0008",
+    "b": "GH-B31-0110",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0050",
+    "b": "GH-B27-0042",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B16-0066",
+    "b": "GH-B27-0108",
+    "token_jaccard": 0.556,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-B03-0010",
+    "b": "GH-B27-0090",
+    "token_jaccard": 0.556,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-CINEMA-B04-0010",
+    "b": "GH-B25-0021",
+    "token_jaccard": 0.625,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-HISTORY-B04-0001",
+    "b": "GH-B22-0080",
+    "token_jaccard": 0.636,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-FOOD-B04-0003",
+    "b": "GH-B34-0066",
+    "token_jaccard": 0.533,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B22-0081",
+    "b": "GH-B34-0066",
+    "token_jaccard": 0.588,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-PUZZLES-B04-0005",
+    "b": "GH-B30-0087",
+    "token_jaccard": 0.667,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-TECHNOLOGY-B04-0002",
+    "b": "GH-B11-0060",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B20-0049",
+    "b": "GH-B31-0068",
+    "token_jaccard": 0.643,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-WHO-B06-0030",
+    "b": "GH-B33-0117",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0083",
+    "b": "GH-B33-0117",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0088",
+    "b": "GH-B10-0045",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-FOOD-B05-0075",
+    "b": "GH-B14-0016",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B08-0074",
+    "b": "GH-B29-0119",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B11-0013",
+    "b": "GH-B12-0011",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B11-0013",
+    "b": "GH-B26-0020",
+    "token_jaccard": 0.714,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B12-0011",
+    "b": "GH-B26-0020",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B15-0006",
+    "b": "GH-B24-0011",
+    "token_jaccard": 0.571,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B23-0005",
+    "b": "GH-B33-0001",
+    "token_jaccard": 0.6,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B22-0113",
+    "b": "GH-B24-0113",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B25-0042",
+    "b": "GH-B26-0040",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B23-0077",
+    "b": "GH-B26-0118",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B25-0014",
+    "b": "GH-B31-0010",
+    "token_jaccard": 0.615,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B27-0079",
+    "b": "GH-B32-0078",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B28-0027",
+    "b": "GH-B31-0021",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  },
+  {
+    "a": "GH-B29-0069",
+    "b": "GH-B32-0069",
+    "token_jaccard": 0.5,
+    "same_answer": true,
+    "decision": "EDITORIAL_CANDIDATE_NOT_FINAL"
+  }
+]

@@ -1,0 +1,21 @@
+previews:
+  generation: 'off'
+services:
+  - type: web
+    name: gaminghub-duel-wss
+    runtime: python
+    plan: free
+    branch: integration/gaminghub-final-20261024
+    autoDeployTrigger: 'off'
+    buildCommand: pip install -r deployment/gaminghub-duel-wss/requirements.txt
+    startCommand: python -u server/secure_duel_service.py
+    healthCheckPath: /health
+    numInstances: 1
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.3
+      - key: DUEL_AUTH_SECRET
+        generateValue: true
+      - key: DUEL_MODERATION_DB
+        value: /tmp/gaminghub-duel-reports.sqlite

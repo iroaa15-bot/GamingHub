@@ -44,6 +44,84 @@ jobs:
         run: |
           timeout 120 godot --headless --path . --script res://tests/release_runtime.gd 2>&1 | tee release-runtime.log
           grep -q RELEASE_RUNTIME_PASS release-runtime.log
+      - name: Verify account session restoration and origin isolation
+        # Storage double here; Android Keystore acceptance is recorded separately.
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/session_persistence.gd 2>&1 | tee godot-session.log
+          grep -q 'PASS: refresh restoration' godot-session.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/public_account_requests.gd 2>&1 | tee godot-public-account.log
+          grep -q PUBLIC_ACCOUNT_REQUESTS_PASS godot-public-account.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/avatar_picker_dispatch.gd 2>&1 | tee godot-avatar-picker.log
+            grep -q AVATAR_PICKER_DISPATCH_PASS godot-avatar-picker.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/account_progress_isolation.gd 2>&1 | tee godot-account-isolation.log
+            grep -q ACCOUNT_PROGRESS_ISOLATION_PASS godot-account-isolation.log
+      - name: Verify Arabic and English across fresh Godot processes
+        shell: bash
+        run: |
+          set -eu
+          export XDG_DATA_HOME="$(mktemp -d)"
+          for language in en ar; do
+            timeout 30 godot --headless --path . --script res://tests/language_restart.gd -- save "$language"
+            timeout 30 godot --headless --path . --script res://tests/language_restart.gd -- check "$language"
+          done
+      - name: Verify unified profile and server point display
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/unified_profile.gd 2>&1 | tee godot-profile.log
+          grep -q 'PASS: verified profile survives' godot-profile.log
+      - name: Verify published presentation and offline fallback
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/remote_appearance.gd 2>&1 | tee godot-appearance.log
+          grep -q REMOTE_APPEARANCE_PASS godot-appearance.log
+      - name: Verify player account UI has no developer or admin controls
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/player_safe_account.gd 2>&1 | tee godot-safe-account.log
+          grep -q PLAYER_SAFE_ACCOUNT_PASS godot-safe-account.log
+      - name: Verify simplified navigation and role controls
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . --script res://tests/unified_catalog_ui.gd 2>&1 | tee godot-catalog.log
+          grep -q 'UNIFIED_CATALOG_UI true' godot-catalog.log
+          timeout 120 godot --headless --path . --script res://tests/simplified_navigation.gd 2>&1 | tee godot-navigation.log
+          grep -q SIMPLIFIED_NAVIGATION_PASS godot-navigation.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/button_inventory.gd 2>&1 | tee godot-button-inventory.log
+          grep -q 'enabled_unwired=0' godot-button-inventory.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/voice_continuity.gd 2>&1 | tee godot-voice-continuity.log
+            grep -q 'VOICE_CONTINUITY continuous=true text_stopped=true bounded=true' godot-voice-continuity.log
+            timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/guess_and_membership.gd 2>&1 | tee godot-guess-membership.log
+            grep -q GUESS_AND_MEMBERSHIP_PASS godot-guess-membership.log
+      - name: Verify challenge audio controls and Android touch ordering
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 60 godot --headless --audio-driver Dummy --path . --script res://tests/player_cards_layout.gd 2>&1 | tee godot-player-cards.log
+          grep -q 'PLAYER_CARDS_LAYOUT true' godot-player-cards.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/challenge_audio.gd 2>&1 | tee godot-challenge-audio.log
+          grep -q CHALLENGE_AUDIO_PASS godot-challenge-audio.log
+          timeout 120 godot --headless --audio-driver Dummy --path . --script res://tests/room_audio_policy.gd 2>&1 | tee godot-audio-policy.log
+          ! grep -q 'AUDIO_POLICY.*false' godot-audio-policy.log
+      - name: Verify real WebSocket recovery and delayed resume acknowledgement
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 -u tests/room_recovery_fixture.py > room-recovery-fixture.log 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q ROOM_RECOVERY_FIXTURE_READY room-recovery-fixture.log; then break; fi
+            sleep 0.2
+          done
+          grep -q ROOM_RECOVERY_FIXTURE_READY room-recovery-fixture.log
+          timeout 90 godot --headless --path . --script res://tests/automatic_room_resume.gd 2>&1 | tee godot-room-recovery.log
+          grep -q AUTOMATIC_ROOM_RESUME_PASS godot-room-recovery.log
       - name: Boot main scene for 60 frames
         shell: bash
         run: |

@@ -1,0 +1,70 @@
+{
+  "server/server.py": {
+    "sha256": "0297ab2b8b91b36d01a488903c0dc8b77dea36a70804293893f4f52a6e750131",
+    "unchanged": true
+  },
+  "server/photo_duel_extension.py": {
+    "sha256": "168032e94848b20dd3c15f196a287665c0131ff65585a1d4d7e577aec3687e2a",
+    "unchanged": true
+  },
+  "server/photo_duel_staging.py": {
+    "sha256": "55b06479b47a6cdd3f257cd6cd63b2ef46a82c9c33a90b22d61a7d4d7e6d9e1c",
+    "unchanged": true
+  },
+  "server/photo_room_service.py": {
+    "sha256": "781f0d6f3a70945acb6054bf940433fa0e8694457321ad2dd1ba956539f2f049",
+    "unchanged": true
+  },
+  "server/photo_match_protocol.py": {
+    "sha256": "558c586797f3791c8d088bf635f5d2ce031808453b576b2286273a329c7d1584",
+    "unchanged": true
+  },
+  "data/network_config.json": {
+    "sha256": "3a03c58321ee1c6b1e6ac73903f1b222fd38b7b071982ab28bb51814490d182b",
+    "unchanged": true
+  },
+  "data/cards.json": {
+    "sha256": "3324bc53c5a681c2007bdf76f8f605944db36372f219dfb1fa4e0e2aa8ccd3ab",
+    "unchanged": true
+  },
+  "scripts/multiplayer.gd": {
+    "sha256": "c7be3c4cad4da3cca0f6d8b29eaca16145d63a57eaf822cbdf2ea88910826add",
+    "unchanged": true
+  },
+  "scripts/android_voice_bridge.gd": {
+    "sha256": "b7dd7dc9e19104574bd2954c491aba9ddf4357ae0351fcd00f707d5b73eaaec1",
+    "unchanged": true
+  },
+  "scripts/ad_manager.gd": {
+    "sha256": "f0fde459309094af79cb45587310246cbf90fb8af2eedc767c463e734dd513b3",
+    "unchanged": true
+  },
+  "scripts/poing_admob_bridge.gd": {
+    "sha256": "07e471b43e8a466f1e14491bc9da08231a136613bc88f836a826a5fb95c7f32e",
+    "unchanged": true
+  },
+  "scripts/daily_ai.gd": {
+    "sha256": "9adde1a658e562e9aa68951686590cd0f8bf328c3a8b8aed4fd05844c5e50493",
+    "unchanged": true
+  },
+  "scripts/daily_rounds.gd": {
+    "sha256": "96490f4a9b5a7a253134e508af6fcf8a7c2bfa831c8c2c37d989310ee3ed39e1",
+    "unchanged": true
+  },
+  "render.yaml": {
+    "sha256": "555bdbd620130d9f03ff41e36ff9e5c02e6eeba678d261405d111c1760610c2a",
+    "unchanged": true
+  },
+  "export_presets.cfg": {
+    "sha256": "ca1a82e80c6392b0b44e3b5bc1c74c10145ae5bbbbf9ea198dd843047850a142",
+    "unchanged": true
+  },
+  "addons/gaminghub_voice/bin/gaminghub-voice-debug.aar": {
+    "sha256": "60a563a8c8785b0dfac45d2691193fd17ad882617e40f50174ed0cbccce74fba",
+    "unchanged": true
+  },
+  "addons/gaminghub_voice/bin/gaminghub-voice-release.aar": {
+    "sha256": "02a088d22cd7a5367a21cc2cfb11692900a67db850a42a0901d5c245ad7806c4",
+    "unchanged": true
+  }
+}

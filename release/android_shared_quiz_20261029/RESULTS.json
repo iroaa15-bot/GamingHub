@@ -1,0 +1,20 @@
+{
+  "apk_source_commit": "4bbd7c841b220c061e8bf423a2ec9002629aa4a8",
+  "apk_sha256": "8d0004efd038f30943082f1cbb50b7d31328b7652dbb586f2bb1e58535fbf9e6",
+  "room": "510122",
+  "game": "Guess the Sound / Shared Quiz",
+  "service": "loopback staging 8886 via adb reverse",
+  "rounds": 1,
+  "host": "OPPO CPH2015 Android 9",
+  "joiner": "reeder S23 SE Android 16",
+  "answers_received": 2,
+  "correct_label_ar": "بطيء",
+  "host_answer_ar": "بطيء",
+  "joiner_answer_ar": "صامت",
+  "host_score": 1500,
+  "joiner_score": 0,
+  "result": "PASS: observed physical two-device question/options, 2 answers, scoring and final results",
+  "timing_limit": "Screenshots sequential; no millisecond audio/network synchrony measurement",
+  "first_attempt": "room377903 expired before injected answers; 0/2, not counted as answer PASS",
+  "functional_head_comparison": "At HEAD97aace4, only reports differed from APK source; no functional changes missing"
+}

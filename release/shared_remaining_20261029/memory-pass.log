@@ -1,0 +1,40 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+ERROR: Can't create shader cache folder, no shader caching will happen: user://
+   at: RasterizerGLES3 (drivers/gles3/rasterizer_gles3.cpp:335)
+OpenGL API 3.3.0 Core Profile Context 23.19.24.251211 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon (TM) Graphics
+
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+GH_AUDIO_EFFECT startup bus=Game SFX
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_MUSIC STOP muted=true membership=true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+MECHANICS_UI 8 real UI join true
+GH_AUDIO_EFFECT all_ready bus=Game SFX
+GH_AUDIO_EFFECT round_start bus=Game SFX
+MECHANICS_UI 8 actual controls visible true
+MECHANICS_UI 8 same question payload true
+MECHANICS_UI memory retains actual pair board true
+MEMORY_STEP 1 first 0 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 2 first 2 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 3 first 0 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 4 first 4 matched [0, 3] status تحدٍ متزامن للجميع
+MEMORY_STEP 5 first 1 matched [0, 3] status تحدٍ متزامن للجميع
+MEMORY_STEP 6 first 6 matched [0, 3, 1, 5] status تحدٍ متزامن للجميع
+MEMORY_STEP 7 first 7 matched [0, 3, 1, 5, 6, 2] status تحدٍ متزامن للجميع
+MECHANICS_UI memory solved by real flip callbacks without board disclosure true
+MEMORY_STEP 1 first 0 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 2 first 2 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 3 first 0 matched [] status تحدٍ متزامن للجميع
+MEMORY_STEP 4 first 4 matched [0, 3] status تحدٍ متزامن للجميع
+MEMORY_STEP 5 first 1 matched [0, 3] status تحدٍ متزامن للجميع
+MEMORY_STEP 6 first 6 matched [0, 3, 1, 5] status تحدٍ متزامن للجميع
+MEMORY_STEP 7 first 7 matched [0, 3, 1, 5, 6, 2] status تحدٍ متزامن للجميع
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT correct bus=Game SFX
+GH_AUDIO_EFFECT victory bus=Game SFX
+GH_AUDIO_EFFECT results bus=Game SFX
+MECHANICS_UI memory solved by real flip callbacks without board disclosure true
+MECHANICS_UI 8 shared final results true
+MECHANICS_UI 8 authoritative identical scores true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+ORIGINAL_ALL_REAL_GODOT_UI_WS true []

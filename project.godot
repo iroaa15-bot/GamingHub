@@ -20,6 +20,14 @@ config/features=PackedStringArray("4.5", "GL Compatibility")
 run/max_fps=60
 config/icon="res://assets/ui/gaming_hub_icon.png"
 
+boot_splash/show_image=false
+boot_splash/image="res://assets/ui/gaming_hub_brand.png"
+boot_splash/bg_color=Color(0.086275, 0.070588, 0.286275, 1)
+
+[audio]
+
+driver/enable_input=true
+
 [autoload]
 
 AdManager="*res://scripts/ad_manager.gd"
@@ -27,6 +35,9 @@ PoingAdsBridge="*res://scripts/poing_admob_bridge.gd"
 LiveOps="*res://scripts/live_ops.gd"
 DailyAI="*res://scripts/daily_ai.gd"
 DailyRounds="*res://scripts/daily_rounds.gd"
+RoomAudioPolicy="*res://scripts/room_audio_policy.gd"
+GamingHubAccount="*res://scripts/network/gaminghub_auth.gd"
+PublishedContent="*res://scripts/network/published_content.gd"
 
 [display]
 
@@ -35,15 +46,25 @@ window/size/viewport_height=840
 window/stretch/mode="canvas_items"
 window/handheld/orientation=1
 
+[editor]
+
+import/use_multiple_threads=false
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/admob/plugin.cfg")
+enabled=PackedStringArray("res://addons/admob/plugin.cfg", "res://addons/gaminghub_voice/plugin.cfg", "res://addons/gaminghub_identity/plugin.cfg")
+
+[gaminghub]
+
+identity_api_url="https://gaminghub-voice-staging.onrender.com"
 
 [gui]
 
 theme/default_font_size=21
 
 [rendering]
+
+environment/defaults/default_clear_color=Color(0.086275, 0.070588, 0.286275, 1)
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

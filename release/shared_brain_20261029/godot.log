@@ -1,0 +1,25 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+QUIZ_CHECK 2 clients authenticated game 3 true
+GH_AUDIO_EFFECT room_create bus=Game SFX
+GH_AUDIO_EFFECT startup bus=Game SFX
+QUIZ_CHECK room created true
+GH_AUDIO_EFFECT player_join bus=Game SFX
+QUIZ_CHECK all real clients joined true
+GH_AUDIO_MUSIC STOP muted=true membership=true
+QUIZ_CHECK configuration accepted true
+QUIZ_CHECK same quiz starts true
+QUIZ_CHECK identical shuffled options and shared schedule true
+QUIZ_CHECK answer absent before results true
+QUIZ_CHECK pre countdown answer rejected true
+QUIZ_CHECK actual original catalog answer mapping true
+QUIZ_CHECK shared results and room retained true
+SCORING_EVIDENCE [1500.0, 1250.0] [{ "player": 0.0, "choice": 3.0, "correct": true, "points": 1500.0, "elapsed_ms": 304.0 }, { "player": 1.0, "choice": 3.0, "correct": true, "points": 1250.0, "elapsed_ms": 305.0 }]
+QUIZ_CHECK fastest correct gets more server points true
+QUIZ_CHECK identical authoritative scoring and answer reveal true
+GH_AUDIO_MUSIC PLAY membership=false enabled=true
+BRAIN_QUIZ_REAL_GODOT_WS true []
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2514)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:795)

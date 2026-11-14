@@ -1,0 +1,23 @@
+{
+  "base_commit": "09b56be8581f84ecd57c9797c6220d8fcf5a4898",
+  "branch": "integration/gaminghub-final-20261024",
+  "six_player_final_checks": 30,
+  "six_player_pass": true,
+  "six_player_script_errors": false,
+  "six_player_protected_files_unchanged": true,
+  "prior_capacities_passed": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "prior_capacities_rerun_this_turn": false,
+  "real_10_second_timeout_previously_passed": true,
+  "negative_confirmation_final_pass": true,
+  "editor_shutdown_warnings_reproduced_without_game_clients": true,
+  "apk_built": false,
+  "production_deployed": false,
+  "android_voice": "BLOCKED: no real Android hardware test performed",
+  "android_touch": "BLOCKED: no real Android hardware test performed",
+  "group_voice": "Not implemented by this extension; existing original voice module preserved"
+}

@@ -1,0 +1,23 @@
+Godot Engine v4.5.1.stable.official.f62fdbde1 - https://godotengine.org
+
+SECURE_CHECK authenticated clients negotiate agreement and voice true
+SECURE_CHECK secure agreed room create true
+SECURE_CHECK secure room membership true
+SECURE_CHECK voice mode proposal sync true
+SECURE_CHECK mutual consent while waiting true
+SECURE_CHECK existing mixer delivers PCM in waiting room (synthetic silence) true
+SECURE_CHECK both accept voice configuration true
+SECURE_CHECK start after voice agreement true
+SECURE_CHECK voice question opens authorized yes no true
+SECURE_CHECK yes no synchronizes turn true
+SECURE_CHECK match ends without destroying membership true
+SECURE_CHECK voice survives finished match true
+SECURE_CHECK mixer delivers after match true
+SECURE_CHECK automatic same-identity auth renewal true
+SECURE_CHECK connection loss pauses voice true
+SECURE_CHECK authenticated finished-room reconnect true
+SECURE_CHECK fresh consent required after reconnect true
+SECURE_CHECK renewed consent true
+SECURE_CHECK new epoch PCM resumes true
+SECURE_CHECK exit closes voice room cleanly true
+SECURE_AGREEMENT_VOICE_REAL_GODOT true synthetic transport, not acoustic Android PASS []

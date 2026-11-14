@@ -24,7 +24,12 @@ func attach(connection: Node) -> void:
  bridge.outgoing_pcm.connect(_outgoing)
  bridge.permission_ready.connect(_permission)
  bridge.voice_unavailable.connect(_failure)
- bridge.status_changed.connect(func(_state: String, details: String): last_status=details; changed.emit())
+ bridge.status_changed.connect(func(state: String, details: String):
+  last_status=details
+  if OS.is_debug_build() and state == "active":
+   print("GH_VOICE_NATIVE_STATUS ", details)
+  changed.emit()
+ )
  add_child(bridge)
  client.state_changed.connect(_state)
  client.event_received.connect(_event)

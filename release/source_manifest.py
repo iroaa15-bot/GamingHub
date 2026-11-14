@@ -43,7 +43,7 @@ def included(root=ROOT):
         return True
     return sorted((p for p in files if enabled_binary(p) and p.relative_to(root).as_posix() not in EXCLUDE
                    and '__pycache__' not in p.parts and p.suffix not in {'.pyc', '.import'}
-                   and '.godot' not in p.parts and '.gradle' not in p.parts and 'build' not in p.parts),
+                   and '.godot' not in p.parts and '.gradle' not in p.parts and '.kotlin' not in p.parts and 'build' not in p.parts),
                   key=lambda p: p.relative_to(root).as_posix())
 
 def inventory(root=ROOT):

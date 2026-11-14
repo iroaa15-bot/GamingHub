@@ -607,7 +607,8 @@ func play_clip(id: String, audio_format: String = "wav") -> void:
  load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player = AudioStreamPlayer.new()
  audio_player.bus="Game SFX"
- audio_player.stream = PublishedContent.media.get(id) as AudioStream if id.begins_with("pub_")
+ if id.begins_with("pub_"):
+  audio_player.stream = PublishedContent.media.get(id) as AudioStream
  if not id.begins_with("pub_") and audio_format in ["wav","ogg"]:
   var path := "res://assets/audio/" + id + "." + audio_format
   if ResourceLoader.exists(path):audio_player.stream=load(path) as AudioStream

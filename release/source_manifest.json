@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 1800,
+  "file_count": 1801,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "c053df43038e964b8e07578e661f0292115db963a727dbca4381195a82ddba91",
@@ -968,7 +968,7 @@
     "docs/index.html": "c9a6f3763fb012870dc8dbf59f42662e2fd94b2e6d13e88286a69efbaf0a54f3",
     "docs/privacy.html": "ad27eed6660c48aa71398c8dcd906502a3916103520ecca753d9dadbbe234914",
     "docs/status.json": "6d53cbbfc8efbfa86e6d09c57fabbd67d72f4eb0a8f57de42ca13d015b47541d",
-    "export_presets.cfg": "1a85f5e716c1203b2e1e47269d1b78d452c772d860c1170c12d0e9b65b5d41c4",
+    "export_presets.cfg": "f235b8276b1cc023cf034250b9bfcbe689f3fcb83e1063e559a5ddc1de96c6d4",
     "identity_backend/Dockerfile": "1b517505373d9d23d5f846bf2119b3b4ac7da3cec817ae115c974faab8e46b9d",
     "identity_backend/admin_assets.py": "daf64c3c88c7b9eed59f7bf77594b18380b8fb12c38e8cf43cd8af6ba52a45a7",
     "identity_backend/admin_auth.py": "d6ac017046470280fa28ccac0b4fc5bb91686cede86118110fc66b83fe77cc9f",
@@ -1801,6 +1801,7 @@
     "tools/generate_challenge_audio.py": "24d45e48abea4ecd00a1b60766016c3511ad5b627c33e1306f9e3226e4bb5231",
     "tools/generate_premium_audio.py": "cb13d9ed904d7334dafaa26c9b917e4ba7ec68d0515647e521a224f962e555fe",
     "tools/run_social_tests.ps1": "4bbbae322975ebafd960b1432bb4eae27a282d30e4aec6ead1d51981ba7ca924",
-    "tools/validate_daily.py": "c58ac22b74cff86a88e3aeb536d4fd031f3350a26bcd150fdfd435509b330aac"
+    "tools/validate_daily.py": "c58ac22b74cff86a88e3aeb536d4fd031f3350a26bcd150fdfd435509b330aac",
+    "assets/ui/android_launch_background.png": "a1fdc0fc80bf861116b7b59c755b40c7b7114dc57f50cd508a47b74ee4a1f1be"
   }
 }

@@ -24,6 +24,15 @@ func run() -> void:
  snapshot.round=21;adapter._state(snapshot)
  var mute_preserved: bool=adapter.muted and adapter.requested and bridge.active
  adapter.set_muted(false)
+ for temporary_error in ["Voice paused until room reconnects","Voice room unavailable"]:
+  adapter._event({"type":"duel_error","scope":"voice","message":temporary_error})
+  continuous=continuous and adapter.requested and not bridge.active and adapter._permission_granted
+  snapshot.voice.local_enabled=false;snapshot.voice.peer_enabled=false
+  adapter._state(snapshot)
+  continuous=continuous and not bridge.active
+  snapshot.voice.local_enabled=true;snapshot.voice.peer_enabled=true
+  adapter._state(snapshot)
+  continuous=continuous and bridge.active and adapter.requested
  adapter._event({"type":"duel_error","scope":"voice","message":"Request rate limit"})
  adapter._event({"type":"duel_error","scope":"voice","message":"Stale audio frame"})
  adapter._event({"type":"duel_error","scope":"voice","message":"Voice consent or epoch mismatch"})

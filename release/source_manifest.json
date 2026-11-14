@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "file_count": 1803,
+  "file_count": 1805,
   "sha256": {
     ".github/workflows/deploy-pages.yml": "db138ed1276b99cd30d879944f79a1b6c3fabf9b7c3b0ddc48f83313b471f507",
     ".github/workflows/godot-checks.yml": "c053df43038e964b8e07578e661f0292115db963a727dbca4381195a82ddba91",
@@ -555,6 +555,7 @@
     "ai_daily/validate_release.py": "a94bcf0ed1a6a083fac327ac5e0daa3e7810fd558495386a8a3a8016260e0806",
     "assets/audio/bell.wav": "54a7f819e2f68bb314e81c8a3850f23e6af99dad2464d00f11ea22c94d8c839b",
     "assets/audio/clock.wav": "67503ced7debf83e23f19eee546c6e5872bff73c99aad8c403793b6739272d46",
+    "assets/audio/doorbell_chime.ogg": "c0f54925d7beddadd0ab77b71505c9e5e9d4ebda552b695418bb14ae9b0b2b4a",
     "assets/audio/drum.wav": "27684861ffae63b79a85082f862e46a5b5cd41c24efff09434cc26c3a49d5c37",
     "assets/audio/feedback_celebrate.wav": "1512158246e3cfcc9248fef3d6a9c8ba4cb3111a8d5410b02a4587ae657b7e40",
     "assets/audio/feedback_retry.wav": "1b015fa272cb7b6fc86234d2c13f41daaf43641308700a3f220c9731be2506a4",
@@ -611,6 +612,8 @@
     "assets/cards/lion.png": "7dbe2f8a9917b719ccadbb2136ea083901beac546da7de524dba78cefd5b0b21",
     "assets/cards/panda.png": "3423705a2a6ca4ec1473960292ce711ced0a28fec6295cea26df1fd4149934c8",
     "assets/cards/pizza.png": "e97cb4f33c45659a6083a4e2de1d2f002cee85ee6992d3324629fdec8d389309",
+    "assets/cinema/cairo_arrivals.ogv": "fa688ebd352298689298f764cb8cb310f1844a1d0641e81b67aa70f4bb60c686",
+    "assets/cinema/cairo_arrivals.ogv.uid": "69bda6b2cf8dde9ab84fc8db35f09dbdd75f11bef5ae6bd1af38117d32eb4352",
     "assets/generated/ASSET_MANIFEST.json": "cce3b96dacdfe7f1b5ee4ffbb3b11295465dca6aaf1c8063a45a73b619a07be1",
     "assets/generated/PICTURE_EXPANSION_MANIFEST.json": "e6d448314fd645b5d59c283bc4e476f21afd730735d9783e0f24ce8738477526",
     "assets/generated/air_conditioner.webp": "5553a442d9f8a192e6ac0f41fc19245e506a34425bf30246d06120424af8fb17",
@@ -845,6 +848,7 @@
     "assets/photos/PHOTO_CREDITS.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
     "assets/photos/README.txt": "41ba9cfc7fd23db92acf6859fdc8c6f38e94a704bd679906645f40f797e7e9e2",
     "assets/photos/README_AR.txt": "7796aa04db4926a2bb49ccf975aeac673537d40fce99ae866d8b5b25d991d901",
+    "assets/ui/android_launch_background.png": "a1fdc0fc80bf861116b7b59c755b40c7b7114dc57f50cd508a47b74ee4a1f1be",
     "assets/ui/game_0.svg": "5eb8692fcb3b3a21d96998caaebf2234bcc84810279921cad054956564740a9d",
     "assets/ui/game_1.svg": "3d19e45e761f02be3a493f8cad4eb4ce2f2c07ffb70f7df13a429d184afb6360",
     "assets/ui/game_2.svg": "1c863c16594e627b0236e85318840b84c4e544dbd60a1d7fb400c5339242831b",
@@ -1438,7 +1442,7 @@
     "scripts/photo_duel_mic_probe_staging.gd.uid": "72329a0bc65e34edbdb045303e2daec46e3600f5b2425693372bb7fdfb8a72e6",
     "scripts/photo_duel_network_staging.gd": "bee6c6cb5409586b3dd09a0cf966b27c343905565307ca2c469c47cfaa11a319",
     "scripts/photo_duel_network_staging.gd.uid": "f3e13b0595b34f79284f3affd7d75339223595ce5c6dc96f6b9bb1a8ae7cd5d8",
-    "scripts/photo_duel_voice_adapter.gd": "11ac3f1e6677a46d873b2fba45a96b83508c8eeb1c2d02a6fe38341f64be2a42",
+    "scripts/photo_duel_voice_adapter.gd": "c66746e29b9ea86f4a1717d45d1a78e7cf4c833818cb5973944b0ecbe55d1b46",
     "scripts/photo_duel_voice_adapter.gd.uid": "d319148882dca2bcea5f59a725e935cd8769b8d6081ef4aa8a600007ba22cf0d",
     "scripts/photo_duel_voice_receiver_staging.gd": "60d36d138ac937aed3048cef769ab76c1f351d77b5c08d47b395c07309681a1f",
     "scripts/photo_duel_voice_receiver_staging.gd.uid": "99bde559eea97d93ced69730b9ac7a49d5bfaa3e09ebf7500e58e9b67500407a",
@@ -1600,6 +1604,7 @@
     "tests/journeys.gd": "3af7470f7a24c7f5b4c9dfe987a1be6b25f1a8bb842e89030a381fc186db55af",
     "tests/journeys.gd.uid": "62f8f9dc283d82f3872eb3dcba1f2d6bfb3bf62aa8c80035fd62b2561e2ddd11",
     "tests/language_restart.gd": "3d550e6ed6f8afaeecf138e958b73a484c1b60ac10a69f59207afdcc9e641c74",
+    "tests/language_restart.gd.uid": "470741b4d3147fd8b8a3f77ab5dcc8a2b9003cf9cd46c296fdb302c838c15eb8",
     "tests/languages.gd": "2d25a8814cd1a0aee3def760da45f8f13b78b14bcecd947c3179dd8f3ff1138a",
     "tests/languages.gd.uid": "65d861630ac004487ed5a11fd9f7160a801f0fd94869c893074d44d74c32e879",
     "tests/main_picture_flow_ui.gd": "32b9db4132f3b6b08adc82586b2e5108679b146081cd8c858c76c7f394cc7950",
@@ -1782,7 +1787,7 @@
     "tests/unified_profile.gd.uid": "36cc51e836b993cf95da0ee344ce40bc5e5c08b3cb16d25604587ef0a19b39b2",
     "tests/visual_switch_access_regression.gd": "201b3a9569a50ad594a44da6d0e8979ed2ece722f02d499ea26f3907263766d2",
     "tests/visual_switch_access_regression.gd.uid": "4342d710c6b2dce0c1d49e6f723d2d78616257ac4cd1fcdabac23109d11ad9f4",
-    "tests/voice_continuity.gd": "f53060512e955e31e56e2243da9309ac2631caed9ef5b036b5bd8cd3249ed4eb",
+    "tests/voice_continuity.gd": "e70d41c83ebcf7ad6026c20acb10ae1db3eede785904064481c8236d0d86939e",
     "tests/voice_continuity.gd.uid": "f24f1eb455acb196e21f403d0e6947824dafffc7c74f891b51a33e6d570502eb",
     "tests/voice_health_metadata.gd": "86f95889fa999965662ae9409912a668e82e6f45416afefe8679c80c332b3c4a",
     "tests/voice_health_metadata.gd.uid": "fe58a2529b1aae6d199d83277a3b1e24adc8cad3f81b4b260edda49451ca866b",
@@ -1801,9 +1806,6 @@
     "tools/generate_challenge_audio.py": "24d45e48abea4ecd00a1b60766016c3511ad5b627c33e1306f9e3226e4bb5231",
     "tools/generate_premium_audio.py": "cb13d9ed904d7334dafaa26c9b917e4ba7ec68d0515647e521a224f962e555fe",
     "tools/run_social_tests.ps1": "4bbbae322975ebafd960b1432bb4eae27a282d30e4aec6ead1d51981ba7ca924",
-    "tools/validate_daily.py": "c58ac22b74cff86a88e3aeb536d4fd031f3350a26bcd150fdfd435509b330aac",
-    "assets/ui/android_launch_background.png": "a1fdc0fc80bf861116b7b59c755b40c7b7114dc57f50cd508a47b74ee4a1f1be",
-    "assets/cinema/cairo_arrivals.ogv": "fa688ebd352298689298f764cb8cb310f1844a1d0641e81b67aa70f4bb60c686",
-    "assets/audio/doorbell_chime.ogg": "c0f54925d7beddadd0ab77b71505c9e5e9d4ebda552b695418bb14ae9b0b2b4a"
+    "tools/validate_daily.py": "c58ac22b74cff86a88e3aeb536d4fd031f3350a26bcd150fdfd435509b330aac"
   }
 }

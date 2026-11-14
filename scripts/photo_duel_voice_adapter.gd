@@ -117,6 +117,12 @@ func _event(message: Dictionary) -> void:
   # Keep the user's existing call intent; do not send more frames/opt-outs into
   # a socket the server has just declared unbound.
   if str(message.get("message","")).to_lower()=="not in a room":return
+  if str(message.get("message","")) in ["Voice paused until room reconnects","Voice room unavailable"]:
+   # In-flight PCM may arrive after a disconnect pauses the room. Suspend
+   # native I/O, but keep the explicit call intent for the next valid snapshot.
+   # Canonical closed/consent snapshots still govern whether audio can restart.
+   _stop(true)
+   return
   if str(message.get("message","")) in ["Request rate limit","Stale audio frame","Voice consent or epoch mismatch"]:
    # These reject individual media frames, not microphone consent or the call.
    # TCP/mobile jitter must not turn a dropped frame into a permanent hang-up.

@@ -1779,7 +1779,7 @@
     "tests/test_smart_play_v81.py": "95b8a5dee80f584621d72f2599883c113def5a5d6b77172bc970bb71e1622cba",
     "tests/test_source_archive_v92.py": "fdc1acf49283b63af02125ff5929139471c3708dbb531affde5eeccf82e5c370",
     "tests/test_source_sync_v91.py": "239f0c4486be3719d32149da18649205e8037df78c34e4cab3d8561e60bcf628",
-    "tests/test_touch_navigation_v84.py": "d1d011e84031a815fdba070bfc6f4e1991d84f7dbfb46487a058603c751a9eaf",
+    "tests/test_touch_navigation_v84.py": "f0388a64db7666ee36cee13373a40dba90023e707efe85b009abcb9c67cad5e8",
     "tests/test_triple_v46.py": "efcd6982dea30976d1b7088f0b269d45e3cbd1d18dd3fd503211a715cd780017",
     "tests/test_upload_archive_v93.py": "54cf19d1385d723f93060dc747d3e90904551fe508a971edddbeaae8c425171d",
     "tests/test_v105_admob_static.py": "92b3e50d347467b0d42ceea97f0fbf3ed932a34df66d3d6104e50867a92d018f",

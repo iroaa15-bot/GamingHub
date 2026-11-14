@@ -47,6 +47,8 @@ class TouchNavigationV84(unittest.TestCase):
   self.assertIn('if reduced_motion:\n  target.scale = Vector2.ONE\n  return',MAIN)
  def test_home_shows_xp(self):
   home=MAIN.split('func show_home() -> void:',1)[1].split('\nfunc ',1)[0]
+  if 'show_home_legacy()' in home:
+   home=MAIN.split('func show_home_legacy() -> void:',1)[1].split('\nfunc ',1)[0]
   self.assertIn('profile.get("xp",0)',home)
   self.assertIn('LEVEL %d • XP %d • WINS %d • MATCHES %d',home)
 

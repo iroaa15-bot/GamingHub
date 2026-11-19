@@ -38,7 +38,7 @@ func run() -> void:
    controls[0].pressed.emit() # Same-frame repeat must not submit twice.
   valid=valid and await until(func():return a.client.state.party.phase=="results" and b.client.state.party.phase=="results")
   valid=valid and int(a.client.state.scores[0])==10 and int(a.client.state.scores[1])==0 and a.client.state.scores==b.client.state.scores
-  valid=valid and a._seats.is_visible_in_tree() and a.heading.text.contains("1")
+  valid=valid and a._seats.is_visible_in_tree() and a.play_view.title.text.contains("1/10")
   print("SOCIAL_UI_STAGE results=",valid," scores=",a.client.state.scores," peer_scores=",b.client.state.scores)
  if valid:
   for round_index in range(1,10):

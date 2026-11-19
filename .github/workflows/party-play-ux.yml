@@ -1,0 +1,70 @@
+name: Party play UX regression
+on:
+  pull_request:
+    paths:
+      - 'scripts/open_heart_play_view.gd'
+      - 'scripts/social_room_ui.gd'
+      - 'tests/open_heart_play_view.gd'
+      - 'tests/social_rooms_ui.gd'
+      - 'tests/social_room_ui_network.gd'
+      - '.github/workflows/party-play-ux.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  party-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r server/requirements.txt
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Import resources
+        run: godot --headless --audio-driver Dummy --editor --import --quit
+      - name: Stable layout and preserved room/audio behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          for script in open_heart_play_view social_rooms_ui voice_continuity room_audio_policy account_progress_isolation; do
+            timeout 120 godot --headless --audio-driver Dummy --script "res://tests/$script.gd" 2>&1 | tee "$script.log"
+            if [ "$script" = room_audio_policy ]; then
+              sed '/^ERROR: [0-9][0-9]* resources still in use at exit/d' "$script.log" > checked.log
+            else
+              cp "$script.log" checked.log
+            fi
+            ! grep -E 'SCRIPT ERROR|^ERROR:|AUDIO_POLICY.*false|PARTY_PLAY_VIEW_PASS=false|SOCIAL_ROOMS_UI false' checked.log
+          done
+          grep -q 'PARTY_PLAY_VIEW_PASS=true' open_heart_play_view.log
+          grep -q 'SOCIAL_ROOMS_UI true cases=120' social_rooms_ui.log
+          grep -q 'VOICE_CONTINUITY continuous=true' voice_continuity.log
+          grep -q 'ACCOUNT_PROGRESS_ISOLATION_PASS' account_progress_isolation.log
+      - name: Full ten-round match over real local WebSockets
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          python -u server/run_social_local.py --port 8898 --draft-content > social-server.log 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q SOCIAL_LOCAL_READY social-server.log; then break; fi
+            sleep 0.2
+          done
+          grep -q SOCIAL_LOCAL_READY social-server.log
+          timeout 90 godot --headless --audio-driver Dummy --script res://tests/social_room_ui_network.gd -- --duel-local=ws://127.0.0.1:8898 2>&1 | tee social-network.log
+          grep -q 'SOCIAL_UI_FULL_MATCH true' social-network.log
+          grep -q 'SOCIAL_ROOM_UI_NETWORK true' social-network.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' social-network.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: party-play-ux-logs
+          path: '*.log'

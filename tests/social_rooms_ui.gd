@@ -21,8 +21,9 @@ func run() -> void:
      var state={"code":"123456","capacity":count,"joined":count,"connected":[],"scores":[],"confirmed":[],"profiles":[],"player":player,"current":0,"host":0,"responder":1,"started":true,"room_agreement":true,"primary_mode":"voice","config_revision":1,"picture_difficulty":"easy","opponents":[],"preset_questions":[],"party":{"category":category,"phase":"active","actor":"0","round":0,"rounds":10,"card_id":"fixture","card":{"id":"fixture","text_ar":"كارت اختبار","text_en":"Test card"},"voted_players":[],"story_committed":false,"power":"bonus"}}
      for i in range(count):state.connected.append(true);state.scores.append(0);state.confirmed.append(true)
      view._state(state);await process_frame
-     valid=valid and not view._match_controls.visible and view.party_panel.visible
-     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==view.party_panel
+     var redesigned: bool=category=="open_heart"
+     valid=valid and not view._match_controls.visible and (view.play_view.visible if redesigned else view.party_panel.visible)
+     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==(view.play_view.content if redesigned else view.party_panel)
      var expected: int=0
      if category=="open_heart":expected=2 if player==0 else 0
      elif category=="who_among_us":expected=count-1
@@ -30,10 +31,15 @@ func run() -> void:
      elif category=="truth_or_fiction":expected=2 if player==0 else 0
      elif category=="table_flip":expected=count-1 if player==0 else 0
      var buttons: Array=view.party_panel.find_children("*","Button",true,false)
+     if redesigned:
+      buttons=[]
+      for control in [view.play_view.participate,view.play_view.skip]:
+       if control.visible:buttons.append(control)
      valid=valid and buttons.size()==expected
      state.paused=true;view._state(state)
      valid=valid and view._seats.is_visible_in_tree()
      for control in view.party_panel.find_children("*","Button",true,false):valid=valid and control.disabled
+     if redesigned:valid=valid and view.play_view.participate.disabled and view.play_view.skip.disabled
      for mode in ["text","mixed","tap","voice"]:
       state.primary_mode=mode;view._state(state)
       valid=valid and view._social_chat.visible==(mode in ["text","mixed"])
@@ -43,7 +49,7 @@ func run() -> void:
      valid=valid and view.status.text==("انتهت المباراة بالتعادل" if language=="ar" else "Match finished in a draw")
      state.party.phase="lobby";state.started=false;state.match_finished=false
      view._state(state)
-     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==view._main_column
+     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==(view.play_view.content if redesigned else view._main_column)
      valid=valid and not view._agreement_info.text.contains("Difficulty") and not view._agreement_info.text.contains("الصعوبة")
      cases+=1
    view.queue_free();await process_frame

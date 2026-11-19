@@ -50,6 +50,7 @@ func run() -> void:
    var mute_position: Vector2=ui.voice_mute_button.global_position
    check(ui.play_view.participate.is_visible_in_tree() and not ui.play_view.participate.disabled,"actor can participate")
    check(ui.voice_mute_button.get_global_rect().end.y<=root.size.y,"mute stays on screen")
+   check(ui.play_view.card.get_global_rect().end.y<=ui.play_view.scroll.get_global_rect().end.y,"full prompt fits with 2..6 compact seats")
    ui._state(state);await process_frame;await process_frame
    check(card_id==ui.play_view.card.get_instance_id(),"snapshot retains prompt node")
    check(mute_position.is_equal_approx(ui.voice_mute_button.global_position),"snapshot retains mute position")

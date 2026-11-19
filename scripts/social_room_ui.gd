@@ -26,7 +26,7 @@ func _ready() -> void:
  party_panel=VBoxContainer.new();party_panel.add_theme_constant_override("separation",12);_main_column.add_child(party_panel)
  _social_chat=VBoxContainer.new();_main_column.add_child(_social_chat)
  _chat_toggle.reparent(_social_chat);_chat_body.reparent(_social_chat)
- if selected_social=="open_heart":
+ if selected_social in SOCIAL_TITLES:
   play_view=load("res://scripts/open_heart_play_view.gd").new()
   add_child(play_view)
   play_view.setup(self)

@@ -54,7 +54,7 @@ func run() -> void:
    state.started=true;state.connected[count-1]=true
    state.party={"category":"who_among_us","phase":"active","round":0,"rounds":10,"actor":"0","card_id":"fixture","card":{"text_ar":"مين فينا أكتر شخص بيحب السفر؟","text_en":"Who among us loves travelling most?"},"voted_players":[]}
    ui.client.state=state;ui._state(state);await snap("question-%s-%d"%[language,count])
-   assert(ui.party_panel.find_child("SocialPromptCard",true,false)!=null)
+   assert(ui.play_view.card.is_visible_in_tree())
    state.party.phase="finished";state.party.round=10;state.match_finished=true;state.winner=count-1
    ui.client.state=state;ui._state(state);await snap("results-%s-%d"%[language,count])
   ui.queue_free();await process_frame

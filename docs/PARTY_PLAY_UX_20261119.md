@@ -1,19 +1,20 @@
-# Open Heart play UX — first implementation
+# Social party play UX
 
 Base: PR #21 head `63cafe4d79b93fb85ad9a4363b4d073909ff2983`.
-Scope: the online Open Heart room only. Other five social games, quiz, photo,
-offline games, account storage, native audio, and server rules are unchanged.
+Scope: all six online social games. Quiz, photo, offline games, account storage,
+native audio, and server rules remain independent of this social renderer.
 
 ## Behavior
 
-- A dedicated, persistent lobby/match layout replaces the rebuilt Open Heart
+- A dedicated, persistent lobby/match layout replaces the rebuilt social
   panel. The common entry, invitation, agreement, identity, and room transport
   remain in use. The existing host-ready/start contract remains authoritative.
 - Stable player seats, a readable prompt, actor/listener instructions, and a
   bottom action area replace the generic stacked photo-game controls.
 - Existing call/mute controls live in a fixed footer outside scrolling content.
   No voice permission, consent, epoch, mute, focus, or recovery behavior changes.
-- Participation and skip use the current card ID. A successful send locks both
+- Participation, secret story commitment, voting, and power actions use the
+  current card ID. A successful send locks the action controls
   buttons until a canonical phase/card transition, rejection, or resumed room
   snapshot. Repeated snapshots do not recreate controls or replay animations.
 - A resume acknowledgement alone does not unlock answers. The following active
@@ -23,7 +24,11 @@ offline games, account storage, native audio, and server rules are unchanged.
   until exit. No account XP or persisted rewards are invented.
 - Text/mixed chat and report/block actions remain available under Chat & report.
 - Exit and Android Back request confirmation. Reduced motion disables the brief
-  prompt fade. Open Heart remains untimed.
+  prompt fade. Only the existing performance games show their real timer;
+  Open Heart and other untimed games remain untimed.
+- Compact in-match player cards keep the entire prompt visible with six seats.
+  Performers' cards and power offers remain private. Another player's vote does
+  not acknowledge a pending local vote; only the local vote's canonical state does.
 
 ## Validation and limits
 

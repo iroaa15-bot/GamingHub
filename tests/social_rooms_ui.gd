@@ -21,7 +21,7 @@ func run() -> void:
      var state={"code":"123456","capacity":count,"joined":count,"connected":[],"scores":[],"confirmed":[],"profiles":[],"player":player,"current":0,"host":0,"responder":1,"started":true,"room_agreement":true,"primary_mode":"voice","config_revision":1,"picture_difficulty":"easy","opponents":[],"preset_questions":[],"party":{"category":category,"phase":"active","actor":"0","round":0,"rounds":10,"card_id":"fixture","card":{"id":"fixture","text_ar":"كارت اختبار","text_en":"Test card"},"voted_players":[],"story_committed":false,"power":"bonus"}}
      for i in range(count):state.connected.append(true);state.scores.append(0);state.confirmed.append(true)
      view._state(state);await process_frame
-     var redesigned: bool=category=="open_heart"
+     var redesigned: bool=is_instance_valid(view.play_view)
      valid=valid and not view._match_controls.visible and (view.play_view.visible if redesigned else view.party_panel.visible)
      valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==(view.play_view.content if redesigned else view.party_panel)
      var expected: int=0
@@ -33,7 +33,7 @@ func run() -> void:
      var buttons: Array=view.party_panel.find_children("*","Button",true,false)
      if redesigned:
       buttons=[]
-      for control in [view.play_view.participate,view.play_view.skip]:
+      for control in view.play_view.option_buttons:
        if control.visible:buttons.append(control)
      valid=valid and buttons.size()==expected
      state.paused=true;view._state(state)

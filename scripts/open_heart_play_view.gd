@@ -1,5 +1,5 @@
 extends VBoxContainer
-## Presentation only. The existing room client and voice adapter own all state.
+## Shared social-game presentation. Room transport, secrets and scoring remain authoritative.
 var room: Control
 var title: Label
 var connection: Label
@@ -11,7 +11,7 @@ var card: PanelContainer
 var lobby: VBoxContainer
 var content: VBoxContainer
 var scroll: ScrollContainer
-var actions: HBoxContainer
+var actions: GridContainer
 var participate: Button
 var skip: Button
 var next_round: Button
@@ -28,6 +28,10 @@ var backdrop: ColorRect
 var tools: VBoxContainer
 var tools_open := false
 var resumed := false
+var option_buttons: Array[Button]=[]
+var options: Array[Dictionary]=[]
+var pending_action := ""
+var timer_slot: VBoxContainer
 
 func words(ar: String, en: String) -> String:
  return room.tr_pair(ar,en)
@@ -68,7 +72,7 @@ func action_button(caption: String, callback: Callable, primary: bool=false) -> 
 
 func setup(owner_room: Control) -> void:
  room=owner_room
- name="OpenHeartPlayView"
+ name="SocialPlayView"
  set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  offset_left=16;offset_right=-16;offset_top=12;offset_bottom=-12
  add_theme_constant_override("separation",8)
@@ -80,6 +84,7 @@ func setup(owner_room: Control) -> void:
  room.move_child(backdrop,get_index())
  title=text_node(self,23)
  connection=text_node(self,14)
+ timer_slot=VBoxContainer.new();add_child(timer_slot)
  scroll=ScrollContainer.new()
  scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
  scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
@@ -106,11 +111,16 @@ func setup(owner_room: Control) -> void:
  room._social_chat.reparent(tools)
  for node in [room.target_player,room.report_reason,room.report_button,room.block_button]:node.reparent(tools)
  response=text_node(self,15)
- actions=HBoxContainer.new();actions.add_theme_constant_override("separation",8);add_child(actions)
- participate=action_button(words("شاركت · +10","Participated · +10"),func():submit("finish",true),true)
- skip=action_button(words("تخطي","Skip"),func():submit("finish",false))
+ actions=GridContainer.new();actions.columns=2;actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",6);add_child(actions)
+ participate=action_button("",func():submit_option(0),true)
+ skip=action_button("",func():submit_option(1))
  next_round=action_button(words("الجولة التالية","Next round"),func():submit("next"),true)
- for node in [participate,skip,next_round]:actions.add_child(node)
+ option_buttons.assign([participate,skip])
+ for i in range(2,6):
+  var index: int=i
+  option_buttons.append(action_button("",func():submit_option(index)))
+ for node in option_buttons:actions.add_child(node)
+ actions.add_child(next_round)
  for node in [room.voice_button,room.voice_mute_button,room._accept_button]:
   for state_name in ["normal","pressed","hover","focus","disabled"]:
    node.add_theme_stylebox_override(state_name,participate.get_theme_stylebox(state_name))
@@ -124,11 +134,14 @@ func restore_shared_layout() -> void:
  # The legacy renderer expects these nodes under its column while updating.
  if room._seats.get_parent()!=room._main_column:room._seats.reparent(room._main_column)
  if room._agreement_box.get_parent()!=room._main_column:room._agreement_box.reparent(room._main_column)
+ for node in [room.clock,room._clock_bar]:
+  if node.get_parent()!=room._main_column:node.reparent(room._main_column)
 
 func display(value: Dictionary) -> void:
  latest=value.duplicate(true)
  var party: Dictionary=value.get("party",{})
  var phase: String=str(party.get("phase","lobby"))
+ var category: String=str(party.get("category",room.selected_social))
  var in_room: bool=not room.client.code.is_empty() and not bool(value.get("closed",false))
  visible=in_room
  backdrop.visible=in_room
@@ -143,10 +156,17 @@ func display(value: Dictionary) -> void:
  room._seats.show()
  room._seats.columns=2 if int(value.get("capacity",2))<=2 else 3
  for i in range(6):
-  room._seat_avatars[i].custom_minimum_size=Vector2(36,36)
+  var compact: bool=phase!="lobby"
+  room._seat_avatars[i].custom_minimum_size=Vector2(24,24) if compact else Vector2(36,36)
   room._seat_labels[i].add_theme_font_size_override("font_size",14)
   room._seat_statuses[i].add_theme_font_size_override("font_size",12)
-  room._seat_panels[i].add_theme_stylebox_override("panel",surface(Color("213553") if i==int(party.get("actor",-1)) and phase=="active" else Color("1b273c")))
+  var player_style: StyleBoxFlat=surface(Color("213553") if i==int(party.get("actor",-1)) and phase=="active" else Color("1b273c"))
+  if compact:
+   for edge in ["top","bottom","left","right"]:player_style.set("content_margin_"+edge,6)
+   room._seat_labels[i].text=room._social_player_name(i).left(14)+" · "+str(int(value.get("scores",[])[i]) if i<value.get("scores",[]).size() else 0)
+   if i<value.get("connected",[]).size() and not bool(value.connected[i]):room._seat_labels[i].text+=" ↻"
+  room._seat_statuses[i].visible=not compact
+  room._seat_panels[i].add_theme_stylebox_override("panel",player_style)
  room._agreement_box.reparent(lobby)
  room._voice_controls.reparent(dock)
  room._voice_controls.visible=bool(value.get("room_agreement",false)) and str(value.get("primary_mode","voice")) in ["voice","mixed"] and bool(room.client.capabilities.get("voice",false))
@@ -154,7 +174,13 @@ func display(value: Dictionary) -> void:
  room.voice_status.custom_minimum_size.y=40
  room.voice_status.max_lines_visible=2
  room._voice_changed()
- room.clock.hide();room._clock_bar.hide()
+ room.voice_button.text=words("إنهاء","End call") if room.voice_adapter.requested else words("اتصال","Call")
+ room.voice_mute_button.text=words("إلغاء الكتم","Unmute") if room.voice_adapter.muted else words("كتم","Mute")
+ for node in [room.clock,room._clock_bar]:node.reparent(timer_slot)
+ room.clock.visible=phase=="active" and int(value.get("timer",0))>0
+ room.clock.add_theme_font_size_override("font_size",18)
+ room._clock_bar.visible=room.clock.visible
+ timer_slot.visible=room.clock.visible
  room._social_chat.visible=phase!="lobby" and str(value.get("primary_mode","voice")) in ["text","mixed"]
  room._chat_toggle.visible=room._social_chat.visible
  tools.visible=tools_open
@@ -170,7 +196,8 @@ func display(value: Dictionary) -> void:
  var count: int=int(value.get("capacity",2))
  var ready_count: int=value.get("confirmed",[]).count(true)
  room._agreement_info.text=words("الجاهزون %d/%d · %d جولات","Ready %d/%d · %d rounds") % [ready_count,count,int(party.get("rounds",10))]
- title.text=words("افتح قلبك · الغرفة %s","Open Heart · Room %s") % room.client.code if phase=="lobby" else words("افتح قلبك · الجولة %d/%d","Open Heart · Round %d/%d") % [mini(int(party.get("round",0))+(1 if phase=="active" else 0),int(party.get("rounds",10))),int(party.get("rounds",10))]
+ var game_title: String=str(room.SOCIAL_TITLES[category][0 if room.language=="ar" else 1])
+ title.text=game_title+words(" · الغرفة %s"," · Room %s") % room.client.code if phase=="lobby" else game_title+words(" · الجولة %d/%d"," · Round %d/%d") % [mini(int(party.get("round",0))+(1 if phase=="active" else 0),int(party.get("rounds",10))),int(party.get("rounds",10))]
  card.visible=phase=="active"
  var actor: int=int(party.get("actor",-1))
  var own_turn: bool=actor==room.client.player
@@ -179,13 +206,29 @@ func display(value: Dictionary) -> void:
  prompt.text=str(prompt_data.get("text_ar","")) if room.language=="ar" else str(prompt_data.get("text_en",prompt_data.get("text_ar","")))
  detail.text=words("بدون مؤقت · يمكنك التخطي دون خصم","No timer · skip without a penalty")
  if room.language=="en" and not prompt_data.has("text_en") and phase=="active":detail.text="This card is in Arabic. No timer · skip without a penalty."
- participate.visible=phase=="active" and own_turn
- skip.visible=participate.visible
+ options.clear()
+ if phase=="active":options.assign(_round_options(party,category,own_turn,int(value.get("capacity",2))))
+ for i in range(option_buttons.size()):
+  option_buttons[i].visible=i<options.size()
+  if i<options.size():option_buttons[i].text=str(options[i].label)
+ actions.layout_direction=room.layout_direction
+ actions.columns=3 if options.size()>2 else 2
  next_round.visible=phase=="results" and room.client.player==0
  ranking.visible=phase in ["results","finished"]
+ if category!="open_heart" and phase=="active":
+  instruction.text=words("دورك الآن","Your turn") if own_turn else words("الدور على %s","Turn: %s") % room._social_player_name(actor)
+  detail.text=words("اختر إجابتك عندما تكون مستعدًا","Choose your answer when ready")
+  if category in ["act_it","show_skill"]:
+   detail.text=words("مثّل الكارت لأصحابك" if category=="act_it" else "نفّذ التحدي لأصحابك","Perform the card for your friends") if own_turn else words("شاهد الأداء ثم صوّت","Watch the performance, then vote")
+   if prompt_data.is_empty():prompt.text=words("الكارت سري عند صاحب الدور","The performer has the secret card")
+  elif category=="truth_or_fiction":
+   detail.text=words("ثبّت الحقيقة سرًا ثم احكِ القصة","Set the truth privately, then tell your story") if own_turn and not bool(party.get("story_committed",false)) else words("اسمع القصة ثم اختر: حقيقة أم تأليف؟","Listen, then choose: true or fiction?")
+  elif category=="table_flip" and bool(party.get("choosing",false)):
+   prompt.text=words("اختر كارت القوة","Choose a power card") if own_turn else words("صاحب الدور يختار كارتًا سريًا","The active player is choosing a private card")
+  if str(room.client.player) in party.get("voted_players",[]):detail.text=words("تم تسجيل تصويتك · بانتظار الباقين","Vote recorded · waiting for the others")
  if phase=="lobby":
   instruction.text=words("اجمع أصحابك ثم استعدوا للعب","Gather your friends and get ready")
-  detail.text=words("المشاركة = 10 نقاط · التخطي بدون خصم","Participation = 10 points · skipping has no penalty")
+  detail.text=words("المشاركة = 10 نقاط · التخطي بدون خصم","Participation = 10 points · skipping has no penalty") if category=="open_heart" else words("لكل لاعب دوره · التصويت والنتائج تظهر في وقتها","Everyone has a role · votes and results reveal at the right time")
  elif ranking.visible:
   instruction.text=words("نتيجة الجولة","Round result") if phase=="results" else words("انتهت المباراة","Match complete")
   if phase=="finished":
@@ -196,7 +239,9 @@ func display(value: Dictionary) -> void:
   var awards: Dictionary=party.get("result",{}).get("awards",{})
   if phase=="results":
    var awarded: Array=awards.keys()
-   detail.text=words("تم تخطي الكارت · بدون نقاط","Card skipped · no points awarded") if awarded.is_empty() else words("%s حصل على +%d نقطة","%s earned +%d points") % [room._social_player_name(int(awarded[0])),int(awards[awarded[0]])]
+   var award_lines: Array[String]=[]
+   for player in awarded:award_lines.append(room._social_player_name(int(player))+": "+("+" if int(awards[player])>0 else "")+str(int(awards[player])))
+   detail.text=words("انتهت الجولة · لا تغيير في النقاط","Round complete · no score change") if awarded.is_empty() else " · ".join(award_lines)
   var scores: Array=value.get("scores",[])
   var order: Array=range(scores.size())
   order.sort_custom(func(a,b):return int(scores[a])>int(scores[b]))
@@ -213,7 +258,9 @@ func display(value: Dictionary) -> void:
    card.modulate.a=0.4;transition=create_tween();transition.tween_property(card,"modulate:a",1.0,0.18)
  if paused:response.text=words("المباراة متوقفة حتى عودة الاتصال","Play is paused until connection returns")
  elif pending_key.is_empty():response.text=words("بانتظار صاحب الغرفة للجولة التالية","Waiting for the host to continue") if phase=="results" and room.client.player!=0 else (words("بانتظار مشاركة اللاعب","Waiting for the player to share") if phase=="active" and not own_turn else "")
- for node in [participate,skip,next_round]:node.disabled=paused or not pending_key.is_empty()
+ if not pending_key.is_empty() and ((pending_action=="duel_party_vote" and str(room.client.player) in party.get("voted_players",[])) or (pending_action=="duel_party_story" and bool(party.get("story_committed",false)))):
+  pending_key=""
+ for node in option_buttons+[next_round]:node.disabled=paused or not pending_key.is_empty()
 
 func submit(kind: String, participated: bool=false) -> void:
  if not pending_key.is_empty() or bool(latest.get("paused",false)) or room.client.capabilities.is_empty():return
@@ -221,15 +268,47 @@ func submit(kind: String, participated: bool=false) -> void:
  var phase: String=str(party.get("phase",""))
  if kind=="finish" and (phase!="active" or str(party.get("actor",""))!=str(room.client.player)):return
  if kind=="next" and (phase!="results" or room.client.player!=0):return
- var result: int
- if kind=="next":result=room.client.send_action("duel_party_next",{"round":int(party.get("round",0))})
- else:result=room.client.send_action("duel_party_finish",{"card_id":str(party.get("card_id","")),"participated":participated})
+ if kind=="next":_send("duel_party_next",{"round":int(party.get("round",0))})
+ else:_send("duel_party_finish",{"card_id":str(party.get("card_id","")),"participated":participated})
+
+func submit_option(index: int) -> void:
+ if index<0 or index>=options.size() or not pending_key.is_empty():return
+ var option: Dictionary=options[index]
+ _send(str(option.action),option.fields)
+
+func _send(action: String, fields: Dictionary) -> void:
+ if not pending_key.is_empty() or bool(latest.get("paused",false)) or room.client.capabilities.is_empty():return
+ var result: int=room.client.send_action(action,fields)
  if result!=OK:
   response.text=words("تعذر الإرسال · حاول مجددًا","Could not send · try again")
   return
- pending_key=phase_key;pending_kind=kind;pending_since=Time.get_ticks_msec()
- response.text=words("جار تسجيل المشاركة…","Recording your response…") if kind=="finish" else words("جار بدء الجولة…","Starting the round…")
- for node in [participate,skip,next_round]:node.disabled=true
+ pending_key=phase_key;pending_action=action;pending_since=Time.get_ticks_msec()
+ response.text=words("جار الإرسال…","Sending…")
+ for node in option_buttons+[next_round]:node.disabled=true
+
+func _round_options(party: Dictionary, category: String, own_turn: bool, capacity: int) -> Array[Dictionary]:
+ var result: Array[Dictionary]=[]
+ var card_id: String=str(party.get("card_id",""))
+ var voted: bool=str(room.client.player) in party.get("voted_players",[])
+ if category=="open_heart" and own_turn:
+  result.append({"label":words("شاركت · +10","Participated · +10"),"action":"duel_party_finish","fields":{"card_id":card_id,"participated":true}})
+  result.append({"label":words("تخطي","Skip"),"action":"duel_party_finish","fields":{"card_id":card_id,"participated":false}})
+ elif category=="who_among_us" and not voted:
+  for i in range(capacity):
+   if i!=room.client.player:result.append({"label":room._social_player_name(i),"action":"duel_party_vote","fields":{"card_id":card_id,"choice":str(i)}})
+ elif category=="truth_or_fiction" and not bool(party.get("story_committed",false)):
+  if own_turn:
+   for truth in [true,false]:result.append({"label":words("حقيقية · اختيار سري" if truth else "تأليف · اختيار سري","True · private choice" if truth else "Fiction · private choice"),"action":"duel_party_story","fields":{"card_id":card_id,"is_true":truth}})
+ elif category in ["act_it","show_skill","truth_or_fiction"] and not own_turn and not voted:
+  for yes in [true,false]:result.append({"label":words(("حقيقية" if yes else "تأليف") if category=="truth_or_fiction" else ("نعم" if yes else "لا"),("True" if yes else "Fiction") if category=="truth_or_fiction" else ("Yes" if yes else "No")),"action":"duel_party_vote","fields":{"card_id":card_id,"choice":yes}})
+ elif category=="table_flip" and own_turn:
+  if bool(party.get("choosing",false)):
+   for offer in party.get("offered",[]):result.append({"label":str(offer.get("text_"+room.language,offer.get("text_ar",""))),"action":"duel_party_choose","fields":{"card_id":str(offer.id)}})
+  elif str(party.get("power","")) in ["bonus","steal","skip"]:
+   for i in range(capacity):
+    if i!=room.client.player:result.append({"label":room._social_player_name(i),"action":"duel_party_power","fields":{"card_id":card_id,"target":str(i)}})
+  else:result.append({"label":words("نفّذ قوة الكارت","Apply card power"),"action":"duel_party_power","fields":{"card_id":card_id}})
+ return result
 
 func rejected(message: Dictionary) -> void:
  if message.get("type")=="duel_resumed":

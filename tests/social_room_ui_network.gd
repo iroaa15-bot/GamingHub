@@ -48,7 +48,9 @@ func run() -> void:
    actor.play_view.participate.pressed.emit()
    valid=valid and await until(func():return a.client.state.party.phase in ["results","finished"] and b.client.state.party.phase==a.client.state.party.phase)
    if not valid:break
-  valid=valid and a.client.state.party.phase=="finished" and a.client.state.scores==[50,50] and b.client.state.scores==[50,50]
+  valid=valid and a.client.state.party.phase=="finished" and b.client.state.party.phase=="finished"
+  for peer in [a,b]:
+   valid=valid and peer.client.state.scores.size()==2 and int(peer.client.state.scores[0])==50 and int(peer.client.state.scores[1])==50
   print("SOCIAL_UI_FULL_MATCH ",valid," ten rounds, duplicate tap locked, scores=",a.client.state.scores)
  a.client.send_action("duel_leave")
  await until(func():return a.client.code.is_empty() and b.client.code.is_empty())

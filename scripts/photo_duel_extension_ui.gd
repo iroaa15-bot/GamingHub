@@ -132,17 +132,11 @@ func button(value: String, action: Callable) -> Button:
  return control
 
 func _style_play_button(control: Button) -> void:
- var tone:=Color("27334c")
- if control in [create_button,join_button,_accept_button,_start_button]:tone=Color("326be8")
- elif control in [yes_button,correct_button]:tone=Color("185e4f")
- elif control in [no_button,wrong_button]:tone=Color("6a2b41")
- for state_name in ["normal","hover","pressed","disabled","focus"]:
-  var skin:=StyleBoxFlat.new();skin.set_corner_radius_all(16)
-  skin.bg_color=Color("263145") if state_name=="disabled" else (tone.lightened(.1) if state_name in ["pressed","focus"] else tone)
-  skin.content_margin_left=12;skin.content_margin_right=12;skin.content_margin_top=10;skin.content_margin_bottom=10
-  control.add_theme_stylebox_override(state_name,skin)
- control.add_theme_color_override("font_color",Color("edf2ff"))
- control.add_theme_color_override("font_disabled_color",Color("9eb0c9"))
+ var tone: String="secondary"
+ if control in [create_button,join_button,_accept_button,_start_button]:tone="primary"
+ elif control in [yes_button,correct_button]:tone="positive"
+ elif control in [no_button,wrong_button]:tone="danger"
+ VisualSkin.decorate_play_action(control,tone)
 
 func _section(title: String, expanded: bool = false) -> VBoxContainer:
  var body := VBoxContainer.new()
@@ -179,7 +173,7 @@ func _ready() -> void:
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
  var bg := ColorRect.new()
- bg.color=Color("111a2c")
+ bg.color=VisualSkin.INK
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
  var scroll := ScrollContainer.new()

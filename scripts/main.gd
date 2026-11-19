@@ -1137,6 +1137,8 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  b.add_theme_stylebox_override("focus", panel_style(ACCENT.darkened(0.15)))
  var tone: String = "gold" if color == GOLD else ("teal" if color == GREEN else ("violet" if color == ACCENT else "secondary"))
  VisualSkin.decorate_button(b, tone)
+ if active_play_screen:
+  VisualSkin.decorate_play_action(b,"positive" if color==GREEN else ("primary" if color in [GOLD,ACCENT] else "secondary"))
  # Consistent touch targets and immediate tactile feedback for all game modes.
  b.focus_mode = Control.FOCUS_ALL
  b.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -1944,7 +1946,7 @@ func show_home_v2() -> void:
  label(tr_ui("خمن صورتك", "GUESS YOUR PICTURE"), 30)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
-  button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
+  button(tr_ui("🌐 انضم إلى غرفة بكود", "🌐 JOIN A ROOM WITH A CODE"), open_guess_multiplayer, ACCENT)
  button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
  button(tr_ui("🎮 قائمة الألعاب", "🎮 GAMES LIST"), show_games_list_v2, GOLD)
  label(tr_ui("الغرف والاتصال", "ROOMS & CONNECTION"), 23)
@@ -2174,7 +2176,7 @@ func show_modes(index: int) -> void:
  if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
  var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
  local.set_meta("mode_action","offline")
- var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_home,PANEL)
+ var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_games_list_v2,PANEL)
  back.set_meta("mode_action","games")
  VisualSkin.compact_menu(root)
 
@@ -2555,13 +2557,13 @@ func round_header_card() -> void:
  frame.add_theme_stylebox_override("panel", panel_style(Color("15274d")))
  root.add_child(frame)
  var inner := VBoxContainer.new()
- inner.add_theme_constant_override("separation", 10)
+ inner.add_theme_constant_override("separation", 6)
  frame.add_child(inner)
  var title_line := Label.new()
- title_line.text = tr_ui("✦ تحدي المعرفة", "✦ KNOWLEDGE CHALLENGE")
+ title_line.text = match_style_name()
  title_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  title_line.add_theme_color_override("font_color", GOLD)
- title_line.add_theme_font_size_override("font_size", int(17 * reading_scale))
+ title_line.add_theme_font_size_override("font_size", int(14 * reading_scale))
  inner.add_child(title_line)
  var status_line := Label.new()
  status_line.text = tr_ui("السؤال %d من %d   •   ⭐ %d نقطة", "QUESTION %d OF %d   •   ⭐ %d POINTS") % [question_index + 1, round_bank.size(), score]
@@ -2693,7 +2695,7 @@ func round_choice_grid(item: Dictionary) -> void:
   root.remove_child(choice_button)
   grid.add_child(choice_button)
   choice_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-  choice_button.custom_minimum_size.y = 82
+  choice_button.custom_minimum_size.y = 64 if reading_scale < 1.25 else 78
   choice_button.add_theme_color_override("font_color", Color("f5f9ff"))
 
 func show_round() -> void:
@@ -2721,7 +2723,6 @@ func show_round() -> void:
  elif not family_active and not campaign_active and not daily_match and (question_index + 1) % 5 == 0:
   label(tr_ui("⚡ محطة التحدي • مكافأة مضاعفة", "⚡ CHECKPOINT • DOUBLE REWARD"), 20)
  if not family_active and not campaign_active and not daily_match:
-  label(match_style_name(), 18)
   if match_style == "survival":
    label(tr_ui("المحاولات المتبقية: %d", "LIVES LEFT: %d") % lives_left, 19)
   elif match_style == "rival":
@@ -2735,17 +2736,8 @@ func show_round() -> void:
   elif match_style == "blitz":
    label(tr_ui("⏱ جاوب قبل انتهاء الوقت لتحصل على نقاط سرعة!", "⏱ ANSWER BEFORE THE CLOCK RUNS OUT FOR BONUS POINTS!"), 17)
 
- var progress := ProgressBar.new()
- progress.max_value = round_bank.size()
- progress.value = question_index
- progress.show_percentage = false
- progress.tooltip_text = tr_ui("تقدم الجولة: %d من %d", "Round progress: %d of %d") % [question_index, round_bank.size()]
- progress.custom_minimum_size.y = 12
- VisualSkin.decorate_progress(progress)
- root.add_child(progress)
  var item: Dictionary = round_bank[question_index]
- label(tr_ui("🧭 نوع التحدي: ", "🧭 CHALLENGE TYPE: ") + topic_title(str(item.get("topic", "all"))), 16)
- label(difficulty_name(int(item.get("level", 1))), 15)
+ label(topic_title(str(item.get("topic", "all"))) + " · " + difficulty_name(int(item.get("level", 1))), 14)
  if question_index == 0 and not adaptive_notice().is_empty() and not campaign_active and not family_active:
   label(adaptive_notice(), 16)
  if question_index > 0 and not family_active:

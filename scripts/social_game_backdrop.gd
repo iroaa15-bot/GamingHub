@@ -33,13 +33,7 @@ func _decorate_content() -> void:
  compact_menu(host)
  for control in host.find_children("*","Button",true,false):
   if control is OptionButton or control is CheckButton:continue
-  for state in ["normal","hover","pressed","disabled","focus"]:
-   var style:=StyleBoxFlat.new()
-   style.bg_color=Color("326be8") if state in ["normal","hover"] else (Color("244bb0") if state=="pressed" else Color("27334c"))
-   style.set_corner_radius_all(18)
-   style.content_margin_left=14;style.content_margin_right=14;style.content_margin_top=10;style.content_margin_bottom=10
-   control.add_theme_stylebox_override(state,style)
-  control.add_theme_color_override("font_color",Color("edf2ff"))
+  decorate_play_action(control,"primary")
  for prompt in host.find_children("SocialPromptCard","PanelContainer",true,false):
   var style:=StyleBoxFlat.new();style.bg_color=Color("edf2fc");style.set_corner_radius_all(22)
   for side in ["left","right","top","bottom"]:style.set("content_margin_"+side,18)
@@ -50,7 +44,7 @@ func _decorate_content() -> void:
   var reveal:=create_tween();reveal.tween_property(host,"modulate:a",1.0,.16)
 
 func _draw() -> void:
- draw_rect(Rect2(Vector2.ZERO,size),Color("111a2c"))
+ super._draw()
 
 func _notification(what: int) -> void:
  if what!=NOTIFICATION_WM_GO_BACK_REQUEST:return

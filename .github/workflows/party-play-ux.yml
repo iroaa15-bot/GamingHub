@@ -9,6 +9,10 @@ on:
       - 'scripts/shared_quiz_ui.gd'
       - 'scripts/social_game_backdrop.gd'
       - 'scripts/local_player_setup.gd'
+      - 'scripts/main.gd'
+      - 'scripts/visual_skin.gd'
+      - 'tests/core_match_acceptance.gd'
+      - 'tests/reference_core_capture.gd'
       - 'tests/open_heart_play_view.gd'
       - 'tests/social_rooms_ui.gd'
       - 'tests/social_room_ui_network.gd'
@@ -40,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           export XDG_DATA_HOME="$(mktemp -d)"
-          for script in open_heart_play_view social_play_actions social_rooms_ui room_play_shell local_party_setup voice_continuity room_audio_policy account_progress_isolation; do
+          for script in open_heart_play_view social_play_actions social_rooms_ui room_play_shell local_party_setup core_match_acceptance voice_continuity room_audio_policy account_progress_isolation; do
             timeout 120 godot --headless --audio-driver Dummy --script "res://tests/$script.gd" 2>&1 | tee "$script.log"
             if [ "$script" = room_audio_policy ]; then
               sed '/^ERROR: [0-9][0-9]* resources still in use at exit/d' "$script.log" > checked.log
@@ -53,6 +57,7 @@ jobs:
           grep -q 'SOCIAL_PLAY_ACTIONS_PASS=true' social_play_actions.log
           grep -q 'ROOM_PLAY_SHELL_PASS=true' room_play_shell.log
           grep -q 'LOCAL_PARTY_SETUP_PASS=true' local_party_setup.log
+          grep -q 'CORE_MATCH_ACCEPTANCE_PASS=true' core_match_acceptance.log
           grep -q 'SOCIAL_ROOMS_UI true cases=120' social_rooms_ui.log
           grep -q 'VOICE_CONTINUITY continuous=true' voice_continuity.log
           grep -q 'ACCOUNT_PROGRESS_ISOLATION_PASS' account_progress_isolation.log
@@ -92,6 +97,9 @@ jobs:
           timeout 180 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --script res://tests/reference_ui_capture.gd -- --capture-dir="$PWD/previews/all-games" 2>&1 | tee all-games-visual.log
           grep -q 'REFERENCE_NATIVE_RENDER' all-games-visual.log
           ! grep -q 'SCRIPT ERROR' all-games-visual.log
+          timeout 180 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --resolution 420x900 --script res://tests/reference_core_capture.gd -- --capture-dir="$PWD/previews/core" 2>&1 | tee core-visual.log
+          grep -q 'CORE_REFERENCE_CAPTURE_PASS=true captures=90' core-visual.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' core-visual.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

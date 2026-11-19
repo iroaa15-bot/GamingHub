@@ -17,6 +17,32 @@ const SUN := Color("ffcc42")
 const TEXT := Color("f5f7ff")
 const MUTED := Color("b4c4df")
 
+# Compact gameplay surfaces share the menu palette without oversized menu chrome.
+# Cached native styles keep fixed answer/voice docks stable on small Android screens.
+static func play_surface(fill: Color, radius: int = 18) -> StyleBoxFlat:
+ var style := StyleBoxFlat.new()
+ style.bg_color=fill
+ style.set_corner_radius_all(radius)
+ style.border_color=Color("8975ef",0.55)
+ style.set_border_width_all(1)
+ style.shadow_color=Color("502cbe",0.15)
+ style.shadow_size=4
+ style.shadow_offset=Vector2(0,2)
+ style.content_margin_left=14;style.content_margin_right=14
+ style.content_margin_top=10;style.content_margin_bottom=10
+ return style
+
+static func decorate_play_action(target: Button, tone: String = "secondary") -> void:
+ var colors: Dictionary={"secondary":"211c50","primary":"1856ba","positive":"14614b","danger":"782e50","reward":"725519"}
+ var fill:=Color(colors.get(tone,colors.secondary))
+ for state in ["normal","hover","pressed","disabled","focus"]:
+  var style:=play_surface(Color("20283d") if state=="disabled" else (fill.lightened(.12) if state in ["hover","focus"] else (fill.darkened(.15) if state=="pressed" else fill)))
+  if state=="focus":style.border_color=CYAN;style.set_border_width_all(2)
+  if state=="disabled":style.border_color=Color("46516c");style.shadow_size=0
+  target.add_theme_stylebox_override(state,style)
+ for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:target.add_theme_color_override(state,TEXT)
+ target.add_theme_color_override("font_disabled_color",MUTED)
+
 func _ready() -> void:
  mouse_filter = Control.MOUSE_FILTER_IGNORE
  resized.connect(queue_redraw)

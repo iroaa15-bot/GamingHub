@@ -34,7 +34,7 @@ Account storage, native audio, server rules, scoring and consent are unchanged.
   ordering and memory mechanics. MCQ/submit/next controls sit outside scrolling
   content. Pending-answer locking survives frame updates; correctness appears
   only after the authoritative reveal. Final photo draws are labelled correctly.
-- Local social screens use flat surfaces and brief transitions. Individual name
+- Local social screens use shared midnight/purple surfaces and brief transitions. Individual name
   fields with a 2–6-player control adapt the existing setup input; local engines,
   secret handovers, rules, scoring and timers are unchanged.
 
@@ -63,9 +63,19 @@ was fixed by compacting player cards. Additional final captures are in CI.
 Both phones retain matching progress/owner/language hashes after update with the
 original development certificate. An unsupported source-overlay test package was
 rolled back; the official CI export is used for device acceptance. Phone/audible
-acceptance is pending unlocked devices and the owner's listening confirmation.
+acceptance is in progress on the unlocked devices. A real Open Heart room and
+voice connection have now been established; audible quality is awaiting the
+owner's listening confirmation. This does not yet prove a complete phone match.
 No production deployment or merge. Hosted account rewards are not proven by a
 memory-only local match. Consult the PR for the latest checks and device evidence.
+
+The supplied fourteen-image pack is traced in
+`VISUAL_REFERENCE_ACCEPTANCE_20261119.md`. A central compact gameplay palette now
+shares the existing navy/purple identity, and local quiz HUDs remove duplicate
+progress/metadata so answers and hints fit more comfortably. No rule or reward
+values change. All ten core games pass local complete-match validator and reward
+idempotency checks in AR/EN. The native capture harness produces 90 seeded states
+per before/after set at 420×900; these are explicitly desktop fixtures.
 
 ## Follow-up acceptance
 

@@ -60,11 +60,7 @@ func action_button(caption: String, callback: Callable, primary: bool=false) -> 
  node.custom_minimum_size=Vector2(0,56)
  node.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  node.add_theme_font_size_override("font_size",18)
- node.add_theme_stylebox_override("normal",surface(Color("326be8") if primary else Color("27334c")))
- node.add_theme_stylebox_override("pressed",surface(Color("244bb0") if primary else Color("35445f")))
- node.add_theme_stylebox_override("hover",node.get_theme_stylebox("normal"))
- node.add_theme_stylebox_override("focus",surface(Color("466ba6")))
- node.add_theme_stylebox_override("disabled",surface(Color("263145")))
+ load("res://scripts/visual_skin.gd").decorate_play_action(node,"primary" if primary else "secondary")
  node.add_theme_color_override("font_color",Color.WHITE)
  node.add_theme_color_override("font_disabled_color",Color("a7b5cc"))
  node.pressed.connect(callback)
@@ -78,7 +74,7 @@ func setup(owner_room: Control) -> void:
  offset_left=16;offset_right=-16;offset_top=12;offset_bottom=-12
  add_theme_constant_override("separation",8)
  backdrop=ColorRect.new()
- backdrop.color=Color("111a2c")
+ backdrop.color=Color("0b1032")
  backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  backdrop.mouse_filter=Control.MOUSE_FILTER_IGNORE
  room.add_child(backdrop)

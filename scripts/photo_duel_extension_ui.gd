@@ -126,9 +126,23 @@ func button(value: String, action: Callable) -> Button:
  control.text = value
  control.custom_minimum_size.y = 56
  VisualSkin.decorate_button(control,"gold")
+ _style_play_button(control)
  control.pressed.connect(_invoke.bind(weakref(control),action),CONNECT_DEFERRED)
  column.add_child(control)
  return control
+
+func _style_play_button(control: Button) -> void:
+ var tone:=Color("27334c")
+ if control in [create_button,join_button,_accept_button,_start_button]:tone=Color("326be8")
+ elif control in [yes_button,correct_button]:tone=Color("185e4f")
+ elif control in [no_button,wrong_button]:tone=Color("6a2b41")
+ for state_name in ["normal","hover","pressed","disabled","focus"]:
+  var skin:=StyleBoxFlat.new();skin.set_corner_radius_all(16)
+  skin.bg_color=Color("263145") if state_name=="disabled" else (tone.lightened(.1) if state_name in ["pressed","focus"] else tone)
+  skin.content_margin_left=12;skin.content_margin_right=12;skin.content_margin_top=10;skin.content_margin_bottom=10
+  control.add_theme_stylebox_override(state_name,skin)
+ control.add_theme_color_override("font_color",Color("edf2ff"))
+ control.add_theme_color_override("font_disabled_color",Color("9eb0c9"))
 
 func _section(title: String, expanded: bool = false) -> VBoxContainer:
  var body := VBoxContainer.new()
@@ -164,7 +178,8 @@ func _ready() -> void:
  for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
- var bg := VisualSkin.new()
+ var bg := ColorRect.new()
+ bg.color=Color("111a2c")
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
  var scroll := ScrollContainer.new()
@@ -466,6 +481,9 @@ func _ready() -> void:
  _entry_back=button(tr_pair("العودة لاختيار إنشاء أو انضمام","Back to create or join"),func():_focus_room_entry("landing"))
  _main_column.move_child(_entry_choices,_main_column.get_children().find(status)+1)
  _apply_entry_visibility()
+
+ for control in _main_column.find_children("*","Button",true,false):
+  if not control is OptionButton and not control is CheckButton:_style_play_button(control)
 
  if get_script()==load("res://scripts/photo_duel_extension_ui.gd"):
   _room_shell=load("res://scripts/room_play_shell.gd").new();add_child(_room_shell)

@@ -1,8 +1,9 @@
 # Social party play UX
 
 Base: PR #21 head `63cafe4d79b93fb85ad9a4363b4d073909ff2983`.
-Scope: all six online social games. Quiz, photo, offline games, account storage,
-native audio, and server rules remain independent of this social renderer.
+Scope: all six online social games, a common frame for photo/quiz rooms, fixed
+answer controls and pending-answer feedback, and modern local social setup.
+Account storage, native audio, server rules, scoring and consent are unchanged.
 
 ## Behavior
 
@@ -15,7 +16,7 @@ native audio, and server rules remain independent of this social renderer.
   No voice permission, consent, epoch, mute, focus, or recovery behavior changes.
 - Participation, secret story commitment, voting, and power actions use the
   current card ID. A successful send locks the action controls
-  buttons until a canonical phase/card transition, rejection, or resumed room
+  until a canonical phase/card transition, rejection, or resumed room
   snapshot. Repeated snapshots do not recreate controls or replay animations.
 - A resume acknowledgement alone does not unlock answers. The following active
   authoritative snapshot permits an explicit retry; the UI never resends it.
@@ -29,6 +30,13 @@ native audio, and server rules remain independent of this social renderer.
 - Compact in-match player cards keep the entire prompt visible with six seats.
   Performers' cards and power offers remain private. Another player's vote does
   not acknowledge a pending local vote; only the local vote's canonical state does.
+- Photo/quiz rooms reuse their existing images, media scheduling, clue privacy,
+  ordering and memory mechanics. MCQ/submit/next controls sit outside scrolling
+  content. Pending-answer locking survives frame updates; correctness appears
+  only after the authoritative reveal. Final photo draws are labelled correctly.
+- Local social screens use flat surfaces and brief transitions. Individual name
+  fields with a 2–6-player control adapt the existing setup input; local engines,
+  secret handovers, rules, scoring and timers are unchanged.
 
 ## Validation and limits
 
@@ -46,11 +54,18 @@ assertions, account progress isolation, and 12 party/room model cases passed.
 Audio-policy teardown emits existing resource-leak diagnostics; its assertions
 pass, so those diagnostics are reported separately rather than called a clean run.
 
-Local real-WebSocket acceptance is unavailable: Python's Windows event-loop
-socketpair blocks before the fixture server starts. GUI preview execution was
-rejected by the automatic approval policy. Consequently no visual screenshot,
-device acceptance, audible call acceptance, or APK acceptance is claimed.
-CI results must be checked on the PR. No production deployment or merge.
+After network permission was granted, local real-WebSocket validation passed:
+the ten-round social UI match, 15 server transport/privacy cases, and cinema/sound
+UI answer-to-result flows. New photo/quiz fixed-control and local six-game setup
+fixtures passed. Native six-player captures were inspected and prompt clipping
+was fixed by compacting player cards. Additional final captures are in CI.
+
+Both phones retain matching progress/owner/language hashes after update with the
+original development certificate. An unsupported source-overlay test package was
+rolled back; the official CI export is used for device acceptance. Phone/audible
+acceptance is pending unlocked devices and the owner's listening confirmation.
+No production deployment or merge. Hosted account rewards are not proven by a
+memory-only local match. Consult the PR for the latest checks and device evidence.
 
 ## Follow-up acceptance
 
@@ -58,5 +73,5 @@ CI results must be checked on the PR. No production deployment or merge.
 2. Run a complete two-phone match with the new debug APK and record the UI.
 3. Hear both directions through notifications, mute, interruption, and reconnect.
 4. Confirm progress hashes before/after APK update and hosted reward persistence.
-5. Extend the shared layout to other games only after this vertical slice is
-   reviewed; preserve secret cards/votes and game-specific timers.
+5. Review the new online/local screens in their actual mechanics and retain all
+   secret-card/vote and media-timing protections before release acceptance.

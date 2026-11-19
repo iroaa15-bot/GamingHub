@@ -1,0 +1,42 @@
+extends SceneTree
+const Fixture=preload("res://tests/open_heart_play_view.gd")
+var failed:=false
+func _initialize() -> void:call_deferred("run")
+func ck(value: bool,message: String) -> void:
+ if not value:failed=true;push_error(message)
+func run() -> void:
+ root.content_scale_size=Vector2i(420,840);root.size=Vector2i(420,840)
+ root.get_node("PublishedContent").busy=true;root.get_node("GamingHubAccount").api_base=""
+ var policy=root.get_node("RoomAudioPolicy");policy.set_music_enabled(false);policy.set_effects_enabled(false)
+ var photo=load("res://scripts/photo_duel_extension_ui.gd").new();root.add_child(photo)
+ photo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ photo.client.code="123456";photo.client.player=0;photo.client.capabilities={"voice":true,"room_agreement":true}
+ var state: Dictionary={"capacity":2,"joined":2,"connected":[true,true],"scores":[0,0],"profiles":[],"current":0,"responder":1,"room_agreement":true,"started":true,"primary_mode":"voice","remaining_ms":20000,"timer":30}
+ photo.client.state=state;photo._state(state);await process_frame;await process_frame
+ var mute: Vector2=photo.voice_mute_button.global_position
+ ck(photo._room_shell.visible and photo._match_controls.is_visible_in_tree(),"photo shell shows existing controls")
+ ck(photo._reply_row.get_parent()==photo._room_shell.reply_dock,"photo answer controls use fixed dock")
+ state.paused=true;photo.client.state=state;photo._state(state);await process_frame;await process_frame
+ ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo reconnect retains mute position")
+ state.paused=false;state.match_finished=true;state.winner=-1;photo.client.state=state;photo._state(state);await process_frame;await process_frame
+ ck(photo.status.text.contains("بالتعادل") and photo._room_shell.result.visible,"photo final draw is visible")
+ ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo results retain mute position")
+ photo.queue_free();await process_frame
+ var ui=load("res://scripts/shared_quiz_ui.gd").new();root.add_child(ui);ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ var transport=ui.client;ui.client=Fixture.RecordingClient.new();root.add_child(ui.client)
+ ui.client.code="654321";ui.client.player=0;ui.client.capabilities={"shared_quiz":true,"room_agreement":true}
+ state={"capacity":2,"joined":2,"connected":[true,true],"scores":[0,0],"room_agreement":true,"primary_mode":"tap","started":true,"quiz":{"phase":"question","round":1,"rounds":2,"start_unix_ms":0,"question":{"id":"q1","mode":"choice","ar":"سؤال؟","en":"Question?","choices_ar":["أ","ب"],"choices_en":["A","B"]},"your_answer":null}}
+ ui.client.state=state;ui._state(state);await process_frame
+ ck(ui.quiz_shell.visible and ui.answer_buttons[0].is_visible_in_tree(),"quiz shell shows answer grid")
+ ui.answer_buttons[0].pressed.emit();ui.answer_buttons[1].pressed.emit()
+ await process_frame;await process_frame
+ ck(ui.client.sent.size()==1,"quiz repeat tap sends one answer")
+ ck(ui.answer_buttons[0].disabled and ui.answer_buttons[1].disabled,"quiz frame loop cannot unlock pending answer")
+ ck(not ui.answer_buttons[0].text.begins_with("✓"),"correctness stays hidden before server reveal")
+ state.quiz.your_answer=0;ui.client.state=state;ui._state(state)
+ ck(ui.send_status.text.contains("تم تسجيل"),"canonical answer acknowledgement is visible")
+ state.quiz.phase="results";state.quiz.correct_index=1;ui.client.state=state;ui._state(state)
+ ck(ui.answer_buttons[1].text.begins_with("✓") and ui.answer_buttons[0].text.begins_with("✕"),"server reveal preserves correctness feedback")
+ ui.client.queue_free();ui.client=transport;ui.queue_free();await process_frame
+ print("ROOM_PLAY_SHELL_PASS="+str(not failed)+" photo/quiz fixed controls, duplicate lock, server reveal")
+ quit(1 if failed else 0)

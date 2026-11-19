@@ -2,6 +2,7 @@ extends SceneTree
 var folder="user://quiz_captures"
 var failures=[]
 var game_id="1"
+var endpoint="ws://127.0.0.1:8884"
 func _initialize() -> void:call_deferred("run")
 func until(predicate: Callable) -> bool:
  var end=Time.get_ticks_msec()+6000
@@ -13,6 +14,7 @@ func ck(ok: bool,name: String) -> void:
  print("QUIZ_UI_CHECK ",name," ",ok)
  if not ok:failures.append(name)
 func snap(name: String) -> void:
+ if DisplayServer.get_name()=="headless":return
  await process_frame;await process_frame;await RenderingServer.frame_post_draw
  root.get_texture().get_image().save_png(folder.path_join(name+".png"))
 func run() -> void:
@@ -20,17 +22,17 @@ func run() -> void:
  for arg in OS.get_cmdline_user_args():
   if arg.begins_with("--capture-dir="):folder=arg.trim_prefix("--capture-dir=")
   if arg.begins_with("--quiz="):game_id=arg.trim_prefix("--quiz=")
+  if arg.begins_with("--duel-local="):endpoint=arg.trim_prefix("--duel-local=")
  DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(folder));root.content_scale_size=Vector2i(420,900)
  var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game=game_id
  var a=script.new();root.add_child(a);a.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var b=script.new();root.add_child(b);b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);b.hide()
- a.service_endpoint="ws://127.0.0.1:8884";a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
+ a.service_endpoint=endpoint;a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
  ck(await until(func():return not a.client.code.is_empty()),"shared UI create via authenticated transport")
- b.service_endpoint="ws://127.0.0.1:8884";b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
+ b.service_endpoint=endpoint;b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
  ck(await until(func():return a.client.state.get("joined",0)==2 and b.client.state.get("joined",0)==2),"UI code join")
  a._accept_configuration();b._accept_configuration()
  await until(func():return a.client.state.confirmed.count(true)==2)
- a.client.send_action("duel_start")
  ck(await until(func():return a.quiz_panel.visible and b.quiz_panel.visible),"quiz controls actually rendered")
  ck(a.answer_buttons[0].text==b.answer_buttons[0].text and not a._match_controls.visible,"same choices with duel controls hidden")
  await create_timer(1.6).timeout

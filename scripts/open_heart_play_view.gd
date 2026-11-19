@@ -72,6 +72,7 @@ func action_button(caption: String, callback: Callable, primary: bool=false) -> 
 
 func setup(owner_room: Control) -> void:
  room=owner_room
+ room._fixed_voice_labels=true
  name="SocialPlayView"
  set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  offset_left=16;offset_right=-16;offset_top=12;offset_bottom=-12

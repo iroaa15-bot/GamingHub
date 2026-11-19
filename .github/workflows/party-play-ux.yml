@@ -4,9 +4,16 @@ on:
     paths:
       - 'scripts/open_heart_play_view.gd'
       - 'scripts/social_room_ui.gd'
+      - 'scripts/room_play_shell.gd'
+      - 'scripts/photo_duel_extension_ui.gd'
+      - 'scripts/shared_quiz_ui.gd'
+      - 'scripts/social_game_backdrop.gd'
+      - 'scripts/local_player_setup.gd'
       - 'tests/open_heart_play_view.gd'
       - 'tests/social_rooms_ui.gd'
       - 'tests/social_room_ui_network.gd'
+      - 'tests/room_play_shell.gd'
+      - 'tests/local_party_setup.gd'
       - '.github/workflows/party-play-ux.yml'
   workflow_dispatch:
 permissions:
@@ -33,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           export XDG_DATA_HOME="$(mktemp -d)"
-          for script in open_heart_play_view social_play_actions social_rooms_ui voice_continuity room_audio_policy account_progress_isolation; do
+          for script in open_heart_play_view social_play_actions social_rooms_ui room_play_shell local_party_setup voice_continuity room_audio_policy account_progress_isolation; do
             timeout 120 godot --headless --audio-driver Dummy --script "res://tests/$script.gd" 2>&1 | tee "$script.log"
             if [ "$script" = room_audio_policy ]; then
               sed '/^ERROR: [0-9][0-9]* resources still in use at exit/d' "$script.log" > checked.log
@@ -44,6 +51,8 @@ jobs:
           done
           grep -q 'PARTY_PLAY_VIEW_PASS=true' open_heart_play_view.log
           grep -q 'SOCIAL_PLAY_ACTIONS_PASS=true' social_play_actions.log
+          grep -q 'ROOM_PLAY_SHELL_PASS=true' room_play_shell.log
+          grep -q 'LOCAL_PARTY_SETUP_PASS=true' local_party_setup.log
           grep -q 'SOCIAL_ROOMS_UI true cases=120' social_rooms_ui.log
           grep -q 'VOICE_CONTINUITY continuous=true' voice_continuity.log
           grep -q 'ACCOUNT_PROGRESS_ISOLATION_PASS' account_progress_isolation.log
@@ -64,6 +73,11 @@ jobs:
           grep -q 'SOCIAL_UI_FULL_MATCH true' social-network.log
           grep -q 'SOCIAL_ROOM_UI_NETWORK true' social-network.log
           ! grep -E 'SCRIPT ERROR|^ERROR:' social-network.log
+          for game in 1 6; do
+            timeout 60 godot --headless --audio-driver Dummy --script res://tests/shared_quiz_ui.gd -- --duel-local=ws://127.0.0.1:8898 --quiz="$game" 2>&1 | tee "quiz-$game.log"
+            grep -q 'SHARED_QUIZ_UI_REAL_WS true' "quiz-$game.log"
+            ! grep -q 'SCRIPT ERROR' "quiz-$game.log"
+          done
       - name: Native visual fixtures under virtual display
         if: ${{ !cancelled() }}
         shell: bash
@@ -75,10 +89,13 @@ jobs:
           grep -q 'PARTY_PLAY_VIEW_PASS=true' visual-fixtures.log
           ! grep -E 'SCRIPT ERROR|^ERROR:' visual-fixtures.log
           test -s previews/active-ar-2.png
+          timeout 180 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --script res://tests/reference_ui_capture.gd -- --capture-dir="$PWD/previews/all-games" 2>&1 | tee all-games-visual.log
+          grep -q 'REFERENCE_NATIVE_RENDER' all-games-visual.log
+          ! grep -q 'SCRIPT ERROR' all-games-visual.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: party-play-ux-logs
           path: |
             *.log
-            previews/*.png
+            previews/**/*.png

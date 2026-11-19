@@ -174,8 +174,10 @@ class SecureDuelHub(AccountRooms,DuelHub):
                 async with self.lock:await self.disconnect(ws)
             self.identities.pop(ws,None)
     async def mixer(self):
+        from voice_frame_clock import VoiceFrameClock
+        clock=VoiceFrameClock()
         while True:
-            await asyncio.sleep(.02)
+            await asyncio.sleep(clock.delay())
             # Close expired transports even when idle, including receive-only
             # voice and authenticated legacy connections. Never await close
             # while holding the room lock (disconnect needs that lock).

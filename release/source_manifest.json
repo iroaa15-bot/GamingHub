@@ -8,7 +8,7 @@
     ".github/workflows/integrated-identity.yml": "58154437b7d265db4191c33d4864b2d237fc236dc7dfe365db0f3e558e908c91",
     ".github/workflows/party-android-experimental.yml": "ab60cc2d5cc0a3a438b603dbc25006077898201a4da9a2a998195ce9979f2d41",
     ".github/workflows/party-home-validation.yml": "6b9b77c799940dfdd373ca4c549203691599b6a5e6f8c12185e9377998e0967b",
-    ".github/workflows/party-play-ux.yml": "a23cc35980dcb5e49dabc074aa3d889fac101d00b9985daf96da53e153b0fc5b",
+    ".github/workflows/party-play-ux.yml": "297ef0a48d8785bf12bf3c1fdf25d7e69927cd6263b7a82ca092a8477b98fe96",
     ".github/workflows/photo-duel-validation.yml": "4bcbe76b20d2a3e067bb8f2dd1423fc9b14ddc67ebd04bbd2c55916036103199",
     ".github/workflows/remote-multiplayer-smoke.yml": "36eb62f50365c8f50bf7b562b2706d467372b274e151e3b6bbe6ce02669aa941",
     ".github/workflows/validate-content.yml": "47038cb062f591bf2ea5c3b5453f4ebf2982e683dab6bae4db203979523592a1",

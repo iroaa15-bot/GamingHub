@@ -63,8 +63,20 @@ jobs:
           grep -q 'SOCIAL_UI_FULL_MATCH true' social-network.log
           grep -q 'SOCIAL_ROOM_UI_NETWORK true' social-network.log
           ! grep -E 'SCRIPT ERROR|^ERROR:' social-network.log
+      - name: Native visual fixtures under virtual display
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          mkdir -p previews
+          timeout 120 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --script res://tests/open_heart_play_view.gd -- --capture-dir="$PWD/previews" 2>&1 | tee visual-fixtures.log
+          grep -q 'PARTY_PLAY_VIEW_PASS=true' visual-fixtures.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' visual-fixtures.log
+          test -s previews/active-ar-2.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: party-play-ux-logs
-          path: '*.log'
+          path: |
+            *.log
+            previews/*.png

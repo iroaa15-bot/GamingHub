@@ -96,6 +96,7 @@ func setup(owner_room: Control) -> void:
  card=PanelContainer.new();card.name="SocialPromptCard";card.custom_minimum_size.y=190
  card.add_theme_stylebox_override("panel",surface(Color("edf2fc")));content.add_child(card)
  prompt=text_node(card,27);prompt.add_theme_color_override("font_color",Color("15233d"))
+ prompt.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
  detail=text_node(content,15)
  ranking=VBoxContainer.new();content.add_child(ranking)
  for i in range(6):rows.append(text_node(ranking,20))

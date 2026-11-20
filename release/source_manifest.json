@@ -1813,7 +1813,7 @@
     "tests/test_performance_rewards_v83.py": "ec3b2c557f69e04bc721d014fe21378bf03e052739a377e01c706a1a0d6e126d",
     "tests/test_portable_inventory.py": "0111608127865405a79a078337546721105e43bca7f58a59f0e82994e553ca8b",
     "tests/test_reconnect_client_v87.py": "f6df9a40d3cfe5f5b55947ba4d33195f4ef86b0982b9846992d00a08f9c52990",
-    "tests/test_release_safety_v115.py": "a2f522e2c038b4acd9f5026edf29452be70cc56202cc6545fed3b024b2bd0848",
+    "tests/test_release_safety_v115.py": "480bdf61d45468580ce14c6d1c9a868cd05e08158a285cbc1591e8a00db40759",
     "tests/test_release_v77.py": "13193be09469ee63cf2dee3c478cbc1f4ac0ceb8a9427286d0d528248819eb95",
     "tests/test_release_v78.py": "6e8172df9790a76306a0c892f51b178ef1b792e5a4f9a29251933864cf73e912",
     "tests/test_reveal_v44.py": "f3e429e0d5fd4c20c9e10ea4b3825512251b5ce0143a56491474abe95802db66",

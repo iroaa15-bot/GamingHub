@@ -80,15 +80,20 @@ func _draw() -> void:
   var dot_color: Color = CYAN if i % 4 == 0 else SUN
   dot_color.a = 0.42 if i % 3 == 0 else 0.16
   draw_circle(Vector2(x, y), (1.5 if i % 4 == 0 else 1.0) * scale_value, dot_color)
- # Low-contrast castle silhouettes echo the supplied lobby artwork without
- # embedding reference screenshots, labels or controls into the background.
- for side in [0,1]:
-  var x: float=size_value.x*(0.07 if side==0 else 0.93)
-  var base: float=size_value.y*0.31
-  var width: float=25*scale_value
-  draw_rect(Rect2(x-width/2,base-105*scale_value,width,105*scale_value),Color("172669",0.52))
-  draw_colored_polygon(PackedVector2Array([Vector2(x-width*.8,base-105*scale_value),Vector2(x,base-146*scale_value),Vector2(x+width*.8,base-105*scale_value)]),Color("273c98",0.5))
-  draw_rect(Rect2(x-3*scale_value,base-87*scale_value,6*scale_value,18*scale_value),Color("47dafa",0.19))
+ # Radial light and fine sparkles recall the supplied game screens without
+ # flattening their pictured controls or placing them over real inputs.
+ var glow_center := Vector2(size_value.x*.5,size_value.y*.33)
+ var reach: float=maxf(size_value.x,size_value.y)*1.15
+ for ray in range(12):
+  var angle: float=float(ray)*TAU/12.0 + .10
+  var left := glow_center + Vector2.from_angle(angle-.045)*reach
+  var right := glow_center + Vector2.from_angle(angle+.045)*reach
+  draw_colored_polygon(PackedVector2Array([glow_center,left,right]),Color("168dff",0.025 if ray%2==0 else 0.012))
+ for i in range(10):
+  var p := Vector2(float((i*173+53)%401)/401.0*size_value.x,float((i*137+81)%701)/701.0*size_value.y)
+  var span: float=(3.5 if i%3==0 else 2.0)*scale_value
+  draw_line(p-Vector2(span,0),p+Vector2(span,0),Color("98eaff",.30),scale_value)
+  draw_line(p-Vector2(0,span),p+Vector2(0,span),Color("98eaff",.30),scale_value)
  var rim:=card(Color.TRANSPARENT,26)
  rim.draw_center=false;rim.border_color=Color("887cff",0.42);rim.set_border_width_all(1)
  rim.shadow_size=0

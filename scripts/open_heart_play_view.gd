@@ -32,6 +32,10 @@ var option_buttons: Array[Button]=[]
 var options: Array[Dictionary]=[]
 var pending_action := ""
 var timer_slot: VBoxContainer
+var room_code: Label
+var lobby_players: Label
+var seat_columns: Array[VBoxContainer] = []
+var seat_rows: Array[HBoxContainer] = []
 
 func words(ar: String, en: String) -> String:
  return room.tr_pair(ar,en)
@@ -106,10 +110,23 @@ func setup(owner_room: Control) -> void:
  content=VBoxContainer.new();content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  content.add_theme_constant_override("separation",12);scroll.add_child(content)
  lobby=VBoxContainer.new();lobby.add_theme_constant_override("separation",8);content.add_child(lobby)
+ var code_panel:=PanelContainer.new()
+ var code_style:=surface(Color("061633"),Color("218be5"))
+ code_style.set_corner_radius_all(14)
+ for edge in ["top","bottom"]:code_style.set("content_margin_"+edge,5)
+ code_panel.add_theme_stylebox_override("panel",code_style);lobby.add_child(code_panel)
+ room_code=text_node(code_panel,22);room_code.add_theme_color_override("font_color",Color("ffdd45"))
  var invite_row := HBoxContainer.new();lobby.add_child(invite_row)
  var copy := action_button(words("نسخ الكود","Copy code"),func():room._copy_room_code())
  var share := action_button(words("مشاركة","Share"),func():room._share_room_code())
  invite_row.add_child(copy);invite_row.add_child(share)
+ lobby_players=text_node(lobby,17)
+ for panel in room._seat_panels:
+  var original:=panel.get_child(0) as VBoxContainer
+  seat_columns.append(original)
+  var horizontal:=HBoxContainer.new()
+  horizontal.add_theme_constant_override("separation",8)
+  panel.add_child(horizontal);horizontal.hide();seat_rows.append(horizontal)
  instruction=text_node(content,21)
  card=PanelContainer.new();card.name="SocialPromptCard";card.custom_minimum_size.y=190
  card.add_theme_stylebox_override("panel",surface(Color("f3f3ff"),Color("ee428f")));content.add_child(card)
@@ -176,19 +193,34 @@ func display(value: Dictionary) -> void:
   pending_key="";phase_key=""
   if room._voice_controls.get_parent()!=room._main_column:room._voice_controls.reparent(room._main_column)
   return
- room._seats.reparent(content)
- content.move_child(room._seats,0)
+ if phase=="lobby":
+  if room._seats.get_parent()!=lobby:room._seats.reparent(lobby)
+  lobby.move_child(room._seats,3)
+ else:
+  if room._seats.get_parent()!=content:room._seats.reparent(content)
+  content.move_child(room._seats,0)
  room._seats.show()
- room._seats.columns=2 if int(value.get("capacity",2))<=2 else 3
+ room._seats.columns=1 if phase=="lobby" else (2 if int(value.get("capacity",2))<=2 else 3)
  for i in range(6):
   var compact: bool=phase!="lobby"
-  room._seat_avatars[i].custom_minimum_size=Vector2(24,24) if compact else Vector2(36,36)
+  var destination: BoxContainer=seat_columns[i] if compact else seat_rows[i]
+  for seat_node in [room._seat_avatars[i],room._seat_labels[i],room._seat_statuses[i]]:
+   if seat_node.get_parent()!=destination:seat_node.reparent(destination)
+  seat_columns[i].visible=compact;seat_rows[i].visible=not compact
+  room._seat_panels[i].custom_minimum_size.y=76 if compact else 42
+  room._seat_avatars[i].custom_minimum_size=Vector2(24,24)
+  room._seat_labels[i].size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  room._seat_statuses[i].size_flags_horizontal=Control.SIZE_EXPAND_FILL if compact else Control.SIZE_SHRINK_CENTER
+  room._seat_statuses[i].custom_minimum_size.x=0 if compact else 110
+  room._seat_statuses[i].autowrap_mode=TextServer.AUTOWRAP_WORD_SMART if compact else TextServer.AUTOWRAP_OFF
+  room._seat_statuses[i].clip_text=not compact
+  room._seat_statuses[i].max_lines_visible=-1 if compact else 1
   room._seat_labels[i].add_theme_font_size_override("font_size",14)
   room._seat_statuses[i].add_theme_font_size_override("font_size",12)
   var is_actor: bool=i==int(party.get("actor",-1)) and phase=="active"
   var player_style: StyleBoxFlat=surface(Color("142e57") if is_actor else Color("101e40"),Color("ffd459") if is_actor else Color("3080ca"))
+  for edge in ["top","bottom","left","right"]:player_style.set("content_margin_"+edge,6)
   if compact:
-   for edge in ["top","bottom","left","right"]:player_style.set("content_margin_"+edge,6)
    room._seat_labels[i].text=room._social_player_name(i).left(14)+" · "+str(int(value.get("scores",[])[i]) if i<value.get("scores",[]).size() else 0)
    if i<value.get("connected",[]).size() and not bool(value.connected[i]):room._seat_labels[i].text+=" ↻"
   room._seat_statuses[i].visible=not compact
@@ -221,6 +253,8 @@ func display(value: Dictionary) -> void:
  room._agreement_box.visible=lobby.visible and bool(value.get("room_agreement",false))
  var count: int=int(value.get("capacity",2))
  var ready_count: int=value.get("confirmed",[]).count(true)
+ room_code.text=words("رمز الغرفة  %s","ROOM CODE  %s") % room.client.code
+ lobby_players.text=words("اللاعبون  %d / %d","PLAYERS  %d / %d") % [int(value.get("joined",0)),count]
  room._agreement_info.text=words("الجاهزون %d/%d · %d جولات","Ready %d/%d · %d rounds") % [ready_count,count,int(party.get("rounds",10))]
  var game_title: String=str(room.SOCIAL_TITLES[category][0 if room.language=="ar" else 1])
  title.text=game_title+words(" · الغرفة %s"," · Room %s") % room.client.code if phase=="lobby" else game_title+words(" · الجولة %d/%d"," · Round %d/%d") % [mini(int(party.get("round",0))+(1 if phase=="active" else 0),int(party.get("rounds",10))),int(party.get("rounds",10))]

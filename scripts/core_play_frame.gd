@@ -1,8 +1,39 @@
 extends RefCounted
 const PlaySkin=preload("res://scripts/visual_skin.gd")
+const FeedbackEmblem=preload("res://scripts/core_feedback_emblem.gd")
 ## Reuse real controls and validators in a fixed action dock.
+static func style_reference_content(main: Control, kind: String) -> void:
+ for child in main.root.get_children():
+  if not child is PanelContainer: continue
+  var existing := child.get_theme_stylebox("panel") as StyleBoxFlat
+  if existing == null: continue
+  if kind == "feedback" and (existing.bg_color.is_equal_approx(Color("14554e")) or existing.bg_color.is_equal_approx(Color("57364b"))):
+   var success := existing.bg_color.is_equal_approx(Color("14554e"))
+   var frame := PlaySkin.play_surface(Color("07183a"),18)
+   frame.border_color = Color("36dd62") if success else Color("ff626f")
+   frame.set_border_width_all(2)
+   child.add_theme_stylebox_override("panel",frame)
+   var stack := child.get_child(0) as VBoxContainer
+   if stack != null:
+    var emblem := FeedbackEmblem.new();emblem.success=success
+    stack.add_child(emblem);stack.move_child(emblem,1)
+  elif kind == "question":
+   var progress: ProgressBar = null
+   for candidate in child.find_children("*","ProgressBar",true,false):
+    progress=candidate;break
+   if progress != null:
+    PlaySkin.decorate_progress(progress,false)
+    var frame := PlaySkin.play_surface(Color("08183a"),16)
+    frame.border_color=Color("469fe8")
+    child.add_theme_stylebox_override("panel",frame)
+   elif existing.bg_color.is_equal_approx(Color("21366b")):
+    var frame := PlaySkin.play_surface(Color("0a1d48"),16)
+    frame.border_color=Color("48caff");frame.set_border_width_all(2)
+    child.add_theme_stylebox_override("panel",frame)
+
 static func apply(main: Control, generation: int, kind: String) -> void:
  if not is_instance_valid(main) or not main.is_inside_tree() or generation!=main.ui_action_generation or main.has_node("CorePlayDock"):return
+ style_reference_content(main,kind)
  var scroll=main.root.get_parent().get_parent() as ScrollContainer
  if scroll==null:return
  var panel:=PanelContainer.new();panel.name="CorePlayDock"
@@ -31,7 +62,7 @@ static func apply(main: Control, generation: int, kind: String) -> void:
   elif node is Button and (node.get_meta("core_dock",false) or kind in ["feedback","results"]):
    if node.get_meta("core_exit",false):node.reparent(navigation);node.custom_minimum_size.y=44
    else:
-    if kind=="question":PlaySkin.decorate_button(node,"violet")
+    if kind in ["question","feedback"]:PlaySkin.decorate_button(node,"violet")
     node.reparent(controls)
  if kind in ["question","picture","memory"]:
   var pause:=Button.new();pause.text=main.tr_ui("استراحة","Pause");pause.custom_minimum_size.y=44

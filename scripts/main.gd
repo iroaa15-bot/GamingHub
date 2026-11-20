@@ -374,7 +374,10 @@ func show_celebration(grand: bool) -> void:
 func result_hero(accuracy: int) -> void:
  var frame := PanelContainer.new()
  frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- frame.add_theme_stylebox_override("panel", panel_style(Color("194e51") if last_match_won else Color("263456")))
+ var result_style := VisualSkin.play_surface(Color("0a1741"),20)
+ result_style.border_color = Color("9672ff")
+ result_style.set_border_width_all(2)
+ frame.add_theme_stylebox_override("panel", result_style)
  root.add_child(frame)
  var content := VBoxContainer.new()
  content.add_theme_constant_override("separation", 8)
@@ -386,6 +389,8 @@ func result_hero(accuracy: int) -> void:
  heading.add_theme_font_size_override("font_size", int(28 * reading_scale))
  heading.add_theme_color_override("font_color", Color.WHITE)
  content.add_child(heading)
+ if last_match_won:
+  content.add_child(load("res://scripts/result_trophy.gd").new())
  var medal := Label.new()
  medal.text = result_medal(accuracy)
  medal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2182,18 +2187,32 @@ func show_modes(index: int) -> void:
  game=index;daily_match=false;family_active=false;campaign_active=false
  clear_ui()
  current_screen="mode"
- VisualSkin.compact_header(root,game_title(index))
+ # Reference mode screens put the game's art and title at the centre of the
+ # page, with the available routes grouped underneath them.
+ var spacer := Control.new()
+ spacer.custom_minimum_size.y = 22
+ root.add_child(spacer)
  var cover:=TextureRect.new();cover.texture=VisualSkin.game_cover(index)
- cover.custom_minimum_size.y=110;cover.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+ cover.custom_minimum_size.y=155;cover.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
  cover.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;root.add_child(cover)
- label(game_subtitle(index),17)
- var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,ACCENT)
+ var title := label(game_title(index),28)
+ title.add_theme_color_override("font_color",Color("f8fbff"))
+ var description := label(game_subtitle(index),16)
+ description.add_theme_color_override("font_color",Color("bdcdf5"))
+ var gap := Control.new()
+ gap.custom_minimum_size.y = 16
+ root.add_child(gap)
+ var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,GOLD)
+ friends.icon=VisualSkin.menu_icon("player");friends.expand_icon=true
+ friends.add_theme_constant_override("icon_max_width",27)
  friends.set_meta("mode_action","friends")
  friends.disabled=age_group in ["under13","unknown"]
  if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
- var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
+ var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,ACCENT)
  local.set_meta("mode_action","offline")
  var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_games_list_v2,PANEL)
+ back.icon=VisualSkin.menu_icon("back");back.expand_icon=true
+ back.add_theme_constant_override("icon_max_width",24)
  back.set_meta("mode_action","games")
  VisualSkin.compact_menu(root)
 

@@ -32,9 +32,11 @@ func run() -> void:
    for button in main.root.find_children("*","Button",true,false):
     if button.has_meta("mode_action"):route_count+=1
    assert(route_count==3)
+   main._start_offline_mode();await snap(prefix+"-setup")
    main.game=id;main.match_style="classic";main.selected_topic="all"
    main.rng.seed=231119+id
    main.start_game();await snap(prefix+"-play")
+   main.pause_local_play();await snap(prefix+"-pause");main._resume_local_play()
    if id not in [0,8] and not main.round_bank.is_empty():
     var item: Dictionary=main.round_bank[main.question_index]
     var answer: String=str(item.get(language,item.get("en","")))

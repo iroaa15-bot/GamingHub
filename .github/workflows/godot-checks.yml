@@ -186,7 +186,8 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p build
-          godot --headless --path . --install-android-build-template --export-debug Android build/GamingHub-v11.5-debug.apk 2>&1 | tee godot-android-export.log
+          python3 release/prepare_android_template.py
+          godot --headless --path . --export-debug Android build/GamingHub-v11.5-debug.apk 2>&1 | tee godot-android-export.log
       - name: Build unsigned release bundle without private credentials
         run: python3 release/build_unsigned_bundle.py
       - name: Keep unsigned bundle for local upload-key signing
@@ -200,6 +201,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 release/verify_android_package.py build/GamingHub-v11.5-debug.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree build/GamingHub-v11.5-debug.apk AndroidManifest.xml > android-manifest-tree.log
+          grep -E 'enableOnBackInvokedCallback.*0x0$' android-manifest-tree.log
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose build/GamingHub-v11.5-debug.apk
           "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging build/GamingHub-v11.5-debug.apk | tee android-package-info.log
           grep -q "package: name='com.iroaa15.gaminghub'" android-package-info.log

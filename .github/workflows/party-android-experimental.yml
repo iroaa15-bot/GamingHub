@@ -6,6 +6,7 @@ on:
       - 'scripts/**'
       - 'scenes/**'
       - '.github/workflows/party-android-experimental.yml'
+      - 'release/prepare_android_template.py'
 permissions:
   contents: read
 jobs:
@@ -48,8 +49,11 @@ jobs:
       - name: Attempt Android debug export
         run: |
           mkdir -p build
+          python3 release/prepare_android_template.py
           godot --headless --path . --export-debug Android build/GamingHub-PartyRoom-experimental.apk
           test -s build/GamingHub-PartyRoom-experimental.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree build/GamingHub-PartyRoom-experimental.apk AndroidManifest.xml > build/manifest-tree.txt
+          grep -E 'enableOnBackInvokedCallback.*0x0$' build/manifest-tree.txt
       - uses: actions/upload-artifact@v4
         with:
           name: GamingHub-PartyRoom-experimental

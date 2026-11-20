@@ -17,18 +17,17 @@ if ($LASTEXITCODE -ne 0) { throw 'Godot smoke failed' }
 & $Godot --headless --path . --quit-after 60
 if ($LASTEXITCODE -ne 0) { throw 'Godot boot failed' }
 New-Item -ItemType Directory -Force -Path build | Out-Null
-# Godot 4.5 CLI requires --install-android-build-template together with --export-*.
-$TemplateArg = @()
-if (!(Test-Path 'android/.build_version')) { $TemplateArg = @('--install-android-build-template') }
+python release/prepare_android_template.py
+if ($LASTEXITCODE -ne 0) { throw 'Android Back compatibility preparation failed' }
 if ($Mode -eq 'debug') {
-  & $Godot --headless --path . @TemplateArg --export-debug Android build/GamingHub-v11.5-debug.apk
+  & $Godot --headless --path . --export-debug Android build/GamingHub-v11.5-debug.apk
   if ($LASTEXITCODE -ne 0) { throw 'Debug APK export failed' }
   python release/verify_android_package.py build/GamingHub-v11.5-debug.apk
 } else {
   if (-not $env:GODOT_ANDROID_KEYSTORE_RELEASE_PATH -or -not $env:GODOT_ANDROID_KEYSTORE_RELEASE_USER -or -not $env:GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD) {
     throw 'Release keystore path, alias and password must be configured in environment variables'
   }
-  & $Godot --headless --path . @TemplateArg --export-release "Android Release" build/GamingHub-v11.5-release.aab
+  & $Godot --headless --path . --export-release "Android Release" build/GamingHub-v11.5-release.aab
   if ($LASTEXITCODE -ne 0) { throw 'Release AAB export failed' }
   python release/verify_android_package.py build/GamingHub-v11.5-release.aab --release
   if ($LASTEXITCODE -ne 0) { throw 'Invalid signed AAB structure' }

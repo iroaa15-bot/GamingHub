@@ -23,7 +23,7 @@ func _run() -> void:
  assert(content.catalog_order().size()==10 and content.settings.is_empty())
  main.show_home()
  grid=main.root.find_child("UnifiedGameCatalog",true,false)
- assert(grid.get_child_count()==6)
+ assert(grid.get_child_count()==10)
  invalid=settings.duplicate(true);invalid.primary="#ffffff"
  assert(not content._accept_settings({"schema":1,"version":9,"settings":invalid}))
  assert(not content._accept_settings(null))

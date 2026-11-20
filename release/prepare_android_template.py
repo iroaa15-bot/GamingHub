@@ -44,6 +44,10 @@ def prepare(root, template=None):
         (root/'android/.build_version').write_text('4.5.1.stable\n',encoding='utf-8')
     original=manifest.read_text(encoding='utf-8')
     manifest.write_text(patch_manifest(original),encoding='utf-8')
+    # zipfile does not restore Unix executable bits from the official template.
+    wrapper=build/'gradlew'
+    if os.name!='nt' and wrapper.exists():
+        wrapper.chmod(wrapper.stat().st_mode | 0o111)
     return manifest
 
 if __name__=='__main__':

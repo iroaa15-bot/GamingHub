@@ -1306,7 +1306,7 @@
     "release/premium_icons_20261029/raster-catalog.log": "c5940d7e34f20dc7543a9bd310d6ac0e448bd3186c1bab5cf8e1863cd4787a67",
     "release/premium_icons_20261029/screens/home-all-original-games.png": "bf5892c98b93fc40ad5fb99e4b77930c3ca7db281b8beb145af455a6cf1220b0",
     "release/premium_icons_20261029/screens/home-primary-six.png": "5c22a1aef111cc9298486519669dbf7780714cf4b9205fd56ff39ca0f9a6bf93",
-    "release/prepare_android_template.py": "0d5e07d0d5617195a7396d456304b0afcac6cd255b5d038c01fe59c315eee608",
+    "release/prepare_android_template.py": "6f38a4d9100f592adddfd5012b53471f90a1a4296702b10ea96ac545b1fd8b98",
     "release/release_gate.py": "9313871e6bfe563623e757b517fae053ba1404978bffa92b2bb1925fbc75a5f5",
     "release/room_agreement_20261027/CHANGED_FILES.txt": "92ca549d5981477a2c3665c6e37c36e2de2b342c4f0b323a85ffda7b6c49639b",
     "release/room_agreement_20261027/REPORT_AR.md": "721cf054d413488fb2830f05af4f6d11772bf63eb9af7b7c932a10eb856c55e6",

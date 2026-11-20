@@ -46,12 +46,25 @@ func text_node(parent: Node, size_value: int) -> Label:
  parent.add_child(node)
  return node
 
-func surface(color: Color) -> StyleBoxFlat:
+func surface(color: Color, border: Color = Color.TRANSPARENT) -> StyleBoxFlat:
  var style := StyleBoxFlat.new()
  style.bg_color=color
  style.set_corner_radius_all(20)
+ if border.a > 0:
+  style.border_color=border
+  style.set_border_width_all(2)
  for edge in ["left","right","top","bottom"]:style.set("content_margin_"+edge,16)
  return style
+
+func accent_button(node: Button, color: Color) -> void:
+ var normal:=surface(color, color.lightened(0.4))
+ normal.set_corner_radius_all(14)
+ for edge in ["left","right","top","bottom"]:normal.set("content_margin_"+edge,6)
+ var pressed:=normal.duplicate() as StyleBoxFlat
+ pressed.bg_color=color.darkened(0.28)
+ node.add_theme_stylebox_override("normal",normal)
+ node.add_theme_stylebox_override("hover",normal)
+ node.add_theme_stylebox_override("pressed",pressed)
 
 func action_button(caption: String, callback: Callable, primary: bool=false) -> Button:
  var node := Button.new()
@@ -74,12 +87,15 @@ func setup(owner_room: Control) -> void:
  offset_left=16;offset_right=-16;offset_top=12;offset_bottom=-12
  add_theme_constant_override("separation",8)
  backdrop=ColorRect.new()
- backdrop.color=Color("0b1032")
+ backdrop.color=Color("07102e")
  backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  backdrop.mouse_filter=Control.MOUSE_FILTER_IGNORE
  room.add_child(backdrop)
  room.move_child(backdrop,get_index())
- title=text_node(self,23)
+ var heading:=PanelContainer.new()
+ heading.add_theme_stylebox_override("panel",surface(Color("101c4a"),Color("6679f2")))
+ add_child(heading)
+ title=text_node(heading,23)
  connection=text_node(self,14)
  timer_slot=VBoxContainer.new();add_child(timer_slot)
  scroll=ScrollContainer.new()
@@ -96,12 +112,17 @@ func setup(owner_room: Control) -> void:
  invite_row.add_child(copy);invite_row.add_child(share)
  instruction=text_node(content,21)
  card=PanelContainer.new();card.name="SocialPromptCard";card.custom_minimum_size.y=190
- card.add_theme_stylebox_override("panel",surface(Color("edf2fc")));content.add_child(card)
+ card.add_theme_stylebox_override("panel",surface(Color("f3f3ff"),Color("ee428f")));content.add_child(card)
  prompt=text_node(card,27);prompt.add_theme_color_override("font_color",Color("15233d"))
  prompt.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
  detail=text_node(content,15)
  ranking=VBoxContainer.new();content.add_child(ranking)
- for i in range(6):rows.append(text_node(ranking,20))
+ for i in range(6):
+  var row:=text_node(ranking,20)
+  row.custom_minimum_size.y=42
+  row.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+  row.add_theme_stylebox_override("normal",surface(Color("101e43"),Color("387ed4")))
+  rows.append(row)
  var tools_button := action_button(words("الدردشة والإبلاغ","Chat & report"),func():tools_open=not tools_open;tools.visible=tools_open)
  tools_button.custom_minimum_size.y=44;content.add_child(tools_button)
  tools=VBoxContainer.new();tools.hide();content.add_child(tools)
@@ -139,6 +160,13 @@ func display(value: Dictionary) -> void:
  var party: Dictionary=value.get("party",{})
  var phase: String=str(party.get("phase","lobby"))
  var category: String=str(party.get("category",room.selected_social))
+ # The two contrasting choices match the party-card reference. Other games
+ # use neutral choices so a colour never suggests an unconfirmed answer.
+ if category=="open_heart":
+  accent_button(participate,Color("087c39"));accent_button(skip,Color("a01e43"))
+ else:
+  load("res://scripts/visual_skin.gd").decorate_play_action(participate,"primary")
+  load("res://scripts/visual_skin.gd").decorate_play_action(skip,"secondary")
  var in_room: bool=not room.client.code.is_empty() and not bool(value.get("closed",false))
  visible=in_room
  backdrop.visible=in_room
@@ -157,7 +185,8 @@ func display(value: Dictionary) -> void:
   room._seat_avatars[i].custom_minimum_size=Vector2(24,24) if compact else Vector2(36,36)
   room._seat_labels[i].add_theme_font_size_override("font_size",14)
   room._seat_statuses[i].add_theme_font_size_override("font_size",12)
-  var player_style: StyleBoxFlat=surface(Color("213553") if i==int(party.get("actor",-1)) and phase=="active" else Color("1b273c"))
+  var is_actor: bool=i==int(party.get("actor",-1)) and phase=="active"
+  var player_style: StyleBoxFlat=surface(Color("142e57") if is_actor else Color("101e40"),Color("ffd459") if is_actor else Color("3080ca"))
   if compact:
    for edge in ["top","bottom","left","right"]:player_style.set("content_margin_"+edge,6)
    room._seat_labels[i].text=room._social_player_name(i).left(14)+" · "+str(int(value.get("scores",[])[i]) if i<value.get("scores",[]).size() else 0)

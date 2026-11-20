@@ -44,6 +44,7 @@ jobs:
           test -f android/build/build.gradle && test -f android/build/settings.gradle
           printf "4.5.1.stable\n" > android/.build_version
           test -s android/.build_version
+          python3 release/prepare_android_template.py
       - name: Import and validate
         run: godot --headless --path . --editor --import --quit
       - name: Attempt Android debug export

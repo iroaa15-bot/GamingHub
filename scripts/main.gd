@@ -1394,24 +1394,27 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  tile.mouse_filter = Control.MOUSE_FILTER_PASS
  tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  var skin := StyleBoxFlat.new()
- skin.bg_color = Color("142447")
- skin.border_color = Color("ffcc42") if index==0 else [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
+ # Distinct game colours follow the reference catalog while retaining the real artwork.
+ var game_fills: Array[String] = ["00539c","9a1835","137334","5d169c","a85a04","b62d28","153b9a","811b73","075886","a94712"]
+ var game_edges: Array[String] = ["54dfff","ff8296","91ec83","dc8dff","ffcc5c","ffb777","81b8ff","ff91df","7ee6ff","ffc270"]
+ skin.bg_color = Color(game_fills[index % game_fills.size()])
+ skin.border_color = Color(game_edges[index % game_edges.size()])
  skin.set_border_width_all(2)
- skin.set_corner_radius_all(20)
+ skin.set_corner_radius_all(16)
  skin.content_margin_left = 8
  skin.content_margin_right = 8
- skin.content_margin_top = 8
- skin.content_margin_bottom = 10
+ skin.content_margin_top = 4
+ skin.content_margin_bottom = 4
  skin.shadow_color = Color(0, 0, 0, 0.34)
  skin.shadow_size = 8
  tile.add_theme_stylebox_override("panel", skin)
  var column := VBoxContainer.new()
- column.add_theme_constant_override("separation", 6)
+ column.add_theme_constant_override("separation", 0)
  tile.add_child(column)
  var art := TextureRect.new()
  var premium_art: Texture2D=VisualSkin.game_cover(index)
  art.texture=premium_art if premium_art!=null else card_texture(art_id)
- art.custom_minimum_size.y = 76 if index==0 else 64
+ art.custom_minimum_size.y = 54
  art.mouse_filter = Control.MOUSE_FILTER_IGNORE
  art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
  art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -1420,6 +1423,14 @@ func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContaine
  var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
  b.tooltip_text = game_subtitle(index)
  b.add_theme_font_size_override("font_size", int(14 * reading_scale))
+ b.custom_minimum_size.y = 48
+ # Keep the original action button while reducing extra menu chrome.
+ for state in ["normal", "hover", "pressed", "focus"]:
+  var face := StyleBoxFlat.new()
+  face.bg_color = Color(1,1,1,0.10 if state=="hover" else (0.16 if state=="pressed" else 0.0))
+  face.set_corner_radius_all(12)
+  if state=="focus":face.border_color=Color("ffffff");face.set_border_width_all(2)
+  b.add_theme_stylebox_override(state,face)
  root.remove_child(b)
  column.add_child(b)
  b.set_meta("compact_game_tile",true)
@@ -2011,7 +2022,7 @@ func show_home_legacy() -> void:
  _add_bottom_navigation("games")
 
 func _add_unique_game_catalog() -> void:
- var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
+ var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else 2
  var configured_columns: int=int(PublishedContent.settings.get("home_columns",0))
  if configured_columns>0: columns=configured_columns
  if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1

@@ -30,6 +30,10 @@ def patch_manifest(text):
 def prepare(root, template=None):
     build=root/'android/build'
     manifest=build/'AndroidManifest.xml'
+    # Generated Gradle resources are not Godot assets. Importing them before a
+    # subsequent export creates .import files that break Android's resource merger.
+    (root/'android').mkdir(exist_ok=True)
+    (root/'android/.gdignore').touch()
     if not manifest.exists():
         if template is None:
             data=Path(os.environ['APPDATA'])/'Godot' if os.name=='nt' else Path(os.environ.get('XDG_DATA_HOME',str(Path.home()/'.local/share')))/'godot'

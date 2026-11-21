@@ -85,3 +85,9 @@ static func apply(main: Control, generation: int, kind: String) -> void:
   var height: float=panel.get_combined_minimum_size().y
   panel.offset_top=-height-24;scroll.offset_bottom=-height-40
  panel.minimum_size_changed.connect(resize_dock);resize_dock.call_deferred()
+ # A focused answer can otherwise make a newly opened round scroll past its
+ # title while the dock is being reparented on touch devices.
+ main.get_tree().process_frame.connect(func():
+  if is_instance_valid(scroll) and is_instance_valid(main) and generation==main.ui_action_generation:
+   scroll.scroll_vertical=0
+ ,CONNECT_ONE_SHOT)

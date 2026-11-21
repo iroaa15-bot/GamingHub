@@ -74,6 +74,9 @@ func display(snapshot: Dictionary) -> void:
  var quiz: Dictionary=snapshot.get("quiz",{})
  var question: Dictionary=quiz.get("question") if quiz.get("question") is Dictionary else {}
  var phase: String=str(quiz.get("phase","lobby")) if kind=="quiz" else ("finished" if snapshot.get("match_finished",false) else ("results" if snapshot.get("awaiting_next_round",false) else ("active" if snapshot.get("started",false) else "lobby")))
+ # Quiz controls live outside the question panel in a fixed dock. Hide the
+ # entire dock until the server actually supplies a question or its result.
+ if kind=="quiz":reply_dock.visible=phase in ["question","results","finished"] and not question.is_empty()
  title.text=game_title+host.tr_pair(" · الغرفة %s"," · Room %s") % host.client.code if phase=="lobby" else game_title
  var paused: bool=bool(snapshot.get("paused",false)) or host.client.capabilities.is_empty()
  notice.text=host.tr_pair("جار استعادة الاتصال · انتظر عودة الغرفة","Reconnecting · waiting for the room") if paused else host.status.text

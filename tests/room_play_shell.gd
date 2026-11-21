@@ -25,6 +25,9 @@ func run() -> void:
  var ui=load("res://scripts/shared_quiz_ui.gd").new();root.add_child(ui);ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var transport=ui.client;ui.client=Fixture.RecordingClient.new();root.add_child(ui.client)
  ui.client.code="654321";ui.client.player=0;ui.client.capabilities={"shared_quiz":true,"room_agreement":true}
+ var lobby: Dictionary={"capacity":2,"joined":1,"connected":[true,false],"scores":[0,0],"room_agreement":true,"primary_mode":"tap","started":false}
+ ui.client.state=lobby;ui._state(lobby);await process_frame
+ ck(ui.quiz_shell.visible and not ui.quiz_shell.reply_dock.visible,"quiz lobby hides empty answer controls")
  state={"capacity":2,"joined":2,"connected":[true,true],"scores":[0,0],"room_agreement":true,"primary_mode":"tap","started":true,"quiz":{"phase":"question","round":1,"rounds":2,"start_unix_ms":0,"question":{"id":"q1","mode":"choice","ar":"سؤال؟","en":"Question?","choices_ar":["أ","ب"],"choices_en":["A","B"]},"your_answer":null}}
  ui.client.state=state;ui._state(state);await process_frame
  ck(ui.quiz_shell.visible and ui.answer_buttons[0].is_visible_in_tree(),"quiz shell shows answer grid")

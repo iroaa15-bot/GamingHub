@@ -26,8 +26,9 @@ func run() -> void:
    for node in main.root.find_children("*","Button",true,false):
     if node.get_meta("setup_action","")=="start":start=node
    assert(start!=null)
-   start.pressed.emit();await process_frame;await process_frame;await process_frame
+   start.grab_focus();start.pressed.emit();await process_frame;await process_frame;await process_frame
    assert(main.active_play_screen and main.has_node("CorePlayDock"))
+   assert(main.root.get_parent().get_parent().scroll_vertical==0)
    main.pause_local_play();assert(is_instance_valid(main._local_pause_dialog) and main.blitz_dialog_paused)
    main._resume_local_play();assert(not main.blitz_dialog_paused)
    print("CORE_REDESIGN_ROUTE_PASS ",id," ",language)

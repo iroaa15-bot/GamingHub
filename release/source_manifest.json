@@ -1763,7 +1763,7 @@
     "tests/shared_quiz_network.gd": "51652595326bcd3962ac435519cce07def9be4ec19d116221c505ed82598be1b",
     "tests/shared_quiz_network.gd.uid": "5382c9f9558262ad9c0bbcd1034a0e3de348ff08f426a40587a7e657a1baf6ed",
     "tests/shared_quiz_security_resume.py": "3a773b9b5bfaf2de920a7ae55d759ef25504b9ccdc11bd6488c594902c6a9d01",
-    "tests/shared_quiz_ui.gd": "c50f2fdee13369a4ec863853780341e1de039dd7f8546139f4c83c564178deb9",
+    "tests/shared_quiz_ui.gd": "12ec7c395e12df51e4fef41befc0e6ebb7f49f2a1b38345eca29d69f93905818",
     "tests/shared_quiz_ui.gd.uid": "9e5595a09e40e758dda6e9344816dbc62e3d22ceea6c130f2fa2d319df2873a7",
     "tests/shared_remaining_adapters.py": "56521edefd8dd691e78d3d6cf5724c2879ae1385a58c119834e63371bd7b4677",
     "tests/show_skill_offline_smoke.gd": "1a6e5677ef92317e25cb5c7c80a024a7c1dc461ed5d94c7d96cceb644cb69b5e",

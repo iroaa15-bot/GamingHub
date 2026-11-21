@@ -35,8 +35,16 @@ func run() -> void:
  await until(func():return a.client.state.confirmed.count(true)==2)
  ck(await until(func():return a.quiz_panel.visible and b.quiz_panel.visible),"quiz controls actually rendered")
  ck(a.answer_buttons[0].text==b.answer_buttons[0].text and not a._match_controls.visible,"same choices with duel controls hidden")
- await create_timer(1.6).timeout
- if game_id=="6":ck(a.audio_player.stream!=null and a.audio_player.playing,"scheduled original audio actually playing in Godot")
+ # Wait for both real clients to receive the start time and enable answers.
+ # A fixed delay races the server countdown on slower runners.
+ var ready: bool=await until(func():return a.client.state.get("quiz",{}).get("phase")=="question" and b.client.state.get("quiz",{}).get("phase")=="question" and not a.answer_buttons[0].disabled and not b.answer_buttons[1].disabled)
+ ck(ready,"both clients ready to answer")
+ if not ready:
+  for ui in [a,b]:ui.client.close_transport();ui.queue_free()
+  await process_frame
+  quit(1);return
+ if game_id=="6":ck(await until(func():return a.audio_player.stream!=null and a.audio_player.playing),"scheduled original audio actually playing in Godot")
+ await create_timer(.15).timeout
  await snap(("sound" if game_id=="6" else "cinema")+"-shared-question")
  a.answer_buttons[0].pressed.emit();b.answer_buttons[1].pressed.emit()
  ck(await until(func():return a.client.state.quiz.phase=="finished"),"actual answer callbacks reach shared results")

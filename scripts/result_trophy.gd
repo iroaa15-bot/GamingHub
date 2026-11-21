@@ -17,7 +17,7 @@ func _draw() -> void:
    draw_colored_polygon(PackedVector2Array([center+Vector2(0,-8),center+Vector2(direction*7,-4),center+Vector2(direction*5,4),center+Vector2(-direction*3,6)]),Color("ffc93c") if leaf%2==0 else Color("e79a12"))
  for i in range(12):
   var point := c + Vector2(float((i*47)%180)-90,float((i*31)%88)-45)
-  var confetti := [Color("f95cdd"),Color("41cfff"),Color("ffd34e")][i%3]
+  var confetti: Color = [Color("f95cdd"),Color("41cfff"),Color("ffd34e")][i%3]
   draw_circle(point,2.0 if i%2==0 else 3.0,confetti)
  var gold := Color("ffcb39")
  var highlight := Color("fff3a0")

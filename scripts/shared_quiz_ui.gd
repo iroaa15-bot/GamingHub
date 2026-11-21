@@ -262,7 +262,7 @@ func _quiz_state(value: Dictionary) -> void:
   var revealed: bool=phase in ["results","finished"] and quiz.has("correct_index")
   var correct_choice: bool=revealed and i==int(quiz.get("correct_index",-1))
   var wrong_choice: bool=revealed and not correct_choice and quiz.get("your_answer")==i
-  VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "secondary"))
+  VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "blue"))
   if correct_choice or wrong_choice:
    answer_buttons[i].add_theme_stylebox_override("disabled",answer_buttons[i].get_theme_stylebox("normal"))
    answer_buttons[i].text=("✓ " if correct_choice else "✕ ")+answer_buttons[i].text

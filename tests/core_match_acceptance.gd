@@ -1,5 +1,6 @@
 extends SceneTree
 ## White-box local match acceptance with real answer validators; no profile disk writes.
+const ResultTrophy = preload("res://scripts/result_trophy.gd")
 func _initialize() -> void:call_deferred("run")
 func answer(main: Control, correct: bool) -> void:
  var item: Dictionary=main.round_bank[main.question_index]
@@ -12,6 +13,10 @@ func answer(main: Control, correct: bool) -> void:
    main.submit_order()
   _:main.select_answer(int(item.correct) if correct else (int(item.correct)+1)%4)
 func run() -> void:
+ var trophy := ResultTrophy.new()
+ root.add_child(trophy)
+ assert(trophy.custom_minimum_size.y > 0)
+ trophy.queue_free()
  root.get_node("PublishedContent").busy=true;root.get_node("GamingHubAccount").api_base=""
  var policy=root.get_node("RoomAudioPolicy");policy.set_music_enabled(false);policy.set_effects_enabled(false)
  var main=load("res://tests/picture_ui_preview.gd").new();root.add_child(main)

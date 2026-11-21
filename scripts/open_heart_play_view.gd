@@ -36,6 +36,7 @@ var room_code: Label
 var lobby_players: Label
 var seat_columns: Array[VBoxContainer] = []
 var seat_rows: Array[HBoxContainer] = []
+var voice_frame: PanelContainer
 
 func words(ar: String, en: String) -> String:
  return room.tr_pair(ar,en)
@@ -138,6 +139,11 @@ func setup(owner_room: Control) -> void:
   var row:=text_node(ranking,20)
   row.custom_minimum_size.y=42
   row.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+  # A single clipped line prevents wrapped result labels from repeatedly
+  # changing the scroll container's minimum width on narrow screens.
+  row.autowrap_mode=TextServer.AUTOWRAP_OFF
+  row.clip_text=true
+  row.max_lines_visible=1
   row.add_theme_stylebox_override("normal",surface(Color("101e43"),Color("387ed4")))
   rows.append(row)
  var tools_button := action_button(words("الدردشة والإبلاغ","Chat & report"),func():tools_open=not tools_open;tools.visible=tools_open)
@@ -160,6 +166,12 @@ func setup(owner_room: Control) -> void:
   for state_name in ["normal","pressed","hover","focus","disabled"]:
    node.add_theme_stylebox_override(state_name,participate.get_theme_stylebox(state_name))
  dock=VBoxContainer.new();dock.add_theme_constant_override("separation",4);add_child(dock)
+ voice_frame=PanelContainer.new();voice_frame.name="VoiceStatusFrame"
+ var voice_style:=surface(Color("071a39"),Color("2479c7"))
+ voice_style.set_corner_radius_all(14)
+ for edge in ["left","right","top","bottom"]:voice_style.set("content_margin_"+edge,4)
+ voice_frame.add_theme_stylebox_override("panel",voice_style);dock.add_child(voice_frame)
+ room.voice_adapter.changed.connect(_sync_voice_visual)
  var leave := action_button(words("مغادرة الغرفة","Leave room"),func():room.confirm_party_leave())
  leave.custom_minimum_size.y=44;add_child(leave)
  set_process(true)
@@ -191,14 +203,15 @@ func display(value: Dictionary) -> void:
  room.party_panel.hide()
  if not in_room:
   pending_key="";phase_key=""
+  voice_frame.hide()
   if room._voice_controls.get_parent()!=room._main_column:room._voice_controls.reparent(room._main_column)
   return
  if phase=="lobby":
   if room._seats.get_parent()!=lobby:room._seats.reparent(lobby)
-  lobby.move_child(room._seats,3)
+  if room._seats.get_index()!=3:lobby.move_child(room._seats,3)
  else:
   if room._seats.get_parent()!=content:room._seats.reparent(content)
-  content.move_child(room._seats,0)
+  if room._seats.get_index()!=0:content.move_child(room._seats,0)
  room._seats.show()
  room._seats.columns=1 if phase=="lobby" else (2 if int(value.get("capacity",2))<=2 else 3)
  for i in range(6):
@@ -225,16 +238,19 @@ func display(value: Dictionary) -> void:
    if i<value.get("connected",[]).size() and not bool(value.connected[i]):room._seat_labels[i].text+=" ↻"
   room._seat_statuses[i].visible=not compact
   room._seat_panels[i].add_theme_stylebox_override("panel",player_style)
- room._agreement_box.reparent(lobby)
- room._voice_controls.reparent(dock)
+ if room._agreement_box.get_parent()!=lobby:room._agreement_box.reparent(lobby)
+ if room._voice_controls.get_parent()!=voice_frame:room._voice_controls.reparent(voice_frame)
  room._voice_controls.visible=bool(value.get("room_agreement",false)) and str(value.get("primary_mode","voice")) in ["voice","mixed"] and bool(room.client.capabilities.get("voice",false))
+ voice_frame.visible=room._voice_controls.visible
  room.voice_status.add_theme_font_size_override("font_size",12)
  room.voice_status.custom_minimum_size.y=40
  room.voice_status.max_lines_visible=2
  room._voice_changed()
+ _sync_voice_visual()
  room.voice_button.text=words("إنهاء","End call") if room.voice_adapter.requested else words("اتصال","Call")
  room.voice_mute_button.text=words("إلغاء الكتم","Unmute") if room.voice_adapter.muted else words("كتم","Mute")
- for node in [room.clock,room._clock_bar]:node.reparent(timer_slot)
+ for node in [room.clock,room._clock_bar]:
+  if node.get_parent()!=timer_slot:node.reparent(timer_slot)
  room.clock.visible=phase=="active" and int(value.get("timer",0))>0
  room.clock.add_theme_font_size_override("font_size",18)
  room._clock_bar.visible=room.clock.visible
@@ -321,6 +337,20 @@ func display(value: Dictionary) -> void:
  if not pending_key.is_empty() and ((pending_action=="duel_party_vote" and str(room.client.player) in party.get("voted_players",[])) or (pending_action=="duel_party_story" and bool(party.get("story_committed",false)))):
   pending_key=""
  for node in option_buttons+[next_round]:node.disabled=paused or not pending_key.is_empty()
+
+func _sync_voice_visual() -> void:
+ if not is_instance_valid(room) or not is_instance_valid(room.voice_adapter):return
+ # The adapter owns consent and media state. Visual cues reflect that state;
+ # an outstanding call request is never presented as an active connection.
+ var requested: bool=room.voice_adapter.requested
+ var active: bool=requested and room.voice_adapter.bridge.active
+ var muted: bool=room.voice_adapter.muted
+ var status_color:=Color("9db2ce")
+ if active:status_color=Color("ffd467") if muted else Color("78e9a3")
+ elif requested:status_color=Color("ffd467")
+ room.voice_status.add_theme_color_override("font_color",status_color)
+ accent_button(room.voice_button,Color("902341") if requested else Color("1356a3"))
+ accent_button(room.voice_mute_button,Color("942e44") if muted else Color("12588e"))
 
 func submit(kind: String, participated: bool=false) -> void:
  if not pending_key.is_empty() or bool(latest.get("paused",false)) or room.client.capabilities.is_empty():return

@@ -49,7 +49,7 @@ func run() -> void:
      valid=valid and view.status.text==("انتهت المباراة بالتعادل" if language=="ar" else "Match finished in a draw")
      state.party.phase="lobby";state.started=false;state.match_finished=false
      view._state(state)
-     valid=valid and view._seats.is_visible_in_tree() and view._seats.get_parent()==(view.play_view.content if redesigned else view._main_column)
+     valid=valid and view._seats.is_visible_in_tree() and (view.play_view.lobby.is_ancestor_of(view._seats) if redesigned else view._seats.get_parent()==view._main_column)
      valid=valid and not view._agreement_info.text.contains("Difficulty") and not view._agreement_info.text.contains("الصعوبة")
      cases+=1
    view.queue_free();await process_frame

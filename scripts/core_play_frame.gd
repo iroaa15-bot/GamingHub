@@ -34,8 +34,13 @@ static func style_reference_content(main: Control, kind: String) -> void:
 static func apply(main: Control, generation: int, kind: String) -> void:
  if not is_instance_valid(main) or not main.is_inside_tree() or generation!=main.ui_action_generation or main.has_node("CorePlayDock"):return
  style_reference_content(main,kind)
+ if kind=="picture":preload("res://scripts/picture_hidden_card_art.gd").attach(main)
  var scroll=main.root.get_parent().get_parent() as ScrollContainer
  if scroll==null:return
+ var compact_view: bool = main.reading_scale>=1.25 or main.get_viewport_rect().size.y<700
+ # Result screens can contain several real actions. Let the entire result
+ # scroll on compact displays instead of creating an oversized fixed footer.
+ if compact_view and kind in ["feedback","results"]:return
  var panel:=PanelContainer.new();panel.name="CorePlayDock"
  panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE);panel.grow_vertical=Control.GROW_DIRECTION_BEGIN
  panel.offset_left=16;panel.offset_right=-16;panel.offset_bottom=-24
@@ -44,6 +49,8 @@ static func apply(main: Control, generation: int, kind: String) -> void:
  dock_style.shadow_color=Color("1956d0",0.22)
  panel.add_theme_stylebox_override("panel",dock_style);main.add_child(panel)
  var controls:=VBoxContainer.new();controls.add_theme_constant_override("separation",8);panel.add_child(controls)
+ # On short screens or large text, keep answer inputs in the scrollable body;
+ # otherwise the fixed dock can consume the entire view or hide the keyboard.
  var choices=main.root.find_child("CoreAnswerChoices",true,false)
  if choices!=null:
   # Cinema and trivia references place the four full-width answers in a stack.
@@ -55,13 +62,16 @@ static func apply(main: Control, generation: int, kind: String) -> void:
     PlaySkin.decorate_button(choice,"blue")
     choice.custom_minimum_size.y=46 if main.reading_scale<1.25 else 60
     choice.add_theme_font_size_override("font_size",int(17*main.reading_scale))
-  if main.reading_scale<1.25:choices.reparent(controls)
+  if not compact_view:choices.reparent(controls)
  var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8)
  for node in main.root.get_children():
-  if node is LineEdit and node.get_meta("core_dock",false):node.reparent(controls);PlaySkin.decorate_input(node)
+  if node is LineEdit and node.get_meta("core_dock",false):
+   if not compact_view:node.reparent(controls)
+   PlaySkin.decorate_input(node)
   elif node is Button and (node.get_meta("core_dock",false) or kind in ["feedback","results"]):
    if node.get_meta("core_exit",false):node.reparent(navigation);node.custom_minimum_size.y=44
    else:
+    if compact_view and kind in ["question","picture","memory"]:continue
     if kind in ["question","feedback"]:PlaySkin.decorate_button(node,"violet")
     node.reparent(controls)
  if kind in ["question","picture","memory"]:

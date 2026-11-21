@@ -14,6 +14,14 @@ func run() -> void:
   for id in range(10):
    main.show_modes(id);main._start_offline_mode()
    assert(main.current_screen=="offline_setup")
+   if id==0:
+    var difficulty_buttons:=0
+    for choice in main.root.find_children("*","Button",true,false):
+     if choice.has_meta("difficulty_value"):
+      choice.pressed.emit()
+      assert(main.difficulty==choice.get_meta("difficulty_value"))
+      difficulty_buttons+=1
+    assert(difficulty_buttons==3)
    var start: Button=null
    for node in main.root.find_children("*","Button",true,false):
     if node.get_meta("setup_action","")=="start":start=node

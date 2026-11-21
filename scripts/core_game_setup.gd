@@ -1,5 +1,29 @@
 extends RefCounted
 const PlaySkin=preload("res://scripts/visual_skin.gd")
+static func picture_difficulty(main: Control) -> void:
+ var surface:=PanelContainer.new()
+ var style:=PlaySkin.play_surface(Color("081b43"),14)
+ style.border_color=Color("3569bc")
+ surface.add_theme_stylebox_override("panel",style);main.root.add_child(surface)
+ var content:=VBoxContainer.new();content.add_theme_constant_override("separation",6);surface.add_child(content)
+ var heading:=Label.new();heading.text=main.tr_ui("مستوى الصعوبة","Difficulty")
+ heading.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ heading.add_theme_font_size_override("font_size",int(16*main.reading_scale));content.add_child(heading)
+ var row:=HBoxContainer.new();row.add_theme_constant_override("separation",6);content.add_child(row)
+ var group:=ButtonGroup.new()
+ var titles: Array=[main.tr_ui("سهل","Easy"),main.tr_ui("متوسط","Medium"),main.tr_ui("صعب","Hard")]
+ for i in range(3):
+  var value: int=i+1
+  var caption: String=titles[i]
+  var choice:=Button.new();choice.text=caption;choice.toggle_mode=true;choice.button_group=group
+  choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choice.custom_minimum_size.y=48
+  choice.add_theme_font_size_override("font_size",int(15*main.reading_scale))
+  PlaySkin.decorate_play_action(choice,["positive","reward","danger"][i])
+  choice.toggled.connect(func(on: bool):choice.text=("✓ " if on else "")+caption)
+  choice.button_pressed=main.difficulty==value
+  choice.set_meta("difficulty_value",value)
+  choice.pressed.connect(func():main.difficulty=value)
+  row.add_child(choice)
 static func selector(main: Control, title: String, values: Array, captions: Array, selected: Variant, changed: Callable) -> void:
  var surface := PanelContainer.new()
  var style := PlaySkin.play_surface(Color("081b43"), 14)
@@ -69,7 +93,8 @@ static func render(main: Control) -> void:
  subtitle.add_theme_font_size_override("font_size", int(14 * main.reading_scale))
  subtitle.add_theme_color_override("font_color", Color("79dbff"))
  titles.add_child(subtitle)
- selector(main,main.tr_ui("المستوى","Difficulty"),[1,2,3],[main.difficulty_name(1),main.difficulty_name(2),main.difficulty_name(3)],main.difficulty,func(value):main.difficulty=value)
+ if main.game==0:picture_difficulty(main)
+ else:selector(main,main.tr_ui("المستوى","Difficulty"),[1,2,3],[main.difficulty_name(1),main.difficulty_name(2),main.difficulty_name(3)],main.difficulty,func(value):main.difficulty=value)
  if main.game==8:
   main.session_length=4*clampi(ceili(float(main.session_length)/4.0),3,5)
   selector(main,main.tr_ui("عدد لوحات الذاكرة","Memory boards"),[12,16,20],["3","4","5"],main.session_length,func(value):main.session_length=value)

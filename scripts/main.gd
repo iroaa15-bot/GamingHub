@@ -373,24 +373,46 @@ func show_celebration(grand: bool) -> void:
 
 func result_hero(accuracy: int) -> void:
  var frame := PanelContainer.new()
+ frame.name = "ResultHero"
  frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- var result_style := VisualSkin.play_surface(Color("0a1741"),20)
- result_style.border_color = Color("9672ff")
+ var result_style := VisualSkin.play_surface(Color("06143a"),20)
+ result_style.border_color = Color("458fe5")
  result_style.set_border_width_all(2)
  frame.add_theme_stylebox_override("panel", result_style)
  root.add_child(frame)
  var content := VBoxContainer.new()
  content.add_theme_constant_override("separation", 8)
  frame.add_child(content)
- var heading := Label.new()
- heading.text = tr_ui("🎉 فوز مستحق!" if last_match_won else "🌟 الجولة انتهت", "🎉 YOU WON!" if last_match_won else "🌟 ROUND COMPLETE")
- heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
- heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
- heading.add_theme_font_size_override("font_size", int(28 * reading_scale))
- heading.add_theme_color_override("font_color", Color.WHITE)
- content.add_child(heading)
  if last_match_won:
   content.add_child(load("res://scripts/result_trophy.gd").new())
+ var ribbon := PanelContainer.new()
+ ribbon.add_theme_stylebox_override("panel", VisualSkin.neon_surface(Color("700caa"), Color("ee83ff")))
+ content.add_child(ribbon)
+ var heading := Label.new()
+ heading.text = tr_ui("النتيجة النهائية" if last_match_won else "انتهت الجولة", "FINAL RESULT" if last_match_won else "ROUND COMPLETE")
+ heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+ heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+ heading.add_theme_font_size_override("font_size", int(24 * reading_scale))
+ heading.add_theme_color_override("font_color", Color.WHITE)
+ ribbon.add_child(heading)
+ var attempted: int = question_index + 1 if mode_finished_early else round_bank.size()
+ var statistics: Array = [
+  [tr_ui("إجمالي النقاط", "Total points"), str(score)],
+  [tr_ui("الإجابات الصحيحة", "Correct answers"), "%d / %d" % [correct_count, attempted]],
+  [tr_ui("الخبرة المكتسبة", "XP earned"), "+%d" % last_reward]
+ ]
+ for entry in statistics:
+  var bar := PanelContainer.new()
+  var bar_style := VisualSkin.play_surface(Color("0c2350"),12)
+  bar_style.border_color = Color("385f9b");bar_style.shadow_size = 0
+  bar_style.content_margin_top = 6;bar_style.content_margin_bottom = 6
+  bar.add_theme_stylebox_override("panel",bar_style)
+  content.add_child(bar)
+  var row := HBoxContainer.new();row.add_theme_constant_override("separation",8);bar.add_child(row)
+  var caption := Label.new();caption.text = str(entry[0]);caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+  caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART;caption.add_theme_font_size_override("font_size",int(15 * reading_scale));row.add_child(caption)
+  var value := Label.new();value.text = str(entry[1]);value.add_theme_font_size_override("font_size",int(17 * reading_scale))
+  value.add_theme_color_override("font_color",Color("ffe08a"));row.add_child(value)
  var medal := Label.new()
  medal.text = result_medal(accuracy)
  medal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1395,54 +1417,7 @@ func feature_card(title_text: String, description: String, action_text: String, 
  column.add_child(play)
 
 func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContainer:
- var tile := PanelContainer.new()
- tile.mouse_filter = Control.MOUSE_FILTER_PASS
- tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- var skin := StyleBoxFlat.new()
- # Distinct game colours follow the reference catalog while retaining the real artwork.
- var game_fills: Array[String] = ["00539c","9a1835","137334","5d169c","a85a04","b62d28","153b9a","811b73","075886","a94712"]
- var game_edges: Array[String] = ["54dfff","ff8296","91ec83","dc8dff","ffcc5c","ffb777","81b8ff","ff91df","7ee6ff","ffc270"]
- skin.bg_color = Color(game_fills[index % game_fills.size()])
- skin.border_color = Color(game_edges[index % game_edges.size()])
- skin.set_border_width_all(2)
- skin.set_corner_radius_all(16)
- skin.content_margin_left = 8
- skin.content_margin_right = 8
- skin.content_margin_top = 4
- skin.content_margin_bottom = 4
- skin.shadow_color = Color(0, 0, 0, 0.34)
- skin.shadow_size = 8
- tile.add_theme_stylebox_override("panel", skin)
- var column := VBoxContainer.new()
- column.add_theme_constant_override("separation", 0)
- tile.add_child(column)
- var art := TextureRect.new()
- var premium_art: Texture2D=VisualSkin.game_cover(index)
- art.texture=premium_art if premium_art!=null else card_texture(art_id)
- art.custom_minimum_size.y = 54
- art.mouse_filter = Control.MOUSE_FILTER_IGNORE
- art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- column.add_child(art)
- var idx: int = index
- var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
- b.tooltip_text = game_subtitle(index)
- b.add_theme_font_size_override("font_size", int(14 * reading_scale))
- b.custom_minimum_size.y = 48
- # Keep the original action button while reducing extra menu chrome.
- for state in ["normal", "hover", "pressed", "focus"]:
-  var face := StyleBoxFlat.new()
-  face.bg_color = Color(1,1,1,0.10 if state=="hover" else (0.16 if state=="pressed" else 0.0))
-  face.set_corner_radius_all(12)
-  if state=="focus":face.border_color=Color("ffffff");face.set_border_width_all(2)
-  b.add_theme_stylebox_override(state,face)
- root.remove_child(b)
- column.add_child(b)
- b.set_meta("compact_game_tile",true)
- b.icon = null # Existing artwork already identifies the game; keep Arabic title width.
- b.expand_icon = true
- b.add_theme_constant_override("icon_max_width", 22)
- return tile
+ return load("res://scripts/reference_game_tile.gd").make(self,index,art_id,favorite)
 
 # World journey: a persistent stage map with themed chapters and replayable challenges.
 const JOURNEY_WORLDS: Array[String] = ["island", "city", "space", "mystery", "arena", "jungle", "ocean", "desert", "clouds", "volcano", "crystals", "robots", "temple", "ice", "stars"]

@@ -25,6 +25,15 @@ func run() -> void:
  var ui=load("res://scripts/shared_quiz_ui.gd").new();root.add_child(ui);ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var transport=ui.client;ui.client=Fixture.RecordingClient.new();root.add_child(ui.client)
  ui.client.code="654321";ui.client.player=0;ui.client.capabilities={"shared_quiz":true,"room_agreement":true}
+ ui.selected_game="1";ui._pending_room_action="create"
+ ui._room_protocol_ready({"shared_quiz":true,"quiz_games":["6"],"room_agreement":true})
+ ck(ui._pending_room_action.is_empty() and ui.client.sent.is_empty(),"unsupported game does not create a room")
+ ui._pending_room_action="create";ui._room_protocol_ready({"shared_quiz":true,"quiz_games":["1"],"room_agreement":true})
+ ck(ui.client.sent.size()==1 and ui.client.sent[0].type=="duel_quiz_create","advertised game can create a room")
+ ui.client.sent.clear()
+ ui.client.state={"primary_mode":"voice"};ui._propose_configuration()
+ ck(ui.client.sent.size()==1 and ui.client.sent[0].fields.primary_mode=="voice","changing quiz category preserves the agreed voice mode")
+ ui.client.sent.clear()
  var lobby: Dictionary={"capacity":2,"joined":1,"connected":[true,false],"scores":[0,0],"room_agreement":true,"primary_mode":"tap","started":false}
  ui.client.state=lobby;ui._state(lobby);await process_frame
  ck(ui.quiz_shell.visible and not ui.quiz_shell.reply_dock.visible,"quiz lobby hides empty answer controls")

@@ -66,12 +66,12 @@ func _ready() -> void:
  column=quiz_panel
  quiz_title=label("",21)
  quiz_question_card=PanelContainer.new();quiz_question_card.name="QuizQuestionCard"
- var question_skin:=VisualSkin.card(Color("edf2fc"),22)
- question_skin.border_color=Color("edf2fc")
+ var question_skin:=VisualSkin.card(Color("0a1d48"),22)
+ question_skin.border_color=Color("48caff")
  quiz_question_card.add_theme_stylebox_override("panel",question_skin)
  quiz_panel.add_child(quiz_question_card);quiz_panel.move_child(quiz_question_card,0)
  quiz_title.reparent(quiz_question_card)
- quiz_title.add_theme_color_override("font_color",Color("15233d"))
+ quiz_title.add_theme_color_override("font_color",Color("f5f7ff"))
  quiz_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
  sound_progress=ProgressBar.new();sound_progress.name="SoundPlaybackProgress";sound_progress.show_percentage=false
  VisualSkin.decorate_progress(sound_progress);quiz_panel.add_child(sound_progress);sound_progress.hide()
@@ -108,8 +108,20 @@ func _ready() -> void:
  quiz_shell.display(client.state)
 func _create_filtered_room() -> void:
  client.send_action("duel_quiz_create",{"game_id":selected_game,"players":players_field.get_selected_id(),"timer":timer_field.get_selected_id(),"rounds":int(target_field.value),"difficulty":_online_rank_keys[_online_rank.selected]})
+func _room_protocol_ready(capabilities: Dictionary) -> void:
+ # Do not create or join a room against a server that did not advertise this
+ # specific game. The offline mode remains available in that situation.
+ var games: Variant=capabilities.get("quiz_games",[])
+ if not bool(capabilities.get("shared_quiz",false)) or not games is Array or selected_game not in games:
+  _pending_room_action=""
+  status.text=tr_pair("غرف هذه اللعبة غير متاحة حاليًا. يمكنك اللعب بدون إنترنت.","Rooms for this game are currently unavailable. Offline play is available.")
+  return
+ super._room_protocol_ready(capabilities)
 func _propose_configuration() -> void:
- client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":"tap"})
+ # Changing a quiz category must not silently turn off a room's agreed voice.
+ var mode: String=str(client.state.get("primary_mode","voice"))
+ if mode not in ["voice","text","tap"]:mode="voice"
+ client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":mode})
 func _state(value: Dictionary) -> void:
  if is_instance_valid(quiz_shell):quiz_shell.before_snapshot()
  super._state(value)
@@ -239,6 +251,9 @@ func _quiz_state(value: Dictionary) -> void:
   _show_step_picks()
  quiz_title.text=tr_pair("سؤال %d من %d • ","Question %d of %d • ") % [int(quiz.get("round",1)),int(quiz.get("rounds",1))]+str(question.get(language,question.get("en","")))
  var choices: Array=question.get("choices_"+language,question.get("choices_en",[]))
+ # Four answers follow the reference's vertical stack; larger sets retain a
+ # compact grid so the room and voice controls remain usable on small screens.
+ answer_grid.columns=1 if choices.size()<=4 else 2
  for i in range(answer_buttons.size()):
   answer_buttons[i].visible=mechanic=="choice" and i<choices.size()
   if i<choices.size():answer_buttons[i].text=str(choices[i])

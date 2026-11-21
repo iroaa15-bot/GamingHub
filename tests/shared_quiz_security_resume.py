@@ -6,6 +6,24 @@ class Peer:
  def __init__(self):self.messages=[]
  async def send(self,message):self.messages.append(message)
 class QuizBoundaries(unittest.IsolatedAsyncioTestCase):
+ async def test_category_change_keeps_explicit_voice_consents(self):
+  h=SharedQuizHub(secrets.token_urlsafe(48),':memory:');a,b=Peer(),Peer()
+  async def action(peer,kind,**fields):return await h.handle(peer,dict(type=kind,protocol=3,**fields))
+  try:
+   for peer in (a,b):h.identities[peer]=h.sessions.issue()[1];await action(peer,'duel_hello',game_id='1')
+   await action(a,'duel_quiz_create',game_id='1',players=2,timer=10,rounds=1,difficulty='easy')
+   room,_=h.binding(a);await action(b,'duel_join',code=room.code)
+   categories=[key for key in h.adapters['1'].categories if h.adapters['1'].pool('easy',key)]
+   self.assertTrue(categories)
+   await action(a,'duel_quiz_propose',category=categories[0],primary_mode='voice')
+   for peer in (a,b):await action(peer,'duel_accept',config_revision=room.config_revision,picture_difficulty='easy')
+   await action(a,'duel_voice_state',enabled=True)
+   self.assertEqual(h.voice[room.code]['enabled'],[True,False])
+   await action(b,'duel_voice_state',enabled=True)
+   await action(a,'duel_quiz_propose',category='all',primary_mode='voice')
+   self.assertEqual(room.primary_mode,'voice')
+   self.assertEqual(h.voice[room.code]['enabled'],[True,True])
+  finally:h.moderation.db.close()
  async def test_pending_security_and_resume(self):
   h=SharedQuizHub(secrets.token_urlsafe(48),':memory:');a,b=Peer(),Peer()
   async def action(peer,kind,**fields):return await h.handle(peer,dict(type=kind,protocol=3,**fields))

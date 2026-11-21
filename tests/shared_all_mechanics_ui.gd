@@ -13,6 +13,7 @@ func until(predicate: Callable) -> bool:
   await create_timer(.025).timeout
  return false
 func snap(name: String) -> void:
+ if DisplayServer.get_name()=="headless":return
  await process_frame;await process_frame;await RenderingServer.frame_post_draw
  root.get_texture().get_image().save_png(folder.path_join(name+".png"))
 func solve_memory(ui: Node) -> void:
@@ -69,7 +70,6 @@ func suite(game: String) -> void:
   await until(func():return b.client.state.picture_category=="Place")
  a._accept_configuration();b._accept_configuration()
  await until(func():return a.client.state.confirmed.count(true)==2)
- a.client.send_action("duel_start")
  ck(await until(func():return a.quiz_panel.visible and b.quiz_panel.visible),game+" actual controls visible")
  ck(a.client.state.quiz.question==b.client.state.quiz.question,game+" same question payload")
  await create_timer(1.7).timeout

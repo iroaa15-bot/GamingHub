@@ -17,14 +17,10 @@ python3 tests/run_checks.py
 "$GODOT" --headless --path "$ROOT" --script res://tests/godot_smoke.gd
 "$GODOT" --headless --path "$ROOT" --quit-after 60
 mkdir -p build
-# Godot requires install-android-build-template together with the export action.
-template_args=()
-if [[ ! -f android/.build_version ]]; then
-  template_args=(--install-android-build-template)
-fi
+python3 release/prepare_android_template.py
 case "${1:-debug}" in
   debug)
-    "$GODOT" --headless --path "$ROOT" "${template_args[@]}" --export-debug Android build/GamingHub-v11.5-debug.apk
+    "$GODOT" --headless --path "$ROOT" --export-debug Android build/GamingHub-v11.5-debug.apk
     python3 release/verify_android_package.py build/GamingHub-v11.5-debug.apk
     echo "Debug APK created. Install and test on two devices before any release."
     ;;
@@ -32,7 +28,7 @@ case "${1:-debug}" in
     : "${GODOT_ANDROID_KEYSTORE_RELEASE_PATH:?Set a release keystore path first}"
     : "${GODOT_ANDROID_KEYSTORE_RELEASE_USER:?Set release key alias first}"
     : "${GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD:?Set release key password first}"
-    "$GODOT" --headless --path "$ROOT" "${template_args[@]}" --export-release "Android Release" build/GamingHub-v11.5-release.aab
+    "$GODOT" --headless --path "$ROOT" --export-release "Android Release" build/GamingHub-v11.5-release.aab
     python3 release/verify_android_package.py build/GamingHub-v11.5-release.aab --release
     echo "AAB produced, but device tests and Google Play policy gates remain mandatory."
     ;;

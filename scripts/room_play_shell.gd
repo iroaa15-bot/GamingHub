@@ -13,6 +13,8 @@ var timers: VBoxContainer
 var reply_dock: VBoxContainer
 var voice_dock: VBoxContainer
 var result: Label
+var result_trophy: Control
+var more_button: Button
 var phase_key := ""
 var motion: Tween
 var tools_open := false
@@ -47,11 +49,13 @@ func setup(room: Control, panel: Control, title_text: String, game_kind: String)
  scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;add_child(scroll)
  body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  body.add_theme_constant_override("separation",10);scroll.add_child(body)
+ result_trophy=load("res://scripts/result_trophy.gd").new()
+ result_trophy.visible=false;body.add_child(result_trophy)
  result=label_node(body,23)
- var more:=Button.new();more.text=host.tr_pair("خيارات الغرفة والإبلاغ","Room options & report")
- more.custom_minimum_size.y=44;more.pressed.connect(func():tools_open=not tools_open;host._settings_body.visible=tools_open)
- load("res://scripts/visual_skin.gd").decorate_play_action(more)
- body.add_child(more)
+ more_button=Button.new();more_button.text=host.tr_pair("خيارات الغرفة والإبلاغ","Room options & report")
+ more_button.custom_minimum_size.y=44;more_button.pressed.connect(func():tools_open=not tools_open;host._settings_body.visible=tools_open)
+ load("res://scripts/visual_skin.gd").decorate_play_action(more_button)
+ body.add_child(more_button)
  reply_dock=VBoxContainer.new();add_child(reply_dock)
  voice_dock=VBoxContainer.new();voice_dock.custom_minimum_size.y=104;add_child(voice_dock)
  var leave:=Button.new();leave.text=host.tr_pair("مغادرة الغرفة","Leave room")
@@ -101,8 +105,12 @@ func display(snapshot: Dictionary) -> void:
  host._invite_box.reparent(body);host._invite_box.visible=phase=="lobby"
  host._agreement_box.reparent(body);host._agreement_box.visible=phase=="lobby" and bool(snapshot.get("room_agreement",false))
  game_panel.reparent(body)
+ body.move_child(more_button,-1)
  host._settings_body.reparent(body);host._settings_body.visible=tools_open
  game_panel.visible=phase!="lobby" and (not question.is_empty() if kind=="quiz" else phase!="finished")
+ # A trophy represents the server-confirmed winner only, never a draw or an
+ # in-progress round. Scores and the actual winner remain server-owned.
+ result_trophy.visible=phase=="finished" and int(snapshot.get("winner",-1))>=0
  if kind=="photo":
   host._reply_row.reparent(reply_dock)
   host.pass_button.reparent(reply_dock)

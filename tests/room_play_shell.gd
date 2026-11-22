@@ -27,7 +27,10 @@ func run() -> void:
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo reconnect retains mute position")
  state.paused=false;state.match_finished=true;state.winner=-1;photo.client.state=state;photo._state(state);await process_frame;await process_frame
  ck(photo.status.text.contains("بالتعادل") and photo._room_shell.result.visible,"photo final draw is visible")
+ ck(not photo._room_shell.result_trophy.visible,"draw does not display a winner trophy")
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo results retain mute position")
+ state.winner=1;photo.client.state=state;photo._state(state);await process_frame
+ ck(photo._room_shell.result_trophy.visible,"server-confirmed winner displays the trophy")
  photo.queue_free();await process_frame
  var ui=load("res://scripts/shared_quiz_ui.gd").new();root.add_child(ui);ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var transport=ui.client;ui.client=Fixture.RecordingClient.new();root.add_child(ui.client)
@@ -56,6 +59,19 @@ func run() -> void:
  ck(ui.send_status.text.contains("تم تسجيل"),"canonical answer acknowledgement is visible")
  state.quiz.phase="results";state.quiz.correct_index=1;ui.client.state=state;ui._state(state)
  ck(ui.answer_buttons[1].text.begins_with("✓") and ui.answer_buttons[0].text.begins_with("✕"),"server reveal preserves correctness feedback")
+ state.quiz.phase="finished";state.winner=1;state.scores=[0,10];ui.client.state=state;ui._state(state);await process_frame
+ ck(not ui.answer_grid.visible and ui.quiz_final_title.visible,"finished match replaces answer controls with results")
+ ck(ui.quiz_shell.more_button.get_index()>ui.quiz_panel.get_index(),"room options follow the match results")
+ ck(ui.quiz_shell.result_trophy.visible and ui.quiz_final_title.text.contains("2"),"server winner is shown in the final match")
+ ck(ui.quiz_scoreboard.get_child_count()==2 and ui.quiz_scoreboard.get_child(0).get_meta("player_index")==1,"final standings follow server totals")
+ ck(ui.quiz_scoreboard.get_child(0).get_child(0).get_child(2).text=="10","standings show the actual total")
+ state.profiles=[{"display_name":"أحمد"},{"display_name":"نورا"}];ui.client.state=state;ui._state(state);await process_frame
+ ck(ui.quiz_final_title.text.contains("نورا"),"winner uses the server profile name")
+ state.winner=-1;state.scores=[10,10];ui.client.state=state;ui._state(state);await process_frame
+ ck(not ui.quiz_shell.result_trophy.visible and ui.quiz_final_title.text.contains("التعادل"),"draw is shown without a winner trophy")
+ ck(ui.quiz_scoreboard.get_child(0).get_child(0).get_child(0).text=="1" and ui.quiz_scoreboard.get_child(1).get_child(0).get_child(0).text=="1","tied players share the same rank")
+ state.quiz.phase="question";state.quiz.your_answer=null;ui.client.state=state;ui._state(state);await process_frame
+ ck(ui.answer_grid.visible and ui.quiz_question_card.visible and not ui.quiz_scoreboard.visible,"new question restores answer controls")
  ui.client.queue_free();ui.client=transport;ui.queue_free();await process_frame
  print("ROOM_PLAY_SHELL_PASS="+str(not failed)+" photo/quiz fixed controls, duplicate lock, server reveal")
  quit(1 if failed else 0)

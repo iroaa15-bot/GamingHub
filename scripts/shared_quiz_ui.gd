@@ -4,6 +4,9 @@ static var selected_game := "1"
 var quiz_panel: VBoxContainer
 var quiz_title: Label
 var quiz_question_card: PanelContainer
+var quiz_final_title: Label
+var quiz_scoreboard: VBoxContainer
+var _scoreboard_key := ""
 var sound_progress: ProgressBar
 var quiz_results: Label
 var answer_buttons: Array[Button]=[]
@@ -89,7 +92,14 @@ func _ready() -> void:
  steps_box=VBoxContainer.new();quiz_panel.add_child(steps_box)
  order_undo=button(tr_pair("إعادة ترتيب البداية","Reset arrangement"),_reset_step_order)
  order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():_send_quiz_answer({"sequence":step_picks.duplicate()}))
+ quiz_final_title=label("")
+ quiz_final_title.add_theme_font_size_override("font_size",24)
+ quiz_final_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ quiz_final_title.hide()
+ quiz_scoreboard=VBoxContainer.new();quiz_scoreboard.add_theme_constant_override("separation",6)
+ quiz_panel.add_child(quiz_scoreboard);quiz_scoreboard.hide()
  quiz_results=label("")
+ quiz_results.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT if language=="ar" else HORIZONTAL_ALIGNMENT_LEFT
  next_button=button(tr_pair("السؤال التالي","Next question"),_send_quiz_next)
  send_status=label("",16)
  answer_grid=GridContainer.new();answer_grid.columns=2
@@ -273,8 +283,9 @@ func _quiz_state(value: Dictionary) -> void:
  sound_progress.visible=replay_button.visible
  replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false)) or _quiz_now()<int(quiz.get("start_unix_ms",0))
  next_button.visible=phase=="results" and client.player==0
+ var finished: bool=phase=="finished"
  var lines := PackedStringArray()
- lines.append(tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
+ lines.append(tr_pair("إجابات السؤال الأخير: %d/%d","Last question answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))] if finished else tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
  if quiz.has("answer_labels"):lines.append(str(quiz.answer_labels.get(language,quiz.answer_labels.get("en",""))))
  if quiz.has("correct_sequence"):
   var ordered: Array=[]
@@ -284,7 +295,26 @@ func _quiz_state(value: Dictionary) -> void:
  if quiz.has("correct_index"):
   var correct: int=int(quiz.correct_index)
   if correct>=0 and correct<choices.size():lines.append(tr_pair("الإجابة: ","Answer: ")+str(choices[correct]))
- for row in quiz.get("results",[]):lines.append(tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
+ for row in quiz.get("results",[]):
+  lines.append(tr_pair("اللاعب %d: %d نقطة في السؤال الأخير","Player %d: %d points in the last question") % [int(row.player)+1,int(row.points)] if finished else tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
+ quiz_final_title.visible=finished
+ quiz_scoreboard.visible=finished
+ if finished:
+  var winner: int=int(value.get("winner",-2))
+  if winner>=0 and winner<int(value.get("capacity",0)):
+   var profiles: Array=value.get("profiles",[])
+   var profile: Dictionary=profiles[winner] if winner<profiles.size() and profiles[winner] is Dictionary else {}
+   var winner_name: String=str(profile.get("display_name","")).strip_edges().left(40)
+   if winner_name.is_empty():winner_name=tr_pair("اللاعب %d","Player %d") % (winner+1)
+   quiz_final_title.text=tr_pair("الفائز: %s","Winner: %s") % winner_name
+  elif winner==-1:quiz_final_title.text=tr_pair("انتهت المباراة بالتعادل","The match is a draw")
+  else:quiz_final_title.text=tr_pair("نتيجة المباراة","Match results")
+  _render_final_scoreboard(value)
+  quiz_question_card.hide();story_text.hide();question_image.hide();memory_grid.hide()
+  written_field.hide();written_submit.hide();clue_control.hide();mechanic_info.hide()
+  steps_box.hide();order_undo.hide();order_submit.hide()
+ else:quiz_question_card.show()
+ answer_grid.visible=mechanic=="choice" and not finished
  quiz_results.text="\n".join(lines)
  var serial: int=int(quiz.get("audio_serial",-1))
  if phase!="question":audio_player.stop();audio_player.stream_paused=false;_audio_pending=false
@@ -298,6 +328,41 @@ func _quiz_state(value: Dictionary) -> void:
   audio_player.stream_paused=false
   _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
  _apply_submission_lock(quiz)
+
+func _render_final_scoreboard(value: Dictionary) -> void:
+ var scores: Array=value.get("scores",[])
+ var profiles: Array=value.get("profiles",[])
+ var winner: int=int(value.get("winner",-1))
+ var key:=JSON.stringify([scores,profiles,winner,language,client.player])
+ if key==_scoreboard_key:return
+ _scoreboard_key=key
+ for child in quiz_scoreboard.get_children():
+  quiz_scoreboard.remove_child(child);child.queue_free()
+ var places: Array=[]
+ for i in range(scores.size()):places.append({"player":i,"score":int(scores[i])})
+ places.sort_custom(func(a,b):return a.score>b.score if a.score!=b.score else a.player<b.player)
+ var prior_score: Variant=null
+ var rank:=0
+ for index in range(places.size()):
+  var item: Dictionary=places[index]
+  if prior_score==null or int(item.score)!=int(prior_score):rank=index+1
+  prior_score=item.score
+  var player: int=int(item.player)
+  var profile: Dictionary=profiles[player] if player<profiles.size() and profiles[player] is Dictionary else {}
+  var player_name: String=str(profile.get("display_name","")).strip_edges().left(40)
+  if player_name.is_empty():player_name=tr_pair("اللاعب %d","Player %d") % (player+1)
+  if player==client.player:player_name+=tr_pair(" • أنت"," • You")
+  var panel:=PanelContainer.new();panel.set_meta("player_index",player)
+  var row_style:=VisualSkin.card(Color("0a1d48"),14)
+  row_style.border_color=Color("ffd76a") if player==winner else Color("4985ce")
+  row_style.set_border_width_all(1);row_style.shadow_size=0
+  row_style.content_margin_top=5;row_style.content_margin_bottom=5
+  panel.add_theme_stylebox_override("panel",row_style);quiz_scoreboard.add_child(panel)
+  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);panel.add_child(row)
+  var place:=Label.new();place.text=str(rank);place.add_theme_color_override("font_color",Color("ffd76a"));row.add_child(place)
+  var name_label:=Label.new();name_label.text=player_name;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_child(name_label)
+  var points:=Label.new();points.text=str(item.score);points.add_theme_color_override("font_color",Color("ffffff"));row.add_child(points)
 
 func _send_quiz_answer(fields: Dictionary) -> void:
  var quiz: Dictionary=client.state.get("quiz",{})

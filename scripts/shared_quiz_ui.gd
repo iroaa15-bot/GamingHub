@@ -5,6 +5,7 @@ var quiz_panel: VBoxContainer
 var quiz_title: Label
 var quiz_question_card: PanelContainer
 var quiz_final_title: Label
+var quiz_final_banner: PanelContainer
 var quiz_scoreboard: VBoxContainer
 var sound_progress: ProgressBar
 var quiz_results: Label
@@ -91,13 +92,18 @@ func _ready() -> void:
  steps_box=VBoxContainer.new();quiz_panel.add_child(steps_box)
  order_undo=button(tr_pair("إعادة ترتيب البداية","Reset arrangement"),_reset_step_order)
  order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():_send_quiz_answer({"sequence":step_picks.duplicate()}))
- quiz_final_title=label("")
+ quiz_final_banner=PanelContainer.new()
+ quiz_final_banner.add_theme_stylebox_override("panel",VisualSkin.neon_surface(Color("571698"),Color("dc9dff")))
+ quiz_panel.add_child(quiz_final_banner);quiz_final_banner.hide()
+ quiz_final_title=label("");quiz_final_title.reparent(quiz_final_banner)
  quiz_final_title.add_theme_font_size_override("font_size",24)
+ quiz_final_title.add_theme_color_override("font_color",Color("ffffff"))
  quiz_final_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
  quiz_final_title.hide()
  quiz_scoreboard=VBoxContainer.new();quiz_scoreboard.add_theme_constant_override("separation",6)
  quiz_panel.add_child(quiz_scoreboard);quiz_scoreboard.hide()
  quiz_results=label("")
+ quiz_results.add_theme_color_override("font_color",Color("edf2ff"))
  # The container already mirrors in RTL, so leading alignment remains correct
  # for both Arabic and English without reversing the text itself.
  quiz_results.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT
@@ -299,6 +305,7 @@ func _quiz_state(value: Dictionary) -> void:
  for row in quiz.get("results",[]):
   lines.append(tr_pair("اللاعب %d: %d نقطة في السؤال الأخير","Player %d: %d points in the last question") % [int(row.player)+1,int(row.points)] if finished else tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
  quiz_final_title.visible=finished
+ quiz_final_banner.visible=finished
  quiz_scoreboard.visible=finished
  if finished:
   var winner: int=int(value.get("winner",-2))

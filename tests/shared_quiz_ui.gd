@@ -51,6 +51,7 @@ func run() -> void:
  ck(await until(func():return b.client.state.quiz.phase=="finished"),"both clients receive the final result")
  ck(a.client.state.scores==b.client.state.scores,"both clients receive identical final scores")
  ck(a.quiz_scoreboard.visible and b.quiz_scoreboard.visible and a.quiz_scoreboard.get_child_count()==2 and b.quiz_scoreboard.get_child_count()==2,"both final screens show server standings")
+ ck(a.quiz_final_banner.visible and b.quiz_final_banner.visible,"both final screens show the result banner")
  ck(not a.answer_grid.visible and not b.answer_grid.visible,"final results hide the answer controls")
  await snap(("sound" if game_id=="6" else "cinema")+"-shared-results")
  a.client.send_action("duel_leave")

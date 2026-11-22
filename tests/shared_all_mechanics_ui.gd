@@ -125,6 +125,10 @@ func suite(game: String) -> void:
   a.answer_buttons[correct].pressed.emit();b.answer_buttons[(correct+1)%q.choices_ar.size()].pressed.emit()
  ck(await until(func():return a.client.state.quiz.phase=="finished" and b.client.state.quiz.phase=="finished"),game+" shared final results")
  ck(a.client.state.scores==b.client.state.scores and a.client.state.scores[0]>0,game+" authoritative identical scores")
+ var leader: int=0 if int(a.client.state.scores[0])>=int(a.client.state.scores[1]) else 1
+ var boards_ready: bool=a.quiz_scoreboard.visible and b.quiz_scoreboard.visible and a.quiz_scoreboard.get_child_count()==2 and b.quiz_scoreboard.get_child_count()==2
+ ck(boards_ready,game+" final standings visible to both players")
+ if boards_ready:ck(int(a.quiz_scoreboard.get_child(0).get_meta("player_index"))==leader and int(b.quiz_scoreboard.get_child(0).get_meta("player_index"))==leader,game+" standings use the server score order")
  await snap(game+"-results")
  a.client.send_action("duel_leave");await create_timer(.1).timeout
  for ui in [a,b]:ui.client.close_transport();ui.queue_free()

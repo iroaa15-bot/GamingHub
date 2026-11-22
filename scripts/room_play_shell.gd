@@ -13,6 +13,7 @@ var timers: VBoxContainer
 var reply_dock: VBoxContainer
 var voice_dock: VBoxContainer
 var result: Label
+var result_banner: PanelContainer
 var result_trophy: Control
 var result_standings: VBoxContainer
 var more_button: Button
@@ -52,7 +53,10 @@ func setup(room: Control, panel: Control, title_text: String, game_kind: String)
  body.add_theme_constant_override("separation",10);scroll.add_child(body)
  result_trophy=load("res://scripts/result_trophy.gd").new()
  result_trophy.visible=false;body.add_child(result_trophy)
- result=label_node(body,23)
+ result_banner=PanelContainer.new()
+ result_banner.add_theme_stylebox_override("panel",load("res://scripts/visual_skin.gd").neon_surface(Color("571698"),Color("dc9dff")))
+ result_banner.visible=false;body.add_child(result_banner)
+ result=label_node(result_banner,23)
  result_standings=VBoxContainer.new();result_standings.add_theme_constant_override("separation",6)
  result_standings.visible=false;body.add_child(result_standings)
  more_button=Button.new();more_button.text=host.tr_pair("خيارات الغرفة والإبلاغ","Room options & report")
@@ -116,6 +120,7 @@ func display(snapshot: Dictionary) -> void:
  # in-progress round. Scores and the actual winner remain server-owned.
  result_trophy.visible=phase=="finished" and int(snapshot.get("winner",-1))>=0
  result_standings.visible=kind=="photo" and phase=="finished"
+ result_banner.visible=kind=="photo" and phase in ["results","finished"]
  if result_standings.visible:render_scoreboard(result_standings,snapshot)
  if kind=="photo":
   host._reply_row.reparent(reply_dock)

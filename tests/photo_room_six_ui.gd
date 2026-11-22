@@ -86,6 +86,7 @@ func run():
  check(await until(func():return bool(a.client.state.get("match_finished",false)) and bool(b.client.state.get("match_finished",false))),"real match reaches final results")
  check(a.client.state.scores==b.client.state.scores and int(a.client.state.winner)==0,"final winner and scores match")
  check(a._room_shell.result_standings.visible and a._room_shell.result_standings.get_child_count()==2 and int(a._room_shell.result_standings.get_child(0).get_meta("player_index"))==0,"final UI displays the server standings")
+ check(a._room_shell.result_banner.visible and b._room_shell.result_banner.visible,"both final screens show the result banner")
  check(not a.status.text.contains("الصوت متاح"),"tap mode does not claim voice is available")
  a.client.send_action("duel_leave")
  check(await until(func():return a.client.code.is_empty() and b.client.code.is_empty()),"final room closes for both players")

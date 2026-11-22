@@ -66,6 +66,10 @@ class AgreementHub(FilterHub):
    return await self.publish(room)
   if room.started:
    if getattr(room,'awaiting_next_round',False):
+    # A paused round must not trap players in the room or prevent snapshots
+    # and chat while the winner decides when to continue.
+    if action in ('duel_sync','duel_leave','duel_chat'):
+     return await super().handle(ws,msg)
     if action!='duel_next_round' or room.paused or player!=room.current or type(msg.get('round')) is not int or msg['round']!=room.round:
      raise ProtocolError('Wait for the winner to continue to the next round')
     choices=[key for key in room.catalog if key not in room.used_images]

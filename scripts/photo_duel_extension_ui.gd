@@ -706,7 +706,18 @@ func _state(value: Dictionary) -> void:
   _main_column.move_child(_invite_box,_main_column.get_children().find(heading)+1)
   heading.text=tr_pair("غرفة الانتظار","Waiting room")
  if bool(value.get("match_finished",false)) and not client.code.is_empty():
-  status.text=tr_pair("انتهت المباراة بالتعادل • الصوت متاح حتى المغادرة","Match finished in a draw • voice remains available until exit") if int(value.get("winner",-1))<0 else tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
+  var winner: int=int(value.get("winner",-2))
+  if winner==-1:status.text=tr_pair("انتهت المباراة بالتعادل","Match finished in a draw")
+  elif winner>=0 and winner<int(value.get("capacity",0)):
+   var profiles: Array=value.get("profiles",[])
+   var profile: Dictionary=profiles[winner] if winner<profiles.size() and profiles[winner] is Dictionary else {}
+   var name_value: String=str(profile.get("display_name","")).strip_edges().left(40)
+   if name_value.is_empty():name_value=tr_pair("اللاعب %d","player %d") % (winner+1)
+   status.text=tr_pair("انتهت المباراة • الفائز: %s","Match finished • winner: %s") % name_value
+  else:status.text=tr_pair("انتهت المباراة","Match finished")
+  var voice: Dictionary=value.get("voice",{}) if value.get("voice",{}) is Dictionary else {}
+  if str(value.get("primary_mode","tap")) in ["voice","mixed"] and bool(client.capabilities.get("voice",false)) and bool(voice.get("available",false)):
+   status.text+=tr_pair(" • الصوت متاح حتى المغادرة"," • voice remains available until exit")
  elif bool(value.get("closed",false)) and client.code.is_empty(): status.text=tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend's code")
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")

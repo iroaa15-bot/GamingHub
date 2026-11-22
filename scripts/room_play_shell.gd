@@ -14,6 +14,7 @@ var reply_dock: VBoxContainer
 var voice_dock: VBoxContainer
 var result: Label
 var result_trophy: Control
+var result_standings: VBoxContainer
 var more_button: Button
 var phase_key := ""
 var motion: Tween
@@ -52,6 +53,8 @@ func setup(room: Control, panel: Control, title_text: String, game_kind: String)
  result_trophy=load("res://scripts/result_trophy.gd").new()
  result_trophy.visible=false;body.add_child(result_trophy)
  result=label_node(body,23)
+ result_standings=VBoxContainer.new();result_standings.add_theme_constant_override("separation",6)
+ result_standings.visible=false;body.add_child(result_standings)
  more_button=Button.new();more_button.text=host.tr_pair("خيارات الغرفة والإبلاغ","Room options & report")
  more_button.custom_minimum_size.y=44;more_button.pressed.connect(func():tools_open=not tools_open;host._settings_body.visible=tools_open)
  load("res://scripts/visual_skin.gd").decorate_play_action(more_button)
@@ -111,12 +114,14 @@ func display(snapshot: Dictionary) -> void:
  # A trophy represents the server-confirmed winner only, never a draw or an
  # in-progress round. Scores and the actual winner remain server-owned.
  result_trophy.visible=phase=="finished" and int(snapshot.get("winner",-1))>=0
+ result_standings.visible=kind=="photo" and phase=="finished"
+ if result_standings.visible:render_scoreboard(result_standings,snapshot)
  if kind=="photo":
   host._reply_row.reparent(reply_dock)
   host.pass_button.reparent(reply_dock)
   host._reply_row.visible=phase=="active"
   result.visible=phase in ["results","finished"]
-  result.text=host._scores.text+"\n"+host.status.text
+  result.text=host.status.text if phase=="finished" else host._scores.text+"\n"+host.status.text
  else:result.hide()
  for control in [host.clock,host._clock_bar]:control.reparent(timers)
  timers.visible=host.clock.visible
@@ -132,3 +137,38 @@ func display(snapshot: Dictionary) -> void:
   game_panel.modulate.a=1.0
   if game_panel.visible and not bool(get_tree().root.get_meta("reduced_motion",false)):
    game_panel.modulate.a=0.5;motion=create_tween();motion.tween_property(game_panel,"modulate:a",1.0,.16)
+
+func render_scoreboard(target: VBoxContainer, value: Dictionary) -> void:
+ var scores: Array=value.get("scores",[])
+ var profiles: Array=value.get("profiles",[])
+ var winner: int=int(value.get("winner",-1))
+ var key:=JSON.stringify([scores,profiles,winner,host.language,host.client.player])
+ if key==str(target.get_meta("scoreboard_key","")):return
+ target.set_meta("scoreboard_key",key)
+ for child in target.get_children():
+  target.remove_child(child);child.queue_free()
+ var places: Array=[]
+ for i in range(scores.size()):places.append({"player":i,"score":int(scores[i])})
+ places.sort_custom(func(a,b):return a.score>b.score if a.score!=b.score else a.player<b.player)
+ var prior_score: Variant=null
+ var rank:=0
+ for index in range(places.size()):
+  var item: Dictionary=places[index]
+  if prior_score==null or int(item.score)!=int(prior_score):rank=index+1
+  prior_score=item.score
+  var player: int=int(item.player)
+  var profile: Dictionary=profiles[player] if player<profiles.size() and profiles[player] is Dictionary else {}
+  var player_name: String=str(profile.get("display_name","")).strip_edges().left(40)
+  if player_name.is_empty():player_name=host.tr_pair("اللاعب %d","Player %d") % (player+1)
+  if player==host.client.player:player_name+=host.tr_pair(" • أنت"," • You")
+  var panel:=PanelContainer.new();panel.set_meta("player_index",player)
+  var row_style: StyleBoxFlat=load("res://scripts/visual_skin.gd").card(Color("0a1d48"),14)
+  row_style.border_color=Color("ffd76a") if player==winner else Color("4985ce")
+  row_style.set_border_width_all(1);row_style.shadow_size=0
+  row_style.content_margin_top=5;row_style.content_margin_bottom=5
+  panel.add_theme_stylebox_override("panel",row_style);target.add_child(panel)
+  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);panel.add_child(row)
+  var place:=Label.new();place.text=str(rank);place.add_theme_color_override("font_color",Color("ffd76a"));row.add_child(place)
+  var name_label:=Label.new();name_label.text=player_name;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+  name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_child(name_label)
+  var points:=Label.new();points.text=str(item.score);points.add_theme_color_override("font_color",Color("ffffff"));row.add_child(points)

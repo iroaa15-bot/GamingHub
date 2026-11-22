@@ -25,12 +25,15 @@ func run() -> void:
  ck(first_turn.border_width_left==1 and waiting.border_width_left==2,"highlight follows server turn")
  state.paused=true;photo.client.state=state;photo._state(state);await process_frame;await process_frame
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo reconnect retains mute position")
- state.paused=false;state.match_finished=true;state.winner=-1;photo.client.state=state;photo._state(state);await process_frame;await process_frame
+ state.paused=false;state.match_finished=true;state.winner=-1;state.voice={"available":true};photo.client.state=state;photo._state(state);await process_frame;await process_frame
  ck(photo.status.text.contains("بالتعادل") and photo._room_shell.result.visible,"photo final draw is visible")
+ ck(photo.status.text.contains("الصوت متاح"),"voice availability is shown only when supported")
  ck(not photo._room_shell.result_trophy.visible,"draw does not display a winner trophy")
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo results retain mute position")
- state.winner=1;photo.client.state=state;photo._state(state);await process_frame
+ state.primary_mode="tap";state.winner=1;state.scores=[0,10];state.profiles=[{}, {"display_name":"نورا"}];photo.client.state=state;photo._state(state);await process_frame
  ck(photo._room_shell.result_trophy.visible,"server-confirmed winner displays the trophy")
+ ck(photo.status.text.contains("نورا") and not photo.status.text.contains("الصوت متاح"),"winner name and unavailable voice state are accurate")
+ ck(photo._room_shell.result_standings.visible and photo._room_shell.result_standings.get_child(0).get_meta("player_index")==1,"photo standings use the server scores")
  photo.queue_free();await process_frame
  var ui=load("res://scripts/shared_quiz_ui.gd").new();root.add_child(ui);ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var transport=ui.client;ui.client=Fixture.RecordingClient.new();root.add_child(ui.client)

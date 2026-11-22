@@ -64,5 +64,32 @@ func run():
  check(host.client.error_count==errors_before,"round break controls accepted")
  for ui in clients:ui.client.close_transport();ui.queue_free()
  await process_frame
+ # A separate one-point match verifies the actual final screen and its
+ # server-owned standings, rather than only a seeded presentation fixture.
+ var a=load("res://scripts/photo_duel_extension_ui.gd").new()
+ var b=load("res://scripts/photo_duel_extension_ui.gd").new()
+ for ui in [a,b]:
+  root.add_child(ui);ui.hide();ui.service_endpoint=endpoint;ui.terms.button_pressed=true
+ a.target_field.value=1;a._request_room_action("create")
+ if not await until(func():return not a.client.code.is_empty()):
+  check(false,"final match creation");quit(1);return
+ b.code_field.text=a.client.code;b._request_room_action("join")
+ if not await until(func():return int(a.client.state.get("joined",0))==2):
+  check(false,"final match join");quit(1);return
+ a._accept_configuration();b._accept_configuration()
+ if not await until(func():return bool(a.client.state.get("started",false)) and bool(b.client.state.get("started",false))):
+  check(false,"final match start");quit(1);return
+ a.guess_field.text="تخمين تجريبي";a.guess_button.pressed.emit()
+ if not await until(func():return b.client.state.get("pending") is Dictionary and b.client.state.pending.get("kind")=="guess"):
+  check(false,"final match guess");quit(1);return
+ b.correct_button.pressed.emit()
+ check(await until(func():return bool(a.client.state.get("match_finished",false)) and bool(b.client.state.get("match_finished",false))),"real match reaches final results")
+ check(a.client.state.scores==b.client.state.scores and int(a.client.state.winner)==0,"final winner and scores match")
+ check(a._room_shell.result_standings.visible and a._room_shell.result_standings.get_child_count()==2 and int(a._room_shell.result_standings.get_child(0).get_meta("player_index"))==0,"final UI displays the server standings")
+ check(not a.status.text.contains("الصوت متاح"),"tap mode does not claim voice is available")
+ a.client.send_action("duel_leave")
+ check(await until(func():return a.client.code.is_empty() and b.client.code.is_empty()),"final room closes for both players")
+ for ui in [a,b]:ui.client.close_transport();ui.queue_free()
+ await process_frame
  print("PHOTO_SIX_REAL_UI_WS ",failures.is_empty()," ",failures)
  quit(0 if failures.is_empty() else 1)

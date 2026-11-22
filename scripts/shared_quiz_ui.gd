@@ -6,7 +6,6 @@ var quiz_title: Label
 var quiz_question_card: PanelContainer
 var quiz_final_title: Label
 var quiz_scoreboard: VBoxContainer
-var _scoreboard_key := ""
 var sound_progress: ProgressBar
 var quiz_results: Label
 var answer_buttons: Array[Button]=[]
@@ -311,7 +310,7 @@ func _quiz_state(value: Dictionary) -> void:
    quiz_final_title.text=tr_pair("الفائز: %s","Winner: %s") % winner_name
   elif winner==-1:quiz_final_title.text=tr_pair("انتهت المباراة بالتعادل","The match is a draw")
   else:quiz_final_title.text=tr_pair("نتيجة المباراة","Match results")
-  _render_final_scoreboard(value)
+  if is_instance_valid(quiz_shell):quiz_shell.render_scoreboard(quiz_scoreboard,value)
   quiz_question_card.hide();story_text.hide();question_image.hide();memory_grid.hide()
   written_field.hide();written_submit.hide();clue_control.hide();mechanic_info.hide()
   steps_box.hide();order_undo.hide();order_submit.hide()
@@ -330,41 +329,6 @@ func _quiz_state(value: Dictionary) -> void:
   audio_player.stream_paused=false
   _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
  _apply_submission_lock(quiz)
-
-func _render_final_scoreboard(value: Dictionary) -> void:
- var scores: Array=value.get("scores",[])
- var profiles: Array=value.get("profiles",[])
- var winner: int=int(value.get("winner",-1))
- var key:=JSON.stringify([scores,profiles,winner,language,client.player])
- if key==_scoreboard_key:return
- _scoreboard_key=key
- for child in quiz_scoreboard.get_children():
-  quiz_scoreboard.remove_child(child);child.queue_free()
- var places: Array=[]
- for i in range(scores.size()):places.append({"player":i,"score":int(scores[i])})
- places.sort_custom(func(a,b):return a.score>b.score if a.score!=b.score else a.player<b.player)
- var prior_score: Variant=null
- var rank:=0
- for index in range(places.size()):
-  var item: Dictionary=places[index]
-  if prior_score==null or int(item.score)!=int(prior_score):rank=index+1
-  prior_score=item.score
-  var player: int=int(item.player)
-  var profile: Dictionary=profiles[player] if player<profiles.size() and profiles[player] is Dictionary else {}
-  var player_name: String=str(profile.get("display_name","")).strip_edges().left(40)
-  if player_name.is_empty():player_name=tr_pair("اللاعب %d","Player %d") % (player+1)
-  if player==client.player:player_name+=tr_pair(" • أنت"," • You")
-  var panel:=PanelContainer.new();panel.set_meta("player_index",player)
-  var row_style:=VisualSkin.card(Color("0a1d48"),14)
-  row_style.border_color=Color("ffd76a") if player==winner else Color("4985ce")
-  row_style.set_border_width_all(1);row_style.shadow_size=0
-  row_style.content_margin_top=5;row_style.content_margin_bottom=5
-  panel.add_theme_stylebox_override("panel",row_style);quiz_scoreboard.add_child(panel)
-  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);panel.add_child(row)
-  var place:=Label.new();place.text=str(rank);place.add_theme_color_override("font_color",Color("ffd76a"));row.add_child(place)
-  var name_label:=Label.new();name_label.text=player_name;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-  name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_child(name_label)
-  var points:=Label.new();points.text=str(item.score);points.add_theme_color_override("font_color",Color("ffffff"));row.add_child(points)
 
 func _send_quiz_answer(fields: Dictionary) -> void:
  var quiz: Dictionary=client.state.get("quiz",{})

@@ -72,6 +72,13 @@ func run() -> void:
  ck(ui.quiz_scoreboard.get_child(0).get_child(0).get_child(0).text=="1" and ui.quiz_scoreboard.get_child(1).get_child(0).get_child(0).text=="1","tied players share the same rank")
  state.quiz.phase="question";state.quiz.your_answer=null;ui.client.state=state;ui._state(state);await process_frame
  ck(ui.answer_grid.visible and ui.quiz_question_card.visible and not ui.quiz_scoreboard.visible,"new question restores answer controls")
+ state.capacity=6;state.joined=6;state.connected=[true,true,true,true,true,true]
+ state.scores=[10,20,30,40,50,60];state.profiles=[];state.winner=5;state.quiz.phase="finished"
+ ui.client.state=state;ui._state(state);await process_frame;await process_frame
+ ck(ui.quiz_scoreboard.get_child_count()==6 and ui.quiz_scoreboard.get_child(0).get_meta("player_index")==5,"six-player standings sort the actual scores")
+ var last_row: Control=ui.quiz_scoreboard.get_child(5)
+ ui.quiz_shell.scroll.ensure_control_visible(last_row);await process_frame;await process_frame
+ ck(last_row.global_position.y+last_row.size.y<=ui.quiz_shell.scroll.global_position.y+ui.quiz_shell.scroll.size.y+1.0,"last standing remains reachable by scrolling")
  ui.client.queue_free();ui.client=transport;ui.queue_free();await process_frame
  print("ROOM_PLAY_SHELL_PASS="+str(not failed)+" photo/quiz fixed controls, duplicate lock, server reveal")
  quit(1 if failed else 0)

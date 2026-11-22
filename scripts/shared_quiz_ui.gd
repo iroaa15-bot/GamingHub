@@ -99,7 +99,9 @@ func _ready() -> void:
  quiz_scoreboard=VBoxContainer.new();quiz_scoreboard.add_theme_constant_override("separation",6)
  quiz_panel.add_child(quiz_scoreboard);quiz_scoreboard.hide()
  quiz_results=label("")
- quiz_results.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT if language=="ar" else HORIZONTAL_ALIGNMENT_LEFT
+ # The container already mirrors in RTL, so leading alignment remains correct
+ # for both Arabic and English without reversing the text itself.
+ quiz_results.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT
  next_button=button(tr_pair("السؤال التالي","Next question"),_send_quiz_next)
  send_status=label("",16)
  answer_grid=GridContainer.new();answer_grid.columns=2

@@ -311,7 +311,10 @@ func display(value: Dictionary) -> void:
    var winner: int=int(value.get("winner",-1))
    instruction.text=words("انتهت المباراة بالتعادل","Match finished in a draw") if winner<0 else words("الفائز: %s","Winner: %s") % room._social_player_name(winner)
    room.status.text=instruction.text
-  detail.text=words("مجموع نقاط المباراة · المكالمة متاحة حتى المغادرة","Match points · voice remains available until you leave")
+  detail.text=words("مجموع نقاط المباراة","Match points")
+  var voice: Dictionary=value.get("voice",{}) if value.get("voice",{}) is Dictionary else {}
+  if not paused and str(value.get("primary_mode","tap")) in ["voice","mixed"] and bool(room.client.capabilities.get("voice",false)) and bool(voice.get("available",false)):
+   detail.text+=words(" · المكالمة متاحة حتى المغادرة"," · voice remains available until you leave")
   var awards: Dictionary=party.get("result",{}).get("awards",{})
   if phase=="results":
    var awarded: Array=awards.keys()

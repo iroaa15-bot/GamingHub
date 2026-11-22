@@ -28,8 +28,12 @@ func run() -> void:
  state.paused=false;state.match_finished=true;state.winner=-1;state.voice={"available":true};photo.client.state=state;photo._state(state);await process_frame;await process_frame
  ck(photo.status.text.contains("بالتعادل") and photo._room_shell.result.visible,"photo final draw is visible")
  ck(photo.status.text.contains("الصوت متاح"),"voice availability is shown only when supported")
+ ck(not photo._room_shell.notice.visible,"final result does not repeat the status above the standings")
  ck(not photo._room_shell.result_trophy.visible,"draw does not display a winner trophy")
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo results retain mute position")
+ state.paused=true;photo.client.state=state;photo._state(state);await process_frame
+ ck(photo._room_shell.notice.visible and not photo.status.text.contains("الصوت متاح"),"reconnect notice replaces voice availability while paused")
+ state.paused=false
  state.primary_mode="tap";state.winner=1;state.scores=[0,10];state.profiles=[{}, {"display_name":"نورا"}];photo.client.state=state;photo._state(state);await process_frame
  ck(photo._room_shell.result_trophy.visible,"server-confirmed winner displays the trophy")
  ck(photo.status.text.contains("نورا") and not photo.status.text.contains("الصوت متاح"),"winner name and unavailable voice state are accurate")

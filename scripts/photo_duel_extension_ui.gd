@@ -716,7 +716,7 @@ func _state(value: Dictionary) -> void:
    status.text=tr_pair("انتهت المباراة • الفائز: %s","Match finished • winner: %s") % name_value
   else:status.text=tr_pair("انتهت المباراة","Match finished")
   var voice: Dictionary=value.get("voice",{}) if value.get("voice",{}) is Dictionary else {}
-  if str(value.get("primary_mode","tap")) in ["voice","mixed"] and bool(client.capabilities.get("voice",false)) and bool(voice.get("available",false)):
+  if not bool(value.get("paused",false)) and str(value.get("primary_mode","tap")) in ["voice","mixed"] and bool(client.capabilities.get("voice",false)) and bool(voice.get("available",false)):
    status.text+=tr_pair(" • الصوت متاح حتى المغادرة"," • voice remains available until exit")
  elif bool(value.get("closed",false)) and client.code.is_empty(): status.text=tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend's code")
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")

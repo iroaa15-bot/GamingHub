@@ -87,6 +87,7 @@ func display(snapshot: Dictionary) -> void:
  title.text=game_title+host.tr_pair(" · الغرفة %s"," · Room %s") % host.client.code if phase=="lobby" else game_title
  var paused: bool=bool(snapshot.get("paused",false)) or host.client.capabilities.is_empty()
  notice.text=host.tr_pair("جار استعادة الاتصال · انتظر عودة الغرفة","Reconnecting · waiting for the room") if paused else host.status.text
+ notice.visible=paused or not (kind=="photo" and phase=="finished")
  host._seats.reparent(body);body.move_child(host._seats,0);host._seats.show()
  for i in range(host._seat_panels.size()):
   host._seat_avatars[i].custom_minimum_size=Vector2(24,24) if phase!="lobby" else Vector2(36,36)

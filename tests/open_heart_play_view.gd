@@ -76,9 +76,16 @@ func run() -> void:
    check(ui.play_view.next_round.is_visible_in_tree(),"host next-round action")
    check(mute_position.is_equal_approx(ui.voice_mute_button.global_position),"results retain mute position")
    if count==2:await snap("results-"+language)
-   state.party.phase="finished";state.party.round=10;state.match_finished=true;state.winner=-1
+   state.party.phase="finished";state.party.round=10;state.match_finished=true;state.winner=-1;state.voice={"available":true}
    ui.client.state=state;ui._state(state);await process_frame;await process_frame
    check(ui.play_view.instruction.text.contains("draw") or ui.play_view.instruction.text.contains("بالتعادل"),"draw is explicit")
+   check(ui.play_view.detail.text.contains("voice") or ui.play_view.detail.text.contains("المكالمة"),"available voice is reflected in final results")
+   state.paused=true;ui.client.state=state;ui._state(state);await process_frame
+   check(not ui.play_view.detail.text.contains("voice") and not ui.play_view.detail.text.contains("المكالمة"),"paused room does not claim voice availability")
+   state.paused=false
+   state.primary_mode="tap";ui.client.state=state;ui._state(state);await process_frame
+   check(not ui.play_view.detail.text.contains("voice") and not ui.play_view.detail.text.contains("المكالمة"),"tap mode does not claim voice availability")
+   state.primary_mode="voice";ui.client.state=state;ui._state(state);await process_frame
    check(mute_position.is_equal_approx(ui.voice_mute_button.global_position),"finished retains mute position")
    if count==2:await snap("finished-"+language)
    state.closed=true;ui.client.state=state;ui._state(state)

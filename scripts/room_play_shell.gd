@@ -84,7 +84,15 @@ func display(snapshot: Dictionary) -> void:
  for i in range(host._seat_panels.size()):
   host._seat_avatars[i].custom_minimum_size=Vector2(24,24) if phase!="lobby" else Vector2(36,36)
   host._seat_labels[i].add_theme_font_size_override("font_size",14)
-  host._seat_panels[i].add_theme_stylebox_override("panel",surface(Color("1b273c")))
+  # Keep the active photo player's turn visible after compacting the seats.
+  # Quiz games are simultaneous, so they do not receive a turn highlight.
+  var active_turn: bool=kind=="photo" and phase=="active" and not paused and int(snapshot.get("current",-1))==i
+  var seat_style:=surface(Color("101d42"))
+  seat_style.border_color=Color("59e4ff") if active_turn else Color("516ba7")
+  seat_style.set_border_width_all(2 if active_turn else 1)
+  if active_turn:
+   seat_style.shadow_color=Color("35b8ff",.35);seat_style.shadow_size=5
+  host._seat_panels[i].add_theme_stylebox_override("panel",seat_style)
   host._seat_statuses[i].visible=phase=="lobby"
   if phase!="lobby":
    var names: PackedStringArray=host._seat_labels[i].text.split("\n")

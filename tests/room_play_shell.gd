@@ -16,6 +16,13 @@ func run() -> void:
  var mute: Vector2=photo.voice_mute_button.global_position
  ck(photo._room_shell.visible and photo._match_controls.is_visible_in_tree(),"photo shell shows existing controls")
  ck(photo._reply_row.get_parent()==photo._room_shell.reply_dock,"photo answer controls use fixed dock")
+ var first_turn: StyleBoxFlat=photo._seat_panels[0].get_theme_stylebox("panel")
+ var waiting: StyleBoxFlat=photo._seat_panels[1].get_theme_stylebox("panel")
+ ck(first_turn.border_width_left==2 and waiting.border_width_left==1,"active turn is highlighted")
+ state.current=1;photo.client.state=state;photo._state(state);await process_frame
+ first_turn=photo._seat_panels[0].get_theme_stylebox("panel")
+ waiting=photo._seat_panels[1].get_theme_stylebox("panel")
+ ck(first_turn.border_width_left==1 and waiting.border_width_left==2,"highlight follows server turn")
  state.paused=true;photo.client.state=state;photo._state(state);await process_frame;await process_frame
  ck(photo.voice_mute_button.global_position.is_equal_approx(mute),"photo reconnect retains mute position")
  state.paused=false;state.match_finished=true;state.winner=-1;photo.client.state=state;photo._state(state);await process_frame;await process_frame

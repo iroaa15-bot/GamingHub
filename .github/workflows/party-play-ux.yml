@@ -13,6 +13,7 @@ on:
       - 'scripts/visual_skin.gd'
       - 'scripts/core_game_setup.gd'
       - 'scripts/core_play_frame.gd'
+      - 'scripts/picture_hidden_card_art.gd'
       - 'tests/core_redesign_flow.gd'
       - 'tests/core_match_acceptance.gd'
       - 'tests/reference_core_capture.gd'

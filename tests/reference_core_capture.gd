@@ -36,6 +36,13 @@ func run() -> void:
    main.game=id;main.match_style="classic";main.selected_topic="all"
    main.rng.seed=231119+id
    main.start_game();await snap(prefix+"-play")
+   if id==0:
+    var concealed=main.root.get_node_or_null("PictureHiddenCard")
+    assert(concealed!=null)
+    var secret_name: String=str(main.my_secret.get("name",""))
+    assert(not secret_name.is_empty())
+    for text_node in concealed.find_children("*","Label",true,false):
+     assert(not text_node.text.contains(secret_name))
    main.pause_local_play();await snap(prefix+"-pause");main._resume_local_play()
    if id not in [0,8] and not main.round_bank.is_empty():
     var item: Dictionary=main.round_bank[main.question_index]

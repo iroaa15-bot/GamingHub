@@ -57,11 +57,18 @@ func _draw() -> void:
  box.shadow_size=10
  draw_style_box(box,bounds)
  var center:=bounds.get_center()
+ # Keep every ray inside the card: its bright centre leads into the same
+ # violet starburst used in the reference without revealing the secret card.
  for ray in range(12):
   var angle:=float(ray)*TAU/12.0
-  var a:=center+Vector2.from_angle(angle)*18.0
-  var b:=center+Vector2.from_angle(angle)*minf(bounds.size.x*0.37,bounds.size.y*0.58)
-  draw_line(a,b,Color("9a66ff",0.18),5.0,true)
+  var points:=PackedVector2Array([center])
+  for edge_angle in [angle-.075,angle+.075]:
+   var direction:=Vector2.from_angle(edge_angle)
+   var distance:=minf((bounds.size.x*.5-5)/maxf(absf(direction.x),.001),(bounds.size.y*.5-5)/maxf(absf(direction.y),.001))
+   points.append(center+direction*distance)
+  draw_colored_polygon(points,Color("c287ff",.25 if ray%2==0 else .13))
+ for glow in range(14,0,-1):
+  draw_circle(center,float(glow)*4.0,Color("bc78ff",.022))
  var head:=center+Vector2(0,-19)
  draw_circle(head,24,Color("070b32"))
- draw_circle(center+Vector2(0,33),40,Color("070b32"))
+ draw_circle(center+Vector2(0,27),35,Color("070b32"))

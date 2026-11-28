@@ -13,6 +13,7 @@ func until(predicate: Callable) -> bool:
   await create_timer(.025).timeout
  return false
 func snap(name: String) -> void:
+ if DisplayServer.get_name()=="headless":return
  await process_frame;await process_frame;await RenderingServer.frame_post_draw
  root.get_texture().get_image().save_png(folder.path_join(name+".png"))
 func solve_memory(ui: Node) -> void:
@@ -56,11 +57,24 @@ func solve_memory(ui: Node) -> void:
   await create_timer(1.7).timeout
   ui.client.send_action("duel_sync");await create_timer(.08).timeout
  ck(ui.client.state.quiz.your_answer==true,"memory solved by real flip callbacks without board disclosure")
+func arrange_steps(ui: Node, q: Dictionary, original: Dictionary) -> void:
+ # Emit the same move signal used by drag-and-drop; the controls retain their
+ # original indices while their visual order changes.
+ for position in range(original.steps_ar.size()):
+  var desired: int=q.steps_ar.find(original.steps_ar[position])
+  var target: int=ui.step_picks[position]
+  if desired!=target:
+   ui.step_controls[desired].move_requested.emit(desired,target)
+   await process_frame;await process_frame
 func suite(game: String) -> void:
  var script=load("res://scripts/shared_quiz_ui.gd");script.selected_game=game
  var a=script.new();root.add_child(a);a.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  var b=script.new();root.add_child(b);b.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);b.hide()
- a.service_endpoint=endpoint;a.terms.button_pressed=true;a.target_field.value=1;a._request_room_action("create")
+ a.service_endpoint=endpoint;a.terms.button_pressed=true;a.target_field.value=1
+ # The fixture solves two private boards sequentially, so use the real
+ # untimed option rather than letting the round expire before player two acts.
+ if game=="8":a.timer_field.select(0)
+ a._request_room_action("create")
  if not await until(func():return not a.client.code.is_empty()):ck(false,game+" create: "+a.status.text);quit(1);return
  b.service_endpoint=endpoint;b.terms.button_pressed=true;b.code_field.text=a.client.code;b._request_room_action("join")
  ck(await until(func():return a.client.state.get("joined",0)==2 and b.client.state.get("joined",0)==2),game+" real UI join")
@@ -69,10 +83,15 @@ func suite(game: String) -> void:
   await until(func():return b.client.state.picture_category=="Place")
  a._accept_configuration();b._accept_configuration()
  await until(func():return a.client.state.confirmed.count(true)==2)
- a.client.send_action("duel_start")
  ck(await until(func():return a.quiz_panel.visible and b.quiz_panel.visible),game+" actual controls visible")
  ck(a.client.state.quiz.question==b.client.state.quiz.question,game+" same question payload")
- await create_timer(1.7).timeout
+ # Both clients must reach the server's start time before controls are used.
+ # Fixed sleeps can race initialization on slower devices or CI runners.
+ var ready: bool=await until(func():return a.client.state.get("quiz",{}).get("phase")=="question" and b.client.state.get("quiz",{}).get("phase")=="question" and a._quiz_now()>=int(a.client.state.quiz.get("start_unix_ms",0))+200 and b._quiz_now()>=int(b.client.state.quiz.get("start_unix_ms",0))+200)
+ ck(ready,game+" both players passed the countdown")
+ if not ready:
+  for ui in [a,b]:ui.client.close_transport();ui.queue_free()
+  await process_frame;return
  var q: Dictionary=a.client.state.quiz.question
  var mode: String=q.get("mode","choice")
  await snap(game+"-"+mode)
@@ -90,13 +109,14 @@ func suite(game: String) -> void:
   a.written_submit.pressed.emit();b.written_submit.pressed.emit()
  elif mode=="order":
   ck(a.order_submit.visible and not a.answer_buttons[0].visible,"ordering retains step selection")
-  for step in original.steps_ar:
-   a.step_controls[q.steps_ar.find(step)].pressed.emit();await process_frame
-  print("ORDER_PICKS_BEFORE ",a.step_picks," expected ",original.steps_ar.size()," undo_disabled ",a.order_undo.disabled)
-  a.order_undo.pressed.emit();await process_frame;print("ORDER_PICKS_AFTER ",a.step_picks);ck(a.step_picks.size()==original.steps_ar.size()-1,"order undo")
-  a.step_controls[q.steps_ar.find(original.steps_ar.back())].pressed.emit();await process_frame;a.order_submit.pressed.emit()
-  for i in range(q.steps_ar.size()):b.step_controls[i].pressed.emit()
-  b.order_submit.pressed.emit()
+  await arrange_steps(a,q,original)
+  var correct_order: Array=[]
+  for step in original.steps_ar:correct_order.append(q.steps_ar.find(step))
+  ck(a.step_picks==correct_order,"drag signal arranges the original steps")
+  a.order_undo.pressed.emit();await process_frame;await process_frame
+  ck(a.step_picks==Array(range(q.steps_ar.size())),"reset restores the initial order")
+  await arrange_steps(a,q,original)
+  a.order_submit.pressed.emit();b.order_submit.pressed.emit()
  elif mode=="memory":
   ck(a.memory_grid.visible and not a.answer_buttons[0].visible,"memory retains actual pair board")
   await solve_memory(a);await solve_memory(b)
@@ -105,12 +125,16 @@ func suite(game: String) -> void:
   a.answer_buttons[correct].pressed.emit();b.answer_buttons[(correct+1)%q.choices_ar.size()].pressed.emit()
  ck(await until(func():return a.client.state.quiz.phase=="finished" and b.client.state.quiz.phase=="finished"),game+" shared final results")
  ck(a.client.state.scores==b.client.state.scores and a.client.state.scores[0]>0,game+" authoritative identical scores")
+ var leader: int=0 if int(a.client.state.scores[0])>=int(a.client.state.scores[1]) else 1
+ var boards_ready: bool=a.quiz_scoreboard.visible and b.quiz_scoreboard.visible and a.quiz_scoreboard.get_child_count()==2 and b.quiz_scoreboard.get_child_count()==2
+ ck(boards_ready,game+" final standings visible to both players")
+ if boards_ready:ck(int(a.quiz_scoreboard.get_child(0).get_meta("player_index"))==leader and int(b.quiz_scoreboard.get_child(0).get_meta("player_index"))==leader,game+" standings use the server score order")
  await snap(game+"-results")
  a.client.send_action("duel_leave");await create_timer(.1).timeout
  for ui in [a,b]:ui.client.close_transport();ui.queue_free()
  await process_frame
 func run() -> void:
- create_timer(160).timeout.connect(func():print("MECHANICS_TIMEOUT");quit(1))
+ create_timer(300).timeout.connect(func():print("MECHANICS_TIMEOUT");quit(1))
  DirAccess.make_dir_recursive_absolute(folder);root.content_scale_size=Vector2i(420,900)
  var games: Array=["2","7","9","4","5","8"]
  for arg in OS.get_cmdline_user_args():

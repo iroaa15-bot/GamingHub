@@ -4,6 +4,9 @@ static var selected_game := "1"
 var quiz_panel: VBoxContainer
 var quiz_title: Label
 var quiz_question_card: PanelContainer
+var quiz_final_title: Label
+var quiz_final_banner: PanelContainer
+var quiz_scoreboard: VBoxContainer
 var sound_progress: ProgressBar
 var quiz_results: Label
 var answer_buttons: Array[Button]=[]
@@ -33,6 +36,12 @@ var _audio_serial := -1
 var _audio_start := 0
 var _audio_pending := false
 var _quiz_categories_ready := false
+var quiz_shell: VBoxContainer
+var answer_grid: GridContainer
+var send_status: Label
+var _answer_pending_question := ""
+var _next_pending_question := ""
+var _resume_answer_sync := false
 func _ready() -> void:
  super._ready()
  var title_text: String={"1":tr_pair("تحدي السينما","Cinema Challenge"),"3":tr_pair("تحدي التفكير","Brain Clash"),"4":tr_pair("رحلة الأسرار","Mystery Quest"),"5":tr_pair("ساحة المعلومات","Trivia Arena"),"8":tr_pair("ذاكرة الصور","Picture Memory"),"2":tr_pair("معركة الكلمات","Word Battle"),"7":tr_pair("من أنا؟","Who Am I?"),"9":tr_pair("ترتيب الخطوات","Step Builder"),"6":tr_pair("خمن الصوت","Guess the Sound")}.get(selected_game, tr_pair("غرفة الأسئلة","Quiz room"))
@@ -60,11 +69,13 @@ func _ready() -> void:
  column=quiz_panel
  quiz_title=label("",21)
  quiz_question_card=PanelContainer.new();quiz_question_card.name="QuizQuestionCard"
- var question_skin:=VisualSkin.card(Color("20154c"),22)
- question_skin.border_color=VisualSkin.SUN if selected_game=="1" else VisualSkin.CYAN
+ var question_skin:=VisualSkin.card(Color("0a1d48"),22)
+ question_skin.border_color=Color("48caff")
  quiz_question_card.add_theme_stylebox_override("panel",question_skin)
  quiz_panel.add_child(quiz_question_card);quiz_panel.move_child(quiz_question_card,0)
  quiz_title.reparent(quiz_question_card)
+ quiz_title.add_theme_color_override("font_color",Color("f5f7ff"))
+ quiz_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
  sound_progress=ProgressBar.new();sound_progress.name="SoundPlaybackProgress";sound_progress.show_percentage=false
  VisualSkin.decorate_progress(sound_progress);quiz_panel.add_child(sound_progress);sound_progress.hide()
  story_text=label("")
@@ -73,26 +84,63 @@ func _ready() -> void:
  replay_button=button(tr_pair("إعادة الصوت للجميع • مرة واحدة","Replay for everyone • once"),func():client.send_action("duel_quiz_replay",{"question_id":current_question}))
  for i in range(6):
   var index: int=i
-  answer_buttons.append(button("",func():client.send_action("duel_quiz_answer",{"question_id":current_question,"choice":index})))
+  answer_buttons.append(button("",func():_send_quiz_answer({"choice":index})))
  written_field=LineEdit.new();written_field.placeholder_text=tr_pair("اكتب إجابتك","Type your answer");written_field.max_length=200;VisualSkin.decorate_input(written_field);quiz_panel.add_child(written_field)
- written_submit=button(tr_pair("تأكيد الإجابة","Confirm answer"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"text":written_field.text}))
+ written_submit=button(tr_pair("تأكيد الإجابة","Confirm answer"),func():_send_quiz_answer({"text":written_field.text}))
  mechanic_info=label("")
  clue_control=button(tr_pair("دليل إضافي • يخفض النقاط","Another clue • reduces points"),func():client.send_action("duel_quiz_clue",{"question_id":current_question}))
  steps_box=VBoxContainer.new();quiz_panel.add_child(steps_box)
  order_undo=button(tr_pair("إعادة ترتيب البداية","Reset arrangement"),_reset_step_order)
- order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():client.send_action("duel_quiz_answer",{"question_id":current_question,"sequence":step_picks}))
+ order_submit=button(tr_pair("تحقق من الترتيب","Check order"),func():_send_quiz_answer({"sequence":step_picks.duplicate()}))
+ quiz_final_banner=PanelContainer.new()
+ quiz_final_banner.add_theme_stylebox_override("panel",VisualSkin.neon_surface(Color("571698"),Color("dc9dff")))
+ quiz_panel.add_child(quiz_final_banner);quiz_final_banner.hide()
+ quiz_final_title=label("");quiz_final_title.reparent(quiz_final_banner)
+ quiz_final_title.add_theme_font_size_override("font_size",24)
+ quiz_final_title.add_theme_color_override("font_color",Color("ffffff"))
+ quiz_final_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ quiz_final_title.hide()
+ quiz_scoreboard=VBoxContainer.new();quiz_scoreboard.add_theme_constant_override("separation",6)
+ quiz_panel.add_child(quiz_scoreboard);quiz_scoreboard.hide()
  quiz_results=label("")
- next_button=button(tr_pair("السؤال التالي","Next question"),func():client.send_action("duel_quiz_next"))
+ quiz_results.add_theme_color_override("font_color",Color("edf2ff"))
+ # The container already mirrors in RTL, so leading alignment remains correct
+ # for both Arabic and English without reversing the text itself.
+ quiz_results.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT
+ next_button=button(tr_pair("السؤال التالي","Next question"),_send_quiz_next)
+ send_status=label("",16)
+ answer_grid=GridContainer.new();answer_grid.columns=2
+ answer_grid.add_theme_constant_override("h_separation",8);answer_grid.add_theme_constant_override("v_separation",8)
+ quiz_panel.add_child(answer_grid)
+ for control in answer_buttons:control.reparent(answer_grid);control.size_flags_horizontal=Control.SIZE_EXPAND_FILL;control.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  column=_main_column
  load("res://scripts/room_audio_policy.gd").acquire(get_tree())
  audio_player=AudioStreamPlayer.new();audio_player.bus="Game SFX";audio_player.volume_db=-8;add_child(audio_player)
  _quiz_state(client.state)
  client.state_changed.connect(_quiz_state)
+ client.event_received.connect(_quiz_action_event)
+ quiz_shell=load("res://scripts/room_play_shell.gd").new();add_child(quiz_shell)
+ quiz_shell.setup(self,quiz_panel,title_text,"quiz")
+ for control in [answer_grid,next_button,written_submit,order_submit]:control.reparent(quiz_shell.reply_dock)
+ quiz_shell.display(client.state)
 func _create_filtered_room() -> void:
  client.send_action("duel_quiz_create",{"game_id":selected_game,"players":players_field.get_selected_id(),"timer":timer_field.get_selected_id(),"rounds":int(target_field.value),"difficulty":_online_rank_keys[_online_rank.selected]})
+func _room_protocol_ready(capabilities: Dictionary) -> void:
+ # Do not create or join a room against a server that did not advertise this
+ # specific game. The offline mode remains available in that situation.
+ var games: Variant=capabilities.get("quiz_games",[])
+ if not bool(capabilities.get("shared_quiz",false)) or not games is Array or selected_game not in games:
+  _pending_room_action=""
+  status.text=tr_pair("غرف هذه اللعبة غير متاحة حاليًا. يمكنك اللعب بدون إنترنت.","Rooms for this game are currently unavailable. Offline play is available.")
+  return
+ super._room_protocol_ready(capabilities)
 func _propose_configuration() -> void:
- client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":"tap"})
+ # Changing a quiz category must not silently turn off a room's agreed voice.
+ var mode: String=str(client.state.get("primary_mode","voice"))
+ if mode not in ["voice","text","tap"]:mode="voice"
+ client.send_action("duel_quiz_propose",{"category":_online_category_keys[_online_category.selected],"primary_mode":mode})
 func _state(value: Dictionary) -> void:
+ if is_instance_valid(quiz_shell):quiz_shell.before_snapshot()
  super._state(value)
  _match_controls.hide()
  _mode_field.hide()
@@ -115,6 +163,7 @@ func _state(value: Dictionary) -> void:
    heading.text=tr_pair("الجميع يجيب الآن","Everyone answers together") if value.quiz.phase=="question" else tr_pair("نتائج الجولة","Round results")
    _main_column.move_child(quiz_panel,_main_column.get_children().find(_match_controls))
   _quiz_state(value)
+ if is_instance_valid(quiz_shell):quiz_shell.display(value)
 func _quiz_state(value: Dictionary) -> void:
  if not is_instance_valid(quiz_panel):return
  var quiz: Dictionary=value.get("quiz",{})
@@ -132,6 +181,10 @@ func _quiz_state(value: Dictionary) -> void:
   _sound_phase_key=""
   return
  var phase: String=str(quiz.get("phase",""))
+ if _resume_answer_sync and not bool(value.get("paused",false)):
+  _answer_pending_question="";_next_pending_question="";_resume_answer_sync=false
+ if phase!="question" or quiz.get("your_answer")!=null:_answer_pending_question=""
+ if phase!="results":_next_pending_question=""
  var sound_key: String=str(question.get("id",""))+":"+phase
  if sound_key!=_sound_phase_key:
   _sound_phase_key=sound_key
@@ -151,6 +204,7 @@ func _quiz_state(value: Dictionary) -> void:
  _server_offset=int(quiz.get("server_unix_ms",Time.get_unix_time_from_system()*1000))-int(Time.get_unix_time_from_system()*1000)
  var changed: bool=current_question!=str(question.get("id",""))
  current_question=str(question.get("id",""))
+ if changed:_answer_pending_question="";_next_pending_question=""
  var mechanic: String=str(question.get("mode","choice"))
  story_text.text=str(question.get("narrative_"+language,question.get("narrative_en","")))
  story_text.visible=not story_text.text.is_empty()
@@ -214,6 +268,9 @@ func _quiz_state(value: Dictionary) -> void:
   _show_step_picks()
  quiz_title.text=tr_pair("سؤال %d من %d • ","Question %d of %d • ") % [int(quiz.get("round",1)),int(quiz.get("rounds",1))]+str(question.get(language,question.get("en","")))
  var choices: Array=question.get("choices_"+language,question.get("choices_en",[]))
+ # Four answers follow the reference's vertical stack; larger sets retain a
+ # compact grid so the room and voice controls remain usable on small screens.
+ answer_grid.columns=1 if choices.size()<=4 else 2
  for i in range(answer_buttons.size()):
   answer_buttons[i].visible=mechanic=="choice" and i<choices.size()
   if i<choices.size():answer_buttons[i].text=str(choices[i])
@@ -222,16 +279,25 @@ func _quiz_state(value: Dictionary) -> void:
   var revealed: bool=phase in ["results","finished"] and quiz.has("correct_index")
   var correct_choice: bool=revealed and i==int(quiz.get("correct_index",-1))
   var wrong_choice: bool=revealed and not correct_choice and quiz.get("your_answer")==i
-  VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "secondary"))
+  VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "blue"))
+  # The reference uses darker blue answer pills, with a vivid revealed answer.
+  # This only changes their appearance; answer ownership stays server-driven.
+  var answer_fill: Color=Color("16a82b") if correct_choice else (Color("a91f42") if wrong_choice else Color("123b78"))
+  var answer_edge: Color=Color("a7ff51") if correct_choice else (Color("ff9aad") if wrong_choice else Color("6aaafa"))
+  for state_name in ["normal","hover","pressed"]:
+   var fill: Color=answer_fill.lightened(.08) if state_name=="hover" else (answer_fill.darkened(.15) if state_name=="pressed" else answer_fill)
+   answer_buttons[i].add_theme_stylebox_override(state_name,VisualSkin.neon_surface(fill,answer_edge))
   if correct_choice or wrong_choice:
-   answer_buttons[i].add_theme_stylebox_override("disabled",answer_buttons[i].get_theme_stylebox("normal"))
+   answer_buttons[i].add_theme_stylebox_override("disabled",VisualSkin.neon_surface(answer_fill,answer_edge))
+   answer_buttons[i].add_theme_color_override("font_disabled_color",Color.WHITE)
    answer_buttons[i].text=("✓ " if correct_choice else "✕ ")+answer_buttons[i].text
  replay_button.visible=question.has("audio") and phase=="question"
  sound_progress.visible=replay_button.visible
  replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false)) or _quiz_now()<int(quiz.get("start_unix_ms",0))
  next_button.visible=phase=="results" and client.player==0
+ var finished: bool=phase=="finished"
  var lines := PackedStringArray()
- lines.append(tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
+ lines.append(tr_pair("إجابات السؤال الأخير: %d/%d","Last question answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))] if finished else tr_pair("الإجابات: %d/%d","Answers: %d/%d") % [int(quiz.get("answered_count",0)),int(value.get("capacity",2))])
  if quiz.has("answer_labels"):lines.append(str(quiz.answer_labels.get(language,quiz.answer_labels.get("en",""))))
  if quiz.has("correct_sequence"):
   var ordered: Array=[]
@@ -241,7 +307,27 @@ func _quiz_state(value: Dictionary) -> void:
  if quiz.has("correct_index"):
   var correct: int=int(quiz.correct_index)
   if correct>=0 and correct<choices.size():lines.append(tr_pair("الإجابة: ","Answer: ")+str(choices[correct]))
- for row in quiz.get("results",[]):lines.append(tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
+ for row in quiz.get("results",[]):
+  lines.append(tr_pair("اللاعب %d: %d نقطة في السؤال الأخير","Player %d: %d points in the last question") % [int(row.player)+1,int(row.points)] if finished else tr_pair("اللاعب %d: %d نقطة","Player %d: %d points") % [int(row.player)+1,int(row.points)])
+ quiz_final_title.visible=finished
+ quiz_final_banner.visible=finished
+ quiz_scoreboard.visible=finished
+ if finished:
+  var winner: int=int(value.get("winner",-2))
+  if winner>=0 and winner<int(value.get("capacity",0)):
+   var profiles: Array=value.get("profiles",[])
+   var profile: Dictionary=profiles[winner] if winner<profiles.size() and profiles[winner] is Dictionary else {}
+   var winner_name: String=str(profile.get("display_name","")).strip_edges().left(40)
+   if winner_name.is_empty():winner_name=tr_pair("اللاعب %d","Player %d") % (winner+1)
+   quiz_final_title.text=tr_pair("الفائز: %s","Winner: %s") % winner_name
+  elif winner==-1:quiz_final_title.text=tr_pair("انتهت المباراة بالتعادل","The match is a draw")
+  else:quiz_final_title.text=tr_pair("نتيجة المباراة","Match results")
+  if is_instance_valid(quiz_shell):quiz_shell.render_scoreboard(quiz_scoreboard,value)
+  quiz_question_card.hide();story_text.hide();question_image.hide();memory_grid.hide()
+  written_field.hide();written_submit.hide();clue_control.hide();mechanic_info.hide()
+  steps_box.hide();order_undo.hide();order_submit.hide()
+ else:quiz_question_card.show()
+ answer_grid.visible=mechanic=="choice" and not finished
  quiz_results.text="\n".join(lines)
  var serial: int=int(quiz.get("audio_serial",-1))
  if phase!="question":audio_player.stop();audio_player.stream_paused=false;_audio_pending=false
@@ -254,6 +340,38 @@ func _quiz_state(value: Dictionary) -> void:
  if phase=="question" and not bool(value.get("paused",false)):
   audio_player.stream_paused=false
   _audio_start=int(quiz.get("audio_start_unix_ms",_audio_start))
+ _apply_submission_lock(quiz)
+
+func _send_quiz_answer(fields: Dictionary) -> void:
+ var quiz: Dictionary=client.state.get("quiz",{})
+ if quiz.get("phase")!="question" or bool(client.state.get("paused",false)) or quiz.get("your_answer")!=null or _answer_pending_question==current_question:return
+ if _quiz_now()<int(quiz.get("start_unix_ms",0)):return
+ var payload: Dictionary=fields.duplicate(true);payload["question_id"]=current_question
+ if client.send_action("duel_quiz_answer",payload)==OK:
+  _answer_pending_question=current_question
+  _apply_submission_lock(quiz)
+ else:send_status.text=tr_pair("تعذر الإرسال · حاول مجددًا","Could not send · try again")
+
+func _send_quiz_next() -> void:
+ if client.state.get("quiz",{}).get("phase")!="results" or bool(client.state.get("paused",false)) or not _next_pending_question.is_empty():return
+ if client.send_action("duel_quiz_next")==OK:_next_pending_question=current_question;next_button.disabled=true
+
+func _quiz_action_event(message: Dictionary) -> void:
+ if message.get("type")=="duel_resumed":_resume_answer_sync=true
+ elif message.get("type")=="duel_error" and message.get("scope")!="voice":
+  _answer_pending_question="";_next_pending_question=""
+  _quiz_state(client.state)
+  if is_instance_valid(send_status):send_status.text=tr_pair("لم تُسجل العملية · حاول مجددًا","Action was not recorded · try again")
+
+func _apply_submission_lock(quiz: Dictionary) -> void:
+ if not is_instance_valid(send_status):return
+ var pending: bool=not current_question.is_empty() and _answer_pending_question==current_question
+ send_status.text=tr_pair("جار تسجيل الإجابة…","Recording your answer…") if pending else (tr_pair("تم تسجيل إجابتك · بانتظار الباقين","Answer recorded · waiting for the others") if quiz.get("your_answer")!=null and quiz.get("phase")=="question" else "")
+ if pending:
+  for control in answer_buttons:control.disabled=true
+  written_field.editable=false;written_submit.disabled=true;order_submit.disabled=true
+  for control in step_controls:control.disabled=true;control.ordering_enabled=false
+ next_button.disabled=bool(client.state.get("paused",false)) or not _next_pending_question.is_empty()
 func _show_step_picks() -> void:
  mechanic_info.text=tr_pair("اسحب العناصر لترتيبها ثم اضغط تأكيد.","Drag the items into order, then confirm.")
  var enabled: bool=_can_order_now()
@@ -264,7 +382,7 @@ func _show_step_picks() -> void:
 
 func _can_order_now() -> bool:
  var quiz: Dictionary=client.state.get("quiz",{})
- return quiz.get("phase")=="question" and quiz.get("your_answer")==null and not bool(client.state.get("paused",false)) and _quiz_now()>=int(quiz.get("start_unix_ms",0))
+ return quiz.get("phase")=="question" and quiz.get("your_answer")==null and _answer_pending_question!=current_question and not bool(client.state.get("paused",false)) and _quiz_now()>=int(quiz.get("start_unix_ms",0))
 
 func _move_step_order(source: int,target: int) -> void:
  if not _can_order_now() or source not in step_picks or target not in step_picks:return
@@ -293,7 +411,7 @@ func _process(delta: float) -> void:
  if memory_sync_at>0 and _quiz_now()>=memory_sync_at:
   memory_sync_at=0;client.send_action("duel_sync")
  if quiz.get("phase")=="question" and not bool(client.state.get("paused",false)):
-  if quiz.get("your_answer")==null and _quiz_now()>=int(quiz.get("start_unix_ms",0)):
+  if quiz.get("your_answer")==null and _answer_pending_question!=current_question and _quiz_now()>=int(quiz.get("start_unix_ms",0)):
    replay_button.disabled=not bool(quiz.get("replay_available",false))
    for b in answer_buttons:b.disabled=false
    if str(quiz.get("question",{}).get("mode",""))=="memory":

@@ -37,7 +37,11 @@ class TestReleaseSafetyV115(unittest.TestCase):
 
     def test_ci_hard_gates(self):
         ci = (ROOT/'.github/workflows/godot-checks.yml').read_text()
-        for token in ('platforms;android-36', 'build-tools;36.0.0','targetSdkVersion', 'godot --headless --path . --install-android-build-template --export-debug'):
+        for token in ('platforms;android-36', 'build-tools;36.0.0','targetSdkVersion', 'python3 release/prepare_android_template.py', 'godot --headless --path . --export-debug'):
             self.assertIn(token, ci)
+        # Reinstalling the template here would erase the reviewed Back opt-out.
+        export = ci.index('godot --headless --path . --export-debug')
+        prepare = ci.rindex('python3 release/prepare_android_template.py', 0, export)
+        self.assertNotIn('--install-android-build-template', ci[prepare:export])
 
 if __name__ == '__main__': unittest.main()

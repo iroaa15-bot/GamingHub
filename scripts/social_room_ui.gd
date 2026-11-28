@@ -4,6 +4,8 @@ static var selected_social := "open_heart"
 var party_panel: VBoxContainer
 var _social_phase_key := ""
 var _social_chat: VBoxContainer
+var play_view: VBoxContainer
+var _party_leave_dialog: ConfirmationDialog
 const SOCIAL_TITLES := {"open_heart":["افتح قلبك","Open Heart"],"act_it":["مثّل وورّينا","Act It"],"who_among_us":["مين فينا؟","Who Among Us"],"show_skill":["ورّينا شطارتك","Show Your Skill"],"truth_or_fiction":["صدق ولا تأليف؟","Truth or Fiction"],"table_flip":["اقلب الترابيزة","Flip the Table"]}
 
 static func rooms_available() -> bool:
@@ -24,6 +26,11 @@ func _ready() -> void:
  party_panel=VBoxContainer.new();party_panel.add_theme_constant_override("separation",12);_main_column.add_child(party_panel)
  _social_chat=VBoxContainer.new();_main_column.add_child(_social_chat)
  _chat_toggle.reparent(_social_chat);_chat_body.reparent(_social_chat)
+ if selected_social in SOCIAL_TITLES:
+  play_view=load("res://scripts/open_heart_play_view.gd").new()
+  add_child(play_view)
+  play_view.setup(self)
+  client.event_received.connect(play_view.rejected)
  _state(client.state)
 
 func _create_filtered_room() -> void:
@@ -56,9 +63,14 @@ func _social_player_name(index: int) -> String:
  return tr_pair("اللاعب %d","Player %d") % [index+1]
 
 func _state(value: Dictionary) -> void:
+ if is_instance_valid(play_view):play_view.restore_shared_layout()
  super._state(value)
  _match_controls.hide();_online_filter_box.hide();_online_category.hide();timer_field.hide();pass_button.hide();_voice_question.hide()
  if not is_instance_valid(party_panel):return
+ if is_instance_valid(play_view):
+  _social_chat.visible=false
+  play_view.display(value)
+  return
  for child in party_panel.get_children():
   if child==_seats:continue
   party_panel.remove_child(child);child.queue_free()
@@ -154,3 +166,29 @@ func _scroll_social_to_top() -> void:
  if focus is LineEdit or focus is TextEdit:return
  for child in get_children():
   if child is ScrollContainer:child.scroll_vertical=0
+
+func confirm_party_leave() -> void:
+ if is_instance_valid(_party_leave_dialog):return
+ var dialog := ConfirmationDialog.new()
+ _party_leave_dialog=dialog
+ dialog.title=tr_pair("مغادرة الغرفة؟","Leave room?")
+ dialog.dialog_text=tr_pair("ستغادر المباراة وتنتهي مكالمتك.","You will leave the match and end your call.")
+ dialog.ok_button_text=tr_pair("مغادرة","Leave")
+ dialog.cancel_button_text=tr_pair("استكمال اللعب","Keep playing")
+ dialog.confirmed.connect(_home)
+ dialog.canceled.connect(dialog.queue_free)
+ add_child(dialog)
+ dialog.popup_centered(Vector2i(340,180))
+
+func _notification(what: int) -> void:
+ if what==NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(play_view) and play_view.visible:
+  if not VisualSkin.dismiss_text_input(get_viewport()):confirm_party_leave.call_deferred()
+  return
+ super._notification(what)
+
+func _unhandled_key_input(event: InputEvent) -> void:
+ if is_instance_valid(play_view) and play_view.visible and event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE,KEY_BACK]:
+  get_viewport().set_input_as_handled()
+  if not VisualSkin.dismiss_text_input(get_viewport()):confirm_party_leave.call_deferred()
+  return
+ super._unhandled_key_input(event)

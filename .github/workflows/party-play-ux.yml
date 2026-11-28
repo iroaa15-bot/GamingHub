@@ -1,0 +1,148 @@
+name: Party play UX regression
+on:
+  pull_request:
+    paths:
+      - 'scripts/open_heart_play_view.gd'
+      - 'scripts/social_room_ui.gd'
+      - 'scripts/room_play_shell.gd'
+      - 'scripts/photo_duel_extension_ui.gd'
+      - 'scripts/shared_quiz_ui.gd'
+      - 'scripts/social_game_backdrop.gd'
+      - 'scripts/local_player_setup.gd'
+      - 'scripts/main.gd'
+      - 'scripts/visual_skin.gd'
+      - 'scripts/core_game_setup.gd'
+      - 'scripts/core_play_frame.gd'
+      - 'scripts/picture_hidden_card_art.gd'
+      - 'tests/core_redesign_flow.gd'
+      - 'tests/core_match_acceptance.gd'
+      - 'tests/reference_core_capture.gd'
+      - 'tests/open_heart_play_view.gd'
+      - 'tests/social_rooms_ui.gd'
+      - 'tests/social_room_ui_network.gd'
+      - 'tests/shared_all_mechanics_ui.gd'
+      - 'tests/photo_room_six_ui.gd'
+      - 'tests/shared_quiz_security_resume.py'
+      - 'server/photo_duel_agreement_local.py'
+      - 'server/shared_game_adapters.py'
+      - 'server/shared_quiz_local.py'
+      - 'tests/room_play_shell.gd'
+      - 'tests/local_party_setup.gd'
+      - '.github/workflows/party-play-ux.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  party-play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r server/requirements.txt
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.5.1
+          use-dotnet: false
+          include-templates: false
+      - name: Import resources
+        run: godot --headless --audio-driver Dummy --editor --import --quit
+      - name: Stable layout and preserved room/audio behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          python tests/shared_quiz_security_resume.py
+          for script in open_heart_play_view social_play_actions social_rooms_ui room_play_shell local_party_setup core_match_acceptance core_redesign_flow reference_game_tile voice_continuity room_audio_policy account_progress_isolation; do
+            timeout 120 godot --headless --audio-driver Dummy --script "res://tests/$script.gd" 2>&1 | tee "$script.log"
+            if [ "$script" = room_audio_policy ]; then
+              sed '/^ERROR: [0-9][0-9]* resources still in use at exit/d' "$script.log" > checked.log
+            else
+              cp "$script.log" checked.log
+            fi
+            ! grep -E 'SCRIPT ERROR|^ERROR:|AUDIO_POLICY.*false|PARTY_PLAY_VIEW_PASS=false|SOCIAL_ROOMS_UI false' checked.log
+          done
+          grep -q 'PARTY_PLAY_VIEW_PASS=true' open_heart_play_view.log
+          grep -q 'SOCIAL_PLAY_ACTIONS_PASS=true' social_play_actions.log
+          grep -q 'ROOM_PLAY_SHELL_PASS=true' room_play_shell.log
+          grep -q 'LOCAL_PARTY_SETUP_PASS=true' local_party_setup.log
+          grep -q 'CORE_MATCH_ACCEPTANCE_PASS=true' core_match_acceptance.log
+          grep -q 'CORE_REDESIGN_FLOW_PASS=true' core_redesign_flow.log
+          grep -q 'REFERENCE_GAME_TILE_PASS: 10 actual routes AR/EN' reference_game_tile.log
+          grep -q 'SOCIAL_ROOMS_UI true cases=120' social_rooms_ui.log
+          grep -q 'VOICE_CONTINUITY continuous=true' voice_continuity.log
+          grep -q 'ACCOUNT_PROGRESS_ISOLATION_PASS' account_progress_isolation.log
+      - name: Full ten-round match over real local WebSockets
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          python -u server/run_social_local.py --port 8898 --draft-content > social-server.log 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q SOCIAL_LOCAL_READY social-server.log; then break; fi
+            sleep 0.2
+          done
+          grep -q SOCIAL_LOCAL_READY social-server.log
+          timeout 90 godot --headless --audio-driver Dummy --script res://tests/social_room_ui_network.gd -- --duel-local=ws://127.0.0.1:8898 2>&1 | tee social-network.log
+          grep -q 'SOCIAL_UI_FULL_MATCH true' social-network.log
+          grep -q 'SOCIAL_ROOM_UI_NETWORK true' social-network.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' social-network.log
+          for game in 1 3 6; do
+            timeout 60 godot --headless --audio-driver Dummy --script res://tests/shared_quiz_ui.gd -- --duel-local=ws://127.0.0.1:8898 --quiz="$game" 2>&1 | tee "quiz-$game.log"
+            grep -q 'SHARED_QUIZ_UI_REAL_WS true' "quiz-$game.log"
+            ! grep -q 'SCRIPT ERROR' "quiz-$game.log"
+          done
+          # A fresh local service isolates session rate limits for the six
+          # original mechanics exercised by two real Godot room clients.
+          python -u server/run_social_local.py --port 8899 --draft-content > mechanics-server.log 2>&1 &
+          mechanics_pid=$!
+          trap 'kill "$fixture_pid" "$mechanics_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q SOCIAL_LOCAL_READY mechanics-server.log; then break; fi
+            sleep 0.2
+          done
+          grep -q SOCIAL_LOCAL_READY mechanics-server.log
+          timeout 310 godot --headless --audio-driver Dummy --script res://tests/shared_all_mechanics_ui.gd -- --endpoint=ws://127.0.0.1:8899 --games=2,7,9,4,5,8 --capture-dir="$PWD/previews/mechanics" 2>&1 | tee mechanics-network.log
+          grep -q 'ORIGINAL_ALL_REAL_GODOT_UI_WS true' mechanics-network.log
+          ! grep -q 'SCRIPT ERROR' mechanics-network.log
+          # Give the six-client photo test its own session limit and verify
+          # room controls remain available during the inter-round pause.
+          python -u server/run_social_local.py --port 8900 --draft-content > photo-server.log 2>&1 &
+          photo_pid=$!
+          trap 'kill "$fixture_pid" "$mechanics_pid" "$photo_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 100); do
+            if grep -q SOCIAL_LOCAL_READY photo-server.log; then break; fi
+            sleep 0.2
+          done
+          grep -q SOCIAL_LOCAL_READY photo-server.log
+          timeout 110 godot --headless --editor --audio-driver Dummy --script res://tests/photo_room_six_ui.gd -- --endpoint=ws://127.0.0.1:8900 2>&1 | tee photo-network.log
+          grep -q 'PHOTO_SIX_REAL_UI_WS true' photo-network.log
+          ! grep -q 'SCRIPT ERROR' photo-network.log
+      - name: Native visual fixtures under virtual display
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export XDG_DATA_HOME="$(mktemp -d)"
+          mkdir -p previews
+          timeout 120 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --script res://tests/open_heart_play_view.gd -- --capture-dir="$PWD/previews" 2>&1 | tee visual-fixtures.log
+          grep -q 'PARTY_PLAY_VIEW_PASS=true' visual-fixtures.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' visual-fixtures.log
+          test -s previews/active-ar-2.png
+          timeout 180 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --script res://tests/reference_ui_capture.gd -- --capture-dir="$PWD/previews/all-games" 2>&1 | tee all-games-visual.log
+          grep -q 'REFERENCE_NATIVE_RENDER' all-games-visual.log
+          ! grep -q 'SCRIPT ERROR' all-games-visual.log
+          timeout 180 xvfb-run -a godot --audio-driver Dummy --rendering-method gl_compatibility --resolution 420x900 --script res://tests/reference_core_capture.gd -- --capture-dir="$PWD/previews/core" 2>&1 | tee core-visual.log
+          grep -q 'CORE_REFERENCE_CAPTURE_PASS=true captures=130' core-visual.log
+          ! grep -E 'SCRIPT ERROR|^ERROR:' core-visual.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: party-play-ux-logs
+          path: |
+            *.log
+            previews/**/*.png

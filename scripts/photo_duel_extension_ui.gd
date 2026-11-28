@@ -2,6 +2,8 @@ extends Control
 static var requested_entry := "landing"
 var _entry_mode := "landing"
 var _entry_choices: VBoxContainer
+var _entry_create: Button
+var _entry_join: Button
 var _entry_back: Button
 var _configuration_changed := false
 var _displayed_config_revision := -2
@@ -94,6 +96,10 @@ var _seat_panels: Array[PanelContainer] = []
 var _seat_avatars: Array[TextureRect] = []
 var _seats: GridContainer
 var _scores: Label
+var _room_shell: VBoxContainer
+var _navigation_view: Control
+var _fixed_voice_labels := false
+var _leave_dialog: ConfirmationDialog
 var _menu_touch_guard: Node
 
 
@@ -122,9 +128,17 @@ func button(value: String, action: Callable) -> Button:
  control.text = value
  control.custom_minimum_size.y = 56
  VisualSkin.decorate_button(control,"gold")
+ _style_play_button(control)
  control.pressed.connect(_invoke.bind(weakref(control),action),CONNECT_DEFERRED)
  column.add_child(control)
  return control
+
+func _style_play_button(control: Button) -> void:
+ var tone: String="secondary"
+ if control in [create_button,join_button,_accept_button,_start_button]:tone="primary"
+ elif control in [yes_button,correct_button]:tone="positive"
+ elif control in [no_button,wrong_button]:tone="danger"
+ VisualSkin.decorate_play_action(control,tone)
 
 func _section(title: String, expanded: bool = false) -> VBoxContainer:
  var body := VBoxContainer.new()
@@ -160,6 +174,8 @@ func _ready() -> void:
  for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
+ # Keep the room entry and lobby on the same starry neon backdrop as the
+ # game menus, without putting a decorative layer over the real controls.
  var bg := VisualSkin.new()
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
@@ -456,17 +472,37 @@ func _ready() -> void:
  VisualSkin.enable_menu_swipe(column)
  _entry_choices=VBoxContainer.new();_entry_choices.name="RoomEntryChoices"
  _main_column.add_child(_entry_choices);column=_entry_choices
- button(tr_pair("إنشاء غرفة","Create room"),func():_focus_room_entry("create"))
- button(tr_pair("الانضمام بكود","Join with code"),func():_focus_room_entry("join"))
+ _entry_create=button(tr_pair("إنشاء غرفة","Create room"),func():_focus_room_entry("create"))
+ _entry_join=button(tr_pair("الانضمام بكود","Join with code"),func():_focus_room_entry("join"))
  column=_main_column
  _entry_back=button(tr_pair("العودة لاختيار إنشاء أو انضمام","Back to create or join"),func():_focus_room_entry("landing"))
  _main_column.move_child(_entry_choices,_main_column.get_children().find(status)+1)
  _apply_entry_visibility()
 
+ for control in _main_column.find_children("*","Button",true,false):
+  if not control is OptionButton and not control is CheckButton:_style_play_button(control)
+
+ # Reference room flow uses prominent create and join actions. These remain
+ # the existing buttons and callbacks, so room consent and permissions do not change.
+ for control in [_entry_create,create_button,_start_button]:VisualSkin.decorate_button(control,"teal")
+ for control in [_entry_join,join_button]:VisualSkin.decorate_button(control,"blue")
+ _entry_create.icon=VisualSkin.menu_icon("plus")
+ _entry_join.icon=VisualSkin.menu_icon("player")
+ for control in [_entry_create,_entry_join]:
+  control.custom_minimum_size.y=68
+  control.expand_icon=true
+  control.add_theme_constant_override("icon_max_width",34)
+
+ if get_script()==load("res://scripts/photo_duel_extension_ui.gd"):
+  _room_shell=load("res://scripts/room_play_shell.gd").new();add_child(_room_shell)
+  _room_shell.setup(self,_match_controls,tr_pair("خمن صورتك","Guess Your Picture"),"photo")
+  _room_shell.display(client.state)
+
 func _chat() -> void:
  if client.send_action("duel_chat",{"text":chat_field.text}) == OK: chat_field.clear()
 
 func _state(value: Dictionary) -> void:
+ if is_instance_valid(_room_shell):_room_shell.before_snapshot()
  # Closed snapshots retain the last card, pending action and timer for protocol
  # history. None of that belongs to the next room's entry screen.
  if bool(value.get("closed",false)):
@@ -683,7 +719,19 @@ func _state(value: Dictionary) -> void:
  if _invite_box.visible:
   _main_column.move_child(_invite_box,_main_column.get_children().find(heading)+1)
   heading.text=tr_pair("غرفة الانتظار","Waiting room")
- if bool(value.get("match_finished",false)) and not client.code.is_empty(): status.text=tr_pair("انتهت المباراة • الفائز: اللاعب %d • الصوت متاح حتى المغادرة","Match finished • winner: player %d • voice remains available until exit") % (int(value.get("winner",0))+1)
+ if bool(value.get("match_finished",false)) and not client.code.is_empty():
+  var winner: int=int(value.get("winner",-2))
+  if winner==-1:status.text=tr_pair("انتهت المباراة بالتعادل","Match finished in a draw")
+  elif winner>=0 and winner<int(value.get("capacity",0)):
+   var profiles: Array=value.get("profiles",[])
+   var profile: Dictionary=profiles[winner] if winner<profiles.size() and profiles[winner] is Dictionary else {}
+   var name_value: String=str(profile.get("display_name","")).strip_edges().left(40)
+   if name_value.is_empty():name_value=tr_pair("اللاعب %d","player %d") % (winner+1)
+   status.text=tr_pair("انتهت المباراة • الفائز: %s","Match finished • winner: %s") % name_value
+  else:status.text=tr_pair("انتهت المباراة","Match finished")
+  var voice: Dictionary=value.get("voice",{}) if value.get("voice",{}) is Dictionary else {}
+  if not bool(value.get("paused",false)) and str(value.get("primary_mode","tap")) in ["voice","mixed"] and bool(client.capabilities.get("voice",false)) and bool(voice.get("available",false)):
+   status.text+=tr_pair(" • الصوت متاح حتى المغادرة"," • voice remains available until exit")
  elif bool(value.get("closed",false)) and client.code.is_empty(): status.text=tr_pair("أنشئ غرفة أو أدخل كود صديقك","Create a room or enter your friend's code")
  elif bool(value.get("closed",false)): status.text = tr_pair("انتهت / أغلقت الغرفة","Match finished / room closed")
  elif bool(value.get("paused",false)): status.text = tr_pair("المباراة متوقفة حتى استعادة اتصال اللاعب","Match paused until player reconnects")
@@ -719,6 +767,7 @@ func _state(value: Dictionary) -> void:
  received_at = Time.get_ticks_msec()
 
  _apply_entry_visibility()
+ if is_instance_valid(_room_shell):_room_shell.display(value)
 
 func _process(_delta: float) -> void:
  if not is_instance_valid(client): return
@@ -745,13 +794,16 @@ func _home() -> void:
  if result != OK: _leaving_scene = false
 
 func _notification(what: int) -> void:
- if what == NOTIFICATION_WM_GO_BACK_REQUEST and not VisualSkin.dismiss_text_input(get_viewport()): _home.call_deferred()
+ if what == NOTIFICATION_WM_GO_BACK_REQUEST and not VisualSkin.dismiss_text_input(get_viewport()):
+  if is_instance_valid(_navigation_view) and _navigation_view.visible:confirm_room_leave.call_deferred()
+  else:_home.call_deferred()
 
 func _unhandled_key_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ESCAPE,KEY_BACK]:
   get_viewport().set_input_as_handled()
   if VisualSkin.dismiss_text_input(get_viewport()):return
-  _home.call_deferred()
+  if is_instance_valid(_navigation_view) and _navigation_view.visible:confirm_room_leave.call_deferred()
+  else:_home.call_deferred()
 
 func _connect_service() -> void:
  client.terms_accepted = terms.button_pressed
@@ -818,6 +870,9 @@ func _voice_changed() -> void:
  voice_mute_button.disabled=not voice_adapter.requested
  VisualSkin.icon_action(voice_button,"phone_off" if voice_adapter.requested else "phone",tr_pair("إنهاء اتصال الصوت","End voice connection") if voice_adapter.requested else tr_pair("بدء اتصال الصوت","Start voice connection"))
  VisualSkin.icon_action(voice_mute_button,"mic_off" if voice_adapter.muted else "mic",tr_pair("إلغاء كتم الإرسال","Unmute transmission") if voice_adapter.muted else tr_pair("كتم إرسال الميكروفون","Mute microphone transmission"))
+ if _fixed_voice_labels:
+  voice_button.text=tr_pair("إنهاء","End call") if voice_adapter.requested else tr_pair("اتصال","Call")
+  voice_mute_button.text=tr_pair("إلغاء الكتم","Unmute") if voice_adapter.muted else tr_pair("كتم","Mute")
  if not voice_adapter.is_available(): voice_status.text=tr_pair("الصوت غير متاح الآن؛ يمكنك متابعة اللعب والكتابة.","Voice is unavailable; you can keep playing and use text.")
  elif voice_adapter.requested and not voice_adapter.bridge.active:voice_status.text=tr_pair("بانتظار موافقة الطرف الآخر أو استعادة الصوت","Waiting for peer consent or audio recovery")
  elif voice_adapter.requested:voice_status.text=tr_pair("إرسال الميكروفون مكتوم • الاستقبال متاح","Microphone transmission muted • receiving remains available") if voice_adapter.muted else tr_pair("جلسة الصوت مفعلة طوال عضوية الغرفة","Voice enabled throughout room membership")
@@ -883,3 +938,14 @@ func _share_room_code() -> void:
  if account!=null and account.secure_store!=null and account.secure_store.has_signal("social_result"):
   account.secure_store.call_deferred("shareRoomCode",client.code,language)
  else:_copy_room_code()
+
+func confirm_room_leave() -> void:
+ if is_instance_valid(_leave_dialog):return
+ _leave_dialog=ConfirmationDialog.new()
+ _leave_dialog.title=tr_pair("مغادرة الغرفة؟","Leave room?")
+ _leave_dialog.dialog_text=tr_pair("ستغادر المباراة وتنتهي مكالمتك.","You will leave the match and end your call.")
+ _leave_dialog.ok_button_text=tr_pair("مغادرة","Leave")
+ _leave_dialog.cancel_button_text=tr_pair("استكمال اللعب","Keep playing")
+ _leave_dialog.confirmed.connect(_home)
+ _leave_dialog.canceled.connect(_leave_dialog.queue_free)
+ add_child(_leave_dialog);_leave_dialog.popup_centered(Vector2i(340,180))

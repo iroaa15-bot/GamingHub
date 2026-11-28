@@ -373,19 +373,46 @@ func show_celebration(grand: bool) -> void:
 
 func result_hero(accuracy: int) -> void:
  var frame := PanelContainer.new()
+ frame.name = "ResultHero"
  frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- frame.add_theme_stylebox_override("panel", panel_style(Color("194e51") if last_match_won else Color("263456")))
+ var result_style := VisualSkin.play_surface(Color("06143a"),20)
+ result_style.border_color = Color("458fe5")
+ result_style.set_border_width_all(2)
+ frame.add_theme_stylebox_override("panel", result_style)
  root.add_child(frame)
  var content := VBoxContainer.new()
  content.add_theme_constant_override("separation", 8)
  frame.add_child(content)
+ if last_match_won:
+  content.add_child(load("res://scripts/result_trophy.gd").new())
+ var ribbon := PanelContainer.new()
+ ribbon.add_theme_stylebox_override("panel", VisualSkin.neon_surface(Color("700caa"), Color("ee83ff")))
+ content.add_child(ribbon)
  var heading := Label.new()
- heading.text = tr_ui("🎉 فوز مستحق!" if last_match_won else "🌟 الجولة انتهت", "🎉 YOU WON!" if last_match_won else "🌟 ROUND COMPLETE")
+ heading.text = tr_ui("النتيجة النهائية" if last_match_won else "انتهت الجولة", "FINAL RESULT" if last_match_won else "ROUND COMPLETE")
  heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
- heading.add_theme_font_size_override("font_size", int(28 * reading_scale))
+ heading.add_theme_font_size_override("font_size", int(24 * reading_scale))
  heading.add_theme_color_override("font_color", Color.WHITE)
- content.add_child(heading)
+ ribbon.add_child(heading)
+ var attempted: int = question_index + 1 if mode_finished_early else round_bank.size()
+ var statistics: Array = [
+  [tr_ui("إجمالي النقاط", "Total points"), str(score)],
+  [tr_ui("الإجابات الصحيحة", "Correct answers"), "%d / %d" % [correct_count, attempted]],
+  [tr_ui("الخبرة المكتسبة", "XP earned"), "+%d" % last_reward]
+ ]
+ for entry in statistics:
+  var bar := PanelContainer.new()
+  var bar_style := VisualSkin.play_surface(Color("0c2350"),12)
+  bar_style.border_color = Color("385f9b");bar_style.shadow_size = 0
+  bar_style.content_margin_top = 6;bar_style.content_margin_bottom = 6
+  bar.add_theme_stylebox_override("panel",bar_style)
+  content.add_child(bar)
+  var row := HBoxContainer.new();row.add_theme_constant_override("separation",8);bar.add_child(row)
+  var caption := Label.new();caption.text = str(entry[0]);caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+  caption.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART;caption.add_theme_font_size_override("font_size",int(15 * reading_scale));row.add_child(caption)
+  var value := Label.new();value.text = str(entry[1]);value.add_theme_font_size_override("font_size",int(17 * reading_scale))
+  value.add_theme_color_override("font_color",Color("ffe08a"));row.add_child(value)
  var medal := Label.new()
  medal.text = result_medal(accuracy)
  medal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -807,6 +834,7 @@ func show_results() -> void:
   button(tr_ui("🗺 خريطة العوالم", "🗺 WORLD MAP"), show_journey_map, ACCENT)
  button(tr_ui("تحدٍ جديد", "PLAY AGAIN"), start_family_match if family_active else (start_daily if daily_match else (start_quick_match if quick_match_active else start_game)), GREEN)
  button(tr_ui("قائمة الألعاب", "GAMES MENU"), show_home, ACCENT)
+ _finish_core_view("results")
 
 func advance_challenge_stage() -> void:
  if int(profile.get("journey_selected_stage", 1)) != 1 + int(profile.get("challenge_stage", 0)):
@@ -1137,6 +1165,8 @@ func button(text_value: String, action: Callable, color: Color = PANEL) -> Butto
  b.add_theme_stylebox_override("focus", panel_style(ACCENT.darkened(0.15)))
  var tone: String = "gold" if color == GOLD else ("teal" if color == GREEN else ("violet" if color == ACCENT else "secondary"))
  VisualSkin.decorate_button(b, tone)
+ if active_play_screen:
+  VisualSkin.decorate_play_action(b,"positive" if color==GREEN else ("primary" if color in [GOLD,ACCENT] else "secondary"))
  # Consistent touch targets and immediate tactile feedback for all game modes.
  b.focus_mode = Control.FOCUS_ALL
  b.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -1217,6 +1247,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 var _back_navigation_pending := false
 func _queue_back_navigation() -> void:
+ if is_instance_valid(_local_pause_dialog):_resume_local_play();return
  if VisualSkin.dismiss_text_input(get_viewport()):return
  if _back_navigation_pending or not is_inside_tree() or is_queued_for_deletion(): return
  _back_navigation_pending = true
@@ -1386,43 +1417,7 @@ func feature_card(title_text: String, description: String, action_text: String, 
  column.add_child(play)
 
 func make_game_tile(index: int, art_id: String, favorite: bool) -> PanelContainer:
- var tile := PanelContainer.new()
- tile.mouse_filter = Control.MOUSE_FILTER_PASS
- tile.size_flags_horizontal = Control.SIZE_EXPAND_FILL
- var skin := StyleBoxFlat.new()
- skin.bg_color = Color("142447")
- skin.border_color = Color("ffcc42") if index==0 else [Color("ffb01c"),Color("b343ff"),Color("23cbff")][index%3]
- skin.set_border_width_all(2)
- skin.set_corner_radius_all(20)
- skin.content_margin_left = 8
- skin.content_margin_right = 8
- skin.content_margin_top = 8
- skin.content_margin_bottom = 10
- skin.shadow_color = Color(0, 0, 0, 0.34)
- skin.shadow_size = 8
- tile.add_theme_stylebox_override("panel", skin)
- var column := VBoxContainer.new()
- column.add_theme_constant_override("separation", 6)
- tile.add_child(column)
- var art := TextureRect.new()
- var premium_art: Texture2D=VisualSkin.game_cover(index)
- art.texture=premium_art if premium_art!=null else card_texture(art_id)
- art.custom_minimum_size.y = 76 if index==0 else 64
- art.mouse_filter = Control.MOUSE_FILTER_IGNORE
- art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
- art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
- column.add_child(art)
- var idx: int = index
- var b := button(("★ " if favorite else "") + game_title(index), func(): show_modes(idx), ACCENT if index % 3 == 0 else PANEL)
- b.tooltip_text = game_subtitle(index)
- b.add_theme_font_size_override("font_size", int(14 * reading_scale))
- root.remove_child(b)
- column.add_child(b)
- b.set_meta("compact_game_tile",true)
- b.icon = null # Existing artwork already identifies the game; keep Arabic title width.
- b.expand_icon = true
- b.add_theme_constant_override("icon_max_width", 22)
- return tile
+ return load("res://scripts/reference_game_tile.gd").make(self,index,art_id,favorite)
 
 # World journey: a persistent stage map with themed chapters and replayable challenges.
 const JOURNEY_WORLDS: Array[String] = ["island", "city", "space", "mystery", "arena", "jungle", "ocean", "desert", "clouds", "volcano", "crystals", "robots", "temple", "ice", "stars"]
@@ -1944,7 +1939,7 @@ func show_home_v2() -> void:
  label(tr_ui("خمن صورتك", "GUESS YOUR PICTURE"), 30)
  if age_group != "under13":
   button(tr_ui("👥 العب مع صديق • غرفة وكود دعوة", "👥 PLAY WITH A FRIEND • ROOM CODE"), open_guess_multiplayer, GOLD)
-  button(tr_ui("🌐 ابحث عن منافس أونلاين", "🌐 FIND AN ONLINE OPPONENT"), open_guess_multiplayer, ACCENT)
+  button(tr_ui("🌐 انضم إلى غرفة بكود", "🌐 JOIN A ROOM WITH A CODE"), open_guess_multiplayer, ACCENT)
  button(tr_ui("🤖 العب ضد الكمبيوتر • بدون إنترنت", "🤖 PLAY VS COMPUTER • OFFLINE"), start_guess_offline, GREEN)
  button(tr_ui("🎮 قائمة الألعاب", "🎮 GAMES LIST"), show_games_list_v2, GOLD)
  label(tr_ui("الغرف والاتصال", "ROOMS & CONNECTION"), 23)
@@ -1964,7 +1959,7 @@ func show_games_list_v2() -> void:
  var previews: Array[String] = ["tiger", "pyramids", "banana", "camera", "lighthouse", "eiffel", "violin", "dolphin", "penguin", "bicycle"]
  var favorites: Array = profile.get("favorites", [])
  var grid := GridContainer.new()
- grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 650 else 2
+ grid.columns = 1 if reading_scale >= 1.25 or get_viewport_rect().size.x < 320 else 2
  root.add_child(grid)
  for i in range(GAMES.size()):
   grid.add_child(make_game_tile(i, previews[i % previews.size()], i in favorites))
@@ -2007,20 +2002,20 @@ func show_home_legacy() -> void:
  _add_bottom_navigation("games")
 
 func _add_unique_game_catalog() -> void:
- var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else (3 if get_viewport_rect().size.x>=340 else 2)
+ var columns: int=1 if reading_scale>=1.25 or get_viewport_rect().size.x<280 else 2
  var configured_columns: int=int(PublishedContent.settings.get("home_columns",0))
  if configured_columns>0: columns=configured_columns
  if reading_scale>=1.25 or get_viewport_rect().size.x<280: columns=1
  var catalog_order: Array=PublishedContent.catalog_order()
  if 0 in catalog_order:
   catalog_order.erase(0);catalog_order.push_front(0)
- var primary_count: int=int(PublishedContent.settings.get("primary_count",6))
+ var primary_count: int=int(PublishedContent.settings.get("primary_count",catalog_order.size()))
  var grid := GridContainer.new()
  grid.name="UnifiedGameCatalog";grid.columns=columns
  root.add_child(grid)
  var previews: Array[String]=["tiger","pyramids","banana","camera","lighthouse","eiffel","violin","dolphin","penguin","bicycle"]
  var favorites: Array=profile.get("favorites",[])
- # Six primary games mirror the approved board; every other original game remains reachable once.
+ # The full local catalog is visible; validated remote ordering remains supported.
  for index in catalog_order.slice(0,primary_count):
   var tile := make_game_tile(index,previews[index],index in favorites)
   tile.set_meta("game_id",index);grid.add_child(tile)
@@ -2167,14 +2162,32 @@ func show_modes(index: int) -> void:
  game=index;daily_match=false;family_active=false;campaign_active=false
  clear_ui()
  current_screen="mode"
- VisualSkin.compact_header(root,game_title(index))
- var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,ACCENT)
+ # Reference mode screens put the game's art and title at the centre of the
+ # page, with the available routes grouped underneath them.
+ var spacer := Control.new()
+ spacer.custom_minimum_size.y = 22
+ root.add_child(spacer)
+ var cover:=TextureRect.new();cover.texture=VisualSkin.game_cover(index)
+ cover.custom_minimum_size.y=155;cover.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+ cover.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;root.add_child(cover)
+ var title := label(game_title(index),28)
+ title.add_theme_color_override("font_color",Color("f8fbff"))
+ var description := label(game_subtitle(index),16)
+ description.add_theme_color_override("font_color",Color("bdcdf5"))
+ var gap := Control.new()
+ gap.custom_minimum_size.y = 16
+ root.add_child(gap)
+ var friends:=button(tr_ui("غرف الأصدقاء","Friend rooms"),_open_friend_rooms,GOLD)
+ friends.icon=VisualSkin.menu_icon("player");friends.expand_icon=true
+ friends.add_theme_constant_override("icon_max_width",27)
  friends.set_meta("mode_action","friends")
  friends.disabled=age_group in ["under13","unknown"]
  if friends.disabled:friends.tooltip_text=tr_ui("الغرف غير متاحة لهذه الفئة العمرية؛ اللعب المحلي متاح.","Rooms are unavailable for this age group; offline play is available.")
- var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,GREEN)
+ var local:=button(tr_ui("اللعب بدون إنترنت","Play offline"),_start_offline_mode,ACCENT)
  local.set_meta("mode_action","offline")
- var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_home,PANEL)
+ var back:=button(tr_ui("قائمة الألعاب","Games menu"),show_games_list_v2,PANEL)
+ back.icon=VisualSkin.menu_icon("back");back.expand_icon=true
+ back.add_theme_constant_override("icon_max_width",24)
  back.set_meta("mode_action","games")
  VisualSkin.compact_menu(root)
 
@@ -2191,7 +2204,29 @@ func _start_offline_mode() -> void:
  quick_match_active=false
  match_style="classic"
  selected_topic="all"
- start_game()
+ show_offline_setup()
+
+func show_offline_setup() -> void:
+ load("res://scripts/core_game_setup.gd").render(self)
+
+func _finish_core_view(kind: String) -> void:
+ load("res://scripts/core_play_frame.gd").apply.call_deferred(self,ui_action_generation,kind)
+
+var _local_pause_dialog: AcceptDialog
+func pause_local_play() -> void:
+ if not active_play_screen or is_instance_valid(_local_pause_dialog):return
+ blitz_dialog_paused=true
+ if is_instance_valid(blitz_timer):blitz_timer.paused=true
+ _local_pause_dialog=AcceptDialog.new();_local_pause_dialog.title=tr_ui("استراحة","Paused")
+ _local_pause_dialog.dialog_text=tr_ui("جاهز تكمل؟ جولتك في مكانها.","Ready when you are. Your round is waiting.")
+ _local_pause_dialog.ok_button_text=tr_ui("استكمال اللعب","Resume")
+ _local_pause_dialog.confirmed.connect(_resume_local_play);_local_pause_dialog.canceled.connect(_resume_local_play)
+ add_child(_local_pause_dialog);_local_pause_dialog.popup_centered(Vector2i(340,180))
+
+func _resume_local_play() -> void:
+ if is_instance_valid(_local_pause_dialog):_local_pause_dialog.queue_free()
+ _local_pause_dialog=null;blitz_dialog_paused=false
+ if is_instance_valid(blitz_timer):blitz_timer.paused=blitz_background_paused
 
 func _show_legacy_game_options(index: int) -> void:
  if index != game:
@@ -2555,13 +2590,13 @@ func round_header_card() -> void:
  frame.add_theme_stylebox_override("panel", panel_style(Color("15274d")))
  root.add_child(frame)
  var inner := VBoxContainer.new()
- inner.add_theme_constant_override("separation", 10)
+ inner.add_theme_constant_override("separation", 6)
  frame.add_child(inner)
  var title_line := Label.new()
- title_line.text = tr_ui("✦ تحدي المعرفة", "✦ KNOWLEDGE CHALLENGE")
+ title_line.text = match_style_name()
  title_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
  title_line.add_theme_color_override("font_color", GOLD)
- title_line.add_theme_font_size_override("font_size", int(17 * reading_scale))
+ title_line.add_theme_font_size_override("font_size", int(14 * reading_scale))
  inner.add_child(title_line)
  var status_line := Label.new()
  status_line.text = tr_ui("السؤال %d من %d   •   ⭐ %d نقطة", "QUESTION %d OF %d   •   ⭐ %d POINTS") % [question_index + 1, round_bank.size(), score]
@@ -2683,7 +2718,8 @@ func round_choice_grid(item: Dictionary) -> void:
  var order: Array = range(choices.size())
  shuffle_items(order)
  var grid := GridContainer.new()
- grid.columns = 1 # Portrait: full-width answers with readable text
+ grid.name="CoreAnswerChoices"
+ grid.columns = 1 if reading_scale>=1.25 else 2
  grid.add_theme_constant_override("h_separation", 10)
  grid.add_theme_constant_override("v_separation", 10)
  root.add_child(grid)
@@ -2693,7 +2729,7 @@ func round_choice_grid(item: Dictionary) -> void:
   root.remove_child(choice_button)
   grid.add_child(choice_button)
   choice_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-  choice_button.custom_minimum_size.y = 82
+  choice_button.custom_minimum_size.y = 64 if reading_scale < 1.25 else 78
   choice_button.add_theme_color_override("font_color", Color("f5f9ff"))
 
 func show_round() -> void:
@@ -2721,7 +2757,6 @@ func show_round() -> void:
  elif not family_active and not campaign_active and not daily_match and (question_index + 1) % 5 == 0:
   label(tr_ui("⚡ محطة التحدي • مكافأة مضاعفة", "⚡ CHECKPOINT • DOUBLE REWARD"), 20)
  if not family_active and not campaign_active and not daily_match:
-  label(match_style_name(), 18)
   if match_style == "survival":
    label(tr_ui("المحاولات المتبقية: %d", "LIVES LEFT: %d") % lives_left, 19)
   elif match_style == "rival":
@@ -2735,17 +2770,8 @@ func show_round() -> void:
   elif match_style == "blitz":
    label(tr_ui("⏱ جاوب قبل انتهاء الوقت لتحصل على نقاط سرعة!", "⏱ ANSWER BEFORE THE CLOCK RUNS OUT FOR BONUS POINTS!"), 17)
 
- var progress := ProgressBar.new()
- progress.max_value = round_bank.size()
- progress.value = question_index
- progress.show_percentage = false
- progress.tooltip_text = tr_ui("تقدم الجولة: %d من %d", "Round progress: %d of %d") % [question_index, round_bank.size()]
- progress.custom_minimum_size.y = 12
- VisualSkin.decorate_progress(progress)
- root.add_child(progress)
  var item: Dictionary = round_bank[question_index]
- label(tr_ui("🧭 نوع التحدي: ", "🧭 CHALLENGE TYPE: ") + topic_title(str(item.get("topic", "all"))), 16)
- label(difficulty_name(int(item.get("level", 1))), 15)
+ label(topic_title(str(item.get("topic", "all"))) + " · " + difficulty_name(int(item.get("level", 1))), 14)
  if question_index == 0 and not adaptive_notice().is_empty() and not campaign_active and not family_active:
   label(adaptive_notice(), 16)
  if question_index > 0 and not family_active:
@@ -2778,6 +2804,7 @@ func show_round() -> void:
   if mode == "identity":
    clue_label = label(str(item["clues_" + selected_language][0]), 21)
    clue_button = button(tr_ui("اكشف دليلًا آخر • نقاط أقل", "REVEAL NEXT CLUE • fewer points"), reveal_clue)
+   clue_button.set_meta("core_dock",true)
   var field := LineEdit.new()
   field.add_theme_font_size_override("font_size", int(21 * reading_scale))
   field.placeholder_text = tr_ui("اكتب إجابتك هنا", "Type your answer here")
@@ -2785,13 +2812,17 @@ func show_round() -> void:
   root.add_child(field)
   var submit := func(): submit_written(field.text)
   field.text_submitted.connect(func(_value: String): submit.call())
-  button(tr_ui("تحقق من الإجابة", "CHECK ANSWER"), submit, GREEN)
+  field.set_meta("core_dock",true)
+  button(tr_ui("تحقق من الإجابة", "CHECK ANSWER"), submit, GREEN).set_meta("core_dock",true)
  else:
   round_choice_grid(item)
  if mode != "identity" and (event_modifier != "no_hint" or campaign_active or family_active or daily_match):
   hint_button = button(tr_ui("تلميح • نقاط أقل", "HINT • fewer points"), show_hint, ACCENT)
+  hint_button.set_meta("core_dock",true)
   hint_label = label("", 17)
- button(tr_ui("إنهاء الجولة والعودة", "EXIT MATCH"), confirm_leave_active_game)
+ var exit_action:=button(tr_ui("إنهاء الجولة والعودة", "EXIT MATCH"), confirm_leave_active_game)
+ exit_action.set_meta("core_dock",true);exit_action.set_meta("core_exit",true)
+ _finish_core_view("question")
 
 func start_blitz_clock() -> void:
  blitz_duration = [34.0, 27.0, 21.0][clampi(difficulty - 1, 0, 2)]
@@ -2980,6 +3011,7 @@ func finish_round(correct: bool, answer: String) -> void:
  else:
   finish_match()
   button(tr_ui("شاهد حصيلتك", "VIEW YOUR RESULTS"), show_results, GREEN)
+ _finish_core_view("feedback")
 
 func vault_bank() -> void:
  if vault_locked:
@@ -3164,41 +3196,50 @@ func show_picture_game() -> void:
    label(tr_ui("اكتملت رحلة الصور", "PICTURE JOURNEY COMPLETE"), 24)
    button(tr_ui("العب مجددًا", "Play again"), start_picture_game, GREEN)
   button(tr_ui("كل الألعاب", "All games"), func(): show_home(), ACCENT)
+  _finish_core_view("results")
   return
  label(tr_ui("اسأل سؤالًا إجابته نعم أو لا", "ASK A YES / NO QUESTION"), 19)
  var suggestion: int = best_picture_question()
  if suggestion >= 0:
   var recommended: int = suggestion
-  button(tr_ui("💡 سؤال ذكي: ", "💡 SMART QUESTION: ") + picture_question_text(recommended), func(): ask_picture_question(recommended), GREEN)
+  button(tr_ui("💡 سؤال ذكي: ", "💡 SMART QUESTION: ") + picture_question_text(recommended), func(): ask_picture_question(recommended), GREEN).set_meta("core_dock",true)
  elif player_candidates.size() == 1:
   label(tr_ui("يمكنك إكمال الأسئلة أو اختيار التخمين وقتما تريد.", "Keep asking, or choose to guess whenever you want."), 18)
  var available: Array[int] = available_picture_questions()
  if not available.is_empty():
+  var question_list:=VBoxContainer.new();question_list.visible=false
+  button(tr_ui("اختيار سؤال جاهز","Choose a question"),func():question_list.visible=not question_list.visible,PANEL)
+  root.add_child(question_list)
   var page_count_questions: int = ceili(float(available.size()) / 6.0)
   picture_question_page = clampi(picture_question_page, 0, page_count_questions - 1)
   for i in available.slice(picture_question_page * 6, mini((picture_question_page + 1) * 6, available.size())):
    var qi: int = i
-   button(picture_question_text(qi), func(): ask_picture_question(qi))
+   button(picture_question_text(qi), func(): ask_picture_question(qi)).reparent(question_list)
   if page_count_questions > 1:
-   button(tr_ui("أسئلة أخرى • %d / %d", "MORE QUESTIONS • %d / %d") % [picture_question_page + 1, page_count_questions], func(): picture_question_page = (picture_question_page + 1) % page_count_questions; show_picture_game(), ACCENT)
+   button(tr_ui("أسئلة أخرى • %d / %d", "MORE QUESTIONS • %d / %d") % [picture_question_page + 1, page_count_questions], func(): picture_question_page = (picture_question_page + 1) % page_count_questions; show_picture_game(), ACCENT).reparent(question_list)
  var field := LineEdit.new()
  field.add_theme_font_size_override("font_size", int(21 * reading_scale))
  field.placeholder_text = tr_ui("اكتب اسم بطاقتك بالعربية أو الإنجليزية", "Guess your card name")
  field.custom_minimum_size = Vector2(0, 56)
  root.add_child(field)
- button(tr_ui("خمن بطاقتي", "GUESS MY CARD"), func(): submit_picture_guess(field.text), GREEN)
+ field.set_meta("core_dock",true)
+ button(tr_ui("خمن بطاقتي", "GUESS MY CARD"), func(): submit_picture_guess(field.text), GREEN).set_meta("core_dock",true)
  # The candidate list reflects answers, unlike the old unreachable children-only
  # picker which displayed the full deck and never appeared for audience="all".
- label(tr_ui("أو اختار من البطاقات المحتملة", "OR PICK A POSSIBLE CARD"), 20)
+ var candidate_list:=VBoxContainer.new();candidate_list.visible=false
+ button(tr_ui("اختيار بطاقة محتملة","Choose a possible card"),func():candidate_list.visible=not candidate_list.visible,PANEL)
+ root.add_child(candidate_list)
  if not player_candidates.is_empty():
   var candidate_pages: int = ceili(float(player_candidates.size()) / 6.0)
   card_name_page = clampi(card_name_page, 0, candidate_pages - 1)
   for card in player_candidates.slice(card_name_page * 6, mini(card_name_page * 6 + 6, player_candidates.size())):
    var guessed_name: String = str(card["name"])
-   button(card_display(guessed_name), func(): submit_picture_guess(guessed_name))
+   button(card_display(guessed_name), func(): submit_picture_guess(guessed_name)).reparent(candidate_list)
   if candidate_pages > 1:
-   button(tr_ui("بطاقات أخرى (%d/%d)", "MORE CARDS (%d/%d)") % [card_name_page + 1, candidate_pages], func(): card_name_page = (card_name_page + 1) % candidate_pages; show_picture_game(), ACCENT)
- button(tr_ui("خروج", "Exit"), confirm_leave_active_game, ACCENT)
+   button(tr_ui("بطاقات أخرى (%d/%d)", "MORE CARDS (%d/%d)") % [card_name_page + 1, candidate_pages], func(): card_name_page = (card_name_page + 1) % candidate_pages; show_picture_game(), ACCENT).reparent(candidate_list)
+ var exit_action:=button(tr_ui("خروج", "Exit"), confirm_leave_active_game, ACCENT)
+ exit_action.set_meta("core_dock",true);exit_action.set_meta("core_exit",true)
+ _finish_core_view("picture")
 
 func ask_picture_question(qi: int) -> void:
  if picture_done or qi in asked:
@@ -3532,7 +3573,7 @@ func show_order_choices(item: Dictionary) -> void:
   VisualSkin.decorate_button(item_button,"teal")
   item_button.move_requested.connect(_move_local_order,CONNECT_DEFERRED)
   root.add_child(item_button);order_buttons[index]=item_button
- button(tr_ui("تأكيد الترتيب", "CONFIRM ORDER"), submit_order, GREEN)
+ button(tr_ui("تأكيد الترتيب", "CONFIRM ORDER"), submit_order, GREEN).set_meta("core_dock",true)
 
 func _move_local_order(source: int,target: int) -> void:
  if round_finished or source not in order_picks or target not in order_picks:return
@@ -3626,12 +3667,14 @@ func show_memory() -> void:
   tile.expand_icon = true
   tile.add_theme_constant_override("icon_max_width", 60)
   tile.add_theme_font_size_override("font_size", 30)
-  tile.add_theme_stylebox_override("normal", panel_style(PANEL))
+  VisualSkin.decorate_play_action(tile,"secondary")
   tile.pressed.connect(func(): flip_memory(index))
   grid.add_child(tile)
   memory_buttons.append(tile)
  update_memory_tiles()
- button(tr_ui("الرئيسية", "HOME"), confirm_leave_active_game)
+ var exit_action:=button(tr_ui("الرئيسية", "HOME"), confirm_leave_active_game)
+ exit_action.set_meta("core_dock",true);exit_action.set_meta("core_exit",true)
+ _finish_core_view("memory")
 
 func update_memory_tiles() -> void:
  memory_status.text = tr_ui("أزواج: %d / %d • محاولات: %d", "PAIRS: %d / %d • ATTEMPTS: %d") % [memory_matched.size() / 2, memory_cards.size() / 2, memory_moves]
@@ -3650,6 +3693,9 @@ func flip_memory(index: int) -> void:
  if memory_busy or memory_done or index < 0 or index >= memory_cards.size() or index in memory_open or index in memory_matched:
   return
  memory_open.append(index)
+ if not reduced_motion:
+  memory_buttons[index].modulate.a=.55
+  memory_buttons[index].create_tween().tween_property(memory_buttons[index],"modulate:a",1.0,.14)
  if memory_open.size() == 1:
   update_memory_tiles()
   return
@@ -3701,6 +3747,7 @@ func finish_memory() -> void:
   button(tr_ui("العب مجددًا", "Play again"), start_memory, GREEN)
  button(tr_ui("اختر مجموعة أخرى", "CHOOSE ANOTHER COLLECTION"), func(): show_modes(8), ACCENT)
  button(tr_ui("الرئيسية", "HOME"), show_home)
+ _finish_core_view("results")
 
 var mixed_levels: bool = false
 var selected_campaign: String = "island"

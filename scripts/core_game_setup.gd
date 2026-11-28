@@ -59,6 +59,38 @@ static func selector(main: Control, title: String, values: Array, captions: Arra
  row.add_child(field)
  PlaySkin.decorate_selector(field)
 
+static func cinema_topics(main: Control, topics: Array, captions: Array) -> void:
+ # Build cards only for topics that have approved content. The reference is
+ # illustrative; it does not create new categories or questions.
+ if main.selected_topic not in topics:main.selected_topic="all"
+ var heading:=Label.new()
+ heading.text=main.tr_ui("اختر الفئة","Choose category")
+ heading.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+ heading.add_theme_font_size_override("font_size",int(18*main.reading_scale))
+ main.root.add_child(heading)
+ var grid:=GridContainer.new();grid.columns=2
+ grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8)
+ main.root.add_child(grid)
+ var group:=ButtonGroup.new()
+ for i in range(topics.size()):
+  var key: String=str(topics[i])
+  var tile:=Button.new();tile.text=str(captions[i]);tile.toggle_mode=true;tile.button_group=group
+  tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tile.custom_minimum_size.y=76 if main.reading_scale<1.25 else 100
+  tile.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+  var tile_font_size: int=int(16*main.reading_scale)
+  tile.icon=PlaySkin.game_cover(1) if key=="cinema" else PlaySkin.menu_icon("settings" if key=="craft" else "list")
+  tile.expand_icon=true;tile.add_theme_constant_override("icon_max_width",36)
+  tile.set_meta("topic_value",key)
+  tile.toggled.connect(func(on: bool):
+   PlaySkin.decorate_button(tile,"blue" if on else "violet")
+   tile.add_theme_font_size_override("font_size",tile_font_size)
+  )
+  tile.pressed.connect(func():main.selected_topic=key)
+  grid.add_child(tile)
+  tile.button_pressed=main.selected_topic==key
+  PlaySkin.decorate_button(tile,"blue" if tile.button_pressed else "violet")
+  tile.add_theme_font_size_override("font_size",tile_font_size)
+
 static func render(main: Control) -> void:
  main.clear_ui();main.current_screen="offline_setup"
  main.root.add_theme_constant_override("separation", 8)
@@ -111,7 +143,8 @@ static func render(main: Control) -> void:
   for item in main.eligible_questions(main.game,false):
    var topic: String=str(item.get("topic",""))
    if not topic.is_empty() and topic not in topics:topics.append(topic);captions.append(main.topic_title(topic))
-  selector(main,main.tr_ui("الفئة","Category"),topics,captions,main.selected_topic,func(value):main.selected_topic=value)
+  if main.game==1:cinema_topics(main,topics,captions)
+  else:selector(main,main.tr_ui("الفئة","Category"),topics,captions,main.selected_topic,func(value):main.selected_topic=value)
   selector(main,main.tr_ui("طريقة الجولة","Round style"),["classic","survival","rival","blitz"],[main.tr_ui("كلاسيكي · بدون مؤقت","Classic · untimed"),main.tr_ui("البقاء · 3 محاولات","Survival · 3 lives"),main.tr_ui("سباق نقاط · منافس محلي","Score race · local rival"),main.tr_ui("سرعة · مؤقت حسب المستوى","Blitz · timed by difficulty")],main.match_style,func(value):main.match_style=value)
  else:
   selector(main,main.tr_ui("المغامرة","Adventure"),["island","archive"],[main.tr_ui("جزيرة المنارة","Lighthouse island"),main.tr_ui("أرشيف الأسرار","Secret archive")],main.selected_campaign,func(value):main.selected_campaign=value)

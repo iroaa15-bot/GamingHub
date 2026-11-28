@@ -2,6 +2,8 @@ extends Control
 static var requested_entry := "landing"
 var _entry_mode := "landing"
 var _entry_choices: VBoxContainer
+var _entry_create: Button
+var _entry_join: Button
 var _entry_back: Button
 var _configuration_changed := false
 var _displayed_config_revision := -2
@@ -172,8 +174,9 @@ func _ready() -> void:
  for item in load("res://scripts/approved_content.gd").pictures().get("catalog",[]):catalog[str(item.image)]=item
  for item in data.items:
   if item.group == "original_200": catalog[str(item.image)] = item
- var bg := ColorRect.new()
- bg.color=VisualSkin.INK
+ # Keep the room entry and lobby on the same starry neon backdrop as the
+ # game menus, without putting a decorative layer over the real controls.
+ var bg := VisualSkin.new()
  bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  add_child(bg)
  var scroll := ScrollContainer.new()
@@ -469,8 +472,8 @@ func _ready() -> void:
  VisualSkin.enable_menu_swipe(column)
  _entry_choices=VBoxContainer.new();_entry_choices.name="RoomEntryChoices"
  _main_column.add_child(_entry_choices);column=_entry_choices
- button(tr_pair("إنشاء غرفة","Create room"),func():_focus_room_entry("create"))
- button(tr_pair("الانضمام بكود","Join with code"),func():_focus_room_entry("join"))
+ _entry_create=button(tr_pair("إنشاء غرفة","Create room"),func():_focus_room_entry("create"))
+ _entry_join=button(tr_pair("الانضمام بكود","Join with code"),func():_focus_room_entry("join"))
  column=_main_column
  _entry_back=button(tr_pair("العودة لاختيار إنشاء أو انضمام","Back to create or join"),func():_focus_room_entry("landing"))
  _main_column.move_child(_entry_choices,_main_column.get_children().find(status)+1)
@@ -478,6 +481,17 @@ func _ready() -> void:
 
  for control in _main_column.find_children("*","Button",true,false):
   if not control is OptionButton and not control is CheckButton:_style_play_button(control)
+
+ # Reference room flow uses prominent create and join actions. These remain
+ # the existing buttons and callbacks, so room consent and permissions do not change.
+ for control in [_entry_create,create_button,_start_button]:VisualSkin.decorate_button(control,"teal")
+ for control in [_entry_join,join_button]:VisualSkin.decorate_button(control,"blue")
+ _entry_create.icon=VisualSkin.menu_icon("plus")
+ _entry_join.icon=VisualSkin.menu_icon("player")
+ for control in [_entry_create,_entry_join]:
+  control.custom_minimum_size.y=68
+  control.expand_icon=true
+  control.add_theme_constant_override("icon_max_width",34)
 
  if get_script()==load("res://scripts/photo_duel_extension_ui.gd"):
   _room_shell=load("res://scripts/room_play_shell.gd").new();add_child(_room_shell)

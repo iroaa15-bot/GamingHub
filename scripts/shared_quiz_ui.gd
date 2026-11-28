@@ -280,12 +280,17 @@ func _quiz_state(value: Dictionary) -> void:
   var correct_choice: bool=revealed and i==int(quiz.get("correct_index",-1))
   var wrong_choice: bool=revealed and not correct_choice and quiz.get("your_answer")==i
   VisualSkin.decorate_button(answer_buttons[i],"teal" if correct_choice else ("danger" if wrong_choice else "blue"))
+  # The reference uses darker blue answer pills, with a vivid revealed answer.
+  # This only changes their appearance; answer ownership stays server-driven.
+  var answer_fill: Color=Color("16a82b") if correct_choice else (Color("a91f42") if wrong_choice else Color("123b78"))
+  var answer_edge: Color=Color("a7ff51") if correct_choice else (Color("ff9aad") if wrong_choice else Color("6aaafa"))
+  for state_name in ["normal","hover","pressed"]:
+   var fill: Color=answer_fill.lightened(.08) if state_name=="hover" else (answer_fill.darkened(.15) if state_name=="pressed" else answer_fill)
+   answer_buttons[i].add_theme_stylebox_override(state_name,VisualSkin.neon_surface(fill,answer_edge))
   if correct_choice or wrong_choice:
-   answer_buttons[i].add_theme_stylebox_override("disabled",answer_buttons[i].get_theme_stylebox("normal"))
+   answer_buttons[i].add_theme_stylebox_override("disabled",VisualSkin.neon_surface(answer_fill,answer_edge))
+   answer_buttons[i].add_theme_color_override("font_disabled_color",Color.WHITE)
    answer_buttons[i].text=("✓ " if correct_choice else "✕ ")+answer_buttons[i].text
-   if is_instance_valid(quiz_shell):
-    var tone: Color=Color("185e4f") if correct_choice else (Color("6a2b41") if wrong_choice else Color("27334c"))
-    for state_name in ["normal","hover","pressed","disabled"]:answer_buttons[i].add_theme_stylebox_override(state_name,quiz_shell.surface(tone))
  replay_button.visible=question.has("audio") and phase=="question"
  sound_progress.visible=replay_button.visible
  replay_button.disabled=not bool(quiz.get("replay_available",false)) or bool(value.get("paused",false)) or _quiz_now()<int(quiz.get("start_unix_ms",0))
